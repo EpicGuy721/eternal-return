@@ -1,0 +1,24 @@
+{
+	"schemaVersion": 1,
+	"id": "eternalreturn-gametest",
+	"version": "0.0.0",
+	"name": "Eternal Return game tests",
+	"description": "In-game tests for Eternal Return. Dev runs only; never shipped.",
+	"license": "All-Rights-Reserved",
+	"environment": "*",
+	"entrypoints": {
+		"fabric-gametest": [
+			"com.eternalreturn.gametest.MobFeatureTests",
+			"com.eternalreturn.gametest.FishingTests",
+			"com.eternalreturn.gametest.FishingFixTests",
+			"com.eternalreturn.gametest.WorldgenTests"
+		]
+	},
+	"mixins": [
+		"eternalreturn-gametest.mixins.json"
+	],
+	"depends": {
+		"eternalreturn": "*",
+		"fabric-api": "*"
+	}
+}

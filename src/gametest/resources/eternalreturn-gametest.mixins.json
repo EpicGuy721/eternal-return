@@ -1,0 +1,11 @@
+{
+	"required": true,
+	"package": "com.eternalreturn.gametest.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"TestServerMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

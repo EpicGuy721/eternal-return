@@ -7,6 +7,7 @@ import com.eternalreturn.fishing.Thriftiness;
 import com.eternalreturn.fishing.Worms;
 import com.eternalreturn.mobs.ModEntities;
 import com.eternalreturn.villager.TradeRules;
+import com.eternalreturn.worldgen.WorldgenFeatures;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
@@ -29,6 +30,7 @@ public class EternalReturn implements ModInitializer {
 		Thriftiness.register();
 		Worms.register();
 		TradeRules.registerFishermanTrades();
+		WorldgenFeatures.register();
 		LOGGER.info("Eternal Return loaded: {} capped tiers, {} inherent rules",
 				EternalReturnConfig.rules().caps().size(), EternalReturnConfig.rules().inherent().size());
 	}

@@ -7,13 +7,29 @@ A total conversion for Minecraft. So far it covers three systems: a rework of en
 Requires JDK 21.
 
 ```
-./gradlew build        # jar lands in build/libs/
-./gradlew runClient    # dev client for testing
+./gradlew build             # jar lands in build/libs/ (also compiles the tests, without running them)
+./gradlew runClient         # dev client for testing
+./gradlew runAllGametests   # every in-game test, on headless servers (a few minutes)
 ```
 
 Uses Yarn mappings (`1.21.1+build.3`), Fabric Loader 0.19.5, Fabric API `0.116.17+1.21.1`, and the current Loom from the official Fabric template. The Gradle wrapper is copied from that template.
 
-The project builds and launches. Every mixin was checked with a forced Mixin audit at startup, and the mob features were exercised with a GameTest suite on a headless server. If a future mixin target is wrong the game stops at launch with an error naming the mixin class.
+Dev runs (client, server and tests) also load Moderner Beta `5.0.0-alpha.2+1.21.1`, the world generator this mod is built to sit on. It is a runtime-only dependency: nothing compiles against it, and the released jar doesn't require it.
+
+Every mixin was checked with a forced Mixin audit at startup. If a future mixin target is wrong, the game stops at launch with an error naming the mixin class.
+
+### Tests
+
+In-game tests live in `src/gametest`, a separate test mod that is never packed into the release jar. `runAllGametests` runs four headless servers, each in a fresh world:
+
+| Task | World | What runs |
+|---|---|---|
+| `runGametest` | flat | the mob, fishing and trade suites |
+| `runGametestModernerBeta` | Moderner Beta, Release 1.6.4 amplified | worldgen checks, debug tunnel on |
+| `runGametestModernerBetaTunnelOff` | same | worldgen checks, debug tunnel off |
+| `runGametestVanilla` | vanilla generator | worldgen checks, debug tunnel on (control) |
+
+Each writes `build/gametest/<world>/report.xml`. Test worlds enable only the datapacks a normal new world would, so Moderner Beta's optional "Reduced Height" and "Deepslate Blobs" packs stay off.
 
 ## Features and where they live
 
@@ -46,6 +62,14 @@ The project builds and launches. Every mixin was checked with a forced Mixin aud
 | Zombies throw ender pearls | `ThrowPearlGoal`, `Ballistics` (aiming) |
 | Skeletons draw a sword up close | `SkeletonSidearm`, `AbstractSkeletonEntityMixin` |
 | Monsters break out of boats | `MobEntitySpawnMixin` |
+
+### Worldgen
+
+Just started; the plan and status are in [docs/worldgen.md](docs/worldgen.md). Code lives in `com.eternalreturn.worldgen`.
+
+| Feature | Implementation |
+|---|---|
+| Debug tunnel (off by default) | `DebugTunnelCarver`, `worldgen/configured_carver/debug_tunnel.json`, attached to overworld biomes in `WorldgenFeatures` |
 
 ### Fishing and villagers
 
@@ -159,6 +183,7 @@ Nether fish and infernal bait are fireproof. The new fish also count for the "fi
 - `fortune`: toggles for hoes and shears.
 - `fishing`: `fishRequireBait`; `baits` (item to `lureSeconds`, `nightLureSeconds`, `lava`); `wormDropChance`; `lavaFishingOutsideNether`.
 - `villagers`: `onlyFishermenBuy`; `fishPriceMultiplier` (default 2, applied to every fish a fisherman buys); and `fishermanTrades` (item to `level`, `count`, base `emeralds`, `maxUses`, `experience`; needs a restart).
+- `worldgen`: `debugTunnel` (off by default). Carves one straight 3x3 tunnel at y=20 along z=8 through every chunk on that row, to check that this mod's carvers run under the current world generator. Needs a restart, and only affects newly generated chunks.
 - `mobs`: baby chance, baby speed, and baby creeper fuse and blast multipliers; armor and armor-enchant chances, each written as `base + perDifficulty x clamped local difficulty`; the underground-creeper toggle and its sky-light limit; jockey, fishing rod, ender pearl and sword chances; fishing rod pull strength; the boat-breaking toggle.
 
 Which items belong to each tier is controlled by tags in `data/eternalreturn/tags/item/`, so modded gear can be added with a datapack and no code changes. The same goes for mobs: `data/eternalreturn/tags/entity_type/` decides which mobs can be babies (`baby_variants`, which only works for skeleton-type mobs and creepers), which get the boosted armor (`armored_spawns`), and which can ride spiders (`jockey_riders`).
@@ -174,7 +199,8 @@ Fishing data lives in the same place. The item tag `raw_fish` is what fishermen 
 - Adds one entity, `eternalreturn:zombie_hook`, and 15 items, so the mod must be installed on both client and server.
 - Replaces the `minecraft:gameplay/fishing` loot table (fish now need bait and come from the extended fish table) and adds to the `minecraft:fishes` item tag. Mods that add fish to `minecraft:gameplay/fishing/fish` through Fabric's loot API still work, since that table is used unchanged inside the new one.
 - The trade filter recognizes vanilla's two buy-trade types, including inside the trade rebalance's per-biome wrappers. Buy trades that other mods add with their own trade classes are not detected and stay.
-- Sodium, Moderner Beta: no overlap.
+- Sodium: no overlap.
+- Moderner Beta (5.0.0-alpha.2, Release 1.6.4 amplified): tested. Its chunk generator runs carvers attached to biomes through Fabric's biome modifications, so this mod's carvers work in its worlds without any hook. Its biomes (such as `moderner_beta:early_release_swampland`) are not in vanilla's biome tags, which matters for the fish biome tags (see docs/worldgen.md).
 - Nostalgic Tweaks: if you use its XP removal, this mod is already XP-free. If it has options that change the anvil or enchanting screens, check them alongside this.
 
 ## Quick test checklist

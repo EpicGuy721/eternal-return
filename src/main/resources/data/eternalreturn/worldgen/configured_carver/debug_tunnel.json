@@ -1,0 +1,14 @@
+{
+  "type": "eternalreturn:debug_tunnel",
+  "config": {
+    "probability": 1.0,
+    "y": {
+      "absolute": 20
+    },
+    "yScale": 1.0,
+    "lava_level": {
+      "above_bottom": 8
+    },
+    "replaceable": "#minecraft:overworld_carver_replaceables"
+  }
+}

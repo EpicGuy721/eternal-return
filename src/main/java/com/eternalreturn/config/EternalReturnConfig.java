@@ -55,6 +55,7 @@ public final class EternalReturnConfig {
 	public MobTweaks mobs = new MobTweaks();
 	public FishingTweaks fishing = new FishingTweaks();
 	public VillagerTweaks villagers = new VillagerTweaks();
+	public WorldgenTweaks worldgen = new WorldgenTweaks();
 
 	public static final class BookshelfBias {
 		public boolean enabled = true;
@@ -155,6 +156,15 @@ public final class EternalReturnConfig {
 		 * "emeralds" is before fishPriceMultiplier. Needs a restart.
 		 */
 		public Map<String, FishTrade> fishermanTrades = defaultFishTrades();
+	}
+
+	/** Overworld generation (see docs/worldgen.md). Changes need a restart, and only affect newly generated chunks. */
+	public static final class WorldgenTweaks {
+		/**
+		 * Debug only: carves one straight 3x3 tunnel at y=20 along z=8, through every chunk on that
+		 * row. It checks that this mod's carvers run under the active world generator.
+		 */
+		public boolean debugTunnel = false;
 	}
 
 	public static final class FishTrade {
