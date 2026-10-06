@@ -1,0 +1,35 @@
+{
+  "type": "minecraft:fishing",
+  "pools": [
+    {
+      "rolls": 1.0,
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "value": "eternalreturn:gameplay/lava_fishing/junk",
+          "weight": 10,
+          "quality": -2
+        },
+        {
+          "type": "minecraft:loot_table",
+          "value": "eternalreturn:gameplay/lava_fishing/treasure",
+          "weight": 5,
+          "quality": 2
+        },
+        {
+          "type": "minecraft:loot_table",
+          "value": "eternalreturn:gameplay/lava_fishing/fish",
+          "weight": 85,
+          "quality": -1,
+          "conditions": [
+            {
+              "condition": "eternalreturn:bait"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "random_sequence": "eternalreturn:gameplay/lava_fishing"
+}

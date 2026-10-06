@@ -1,0 +1,186 @@
+{
+  "type": "minecraft:fishing",
+  "pools": [
+    {
+      "rolls": 1.0,
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "value": "minecraft:gameplay/fishing/fish",
+          "weight": 100
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eternalreturn:perch",
+          "weight": 60
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eternalreturn:pike",
+          "weight": 20
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eternalreturn:pike",
+          "weight": 20,
+          "conditions": [
+            {
+              "condition": "eternalreturn:bait",
+              "items": "minecraft:glistering_melon_slice"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eternalreturn:catfish",
+          "weight": 20,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:catfish_waters"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eternalreturn:catfish",
+          "weight": 20,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:catfish_waters"
+              }
+            },
+            {
+              "condition": "eternalreturn:bait",
+              "items": "minecraft:glistering_melon_slice"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eternalreturn:tuna",
+          "weight": 20,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#minecraft:is_ocean"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eternalreturn:tuna",
+          "weight": 20,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#minecraft:is_ocean"
+              }
+            },
+            {
+              "condition": "eternalreturn:bait",
+              "items": "minecraft:glistering_melon_slice"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eternalreturn:icefish",
+          "weight": 20,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:icefish_waters"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eternalreturn:icefish",
+          "weight": 20,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:icefish_waters"
+              }
+            },
+            {
+              "condition": "eternalreturn:bait",
+              "items": "minecraft:glistering_melon_slice"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eternalreturn:electric_eel",
+          "weight": 5,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#minecraft:is_ocean"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eternalreturn:electric_eel",
+          "weight": 10,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#minecraft:is_ocean"
+              }
+            },
+            {
+              "condition": "eternalreturn:bait",
+              "items": "minecraft:glistering_melon_slice"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eternalreturn:anglerfish",
+          "weight": 5,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#minecraft:is_deep_ocean"
+              }
+            },
+            {
+              "condition": "eternalreturn:bait",
+              "items": "eternalreturn:glow_bait"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eternalreturn:koi",
+          "weight": 15,
+          "conditions": [
+            {
+              "condition": "eternalreturn:bait",
+              "items": "minecraft:glistering_melon_slice"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "random_sequence": "eternalreturn:gameplay/fishing/fish"
+}

@@ -1,0 +1,13 @@
+{
+	"required": true,
+	"package": "com.eternalreturn.mixin.client",
+	"compatibilityLevel": "JAVA_21",
+	"client": [
+		"AnvilScreenMixin",
+		"EnchantmentScreenMixin",
+		"mobs.CreeperEntityRendererMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

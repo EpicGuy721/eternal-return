@@ -1,0 +1,43 @@
+{
+  "type": "minecraft:fishing",
+  "pools": [
+    {
+      "rolls": 1.0,
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "eternalreturn:magma_eel",
+          "weight": 60
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eternalreturn:ashfin",
+          "weight": 20,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "minecraft:basalt_deltas"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eternalreturn:soulfin",
+          "weight": 5,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "minecraft:soul_sand_valley"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "random_sequence": "eternalreturn:gameplay/lava_fishing/fish"
+}

@@ -1,0 +1,27 @@
+{
+	"schemaVersion": 1,
+	"id": "eternalreturn",
+	"version": "${version}",
+	"name": "Eternal Return",
+	"description": "A total conversion for Minecraft. Part one reworks enchanting: enchant capacity per material, inherent material enchantments, XP-free tables and anvils, chiseled bookshelf biasing, max levels raised to V, Mending removed, Curse of Invisibility.",
+	"authors": ["Ryan"],
+	"license": "All-Rights-Reserved",
+	"environment": "*",
+	"entrypoints": {
+		"main": ["com.eternalreturn.EternalReturn"],
+		"client": ["com.eternalreturn.client.EternalReturnClient"]
+	},
+	"mixins": [
+		"eternalreturn.mixins.json",
+		{
+			"config": "eternalreturn.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.16.14",
+		"minecraft": "1.21.1",
+		"java": ">=21",
+		"fabric-api": "*"
+	}
+}

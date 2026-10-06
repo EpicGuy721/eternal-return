@@ -1,0 +1,23 @@
+{
+	"enchantment.eternalreturn.invisibility_curse": "Curse of Invisibility",
+	"enchantment.eternalreturn.thriftiness": "Thriftiness",
+	"entity.eternalreturn.zombie_hook": "Fishing Hook",
+	"tooltip.eternalreturn.capacity": "Enchant capacity: %s / %s",
+	"tooltip.eternalreturn.inherent": "Inherent: %s",
+	"container.eternalreturn.over_capacity": "Over capacity: %s / %s",
+	"item.eternalreturn.worm": "Worm",
+	"item.eternalreturn.chum": "Chum",
+	"item.eternalreturn.glow_bait": "Glow Bait",
+	"item.eternalreturn.infernal_bait": "Infernal Bait",
+	"item.eternalreturn.perch": "Perch",
+	"item.eternalreturn.pike": "Pike",
+	"item.eternalreturn.catfish": "Catfish",
+	"item.eternalreturn.tuna": "Tuna",
+	"item.eternalreturn.icefish": "Icefish",
+	"item.eternalreturn.anglerfish": "Anglerfish",
+	"item.eternalreturn.electric_eel": "Electric Eel",
+	"item.eternalreturn.koi": "Koi",
+	"item.eternalreturn.magma_eel": "Magma Eel",
+	"item.eternalreturn.ashfin": "Ashfin",
+	"item.eternalreturn.soulfin": "Soulfin"
+}

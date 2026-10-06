@@ -1,0 +1,37 @@
+{
+	"required": true,
+	"package": "com.eternalreturn.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"AnvilScreenHandlerMixin",
+		"BlockMixin",
+		"EnchantmentHelperMixin",
+		"EnchantmentMixin",
+		"EnchantmentScreenHandlerMixin",
+		"GrindstoneScreenHandlerMixin",
+		"ItemMixin",
+		"ItemStackMixin",
+		"MobEntityMixin",
+		"PlayerEntityMixin",
+		"SheepEntityMixin",
+		"ShearsDispenserBehaviorMixin",
+		"SmithingTransformRecipeMixin",
+		"fishing.FishingBobberEntityMixin",
+		"mobs.AbstractSkeletonEntityMixin",
+		"mobs.CaveSpiderEntityMixin",
+		"mobs.CreeperEntityMixin",
+		"mobs.MobEntitySpawnMixin",
+		"mobs.PolarBearEntityMixin",
+		"mobs.SpawnRestrictionMixin",
+		"mobs.SpiderEntityMixin",
+		"mobs.ZombieEntityMixin",
+		"villager.BuyItemFactoryAccessor",
+		"villager.VillagerEntityMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}
