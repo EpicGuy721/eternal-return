@@ -1,6 +1,7 @@
 package com.eternalreturn.config;
 
 import com.eternalreturn.EternalReturn;
+import com.eternalreturn.worldgen.caves.CaveTypes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
@@ -167,6 +168,71 @@ public final class EternalReturnConfig {
 		 * row. It checks that this mod's carvers run under the active world generator.
 		 */
 		public boolean debugTunnel = false;
+		/** The cave engine (com.eternalreturn.worldgen.caves). Only Eternal Return worlds are affected. */
+		public CaveTweaks caves = new CaveTweaks();
+	}
+
+	/**
+	 * Caves in Eternal Return worlds. Other worlds (vanilla, other Moderner Beta presets, flat) keep
+	 * their normal carving whatever is set here.
+	 */
+	public static final class CaveTweaks {
+		/** The new cave types below. Off: no new caves are carved. */
+		public boolean enabled = true;
+		/**
+		 * Brings back the old caves and ravines (Moderner Beta's Beta-style caves and canyons, and any
+		 * other carver not from this mod) in Eternal Return worlds. Off by default: the types below are
+		 * the only caves there.
+		 */
+		public boolean oldCaves = false;
+		/** Multiplies every type's weight: 2.0 doubles how many caves start, 0.5 halves it. */
+		public double density = 1.0;
+		/**
+		 * Debug: when set to a type id (for example "ravine"), only that type is carved, at a high
+		 * frequency, so examples are easy to find. Empty for normal generation.
+		 */
+		public String debugForceCaveType = "";
+		/**
+		 * Debug: writes the type and start x, y, z of every cave to eternalreturn-cave-starts.csv in the
+		 * game folder as chunks generate, so real examples can be visited with /tp.
+		 */
+		public boolean debugLogCaveStarts = false;
+		/** Per type: enabled, weight (caves starting per 100 chunks), start depth range, radius range. */
+		public Map<String, CaveTypeSettings> types = CaveTypes.defaultSettings();
+
+		/** Adds any type missing from an older config file, with its defaults. */
+		void complete() {
+			if (types == null) {
+				types = new LinkedHashMap<>();
+			}
+			CaveTypes.defaultSettings().forEach(types::putIfAbsent);
+			if (debugForceCaveType == null) {
+				debugForceCaveType = "";
+			}
+		}
+	}
+
+	public static final class CaveTypeSettings {
+		public boolean enabled = true;
+		/** Caves of this type starting per 100 chunks, on average (before the density multiplier). */
+		public double weight;
+		/** A cave's start (its first point) is placed between these y levels. Tunnels may wander beyond. */
+		public int minY;
+		public int maxY;
+		/** Radius range in blocks; what the radius means depends on the type (see docs/worldgen.md). */
+		public double minRadius;
+		public double maxRadius;
+
+		public CaveTypeSettings() {
+		}
+
+		public CaveTypeSettings(double weight, int minY, int maxY, double minRadius, double maxRadius) {
+			this.weight = weight;
+			this.minY = minY;
+			this.maxY = maxY;
+			this.minRadius = minRadius;
+			this.maxRadius = maxRadius;
+		}
 	}
 
 	public static final class FishTrade {
@@ -217,6 +283,13 @@ public final class EternalReturnConfig {
 		if (loaded == null) {
 			loaded = new EternalReturnConfig();
 		}
+		if (loaded.worldgen == null) {
+			loaded.worldgen = new WorldgenTweaks();
+		}
+		if (loaded.worldgen.caves == null) {
+			loaded.worldgen.caves = new CaveTweaks();
+		}
+		loaded.worldgen.caves.complete();
 
 		instance = loaded;
 		compiled = loaded.compile();

@@ -1,0 +1,191 @@
+{
+  "seed": 173164,
+  "slice_area": "384 x 384 blocks from -1472, -1344",
+  "default_open_share": "4.46%",
+  "default_open_share_by_band": "-64:2.1% -48:3.8% -32:5.2% -16:5.5% 0:6.7% 16:6.0% 32:4.6% 48:3.7% 64:2.8% 80:2.1% 96:1.6% 112:0.3%",
+  "old_caves_open_share": "4.55%",
+  "old_caves_open_share_by_band": "-64:3.4% -48:4.8% -32:5.8% -16:5.6% 0:6.8% 16:5.0% 32:3.7% 48:2.9% 64:3.1% 80:2.9% 96:2.0% 112:0.3%",
+  "gallery_forced_open_share": {
+    "spaghetti": "5.34% open",
+    "ravine": "9.03% open",
+    "large": "4.06% open",
+    "vertical": "2.13% open",
+    "zigzag": "2.58% open",
+    "ribbed": "5.61% open"
+  },
+  "examples_near_spawn": {
+    "spaghetti": [
+      {
+        "x": -1281,
+        "y": 72,
+        "z": -1161,
+        "cave_air_within_2_blocks": true,
+        "ground_y": 104
+      },
+      {
+        "x": -1283,
+        "y": -11,
+        "z": -1127,
+        "cave_air_within_2_blocks": true,
+        "ground_y": 82
+      },
+      {
+        "x": -1255,
+        "y": 28,
+        "z": -1147,
+        "cave_air_within_2_blocks": true,
+        "ground_y": 88
+      },
+      {
+        "x": -1316,
+        "y": -51,
+        "z": -1145,
+        "cave_air_within_2_blocks": false,
+        "ground_y": 79
+      }
+    ],
+    "ravine": [
+      {
+        "x": -1286,
+        "y": 15,
+        "z": -1140,
+        "cave_air_within_2_blocks": true,
+        "ground_y": 94
+      },
+      {
+        "x": -1266,
+        "y": 14,
+        "z": -1166,
+        "cave_air_within_2_blocks": true,
+        "ground_y": 100
+      },
+      {
+        "x": -1222,
+        "y": -9,
+        "z": -1132,
+        "cave_air_within_2_blocks": true,
+        "ground_y": 74
+      },
+      {
+        "x": -1226,
+        "y": -29,
+        "z": -1084,
+        "cave_air_within_2_blocks": true,
+        "ground_y": 78
+      }
+    ],
+    "large": [
+      {
+        "x": -1200,
+        "y": -23,
+        "z": -1094,
+        "cave_air_within_2_blocks": true,
+        "ground_y": 93
+      },
+      {
+        "x": -1446,
+        "y": 1,
+        "z": -1241,
+        "cave_air_within_2_blocks": true,
+        "ground_y": 68
+      },
+      {
+        "x": -1141,
+        "y": 14,
+        "z": -1290,
+        "cave_air_within_2_blocks": true,
+        "ground_y": 71
+      }
+    ],
+    "vertical": [
+      {
+        "x": -1275,
+        "y": 51,
+        "z": -1129,
+        "cave_air_within_2_blocks": true,
+        "ground_y": 74
+      },
+      {
+        "x": -1298,
+        "y": 0,
+        "z": -1207,
+        "cave_air_within_2_blocks": true,
+        "ground_y": 91
+      },
+      {
+        "x": -1223,
+        "y": -18,
+        "z": -1130,
+        "cave_air_within_2_blocks": true,
+        "ground_y": 71
+      },
+      {
+        "x": -1302,
+        "y": 23,
+        "z": -1217,
+        "cave_air_within_2_blocks": true,
+        "ground_y": 94
+      }
+    ],
+    "zigzag": [
+      {
+        "x": -1350,
+        "y": 11,
+        "z": -1152,
+        "cave_air_within_2_blocks": true,
+        "ground_y": 69
+      },
+      {
+        "x": -1210,
+        "y": 50,
+        "z": -1145,
+        "cave_air_within_2_blocks": true,
+        "ground_y": 78
+      },
+      {
+        "x": -1271,
+        "y": -50,
+        "z": -1224,
+        "cave_air_within_2_blocks": true,
+        "ground_y": 81
+      },
+      {
+        "x": -1338,
+        "y": 37,
+        "z": -1196,
+        "cave_air_within_2_blocks": true,
+        "ground_y": 99
+      }
+    ],
+    "ribbed": [
+      {
+        "x": -1284,
+        "y": -46,
+        "z": -1176,
+        "cave_air_within_2_blocks": true,
+        "ground_y": 105
+      },
+      {
+        "x": -1304,
+        "y": -3,
+        "z": -1146,
+        "cave_air_within_2_blocks": true,
+        "ground_y": 92
+      },
+      {
+        "x": -1263,
+        "y": 5,
+        "z": -1190,
+        "cave_air_within_2_blocks": true,
+        "ground_y": 90
+      },
+      {
+        "x": -1305,
+        "y": 9,
+        "z": -1211,
+        "cave_air_within_2_blocks": true,
+        "ground_y": 98
+      }
+    ]
+  }
+}

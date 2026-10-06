@@ -64,7 +64,8 @@ public class EternalReturnPresetTests implements FabricGameTest {
 		ctx.assertTrue(unexpected.isEmpty(), "biomes outside the list: " + unexpected);
 
 		// Underground: solid down to the -64 floor, with no deepslate anywhere. Ores that land in the
-		// tuff blobs below y=0 would take their deepslate variant without the stone_ore_replaceables tag.
+		// tuff blobs below y=0 would take their deepslate variant without the ore tag changes (tuff moved from
+		// deepslate_ore_replaceables to stone_ore_replaceables); caves exposing tuff to air made that reachable.
 		int deepslate = 0;
 		Map<String, Integer> deepslateKinds = new TreeMap<>();
 		int solidBelowZero = 0;

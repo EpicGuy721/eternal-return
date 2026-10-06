@@ -254,7 +254,8 @@ public class MobFeatureTests implements FabricGameTest {
 		ctx.complete();
 	}
 
-	@GameTest(templateName = EMPTY_STRUCTURE, tickLimit = 400)
+	/** Waits for the lighting engine to light the new box, which can lag while many tests run at once. */
+	@GameTest(templateName = EMPTY_STRUCTURE, tickLimit = 1200)
 	public void creepersOnlySpawnUnderground(TestContext ctx) {
 		night(ctx);
 		// Sealed stone box: floor y0, walls, roof y3. Interior 3x2x3.

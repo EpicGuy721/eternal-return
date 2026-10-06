@@ -1,0 +1,69 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "fabric:all_mods_loaded",
+      "values": [
+        "moderner_beta"
+      ]
+    }
+  ],
+  "dimensions": {
+    "minecraft:overworld": {
+      "type": "minecraft:overworld",
+      "generator": {
+        "type": "moderner_beta:moderner_beta",
+        "biome_source": {
+          "type": "moderner_beta:moderner_beta",
+          "provider_settings": {
+            "moderner_beta:preset": "eternalreturn:eternal_return"
+          },
+          "cave_provider_settings": {
+            "moderner_beta:preset": "eternalreturn:eternal_return"
+          }
+        },
+        "provider_settings": {
+          "moderner_beta:preset": "eternalreturn:eternal_return"
+        }
+      }
+    },
+    "minecraft:the_nether": {
+      "type": "minecraft:the_nether",
+      "generator": {
+        "type": "minecraft:noise",
+        "biome_source": {
+          "type": "minecraft:multi_noise",
+          "preset": "minecraft:nether"
+        },
+        "settings": "minecraft:nether"
+      }
+    },
+    "minecraft:the_end": {
+      "type": "minecraft:the_end",
+      "generator": {
+        "type": "minecraft:noise",
+        "biome_source": {
+          "type": "minecraft:the_end"
+        },
+        "settings": "minecraft:end"
+      }
+    },
+    "eternalreturn_test:twin": {
+      "type": "minecraft:overworld",
+      "generator": {
+        "type": "moderner_beta:moderner_beta",
+        "biome_source": {
+          "type": "moderner_beta:moderner_beta",
+          "provider_settings": {
+            "moderner_beta:preset": "eternalreturn:eternal_return"
+          },
+          "cave_provider_settings": {
+            "moderner_beta:preset": "eternalreturn:eternal_return"
+          }
+        },
+        "provider_settings": {
+          "moderner_beta:preset": "eternalreturn:eternal_return"
+        }
+      }
+    }
+  }
+}

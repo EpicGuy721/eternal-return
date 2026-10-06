@@ -26,7 +26,9 @@
 		"mobs.SpiderEntityMixin",
 		"mobs.ZombieEntityMixin",
 		"villager.BuyItemFactoryAccessor",
-		"villager.VillagerEntityMixin"
+		"villager.VillagerEntityMixin",
+		"worldgen.CarverContextMixin",
+		"worldgen.ConfiguredCarverMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

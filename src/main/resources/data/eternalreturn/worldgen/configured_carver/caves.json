@@ -1,0 +1,14 @@
+{
+  "type": "eternalreturn:caves",
+  "config": {
+    "probability": 1.0,
+    "y": {
+      "absolute": 0
+    },
+    "yScale": 1.0,
+    "lava_level": {
+      "above_bottom": 8
+    },
+    "replaceable": "#eternalreturn:carvable"
+  }
+}

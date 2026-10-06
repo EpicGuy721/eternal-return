@@ -1,6 +1,6 @@
 # Eternal Return (Fabric 1.21.1)
 
-A total conversion for Minecraft. So far it covers three systems: a rework of enchanting built around capacity, material identity, and libraries of books instead of XP; tougher overworld mobs (baby skeletons and creepers, better-armed zombies and skeletons, new jockeys, cave-only creepers); and fishing as the emerald economy (bait, eleven new fish, lava fishing in the Nether, and fishermen as the only villagers who still pay emeralds). Worldgen has started with its own world type, Eternal Return: Release 1.6.4's continents and oceans with rolling, hilly Beta-style land, built on Moderner Beta.
+A total conversion for Minecraft. So far it covers three systems: a rework of enchanting built around capacity, material identity, and libraries of books instead of XP; tougher overworld mobs (baby skeletons and creepers, better-armed zombies and skeletons, new jockeys, cave-only creepers); and fishing as the emerald economy (bait, eleven new fish, lava fishing in the Nether, and fishermen as the only villagers who still pay emeralds). Worldgen has its own world type, Eternal Return: Release 1.6.4's continents and oceans with rolling, hilly Beta-style land and a new cave system, built on Moderner Beta.
 
 ## Building
 
@@ -10,7 +10,7 @@ Requires JDK 21.
 ./gradlew build             # jar lands in build/libs/ (also compiles the tests, without running them)
 ./gradlew runClient         # dev client for testing
 ./gradlew runAllGametests   # every in-game test, on headless servers (a few minutes)
-./gradlew generateWorldMaps # top-down maps of the world types into docs/worldgen-maps/ (about 15 minutes)
+./gradlew generateWorldMaps # maps of the world types and caves into docs/worldgen-maps/ (about 15 minutes)
 ```
 
 Uses Yarn mappings (`1.21.1+build.3`), Fabric Loader 0.19.5, Fabric API `0.116.17+1.21.1`, and the current Loom from the official Fabric template. The Gradle wrapper is copied from that template.
@@ -21,20 +21,24 @@ Every mixin was checked with a forced Mixin audit at startup. If a future mixin 
 
 ### Tests
 
-In-game tests live in `src/gametest`, a separate test mod that is never packed into the release jar. `runAllGametests` runs six headless servers, each in a fresh world:
+In-game tests live in `src/gametest`, a separate test mod that is never packed into the release jar. `runAllGametests` runs ten headless servers, each in a fresh world:
 
 | Task | World | What runs |
 |---|---|---|
 | `runGametest` | flat | the mob, fishing and trade suites, and a check that the Eternal Return world type loaded |
 | `runGametestNoModernerBeta` | flat, Moderner Beta removed | the same suites, and a check that the world type is skipped cleanly |
-| `runGametestModernerBeta` | Moderner Beta, Release 1.6.4 amplified | worldgen checks, debug tunnel on |
-| `runGametestModernerBetaTunnelOff` | same | worldgen checks, debug tunnel off |
-| `runGametestVanilla` | vanilla generator | worldgen checks, debug tunnel on (control) |
-| `runGametestEternalReturn` | Eternal Return, seed 173164 | world height, biome list, no cave biomes, no deepslate, badlands surface; debug tunnel on |
+| `runGametestModernerBeta` | Moderner Beta, Release 1.6.4 amplified | worldgen checks (debug tunnel on, trial chambers present), carving unchanged |
+| `runGametestModernerBetaTunnelOff` | same | the same with the debug tunnel off |
+| `runGametestModernerBeta164` | Moderner Beta, Release 1.6.4 | carving unchanged; cave density for comparison |
+| `runGametestModernerBetaBeta` | Moderner Beta, Beta 1.7.3 | carving unchanged |
+| `runGametestVanilla` | vanilla generator | worldgen checks (debug tunnel on, trial chambers present), carving unchanged |
+| `runGametestEternalReturn` | Eternal Return, seed 173164 | world height, biome list, no cave biomes, no deepslate, badlands surface, no trial chambers; debug tunnel on |
+| `runGametestEternalReturnOldCaves` | Eternal Return, new caves off, old caves on | carving matches the world from before the cave engine; cave density for comparison |
+| `runGametestCaves` | Eternal Return plus a twin dimension | every cave type, seams, chunk order, the carvable tag, density, timing |
 
-Each writes `build/gametest/<world>/report.xml`. Test worlds enable only the datapacks a normal new world would, so Moderner Beta's optional "Reduced Height" and "Deepslate Blobs" packs stay off.
+"Carving unchanged" hashes 27 chunks generated up to the carving step and compares them with a baseline recorded before the cave engine (`src/gametest/resources/fingerprints/`; `./gradlew runAllGametests -PrecordFingerprints` records new ones). Each run writes `build/gametest/<world>/report.xml`. Test worlds enable only the datapacks a normal new world would, so Moderner Beta's optional "Reduced Height" and "Deepslate Blobs" packs stay off.
 
-The map tool runs the same way: `runWorldmapEternalReturn`, `runWorldmapBeta` and `runWorldmapRelease164` each generate one world at seed 173164 and save height, biome, land and side-view images plus `stats.json` to `docs/worldgen-maps/<preset>/`. Add `-PworldmapHalf=1024` for a 2048-block area instead of 4096. Details in [docs/worldgen.md](docs/worldgen.md).
+The map tool runs the same way: `runWorldmapEternalReturn`, `runWorldmapBeta` and `runWorldmapRelease164` each generate one world at seed 173164 and save height, biome, land and side-view images plus `stats.json` to `docs/worldgen-maps/<preset>/`. Add `-PworldmapHalf=1024` for a 2048-block area instead of 4096. `runWorldmapCaves` saves cave slices at four depths (new caves next to the old ones on the same terrain), a gallery of every cave type, and real cave starts to `docs/worldgen-maps/caves/`. Details in [docs/worldgen.md](docs/worldgen.md).
 
 ## Features and where they live
 
@@ -77,10 +81,13 @@ The plan, status, terrain settings and maps are in [docs/worldgen.md](docs/world
 | Eternal Return world type (needs Moderner Beta) | `data/eternalreturn/worldgen/world_preset/eternal_return.json`, settings preset `data/eternalreturn/moderner_beta/settings_preset/eternal_return.json`, noise settings `data/eternalreturn/worldgen/noise_settings/eternal_return.json`; all generated by `tools/worldgen/build_preset.py` from `tools/worldgen/knobs.json` |
 | Biome list: Release 1.6.4 plus birch forest, savanna, badlands, dark forest | biome layers in the settings preset |
 | No lush caves, dripstone caves or deep dark | settings preset (`caveBiomeSettings`: none) |
-| No deepslate | settings preset (`deepslate_generation` off); block tag `minecraft:stone_ore_replaceables` gains tuff, so ores in tuff blobs stay stone ores |
+| No deepslate | settings preset (`deepslate_generation` off); tuff moved from block tag `minecraft:deepslate_ore_replaceables` to `minecraft:stone_ore_replaceables`, so ores in tuff blobs stay stone ores |
+| No trial chambers in Eternal Return worlds | settings preset (`structure_modifiers.removed`) |
+| Cave engine: six cave types, only in Eternal Return worlds | `com.eternalreturn.worldgen.caves` (`CaveSystemCarver`, `CaveTypes`, one class per type in `types/`); `worldgen/configured_carver/caves.json`; block tag `eternalreturn:carvable` |
+| Old caves off in Eternal Return worlds | `CarverContextMixin` (which world), `ConfiguredCarverMixin` (skips other carvers) |
 | Full -64 to 320 height | noise settings |
 | Debug tunnel (off by default) | `DebugTunnelCarver`, `worldgen/configured_carver/debug_tunnel.json`, attached to overworld biomes in `WorldgenFeatures` |
-| World map tool (dev only) | `WorldmapTests` in `src/gametest` |
+| World map tool (dev only) | `WorldmapTests`, `CaveMapTests` in `src/gametest` |
 
 ### Fishing and villagers
 
@@ -98,7 +105,18 @@ The plan, status, terrain settings and maps are in [docs/worldgen.md](docs/world
 
 ### World type
 
-Pick **World Type: Eternal Return** on the create-world screen (it is also in Moderner Beta's own preset list, in its own category). Oceans and continents are laid out like Release 1.6.4, but the land rolls and climbs like Beta 1.7.3 almost everywhere: mostly rolling and hilly ground around y 65-90, hills to about y 115, mountains up to about y 180, with Beta-style cliffs and the odd overhang. Swamps stay flat and marshy, as in 1.6.4. Sea level is 63, bedrock is at -64, and everything below y=0 is ordinary stone with the usual ores: no deepslate layer and no lush caves, dripstone caves or deep dark. Biomes are Release 1.6.4's (with its hills and shores) plus birch forest, savanna, badlands and dark forest. Caves and ravines are Moderner Beta's old-style ones for now. The Nether and the End are vanilla.
+Pick **World Type: Eternal Return** on the create-world screen (it is also in Moderner Beta's own preset list, in its own category). Oceans and continents are laid out like Release 1.6.4, but the land rolls and climbs like Beta 1.7.3 almost everywhere: mostly rolling and hilly ground around y 65-90, hills to about y 115, mountains up to about y 180, with Beta-style cliffs and the odd overhang. Swamps stay flat and marshy, as in 1.6.4. Sea level is 63, bedrock is at -64, and everything below y=0 is ordinary stone with the usual ores: no deepslate layer and no lush caves, dripstone caves or deep dark. Biomes are Release 1.6.4's (with its hills and shores) plus birch forest, savanna, badlands and dark forest. There are no trial chambers. The Nether and the End are vanilla.
+
+**Caves.** Six types, about as much cave in all as Release 1.6.4 had (4.5% of the underground open):
+
+- spaghetti: systems of long, thin, winding tunnels, 1.6.4's caves;
+- ravines: tall, narrow canyons with jagged walls, some large, some open to the sky;
+- large caverns: rare big chambers (10 to 25 blocks across the main body) with lumpy walls and tunnels leading out;
+- vertical shafts and steep tunnels joining one level to the next;
+- zig-zag tunnels of straight segments with sharp turns;
+- ribbed tunnels that bulge and pinch every few blocks.
+
+Caves stay out of oceans and rivers, and turn to lava at y -56 and below. Vanilla's and Moderner Beta's own caves and ravines no longer generate in Eternal Return worlds; `worldgen.caves.oldCaves` brings them back. Other world types keep their normal caves.
 
 Leave Moderner Beta's "Reduced Height" datapack off for this world type: it moves the floor of every world to y=0.
 
@@ -203,9 +221,12 @@ Nether fish and infernal bait are fireproof. The new fish also count for the "fi
 - `fishing`: `fishRequireBait`; `baits` (item to `lureSeconds`, `nightLureSeconds`, `lava`); `wormDropChance`; `anglerfishMinWaterDepth` (default 10); `lavaFishingOutsideNether`.
 - `villagers`: `onlyFishermenBuy`; `fishPriceMultiplier` (default 2, applied to every fish a fisherman buys); and `fishermanTrades` (item to `level`, `count`, base `emeralds`, `maxUses`, `experience`; needs a restart).
 - `worldgen`: `debugTunnel` (off by default). Carves one straight 3x3 tunnel at y=20 along z=8 through every chunk on that row, to check that this mod's carvers run under the current world generator. Needs a restart, and only affects newly generated chunks.
+- `worldgen.caves` (Eternal Return worlds only; newly generated chunks only): `enabled` (the new caves); `oldCaves` (off: vanilla's, Moderner Beta's and other mods' cave carvers don't run there); `density` (multiplies every weight); per type under `types` (`spaghetti`, `ravine`, `large`, `vertical`, `zigzag`, `ribbed`): `enabled`, `weight` (caves starting per 100 chunks), `minY` and `maxY` (where a cave starts), `minRadius` and `maxRadius`. Debug: `debugForceCaveType` (a type id: only that type, at a high rate) and `debugLogCaveStarts` (writes `type,x,y,z` of every cave start to `eternalreturn-cave-starts.csv` in the game folder).
 - `mobs`: baby chance, baby speed, and baby creeper fuse and blast multipliers; armor and armor-enchant chances, each written as `base + perDifficulty x clamped local difficulty`; the underground-creeper toggle and its sky-light limit; jockey, fishing rod, ender pearl and sword chances; fishing rod pull strength; the boat-breaking toggle.
 
 Which items belong to each tier is controlled by tags in `data/eternalreturn/tags/item/`, so modded gear can be added with a datapack and no code changes. The same goes for mobs: `data/eternalreturn/tags/entity_type/` decides which mobs can be babies (`baby_variants`, which only works for skeleton-type mobs and creepers), which get the boosted armor (`armored_spawns`), and which can ride spiders (`jockey_riders`).
+
+The block tag `eternalreturn:carvable` lists what caves can cut through (vanilla's `overworld_carver_replaceables` and anything added to it).
 
 Fishing data lives in the same place. The item tag `raw_fish` is what fishermen buy and what chum accepts. The block tag `drops_worms` sets where worms come from. The biome tags `catfish_waters`, `icefish_waters` and `ocean_waters` set where those fish live. Their Moderner Beta entries are optional, so the tags load with or without it. Catch odds are in `data/eternalreturn/loot_table/gameplay/`.
 
@@ -221,7 +242,8 @@ Fishing data lives in the same place. The item tag `raw_fish` is what fishermen 
 - Sodium: no overlap.
 - Moderner Beta (5.0.0-alpha.2): tested with its Release 1.6.4, 1.6.4 amplified and Beta 1.7.3 presets, and with the Eternal Return world type built on it. Its chunk generator runs carvers attached to biomes through Fabric's biome modifications, so this mod's carvers work in its worlds without any hook. The fish biome tags include its biomes as optional entries.
 - Without Moderner Beta: the Eternal Return world type and its noise settings are skipped at load (Fabric load conditions) and the optional tag entries are dropped, so the game starts and existing non-Eternal Return worlds load normally. A world created with the Eternal Return type needs Moderner Beta to open.
-- Adds tuff to the vanilla block tag `minecraft:stone_ore_replaceables`, so in every world, ores that generate inside tuff blobs use their stone variant instead of the deepslate one. Adds the world type to `minecraft:normal` (the create-world list) and the preset to Moderner Beta's `selectable` category tag.
+- Adds tuff to the vanilla block tag `minecraft:stone_ore_replaceables` and replaces `minecraft:deepslate_ore_replaceables` with deepslate alone, so in every world, ores that generate inside tuff blobs use their stone variant instead of the deepslate one. A mod that adds blocks to `deepslate_ore_replaceables` may lose them, depending on load order. Adds the world type to `minecraft:normal` (the create-world list) and the preset to Moderner Beta's `selectable` category tag.
+- Caves: in Eternal Return worlds, only this mod's carvers run (vanilla's, Moderner Beta's and other mods' carvers are skipped) unless `worldgen.caves.oldCaves` is on. Other worlds are untouched (checked against fingerprints of vanilla and Moderner Beta worlds). A world counts as Eternal Return by its noise settings, so an Eternal Return world whose generator settings were replaced by hand would carve normally.
 - Moderner Beta's optional "Reduced Height" datapack moves the overworld floor to y=0 for every world, which cuts off the bottom of Eternal Return worlds. Its "Deepslate Blobs" datapack adds deepslate back. Leave both off.
 - Nostalgic Tweaks: if you use its XP removal, this mod is already XP-free. If it has options that change the anvil or enchanting screens, check them alongside this.
 
@@ -268,3 +290,13 @@ World type (needs Moderner Beta): create a creative world with World Type "Etern
 30. `-2000 1176`: a mushroom island. `-288 -352`: ice plains. `-648 456`: dark forest.
 31. Anywhere: F3 never shows `lush_caves`, `dripstone_caves` or `deep_dark`. Dig down to y -60: stone all the way (with the usual granite, diorite, andesite and, below y 0, tuff blobs), bedrock at -64, ores like diamond and redstone in their normal stone texture, no deepslate.
 32. With World Type "Moderner Beta", its Customize screen lists Eternal Return in its own category, with its icon.
+
+Caves (same world; a new world, since chunks generated before this update keep their old caves). `/gamemode spectator`, `/effect give @s night_vision infinite`, then `/tp @s X Y Z` puts you inside each cave, all within about 100 blocks of each other:
+
+33. `-1255 28 -1147`: spaghetti, a system of thin winding tunnels with flat floors; follow them up and down.
+34. `-1286 15 -1140`: a ravine, a narrow, very tall canyon with stepped, jagged walls.
+35. `-1200 -23 -1094`: a large cavern with uneven walls, a lumpy ceiling and tunnels leading off.
+36. `-1275 51 -1129`: the top of a vertical shaft; look down, then follow it to the tunnels at the bottom.
+37. `-1350 11 -1152`: a zig-zag tunnel: straight runs with sharp alternating turns.
+38. `-1304 -3 -1146`: a ribbed tunnel that bulges and pinches every few blocks.
+39. Anywhere: no water pours into caves from oceans or rivers, caves at y -56 and below hold lava, and there are no trial chambers (`/locate structure minecraft:trial_chambers` finds none).

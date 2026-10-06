@@ -35,6 +35,19 @@ public abstract class TestServerMixin {
 		if (tunnel != null) {
 			EternalReturnConfig.get().worldgen.debugTunnel = Boolean.parseBoolean(tunnel);
 		}
+		EternalReturnConfig.CaveTweaks caves = EternalReturnConfig.get().worldgen.caves;
+		String enabled = System.getProperty("eternalreturn.gametest.caves.enabled");
+		if (enabled != null) {
+			caves.enabled = Boolean.parseBoolean(enabled);
+		}
+		String oldCaves = System.getProperty("eternalreturn.gametest.caves.oldCaves");
+		if (oldCaves != null) {
+			caves.oldCaves = Boolean.parseBoolean(oldCaves);
+		}
+		String log = System.getProperty("eternalreturn.gametest.caves.logStarts");
+		if (log != null) {
+			caves.debugLogCaveStarts = Boolean.parseBoolean(log);
+		}
 	}
 
 	/**

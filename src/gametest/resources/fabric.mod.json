@@ -14,7 +14,11 @@
 			"com.eternalreturn.gametest.WorldgenTests",
 			"com.eternalreturn.gametest.EternalReturnPresetTests",
 			"com.eternalreturn.gametest.CompatTests",
-			"com.eternalreturn.gametest.WorldmapTests"
+			"com.eternalreturn.gametest.WorldmapTests",
+			"com.eternalreturn.gametest.ControlFingerprintTests",
+			"com.eternalreturn.gametest.StructureTests",
+			"com.eternalreturn.gametest.CaveTests",
+			"com.eternalreturn.gametest.CaveMapTests"
 		]
 	},
 	"mixins": [

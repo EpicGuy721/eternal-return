@@ -14,7 +14,8 @@ public final class GameTestWorld {
 	/** The headless map tool; only runs in the worldmap runs. */
 	public static final String WORLDMAP_BATCH = "worldmap";
 	/** Batches that need a generated world, so they never run in the flat-world runs. */
-	private static final Set<String> GENERATED_WORLD_BATCHES = Set.of(WORLDGEN_BATCH, ETERNAL_RETURN_BATCH, WORLDMAP_BATCH);
+	private static final Set<String> GENERATED_WORLD_BATCHES = Set.of(WORLDGEN_BATCH, ETERNAL_RETURN_BATCH, WORLDMAP_BATCH,
+			ControlFingerprintTests.FINGERPRINT_BATCH);
 
 	public static final String ETERNAL_RETURN_PRESET = "eternalreturn:eternal_return";
 
@@ -40,7 +41,7 @@ public final class GameTestWorld {
 	public static boolean selects(String batchId) {
 		String batches = System.getProperty("eternalreturn.gametest.batches");
 		if (batches == null) {
-			return !GENERATED_WORLD_BATCHES.contains(batchId);
+			return !GENERATED_WORLD_BATCHES.contains(batchId) && !batchId.startsWith("cave");
 		}
 		return Set.of(batches.split(",")).contains(batchId);
 	}

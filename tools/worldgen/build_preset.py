@@ -86,8 +86,11 @@ for s in pipeline:
 # ---------------------------------------------------------------- caves: no modern cave biomes
 preset['caveBiomeSettings'] = {'moderner_beta:provider': 'moderner_beta:none'}
 
-# ---------------------------------------------------------------- terrain
+# ---------------------------------------------------------------- structures: no trial chambers (Eternal Return worlds only)
 cs = preset['chunkSettings']
+cs['moderner_beta:structure_modifiers']['removed'] = ['minecraft:trial_chambers']
+
+# ---------------------------------------------------------------- terrain
 cs['moderner_beta:deepslate_generation']['enabled'] = False
 cs['moderner_beta:noise_generator_settings'] = f'{NS}:eternal_return'
 land = cs['moderner_beta:noise_landmass']

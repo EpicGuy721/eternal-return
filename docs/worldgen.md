@@ -28,6 +28,8 @@ Inspired by TheMasterCaver's World. Many cave types:
 
 Cave stone depends on the biome (sandstone caves in deserts; granite, diorite, andesite and others elsewhere), and each stone has its own ore variants.
 
+Built so far: spaghetti, ravine, large, vertical, zig-zag and ribbed (see The cave engine below).
+
 No modern cave biomes (lush caves, dripstone caves, deep dark) and no deepslate. The full modern height (-64 to 320) is used.
 
 ## Scope
@@ -50,8 +52,9 @@ The preset is all data. Without Moderner Beta installed, the world type and its 
 ## Status
 
 - Phase 1 (investigation): done. Findings below.
-- Phase 2 (preset, fish tags, terrain): done. Biome list, no cave biomes, no deepslate, full -64 to 320 height, terrain tuned in two passes (the second after playtesting). Caves and ores are not touched yet: caves and ravines are Moderner Beta's old-style ones from its 1.6.4 preset (`forceBetaCaves`, `forceBetaCanyons`), ores are vanilla's.
-- Next: caves (the cave types listed above).
+- Phase 2 (preset, fish tags, terrain): done. Biome list, no cave biomes, no deepslate, full -64 to 320 height, terrain tuned in two passes (the second after playtesting).
+- Phase 3, part 1 (cave engine): done. The shared engine, debug tools and six tunnel types; the old caves are off in Eternal Return worlds; trial chambers removed there. Ores are still vanilla's.
+- Next: maze caves, combination caves and the room types (phase 3, part 2), then biome stone and ore variants.
 
 ## The Eternal Return preset
 
@@ -64,7 +67,8 @@ The preset is all data. Without Moderner Beta installed, the world type and its 
 | `data/eternalreturn/worldgen/world_preset/eternal_return.json` | the world type; vanilla Nether and End |
 | `data/minecraft/tags/worldgen/world_preset/normal.json` | lists the world type on the create-world screen (optional entry) |
 | `data/eternalreturn/moderner_beta/settings_preset_category/`, `data/eternalreturn/tags/moderner_beta/`, `data/moderner_beta/tags/moderner_beta/settings_preset_category/selectable.json` | lists the preset in Moderner Beta's own preset picker, with its icon (`assets/eternalreturn/textures/gui/moderner_beta_settings_preset/`) |
-| `data/minecraft/tags/block/stone_ore_replaceables.json` | adds tuff, so ores that land in tuff blobs use their stone variant instead of the deepslate one |
+| `data/minecraft/tags/block/stone_ore_replaceables.json`, `data/minecraft/tags/block/deepslate_ore_replaceables.json` | move tuff from the deepslate ore tag to the stone one, so ores that land in tuff blobs use their stone variant |
+| `structure_modifiers.removed` in the settings preset | `minecraft:trial_chambers`: no trial chambers in Eternal Return worlds |
 
 **Biomes.** The 1.6.4 land pool (desert, forest, extreme hills, swampland, plains, taiga, jungle, each listed twice) plus birch forest, savanna, badlands and dark forest (each listed once). Ocean, frozen ocean, river, frozen river, beach, ice plains, ice mountains, mushroom island, and the hills and shore rules are unchanged from 1.6.4. Birch forest, savanna and badlands get hills variants through the hills layer; dark forest has none, as in later versions.
 
@@ -72,7 +76,7 @@ All four later biomes work cleanly next to Moderner Beta's own: Moderner Beta sh
 
 **No cave biomes.** The cave biome provider is `moderner_beta:none`, so lush caves, dripstone caves and the deep dark never generate (and so no ancient cities either).
 
-**No deepslate.** Moderner Beta's deepslate layer is off, so everything below y=0 is ordinary stone. Vanilla still scatters tuff blobs below y=0, and an ore that lands in tuff takes its deepslate variant. The `stone_ore_replaceables` tag change turns those into normal ores. That tag change applies to every world: in a vanilla world, ores inside tuff blobs now use the stone variant as well. Two things can still bring a little deepslate: trial chambers (two of their hallway pieces have cobbled-deepslate rubble), and Moderner Beta's optional "Deepslate Blobs" datapack if someone turns it on.
+**No deepslate.** Moderner Beta's deepslate layer is off, so everything below y=0 is ordinary stone. Vanilla still scatters tuff blobs below y=0, and an ore that lands in tuff would take its deepslate variant. Tuff is added to `stone_ore_replaceables` and taken out of `deepslate_ore_replaceables` (that file replaces vanilla's, leaving only deepslate), so those ores are always the stone kind; the second change matters once caves expose tuff to air, because vanilla's ore placer then falls back to the deepslate target. Both tag changes apply to every world: in a vanilla world, ores inside tuff blobs use the stone variant too. Trial chambers, which have a little cobbled-deepslate rubble, no longer generate in Eternal Return worlds. Moderner Beta's optional "Deepslate Blobs" datapack would still add deepslate if someone turned it on.
 
 **World height.** -64 to 320, all of it used. Bedrock at -64, solid stone with caves and ores from there to the surface, sea level 63, most land between 65 and 90, hills to about 115 and the tallest mountains around 180. Moderner Beta's own 1.6.4 presets stop terrain at y=128; this preset lets it go higher, with room to spare up to 320. Don't turn on Moderner Beta's "Reduced Height" datapack with this preset: it moves the floor to y=0 for every world.
 
@@ -158,6 +162,110 @@ Options: `-PworldmapOut=<dir>` writes to `<dir>/<preset>/` instead; `-PworldmapC
 
 `python tools/worldgen/compare_maps.py` rebuilds `overview.png` (height and land maps with the headline numbers) and `slices_compared.png` (the three side views). `python tools/worldgen/variants.py <variants.json>` renders a list of knob variants into `build/worldgen-variants/<name>/eternal_return/`, prints the stats for each, then restores the shipped preset; the `HALF`, `MAP_CENTRE`, `MAP_CLOSEUP` and `MAP_SLICE_Z` environment variables pass the options above.
 
+## The cave engine (phase 3, part 1)
+
+Six tunnel-style cave types, carved only in Eternal Return worlds. Maze caves, combination caves and the room types come next, then biome stone and ore variants. Code: `com.eternalreturn.worldgen.caves`.
+
+### Which worlds, and the old caves
+
+- **Only Eternal Return worlds.** A world counts as Eternal Return when its generator uses this mod's noise settings (`eternalreturn:eternal_return`), which only the Eternal Return preset references. Moderner Beta rebuilds the settings object when a preset overrides the sea level (ours does), but it keeps the noise router object, so the check compares that (`CaveWorlds`, told to every carver through `CarverContextMixin`).
+- **The old caves are off there.** Every carver runs through `ConfiguredCarver.carve`, under vanilla's generator and Moderner Beta's alike (Moderner Beta swaps in its Beta-style caves and canyons just before that call). In Eternal Return worlds `ConfiguredCarverMixin` skips every carver that isn't this mod's: vanilla's cave and canyon carvers, Moderner Beta's replacements, and any other mod's carvers. Each carver is seeded on its own, so skipping one never moves another's caves.
+- **Everything else is untouched.** In vanilla, other Moderner Beta presets and flat worlds the cave carver does nothing and nothing is skipped. The control fingerprints prove it (see Tests).
+- **Toggles.** `worldgen.caves.enabled` turns the new caves off; `worldgen.caves.oldCaves` brings the old ones back in Eternal Return worlds. With the new caves off and the old ones on, an Eternal Return world comes out block for block as it did before the cave engine.
+
+### How a cave is carved
+
+- One carver, `eternalreturn:caves` (`CaveSystemCarver`), attached to every overworld biome after the biome's own carvers. The generator calls it for the chunk being carved once per nearby source chunk (up to 8 chunks away), with a random seeded from the world seed and that source chunk; Release 1.6.4's caves worked the same way.
+- From that seed each type gets its own random (salted with the type's name), so turning a type off or changing its weight leaves the other types' caves where they were. The type decides how many caves start in the source chunk (weight per 100 chunks), places each start in the chunk at a y in its depth range, and simulates the whole cave. Only the parts inside the chunk being carved are written.
+- Shapes stay within 120 blocks (per axis) of their source chunk's centre, so every chunk a cave touches also sees its source: caves line up across chunk borders, and the result doesn't depend on which chunks generate first.
+- Shared building blocks (`CaveBuilder`, `Tunnel`, `ChunkCarver`): ellipsoids with an optional flat floor, any custom shape, and a winding tunnel walker using Release 1.6.4's wander maths. A new type is one class plus one line in `CaveTypes`.
+
+`ChunkCarver` holds the rules every type follows:
+
+- Only blocks in the block tag `eternalreturn:carvable` are replaced. It contains vanilla's `#minecraft:overworld_carver_replaceables` (all overworld stones, dirt, sand, terracotta, gravel, sandstone, snow, packed ice and more), so the biome stone variants planned next only need adding to the tag. Bedrock and anything outside the tag stay.
+- Nothing is carved in the bottom layer or within 8 blocks of the top (vanilla's limits).
+- At or below the lava level (vanilla's 8 blocks above the floor: y -56) carved blocks become lava, above it cave air.
+- A shape is skipped in a chunk when water, or lava above the lava level, lies in or next to its box: Release 1.6.4's rule, which keeps caves from breaching oceans, rivers and lakes. Water just across the chunk's edge is read from the generator's height map (the ocean or river surface there), because the neighbouring chunk may not exist yet. Vanilla's carver tag contains water, but this rule means water is never carved.
+- When grass or mycelium is carved, the dirt under it becomes the same block, as vanilla does.
+
+### The types
+
+Weight is caves starting per 100 chunks; spaghetti counts systems. Start y is where a cave begins (tunnels wander beyond it). Radius ranges are in blocks.
+
+| Type | Looks like | Weight | Start y | Radius |
+|---|---|---|---|---|
+| `spaghetti` | Release 1.6.4's caves: systems of two to six long, thin tunnels leaving from points a few blocks apart, wandering in heading and height, with flat floors. One tunnel in five branches once; one in three keeps its slope for longer, so it climbs or drops a long way. Shallow ones can break out at the surface. | 24 | -58 to 85 | 1.3 to 2.0 (half-width) |
+| `ravine` | Release 1.6.4's ravines: long, narrow canyons three to four times as tall as they are wide, with vertical, jagged walls (the width changes every one to three blocks of height). One in four is a large ravine, wider, taller and grown both ways from its start. Shallow ones open to the surface. | 2 | -30 to 45 | 2.5 to 4.5 (half-width; large ×1.5) |
+| `large` | A big chamber: a flattened, stretched main body with five to ten lobes of different sizes and heights around it, so the walls are uneven and the ceiling lumpy, a mostly flat floor, and two to five winding tunnels leading out. The deepest can have lava on the floor. | 1 | -48 to 15 | 10 to 25 (main chamber) |
+| `vertical` | Steep connections between levels. Three in five are shafts dropping 20 to 60 blocks with a slight drift and a bulging wall; the rest are steep tunnels at 50 to 75 degrees. Short side tunnels leave the top and bottom so they join the caves around them. | 8 | -20 to 60 (the top) | 1.5 to 3.5 |
+| `zigzag` | Constant-width tunnels made of equal straight segments (6 to 14 blocks) turning the same sharp angle (70 to 110 degrees) left and right in turn, each segment with its own gentle slope. | 7 | -50 to 50 | 1.5 to 2.5 |
+| `ribbed` | Gently curving tunnels whose width pulses 35 to 55 percent above and below the base every 5 to 9 blocks: wide bulges between rings of rock. | 7 | -50 to 50 | 2.0 to 3.5 (base) |
+
+The settings that matter most for how much cave there is: `worldgen.caves.density` (multiplies every weight), the spaghetti weight (most of the cave volume) and its radius range, then the large-cave weight (rare but big).
+
+### Density
+
+Share of the underground (everything below the ground surface) that is open, over a land square of 24 x 24 chunks (from -1472, -1344; seed 173164):
+
+| Depth | New caves | Old caves, same terrain | Release 1.6.4 world |
+|---|---|---|---|
+| y -64 to -49 | 2.1% | 3.4% | 3.2% |
+| y -48 to -33 | 3.8% | 4.8% | 5.1% |
+| y -32 to -17 | 5.2% | 5.8% | 7.4% |
+| y -16 to -1 | 5.5% | 5.6% | 6.2% |
+| y 0 to 15 | 6.7% | 6.8% | 5.4% |
+| y 16 to 31 | 6.0% | 5.0% | 4.1% |
+| y 32 to 47 | 4.6% | 3.7% | 3.4% |
+| y 48 to 63 | 3.7% | 2.9% | 1.1% |
+| y 64 to 79 | 2.8% | 3.1% | 0.2% |
+| **All** | **4.46%** | **4.55%** | **4.53%** |
+
+"Old caves" are Moderner Beta's 1.6.4-style caves on the identical terrain (the twin dimension with the engine off); the Release 1.6.4 world is Moderner Beta's own preset (its terrain is lower, hence the empty top rows). The new caves carry about the same total, a little thinner at the very bottom and a little more in the middle.
+
+### Timing
+
+Chunk generation up to the carving step, one chunk at a time, same squares with the engine on and off (overworld and twin dimension, swapped between rounds), 392 chunks each:
+
+| | ms per chunk |
+|---|---|
+| No caves | 63.3 |
+| New caves | 68.7 |
+| Old caves (Moderner Beta's) | 70.6 |
+
+Time spent inside the cave carver: 8.6 ms per chunk (each chunk simulates the caves of the 289 chunks around it). Three earlier runs gave 6.5 to 7.8 ms, so expect 6 to 9 ms depending on the machine's load. The new caves cost about the same as the old ones.
+
+### Dev options
+
+- `debugForceCaveType`: a type id, and only that type is carved, at a high rate (spaghetti, vertical, zigzag and ribbed 60 per 100 chunks; ravine 10; large 8).
+- `debugLogCaveStarts`: appends `type,x,y,z` for every cave start to `eternalreturn-cave-starts.csv` in the game folder as chunks generate. Teleport to any line to stand inside that cave.
+
+### Cave maps
+
+`./gradlew runWorldmapCaves` (part of `generateWorldMaps`) writes to `docs/worldgen-maps/caves/`:
+
+- `slices.png`: the land square cut at y -50, -20, 20 and 50, new caves next to the old ones on the same terrain (black = cave). `slice_y*.png` are the new-cave slices on their own.
+- `gallery.png`: each type forced in its own 128 x 128 block square, seen from above (colour = height of the highest cave block) and from the side.
+- `caves.json`: the density numbers and real cave starts in the land square (used for the README checklist).
+
+### Trial chambers
+
+Removed in Eternal Return worlds only: the preset lists `minecraft:trial_chambers` in Moderner Beta's `structure_modifiers.removed`, which drops the structure set from that world's placement. Nothing changes in other worlds. In Eternal Return worlds this also means no breezes, trial spawners, vaults, trial keys, heavy cores or maces. The structure test counts starts over an 8192-block square: none in Eternal Return, 222 in a vanilla world and 177 in a Moderner Beta 1.6.4 world.
+
+### Tests
+
+- `runGametestCaves` (Eternal Return with a twin dimension that has the same generator):
+  - per type, forced, in a square of its own: caves exist; the open share is in a sane range; no gaps in the bedrock floor, no cave air at or below the lava level, no lava above it, nothing within 8 blocks of the top; no cave block touches an ocean, river or lake; cave borders line up across chunk edges as well as inside chunks; the same chunk generated first in one dimension and last in the other is identical; every logged start is of that type and in its depth range;
+  - every block of `eternalreturn:carvable` is carved, bedrock and obsidian aren't, a shape beside water is skipped, lava at and below the lava level;
+  - default density and the timing above.
+- `runGametestEternalReturnOldCaves`: new caves off, old caves on: carved terrain matches the fingerprint recorded before the cave engine.
+- Control fingerprints, unchanged: vanilla, Moderner Beta 1.6.4 amplified (debug tunnel on and off), Release 1.6.4 and Beta 1.7.3. Each hashes 27 chunks generated up to the carving step and compares with `src/gametest/resources/fingerprints/`; `-PrecordFingerprints` records new baselines.
+
+### Known limits
+
+- Water pockets inside the terrain (below sea level, not connected to an ocean) are only seen within the chunk being carved, so a cave can touch one across a chunk edge; the cave tests found none in their squares.
+- Other mods' carvers don't run in Eternal Return worlds unless `oldCaves` is on.
+- Ores: tuff is now in `stone_ore_replaceables` and no longer in `deepslate_ore_replaceables` (replaced), because caves exposing tuff to air let vanilla's ore placer fall back to the deepslate variant.
+
 ## Phase 1 findings (Moderner Beta 5.0.0-alpha.2)
 
 Sources: the mod's shipped data and its source (Codeberg, tag `5.0.0-alpha.2`). The official docs site (moderner.nostalgica.net) has no DNS record and the Codeberg wiki is empty.
@@ -168,7 +276,7 @@ Sources: the mod's shipped data and its source (Codeberg, tag `5.0.0-alpha.2`). 
 
 **Biomes.** Release presets use a `fractal_layers` pipeline, the old GenLayer stack, written out in the preset: `random_biome` pools, `biome_replacement`, `weighted_pool`, hills, shores, rivers. Trimming or adding biomes means editing those lists in our own preset. Beta-style presets also have `biome_injection_rules`. A 1.6.4 world uses vanilla `desert`, `forest`, `jungle`, `ocean`, `frozen_ocean`, `river`, `frozen_river`, `beach`, `mushroom_fields`, plus Moderner Beta's own `early_release_ice_plains`, `early_release_taiga`, `early_release_swampland`, `early_release_extreme_hills`, `late_beta_plains`. A cave-biome layer adds `lush_caves`, `dripstone_caves` and `deep_dark` underground. Moderner Beta's own biomes are not in vanilla tags such as `#minecraft:is_overworld`.
 
-**Caves.** `chunkSettings.cave_generation` has `useCarvers` (master switch: off skips every carver, ours included), `forceBetaCaves` / `forceBetaCanyons` (swap vanilla's `cave`, `cave_extra_underground` and `canyon` carvers for Beta versions), `useNoiseCaves` and `fixCaveBorders`. Its `applyCarvers` loops over each nearby chunk's biome carvers like vanilla does, so carvers added through Fabric biome modifications run. Proven by the debug tunnel test (see README, Tests). Removing vanilla's cave carvers from biomes should also remove the Beta caves that replace them (from reading the code; untested).
+**Caves.** `chunkSettings.cave_generation` has `useCarvers` (master switch: off skips every carver, ours included), `forceBetaCaves` / `forceBetaCanyons` (swap vanilla's `cave`, `cave_extra_underground` and `canyon` carvers for Beta versions), `useNoiseCaves` and `fixCaveBorders`. Its `applyCarvers` loops over each nearby chunk's biome carvers like vanilla does, so carvers added through Fabric biome modifications run. Proven by the debug tunnel test (see README, Tests). Removing vanilla's cave carvers from biomes should also remove the Beta caves that replace them (from reading the code; untested). Phase 3 skips them at carve time instead, in Eternal Return worlds only (see The cave engine).
 
 **World height.** Moderner Beta ships an optional "Reduced Height" datapack that moves the overworld floor to y=0, like old versions. It is off unless chosen at world creation. Without it, the world keeps the normal -64 floor. Moderner Beta's own presets cap terrain at y=128 even so; the Eternal Return preset uses the full range (see above).
 
