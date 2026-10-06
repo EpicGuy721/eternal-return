@@ -125,6 +125,8 @@ public final class EternalReturnConfig {
 		public Map<String, BaitStats> baits = defaultBaits();
 		/** Chance for blocks in eternalreturn:drops_worms to drop a worm when a player mines them. */
 		public double wormDropChance = 0.04;
+		/** Anglerfish only bite where the water under the hook is at least this many blocks deep. */
+		public int anglerfishMinWaterDepth = 10;
 		/** Lava fishing works in ultrawarm dimensions (the Nether). True allows it in any lava. */
 		public boolean lavaFishingOutsideNether = false;
 	}

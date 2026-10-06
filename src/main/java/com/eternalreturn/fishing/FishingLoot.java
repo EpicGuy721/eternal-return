@@ -15,6 +15,8 @@ import net.minecraft.world.World;
 public final class FishingLoot {
 	public static final LootConditionType BAIT_CONDITION = Registry.register(
 			Registries.LOOT_CONDITION_TYPE, EternalReturn.id("bait"), new LootConditionType(BaitLootCondition.CODEC));
+	public static final LootConditionType DEEP_WATER_CONDITION = Registry.register(
+			Registries.LOOT_CONDITION_TYPE, EternalReturn.id("deep_water"), new LootConditionType(DeepWaterLootCondition.CODEC));
 
 	/** Used instead of minecraft:gameplay/fishing when the hook is in lava. */
 	public static final RegistryKey<LootTable> LAVA_FISHING = RegistryKey.of(RegistryKeys.LOOT_TABLE, EternalReturn.id("gameplay/lava_fishing"));

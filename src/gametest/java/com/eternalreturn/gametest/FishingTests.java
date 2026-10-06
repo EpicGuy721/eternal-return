@@ -2,6 +2,7 @@ package com.eternalreturn.gametest;
 
 import com.eternalreturn.config.EternalReturnConfig;
 import com.eternalreturn.fishing.Bait;
+import com.eternalreturn.fishing.DeepWaterLootCondition;
 import com.eternalreturn.fishing.FishingItems;
 import com.eternalreturn.fishing.FishingLoot;
 import com.mojang.authlib.GameProfile;
@@ -96,17 +97,22 @@ public class FishingTests implements FabricGameTest {
 	private static void fillBiome(TestContext ctx, String biome) {
 		MinecraftServer server = ctx.getWorld().getServer();
 		BlockPos a = ctx.getAbsolutePos(new BlockPos(-4, -4, -4));
-		BlockPos b = ctx.getAbsolutePos(new BlockPos(11, 11, 11));
+		BlockPos b = ctx.getAbsolutePos(new BlockPos(11, 20, 11));
 		server.getCommandManager().executeWithPrefix(server.getCommandSource().withSilent(),
 				"fillbiome " + a.getX() + " " + a.getY() + " " + a.getZ() + " " + b.getX() + " " + b.getY() + " " + b.getZ() + " " + biome);
 	}
 
 	/** Rolls a fishing loot table the way FishingBobberEntity.use does, with the given bait on the hook. */
 	private static Map<Item, Integer> sample(TestContext ctx, RegistryKey<LootTable> key, Item bait, int rolls) {
+		return sample(ctx, key, bait, rolls, new BlockPos(3, 1, 3));
+	}
+
+	/** Same, with the hook at a given test-relative position (the deep water tests put it on a real water column). */
+	private static Map<Item, Integer> sample(TestContext ctx, RegistryKey<LootTable> key, Item bait, int rolls, BlockPos hookAt) {
 		ServerWorld world = ctx.getWorld();
 		PlayerEntity angler = ctx.createMockPlayer(GameMode.SURVIVAL);
 		FishingBobberEntity hook = new FishingBobberEntity(angler, world, 0, 0);
-		hook.setPosition(Vec3d.ofBottomCenter(ctx.getAbsolutePos(new BlockPos(3, 1, 3))));
+		hook.setPosition(Vec3d.ofBottomCenter(ctx.getAbsolutePos(hookAt)));
 		setField(hook, "eternalreturn$bait", bait == null ? ItemStack.EMPTY : new ItemStack(bait));
 		LootTable table = world.getServer().getReloadableRegistries().getLootTable(key);
 		Map<Item, Integer> counts = new HashMap<>();
@@ -175,15 +181,43 @@ public class FishingTests implements FabricGameTest {
 
 		fillBiome(ctx, "minecraft:deep_ocean");
 		Map<Item, Integer> glowDeep = sample(ctx, water, FishingItems.GLOW_BAIT, 4000);
-		check(ctx, n(glowDeep, FishingItems.ANGLERFISH) > 0, "anglerfish on glow bait in deep ocean: " + glowDeep);
 		check(ctx, n(glowDeep, FishingItems.TUNA) > 0 && n(glowDeep, FishingItems.ELECTRIC_EEL) > 0, "ocean fish: " + glowDeep);
-		Map<Item, Integer> wormDeep = sample(ctx, water, FishingItems.WORM, 4000);
-		check(ctx, n(wormDeep, FishingItems.ANGLERFISH) == 0, "anglerfish needs glow bait: " + wormDeep);
+		check(ctx, n(glowDeep, FishingItems.ANGLERFISH) == 0, "no anglerfish without deep water under the hook: " + glowDeep);
 
 		fillBiome(ctx, "minecraft:swamp");
 		check(ctx, n(sample(ctx, water, FishingItems.WORM, 2000), FishingItems.CATFISH) > 0, "catfish in swamps");
 		fillBiome(ctx, "minecraft:snowy_plains");
 		check(ctx, n(sample(ctx, water, FishingItems.WORM, 2000), FishingItems.ICEFISH) > 0, "icefish in the cold");
+		ctx.complete();
+	}
+
+	/**
+	 * Anglerfish: any ocean biome, glow bait, and at least fishing.anglerfishMinWaterDepth (10) blocks of
+	 * water under the hook. deep_pool is a 5x14x5 column of water.
+	 */
+	@GameTest(templateName = "eternalreturn_test:deep_pool", batchId = "fishing_loot_deep", tickLimit = 200)
+	public void anglerfishNeedDeepWater(TestContext ctx) {
+		RegistryKey<LootTable> water = LootTables.FISHING_GAMEPLAY;
+		BlockPos deep = new BlockPos(2, 14, 2);
+		BlockPos shallow = new BlockPos(2, 5, 2);
+		check(ctx, DeepWaterLootCondition.waterDepth(ctx.getWorld(), ctx.getAbsolutePos(deep)) == 14, "deep spot depth "
+				+ DeepWaterLootCondition.waterDepth(ctx.getWorld(), ctx.getAbsolutePos(deep)));
+		check(ctx, DeepWaterLootCondition.waterDepth(ctx.getWorld(), ctx.getAbsolutePos(shallow)) == 5, "shallow spot depth");
+
+		fillBiome(ctx, "minecraft:ocean");
+		check(ctx, n(sample(ctx, water, FishingItems.GLOW_BAIT, 4000, deep), FishingItems.ANGLERFISH) > 0, "anglerfish over 14 deep ocean water");
+		check(ctx, n(sample(ctx, water, FishingItems.GLOW_BAIT, 4000, shallow), FishingItems.ANGLERFISH) == 0, "no anglerfish over 5 deep water");
+		check(ctx, n(sample(ctx, water, FishingItems.WORM, 4000, deep), FishingItems.ANGLERFISH) == 0, "anglerfish need glow bait");
+		EternalReturnConfig.FishingTweaks cfg = EternalReturnConfig.get().fishing;
+		int saved = cfg.anglerfishMinWaterDepth;
+		cfg.anglerfishMinWaterDepth = 15;
+		try {
+			check(ctx, n(sample(ctx, water, FishingItems.GLOW_BAIT, 4000, deep), FishingItems.ANGLERFISH) == 0, "config minimum 15 rules out 14 deep");
+		} finally {
+			cfg.anglerfishMinWaterDepth = saved;
+		}
+		fillBiome(ctx, "minecraft:plains");
+		check(ctx, n(sample(ctx, water, FishingItems.GLOW_BAIT, 4000, deep), FishingItems.ANGLERFISH) == 0, "no anglerfish outside ocean biomes");
 		ctx.complete();
 	}
 

@@ -23,59 +23,62 @@ loom {
 			sourceSet sourceSets.gametest
 		}
 	}
+}
 
-	// Headless test servers. The gametest mod's TestServerMixin reads the eternalreturn.gametest.*
-	// properties: which world preset to use, which test batches to run, and worldgen config overrides.
-	runs {
-		gametest {
-			server()
-			name "Game Test (flat world)"
-			source sourceSets.gametest
-			runDir "build/gametest/flat"
-			vmArg "-Dfabric-api.gametest"
-			vmArg "-Dfabric-api.gametest.report-file=${file("build/gametest/flat/report.xml")}"
-		}
-		gametestModernerBeta {
-			server()
-			name "Game Test (Moderner Beta 1.6.4 amplified, debug tunnel on)"
-			source sourceSets.gametest
-			runDir "build/gametest/moderner_beta"
-			vmArg "-Dfabric-api.gametest"
-			vmArg "-Dfabric-api.gametest.report-file=${file("build/gametest/moderner_beta/report.xml")}"
-			vmArg "-Deternalreturn.gametest.preset=eternalreturn_test:moderner_beta_1_6_4_amplified"
-			vmArg "-Deternalreturn.gametest.batches=worldgen"
-			vmArg "-Deternalreturn.gametest.debugTunnel=true"
-		}
-		gametestModernerBetaTunnelOff {
-			server()
-			name "Game Test (Moderner Beta 1.6.4 amplified, debug tunnel off)"
-			source sourceSets.gametest
-			runDir "build/gametest/moderner_beta_off"
-			vmArg "-Dfabric-api.gametest"
-			vmArg "-Dfabric-api.gametest.report-file=${file("build/gametest/moderner_beta_off/report.xml")}"
-			vmArg "-Deternalreturn.gametest.preset=eternalreturn_test:moderner_beta_1_6_4_amplified"
-			vmArg "-Deternalreturn.gametest.batches=worldgen"
-			vmArg "-Deternalreturn.gametest.debugTunnel=false"
-		}
-		gametestVanilla {
-			server()
-			name "Game Test (vanilla generator, debug tunnel on)"
-			source sourceSets.gametest
-			runDir "build/gametest/vanilla"
-			vmArg "-Dfabric-api.gametest"
-			vmArg "-Dfabric-api.gametest.report-file=${file("build/gametest/vanilla/report.xml")}"
-			vmArg "-Deternalreturn.gametest.preset=minecraft:normal"
-			vmArg "-Deternalreturn.gametest.batches=worldgen"
-			vmArg "-Deternalreturn.gametest.debugTunnel=true"
-		}
+// Headless test servers (Fabric GameTest). The gametest mod's TestServerMixin reads the
+// eternalreturn.gametest.* properties: the world preset, the seed, which test batches run, and
+// worldgen config overrides. Each run gets its own fresh world under build/gametest/<dir>.
+def worldmapSeed = "173164"
+def gameTestRun = { String runName, String label, String dir, Map<String, String> props ->
+	loom.runs.create(runName) {
+		server()
+		name label
+		source sourceSets.gametest
+		runDir "build/gametest/${dir}"
+		vmArg "-Dfabric-api.gametest"
+		vmArg "-Dfabric-api.gametest.report-file=${file("build/gametest/${dir}/report.xml")}"
+		props.each { key, value -> vmArg "-Deternalreturn.${key}=${value}" }
 	}
+}
+gameTestRun("gametest", "Game Test (flat world)", "flat", [:])
+gameTestRun("gametestNoModernerBeta", "Game Test (flat world, without Moderner Beta)", "flat_no_moderner_beta", [:])
+gameTestRun("gametestModernerBeta", "Game Test (Moderner Beta 1.6.4 amplified, debug tunnel on)", "moderner_beta",
+		["gametest.preset": "eternalreturn_test:moderner_beta_1_6_4_amplified", "gametest.batches": "worldgen", "gametest.debugTunnel": "true"])
+gameTestRun("gametestModernerBetaTunnelOff", "Game Test (Moderner Beta 1.6.4 amplified, debug tunnel off)", "moderner_beta_off",
+		["gametest.preset": "eternalreturn_test:moderner_beta_1_6_4_amplified", "gametest.batches": "worldgen", "gametest.debugTunnel": "false"])
+gameTestRun("gametestVanilla", "Game Test (vanilla generator, debug tunnel on)", "vanilla",
+		["gametest.preset": "minecraft:normal", "gametest.batches": "worldgen", "gametest.debugTunnel": "true"])
+gameTestRun("gametestEternalReturn", "Game Test (Eternal Return preset)", "eternal_return",
+		["gametest.preset": "eternalreturn:eternal_return", "gametest.seed": worldmapSeed, "gametest.batches": "worldgen,worldgen_er", "gametest.debugTunnel": "true"])
+
+// The headless map tool: renders maps of a preset at a fixed seed into docs/worldgen-maps/<name>.
+// -PworldmapHalf=1024 renders a smaller area (faster); -PworldmapOut=<dir> writes to <dir>/<name> instead.
+// -PworldmapCentre=x,z moves the area; -PworldmapCloseup=x,z and -PworldmapSliceZ=z pin the close-up and side view.
+def worldmapOptions = [centre: "worldmapCentre", closeup: "worldmapCloseup", slice_z: "worldmapSliceZ"]
+	.findAll { key, property -> findProperty(property) != null }
+	.collectEntries { key, property -> ["worldmap.${key}".toString(), findProperty(property).toString()] }
+[
+	[task: "worldmapEternalReturn", map: "eternal_return", preset: "eternalreturn:eternal_return"],
+	[task: "worldmapBeta", map: "beta_1_7_3", preset: "eternalreturn_test:moderner_beta_beta"],
+	[task: "worldmapRelease164", map: "release_1_6_4", preset: "eternalreturn_test:moderner_beta_1_6_4"],
+].each { m ->
+	gameTestRun(m.task, "World map (${m.map})", "worldmap_${m.map}",
+			["gametest.preset": m.preset, "gametest.seed": worldmapSeed, "gametest.batches": "worldmap",
+			 "worldmap.name": m.map, "worldmap.half": (findProperty("worldmapHalf") ?: "2048").toString(),
+			 "worldmap.out": file("${findProperty("worldmapOut") ?: "docs/worldgen-maps"}/${m.map}").absolutePath] + worldmapOptions)
+}
+
+// Moderner Beta is a dev-runtime mod for every run; this one takes it off the classpath to prove
+// the mod and its data work without it.
+tasks.matching { it.name == "runGametestNoModernerBeta" }.configureEach {
+	classpath = classpath.filter { !it.name.contains("moderner-beta") && !it.name.contains("moderner_beta") }
 }
 
 // Every test run starts from a fresh world, so chunks generated by an earlier run can't leak in.
 tasks.register("cleanGametestRuns", Delete) {
 	delete layout.buildDirectory.dir("gametest")
 }
-tasks.matching { it.name.startsWith("runGametest") }.configureEach {
+tasks.matching { it.name.startsWith("runGametest") || it.name.startsWith("runWorldmap") }.configureEach {
 	dependsOn "cleanGametestRuns"
 }
 // "build" compiles the tests (so they can't silently break) but doesn't run them; runAllGametests does.
@@ -84,8 +87,14 @@ tasks.named("check") {
 }
 tasks.register("runAllGametests") {
 	group = "verification"
-	description = "Runs every game test suite: the flat-world suites and the worldgen checks."
-	dependsOn "runGametest", "runGametestModernerBeta", "runGametestModernerBetaTunnelOff", "runGametestVanilla"
+	description = "Runs every game test suite: the flat-world suites (with and without Moderner Beta) and the worldgen checks."
+	dependsOn "runGametest", "runGametestNoModernerBeta", "runGametestModernerBeta", "runGametestModernerBetaTunnelOff",
+			"runGametestVanilla", "runGametestEternalReturn"
+}
+tasks.register("generateWorldMaps") {
+	group = "verification"
+	description = "Renders the world maps in docs/worldgen-maps (Eternal Return preset and the two controls)."
+	dependsOn "runWorldmapEternalReturn", "runWorldmapBeta", "runWorldmapRelease164"
 }
 
 repositories {

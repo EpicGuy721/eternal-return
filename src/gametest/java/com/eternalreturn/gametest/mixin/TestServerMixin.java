@@ -2,11 +2,13 @@ package com.eternalreturn.gametest.mixin;
 
 import com.eternalreturn.config.EternalReturnConfig;
 import com.eternalreturn.gametest.GameTestWorld;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.test.TestFunction;
 import net.minecraft.test.TestServer;
 import net.minecraft.util.Identifier;
+import net.minecraft.world.gen.GeneratorOptions;
 import net.minecraft.world.gen.WorldPreset;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -50,11 +52,14 @@ public abstract class TestServerMixin {
 
 	@ModifyVariable(method = "create", at = @At("HEAD"), argsOnly = true)
 	private static Collection<TestFunction> eternalreturn$selectBatches(Collection<TestFunction> tests) {
-		boolean worldgenRun = GameTestWorld.isWorldgenRun();
-		List<TestFunction> selected = tests.stream()
-				.filter(test -> test.batchId().startsWith(GameTestWorld.WORLDGEN_BATCH) == worldgenRun)
-				.toList();
-		return selected;
+		return tests.stream().filter(test -> GameTestWorld.selects(test.batchId())).toList();
+	}
+
+	/** The test world's seed is fixed at 0; worldgen runs pick their own (eternalreturn.gametest.seed). */
+	@ModifyExpressionValue(method = "method_40377", at = @At(value = "FIELD", target = "Lnet/minecraft/test/TestServer;TEST_LEVEL:Lnet/minecraft/world/gen/GeneratorOptions;"))
+	private static GeneratorOptions eternalreturn$seed(GeneratorOptions options) {
+		Long seed = GameTestWorld.seedProperty();
+		return seed == null ? options : new GeneratorOptions(seed, options.shouldGenerateStructures(), options.hasBonusChest());
 	}
 
 	/** method_40377 is the lambda in create() that builds the world from WorldPresets.FLAT. */

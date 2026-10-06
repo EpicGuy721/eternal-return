@@ -1,0 +1,11 @@
+{
+  "defaultIcon": "eternalreturn:eternal_return",
+  "name": {
+    "color": "gold",
+    "translate": "createWorld.customize.modern_beta.preset_category.name.eternalreturn.eternal_return"
+  },
+  "description": {
+    "translate": "createWorld.customize.modern_beta.preset_category.desc.eternalreturn.eternal_return"
+  },
+  "presetTag": "eternalreturn:eternal_return"
+}

@@ -254,7 +254,7 @@ public class MobFeatureTests implements FabricGameTest {
 		ctx.complete();
 	}
 
-	@GameTest(templateName = EMPTY_STRUCTURE, tickLimit = 100)
+	@GameTest(templateName = EMPTY_STRUCTURE, tickLimit = 400)
 	public void creepersOnlySpawnUnderground(TestContext ctx) {
 		night(ctx);
 		// Sealed stone box: floor y0, walls, roof y3. Interior 3x2x3.

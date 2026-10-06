@@ -69,7 +69,7 @@
             {
               "condition": "minecraft:location_check",
               "predicate": {
-                "biomes": "#minecraft:is_ocean"
+                "biomes": "#eternalreturn:ocean_waters"
               }
             }
           ]
@@ -82,7 +82,7 @@
             {
               "condition": "minecraft:location_check",
               "predicate": {
-                "biomes": "#minecraft:is_ocean"
+                "biomes": "#eternalreturn:ocean_waters"
               }
             },
             {
@@ -129,7 +129,7 @@
             {
               "condition": "minecraft:location_check",
               "predicate": {
-                "biomes": "#minecraft:is_ocean"
+                "biomes": "#eternalreturn:ocean_waters"
               }
             }
           ]
@@ -142,7 +142,7 @@
             {
               "condition": "minecraft:location_check",
               "predicate": {
-                "biomes": "#minecraft:is_ocean"
+                "biomes": "#eternalreturn:ocean_waters"
               }
             },
             {
@@ -159,8 +159,11 @@
             {
               "condition": "minecraft:location_check",
               "predicate": {
-                "biomes": "#minecraft:is_deep_ocean"
+                "biomes": "#eternalreturn:ocean_waters"
               }
+            },
+            {
+              "condition": "eternalreturn:deep_water"
             },
             {
               "condition": "eternalreturn:bait",

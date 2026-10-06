@@ -12,6 +12,66 @@
     "minecraft:grove",
     "minecraft:snowy_slopes",
     "minecraft:frozen_peaks",
-    "minecraft:jagged_peaks"
+    "minecraft:jagged_peaks",
+    {
+      "id": "moderner_beta:early_release_ice_plains",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:late_beta_ice_plains",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:early_release_taiga",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:late_beta_taiga",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:beta_tundra",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:beta_taiga",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:beta_ice_desert",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:beta_frozen_ocean",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:beta_cold_ocean",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:pe_tundra",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:pe_taiga",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:pe_ice_desert",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:pe_frozen_ocean",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:pe_cold_ocean",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:alpha_winter",
+      "required": false
+    }
   ]
 }

@@ -1,0 +1,80 @@
+{
+  "name": "release_1_6_4",
+  "preset": "eternalreturn_test:moderner_beta_1_6_4",
+  "seed": 173164,
+  "area_blocks": "4096 x 4096 centred on 0,0",
+  "world_height": "-64 to 320",
+  "sea_level": 63,
+  "water_share": 0.647,
+  "ocean_biome_share": 0.445,
+  "land_height": {
+    "p5": 64,
+    "p50": 68,
+    "p90": 78,
+    "p99": 104,
+    "max": 124
+  },
+  "water_depth": {
+    "p5": 0,
+    "p50": 12,
+    "p90": 17,
+    "p99": 19,
+    "max": 23
+  },
+  "land_roughness_blocks_per_4": 1.312,
+  "landmasses": {
+    "count_over_1_chunk": 200,
+    "count_over_256x256": 10,
+    "largest_blocks": 2541696,
+    "largest_share_of_land": 0.429
+  },
+  "terrain_mix": {
+    "window_blocks": 32,
+    "land_windows": 4622,
+    "flat": 0.469,
+    "rolling": 0.337,
+    "hilly": 0.159,
+    "mountains": 0.036,
+    "extreme": 0.0,
+    "median_relief_by_biome": {
+      "beach": 10,
+      "desert": 6,
+      "forest": 6,
+      "jungle": 11,
+      "river": 14,
+      "early_release_extreme_hills": 26,
+      "early_release_ice_plains": 9,
+      "early_release_swampland": 2,
+      "early_release_taiga": 8,
+      "late_beta_plains": 6
+    }
+  },
+  "biome_share": {
+    "minecraft:ocean": 0.443,
+    "moderner_beta:early_release_ice_plains": 0.084,
+    "minecraft:river": 0.076,
+    "minecraft:desert": 0.069,
+    "moderner_beta:early_release_extreme_hills": 0.062,
+    "moderner_beta:early_release_swampland": 0.061,
+    "minecraft:jungle": 0.057,
+    "minecraft:forest": 0.046,
+    "moderner_beta:early_release_taiga": 0.039,
+    "moderner_beta:late_beta_plains": 0.032,
+    "minecraft:beach": 0.021,
+    "minecraft:frozen_river": 0.006,
+    "minecraft:frozen_ocean": 0.002,
+    "minecraft:mushroom_fields": 0.001
+  },
+  "slice_z": -1040,
+  "closeup_centre": "1024, -256",
+  "weirdness": {
+    "chunks_sampled": 576,
+    "land_columns_with_overhang": 0.006,
+    "air_blocks_under_ground_per_land_column": 0.151,
+    "tallest_ground_y": 122
+  },
+  "timing_ms": {
+    "sampling": 290696,
+    "chunks": 46213
+  }
+}

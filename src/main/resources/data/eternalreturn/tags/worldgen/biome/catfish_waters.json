@@ -1,6 +1,22 @@
 {
   "values": [
     "minecraft:swamp",
-    "minecraft:mangrove_swamp"
+    "minecraft:mangrove_swamp",
+    {
+      "id": "moderner_beta:early_release_swampland",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:late_beta_swampland",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:beta_swampland",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:pe_swampland",
+      "required": false
+    }
   ]
 }

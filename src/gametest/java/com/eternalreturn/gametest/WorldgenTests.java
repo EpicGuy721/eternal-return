@@ -37,7 +37,7 @@ public class WorldgenTests implements FabricGameTest {
 		boolean expected = EternalReturnConfig.get().worldgen.debugTunnel;
 		String generator = world.getChunkManager().getChunkGenerator().getClass().getName();
 		String preset = GameTestWorld.presetProperty();
-		if (preset != null && preset.contains("moderner_beta")) {
+		if (preset != null && !preset.startsWith("minecraft:")) {
 			ctx.assertTrue(generator.contains("modernerbeta"), "expected a Moderner Beta world, got generator " + generator);
 		}
 

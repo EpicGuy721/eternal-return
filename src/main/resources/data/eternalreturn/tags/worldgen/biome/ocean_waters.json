@@ -1,0 +1,45 @@
+{
+  "values": [
+    "#minecraft:is_ocean",
+    {
+      "id": "moderner_beta:beta_ocean",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:beta_cold_ocean",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:beta_frozen_ocean",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:beta_lukewarm_ocean",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:beta_warm_ocean",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:pe_ocean",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:pe_cold_ocean",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:pe_frozen_ocean",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:pe_lukewarm_ocean",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:pe_warm_ocean",
+      "required": false
+    }
+  ]
+}

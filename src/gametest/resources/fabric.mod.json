@@ -11,7 +11,10 @@
 			"com.eternalreturn.gametest.MobFeatureTests",
 			"com.eternalreturn.gametest.FishingTests",
 			"com.eternalreturn.gametest.FishingFixTests",
-			"com.eternalreturn.gametest.WorldgenTests"
+			"com.eternalreturn.gametest.WorldgenTests",
+			"com.eternalreturn.gametest.EternalReturnPresetTests",
+			"com.eternalreturn.gametest.CompatTests",
+			"com.eternalreturn.gametest.WorldmapTests"
 		]
 	},
 	"mixins": [

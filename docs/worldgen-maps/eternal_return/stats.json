@@ -1,0 +1,88 @@
+{
+  "name": "eternal_return",
+  "preset": "eternalreturn:eternal_return",
+  "seed": 173164,
+  "area_blocks": "4096 x 4096 centred on 0,0",
+  "world_height": "-64 to 320",
+  "sea_level": 63,
+  "water_share": 0.611,
+  "ocean_biome_share": 0.446,
+  "land_height": {
+    "p5": 64,
+    "p50": 71,
+    "p90": 91,
+    "p99": 113,
+    "max": 177
+  },
+  "water_depth": {
+    "p5": 0,
+    "p50": 13,
+    "p90": 17,
+    "p99": 19,
+    "max": 23
+  },
+  "land_roughness_blocks_per_4": 2.161,
+  "landmasses": {
+    "count_over_1_chunk": 135,
+    "count_over_256x256": 8,
+    "largest_blocks": 4442256,
+    "largest_share_of_land": 0.68
+  },
+  "terrain_mix": {
+    "window_blocks": 32,
+    "land_windows": 5433,
+    "flat": 0.165,
+    "rolling": 0.399,
+    "hilly": 0.367,
+    "mountains": 0.067,
+    "extreme": 0.001,
+    "median_relief_by_biome": {
+      "badlands": 13,
+      "beach": 26,
+      "birch_forest": 17,
+      "dark_forest": 16,
+      "desert": 16,
+      "forest": 17,
+      "jungle": 21,
+      "river": 24,
+      "savanna": 20,
+      "early_release_extreme_hills": 26,
+      "early_release_ice_plains": 19,
+      "early_release_swampland": 2,
+      "early_release_taiga": 17,
+      "late_beta_plains": 17
+    }
+  },
+  "biome_share": {
+    "minecraft:ocean": 0.443,
+    "moderner_beta:early_release_ice_plains": 0.085,
+    "minecraft:river": 0.071,
+    "moderner_beta:early_release_taiga": 0.06,
+    "moderner_beta:early_release_swampland": 0.051,
+    "minecraft:forest": 0.048,
+    "minecraft:desert": 0.037,
+    "moderner_beta:late_beta_plains": 0.031,
+    "minecraft:badlands": 0.029,
+    "minecraft:beach": 0.027,
+    "minecraft:jungle": 0.026,
+    "moderner_beta:early_release_extreme_hills": 0.025,
+    "minecraft:dark_forest": 0.02,
+    "minecraft:savanna": 0.02,
+    "minecraft:birch_forest": 0.018,
+    "minecraft:frozen_river": 0.006,
+    "minecraft:frozen_ocean": 0.002,
+    "minecraft:mushroom_fields": 0.001
+  },
+  "slice_z": -1260,
+  "closeup_centre": "-1792, -768",
+  "weirdness": {
+    "chunks_sampled": 576,
+    "land_columns_with_overhang": 0.008,
+    "air_blocks_under_ground_per_land_column": 0.136,
+    "tallest_ground_y": 135
+  },
+  "timing_ms": {
+    "sampling": 534380,
+    "chunks": 88863
+  }
+}
