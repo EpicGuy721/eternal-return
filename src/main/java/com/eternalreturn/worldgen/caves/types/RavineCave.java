@@ -4,6 +4,7 @@ import com.eternalreturn.config.EternalReturnConfig.CaveTypeSettings;
 import com.eternalreturn.worldgen.caves.CaveBuilder;
 import com.eternalreturn.worldgen.caves.CaveType;
 import com.eternalreturn.worldgen.caves.Tunnel;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 
 /**
@@ -29,7 +30,7 @@ public final class RavineCave implements CaveType {
 	}
 
 	@Override
-	public void generate(CaveBuilder builder, Random random, double x, double y, double z, CaveTypeSettings settings) {
+	public Vec3d generate(CaveBuilder builder, Random random, double x, double y, double z, CaveTypeSettings settings) {
 		boolean large = random.nextInt(4) == 0;
 		double width = CaveBuilder.radius(random, settings) * (large ? 1.5 : 1.0);
 		double heightScale = large ? 4.0 : 3.0;
@@ -43,6 +44,7 @@ public final class RavineCave implements CaveType {
 		} else {
 			walk(builder, random, new Tunnel(x, y, z, yaw, pitch), 80 + random.nextInt(40), width, heightScale, walls, false);
 		}
+		return new Vec3d(x, y, z);
 	}
 
 	/** Release 1.6.4: per y level, a width factor that changes every one to three blocks of height. */

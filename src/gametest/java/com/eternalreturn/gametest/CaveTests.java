@@ -50,7 +50,7 @@ public class CaveTests implements FabricGameTest {
 
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "caves_spaghetti", tickLimit = 400_000)
 	public void spaghetti(TestContext ctx) {
-		forcedType(ctx, "spaghetti", 0, 0.002, 0.08);
+		forcedType(ctx, "spaghetti", 0, 0.002, 0.15);
 	}
 
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "caves_ravine", tickLimit = 400_000)
@@ -60,12 +60,12 @@ public class CaveTests implements FabricGameTest {
 
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "caves_large", tickLimit = 400_000)
 	public void large(TestContext ctx) {
-		forcedType(ctx, "large", 2, 0.002, 0.15);
+		forcedType(ctx, "large", 2, 0.002, 0.40);
 	}
 
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "caves_vertical", tickLimit = 400_000)
 	public void vertical(TestContext ctx) {
-		forcedType(ctx, "vertical", 3, 0.002, 0.08);
+		forcedType(ctx, "vertical", 3, 0.002, 0.12);
 	}
 
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "caves_zigzag", tickLimit = 400_000)

@@ -4,6 +4,7 @@ import com.eternalreturn.config.EternalReturnConfig.CaveTypeSettings;
 import com.eternalreturn.worldgen.caves.CaveBuilder;
 import com.eternalreturn.worldgen.caves.CaveType;
 import com.eternalreturn.worldgen.caves.Tunnel;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 
 /**
@@ -28,7 +29,7 @@ public final class RibbedCave implements CaveType {
 	}
 
 	@Override
-	public void generate(CaveBuilder builder, Random random, double x, double y, double z, CaveTypeSettings settings) {
+	public Vec3d generate(CaveBuilder builder, Random random, double x, double y, double z, CaveTypeSettings settings) {
 		double base = CaveBuilder.radius(random, settings);
 		double pulse = 0.35 + random.nextDouble() * 0.2;
 		double period = 5 + random.nextInt(5);
@@ -45,9 +46,10 @@ public final class RibbedCave implements CaveType {
 			}
 			tunnel.keepWithin(builder, radius);
 			if (!builder.inReach(tunnel.x, tunnel.z, radius + 1)) {
-				return;
+				break;
 			}
 			builder.ellipsoid(tunnel.x, tunnel.y, tunnel.z, radius, radius * 0.85, radius, -0.75);
 		}
+		return new Vec3d(x, y, z);
 	}
 }

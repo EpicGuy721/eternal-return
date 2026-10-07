@@ -186,22 +186,25 @@ Six tunnel-style cave types, carved only in Eternal Return worlds. Maze caves, c
 - Nothing is carved in the bottom layer or within 8 blocks of the top (vanilla's limits).
 - At or below the lava level (vanilla's 8 blocks above the floor: y -56) carved blocks become lava, above it cave air.
 - A shape is skipped in a chunk when water, or lava above the lava level, lies in or next to its box: Release 1.6.4's rule, which keeps caves from breaching oceans, rivers and lakes. Water just across the chunk's edge is read from the generator's height map (the ocean or river surface there), because the neighbouring chunk may not exist yet. Vanilla's carver tag contains water, but this rule means water is never carved.
+- Large caverns use a per-block form of that rule instead: each block next to water (or such lava) is left standing and the rest is carved, so a giant cavern near the sea keeps a wall of rock rather than losing a whole lobe at a chunk border.
 - When grass or mycelium is carved, the dirt under it becomes the same block, as vanilla does.
 
 ### The types
 
-Weight is caves starting per 100 chunks; spaghetti counts systems. Start y is where a cave begins (tunnels wander beyond it). Radius ranges are in blocks.
+Weight is caves starting per 100 chunks; spaghetti counts cave systems. Start y is where a cave begins (tunnels wander beyond it). Radius ranges are in blocks.
 
 | Type | Looks like | Weight | Start y | Radius |
 |---|---|---|---|---|
-| `spaghetti` | Release 1.6.4's caves: systems of two to six long, thin tunnels leaving from points a few blocks apart, wandering in heading and height, with flat floors. One tunnel in five branches once; one in three keeps its slope for longer, so it climbs or drops a long way. Shallow ones can break out at the surface. | 24 | -58 to 85 | 1.3 to 2.0 (half-width) |
+| `spaghetti` | Release 1.6.4's caves, with its sizes and maths. A system is one chunk holding a cluster of starts (1.6.4's rand(rand(rand(40) + 1) + 1), at least one), each at its own spot and depth, deeper ones more likely. One start in four opens a round, flattened room (radius 2.5 to 8.5, half as tall) with one to four tunnels out of it. A tunnel runs 85 to 112 blocks, 1.5 blocks in radius at its ends and swelling to 1.5 to 4.5 in the middle; one in ten is widened up to four times. Flat floors, rough walls, one tunnel in six keeps its slope for longer. The one change from 1.6.4: one tunnel in five sends off a thinner side branch and carries on (1.6.4 split most tunnels in two). | 5 | -58 to 85 | 1.5 to 4.5 (radius at the ends, and at the widest for an ordinary tunnel) |
 | `ravine` | Release 1.6.4's ravines: long, narrow canyons three to four times as tall as they are wide, with vertical, jagged walls (the width changes every one to three blocks of height). One in four is a large ravine, wider, taller and grown both ways from its start. Shallow ones open to the surface. | 2 | -30 to 45 | 2.5 to 4.5 (half-width; large ×1.5) |
-| `large` | A big chamber: a flattened, stretched main body with five to ten lobes of different sizes and heights around it, so the walls are uneven and the ceiling lumpy, a mostly flat floor, and two to five winding tunnels leading out. The deepest can have lava on the floor. | 1 | -48 to 15 | 10 to 25 (main chamber) |
-| `vertical` | Steep connections between levels. Three in five are shafts dropping 20 to 60 blocks with a slight drift and a bulging wall; the rest are steep tunnels at 50 to 75 degrees. Short side tunnels leave the top and bottom so they join the caves around them. | 8 | -20 to 60 (the top) | 1.5 to 3.5 |
+| `large` | A big chamber: a flattened, stretched main body with lobes of different sizes and heights around it, so the walls are uneven and the ceiling lumpy, a mostly flat floor, and tunnels leading out. The radius follows a bell curve with a long tail (`typicalRadius` × e^(0.35 × a normal random), kept within the range): about a quarter are under 20, most are 20 to 35, one in seven is 35 to 50, about one in 45 passes 50 and one in 250 passes 65. Big caverns get more lobes and exits and grow less in height than in width: one of radius 76 came out 196 blocks across and 47 tall. The deepest have lava pools on the floor. | 1 | -48 to 15 | 12 to 80, typical 25 (main chamber) |
+| `vertical` | Steep connections between levels. Three in five are shafts dropping 20 to 60 blocks with a slight drift and a bulging wall; the rest are steep tunnels at 50 to 75 degrees. Short side tunnels leave the top and bottom so they join the caves around them. | 8 | -20 to 60 (the top) | 2.5 to 4.5 |
 | `zigzag` | Constant-width tunnels made of equal straight segments (6 to 14 blocks) turning the same sharp angle (70 to 110 degrees) left and right in turn, each segment with its own gentle slope. | 7 | -50 to 50 | 1.5 to 2.5 |
 | `ribbed` | Gently curving tunnels whose width pulses 35 to 55 percent above and below the base every 5 to 9 blocks: wide bulges between rings of rock. | 7 | -50 to 50 | 2.0 to 3.5 (base) |
 
-The settings that matter most for how much cave there is: `worldgen.caves.density` (multiplies every weight), the spaghetti weight (most of the cave volume) and its radius range, then the large-cave weight (rare but big).
+The settings that matter most for how much cave there is: `worldgen.caves.density` (multiplies every weight), the spaghetti weight (most of the cave volume) and its radius range, then the large-cave weight and `typicalRadius` (rare but big).
+
+The radius ranges and the meaning of the spaghetti weight changed after the first playtest (thicker 1.6.4 tunnels, bell-curve caverns, thicker shafts). Config files written before that are reset to the new type defaults once, through `worldgen.caves.typesVersion`.
 
 ### Density
 
@@ -209,18 +212,18 @@ Share of the underground (everything below the ground surface) that is open, ove
 
 | Depth | New caves | Old caves, same terrain | Release 1.6.4 world |
 |---|---|---|---|
-| y -64 to -49 | 2.1% | 3.4% | 3.2% |
-| y -48 to -33 | 3.8% | 4.8% | 5.1% |
-| y -32 to -17 | 5.2% | 5.8% | 7.4% |
-| y -16 to -1 | 5.5% | 5.6% | 6.2% |
-| y 0 to 15 | 6.7% | 6.8% | 5.4% |
-| y 16 to 31 | 6.0% | 5.0% | 4.1% |
-| y 32 to 47 | 4.6% | 3.7% | 3.4% |
-| y 48 to 63 | 3.7% | 2.9% | 1.1% |
-| y 64 to 79 | 2.8% | 3.1% | 0.2% |
-| **All** | **4.46%** | **4.55%** | **4.53%** |
+| y -64 to -49 | 3.7% | 3.4% | 3.2% |
+| y -48 to -33 | 5.2% | 4.8% | 5.1% |
+| y -32 to -17 | 6.7% | 5.8% | 7.4% |
+| y -16 to -1 | 6.2% | 5.6% | 6.2% |
+| y 0 to 15 | 7.6% | 6.8% | 5.4% |
+| y 16 to 31 | 5.5% | 5.0% | 4.1% |
+| y 32 to 47 | 3.9% | 3.7% | 3.4% |
+| y 48 to 63 | 1.8% | 2.9% | 1.1% |
+| y 64 to 79 | 1.4% | 3.1% | 0.2% |
+| **All** | **4.65%** | **4.55%** | **4.53%** |
 
-"Old caves" are Moderner Beta's 1.6.4-style caves on the identical terrain (the twin dimension with the engine off); the Release 1.6.4 world is Moderner Beta's own preset (its terrain is lower, hence the empty top rows). The new caves carry about the same total, a little thinner at the very bottom and a little more in the middle.
+"Old caves" are Moderner Beta's 1.6.4-style caves on the identical terrain (the twin dimension with the engine off); the Release 1.6.4 world is Moderner Beta's own preset (its terrain is lower, hence the empty top rows). The new caves carry about the same total: a little more below y 32 (1.6.4's starts favour low ground), a little less under hills and mountains.
 
 ### Timing
 
@@ -228,15 +231,15 @@ Chunk generation up to the carving step, one chunk at a time, same squares with 
 
 | | ms per chunk |
 |---|---|
-| No caves | 63.3 |
-| New caves | 68.7 |
-| Old caves (Moderner Beta's) | 70.6 |
+| No caves | 64.0 |
+| New caves | 69.3 |
+| Old caves (Moderner Beta's) | 70.3 |
 
-Time spent inside the cave carver: 8.6 ms per chunk (each chunk simulates the caves of the 289 chunks around it). Three earlier runs gave 6.5 to 7.8 ms, so expect 6 to 9 ms depending on the machine's load. The new caves cost about the same as the old ones.
+Time spent inside the cave carver: 5.9 ms per chunk (each chunk simulates the caves of the 289 chunks around it); two other runs gave 5.7 ms. Totals move by a few ms between runs with the machine's load. The new caves cost about the same as the old ones.
 
 ### Dev options
 
-- `debugForceCaveType`: a type id, and only that type is carved, at a high rate (spaghetti, vertical, zigzag and ribbed 60 per 100 chunks; ravine 10; large 8).
+- `debugForceCaveType`: a type id, and only that type is carved, at a high rate (spaghetti 25 systems per 100 chunks; vertical, zigzag and ribbed 60; ravine 10; large 4).
 - `debugLogCaveStarts`: appends `type,x,y,z` for every cave start to `eternalreturn-cave-starts.csv` in the game folder as chunks generate. Teleport to any line to stand inside that cave.
 
 ### Cave maps
@@ -245,7 +248,8 @@ Time spent inside the cave carver: 8.6 ms per chunk (each chunk simulates the ca
 
 - `slices.png`: the land square cut at y -50, -20, 20 and 50, new caves next to the old ones on the same terrain (black = cave). `slice_y*.png` are the new-cave slices on their own.
 - `gallery.png`: each type forced in its own 128 x 128 block square, seen from above (colour = height of the highest cave block) and from the side.
-- `caves.json`: the density numbers and real cave starts in the land square (used for the README checklist).
+- `giant_cavern.png`: a side view through the biggest cavern on land within 5,000 blocks of 0,0. The map tool finds it without generating the area: it replays the seed Moderner Beta hands the cave carver for each chunk and the cavern's radius draw, checks the replay against the caverns the carver actually logged, then generates that one cavern.
+- `caves.json`: the density numbers, real cave starts in the land square (used for the README checklist), the cavern radius counts and biggest caverns, and the giant cavern's measured size.
 
 ### Trial chambers
 
@@ -257,6 +261,7 @@ Removed in Eternal Return worlds only: the preset lists `minecraft:trial_chamber
   - per type, forced, in a square of its own: caves exist; the open share is in a sane range; no gaps in the bedrock floor, no cave air at or below the lava level, no lava above it, nothing within 8 blocks of the top; no cave block touches an ocean, river or lake; cave borders line up across chunk edges as well as inside chunks; the same chunk generated first in one dimension and last in the other is identical; every logged start is of that type and in its depth range;
   - every block of `eternalreturn:carvable` is carved, bedrock and obsidian aren't, a shape beside water is skipped, lava at and below the lava level;
   - default density and the timing above.
+  - "Cave" in these checks is any air below the ground (the generator's own height for the column), or lava at the lava level. The carvers write cave air, but a 16 x 16 x 16 chunk section left with nothing but cave air reads back as plain air, which a giant cavern can do.
 - `runGametestEternalReturnOldCaves`: new caves off, old caves on: carved terrain matches the fingerprint recorded before the cave engine.
 - Control fingerprints, unchanged: vanilla, Moderner Beta 1.6.4 amplified (debug tunnel on and off), Release 1.6.4 and Beta 1.7.3. Each hashes 27 chunks generated up to the carving step and compares with `src/gametest/resources/fingerprints/`; `-PrecordFingerprints` records new baselines.
 

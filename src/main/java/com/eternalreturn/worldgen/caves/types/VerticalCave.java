@@ -5,6 +5,7 @@ import com.eternalreturn.worldgen.caves.CaveBuilder;
 import com.eternalreturn.worldgen.caves.CaveType;
 import com.eternalreturn.worldgen.caves.Tunnel;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 
 /**
@@ -21,7 +22,7 @@ public final class VerticalCave implements CaveType {
 
 	@Override
 	public CaveTypeSettings defaults() {
-		return new CaveTypeSettings(8.0, -20, 60, 1.5, 3.5);
+		return new CaveTypeSettings(8.0, -20, 60, 2.5, 4.5);
 	}
 
 	@Override
@@ -30,12 +31,13 @@ public final class VerticalCave implements CaveType {
 	}
 
 	@Override
-	public void generate(CaveBuilder builder, Random random, double x, double y, double z, CaveTypeSettings settings) {
+	public Vec3d generate(CaveBuilder builder, Random random, double x, double y, double z, CaveTypeSettings settings) {
 		double radius = CaveBuilder.radius(random, settings);
 		int depth = 20 + random.nextInt(41);
 		double[] bottom = random.nextInt(5) < 3 ? shaft(builder, random, x, y, z, radius, depth) : steep(builder, random, x, y, z, radius, depth);
 		stubs(builder, random, x, y, z, radius);
 		stubs(builder, random, bottom[0], bottom[1], bottom[2], radius);
+		return new Vec3d(x, y, z);
 	}
 
 	private static double[] shaft(CaveBuilder builder, Random random, double x, double y, double z, double radius, int depth) {
@@ -65,7 +67,7 @@ public final class VerticalCave implements CaveType {
 	private static double[] steep(CaveBuilder builder, Random random, double x, double y, double z, double radius, int depth) {
 		float slope = -(0.9F + random.nextFloat() * 0.4F);
 		Tunnel tunnel = new Tunnel(x, y, z, random.nextFloat() * CaveBuilder.TAU, slope);
-		double r = Math.max(1.4, radius * 0.8);
+		double r = Math.max(2.0, radius * 0.85);
 		int length = (int) (depth / Math.abs(MathHelper.sin(slope)));
 		for (int i = 0; i < length; i++) {
 			tunnel.step(1.0);
@@ -84,7 +86,7 @@ public final class VerticalCave implements CaveType {
 		int count = 1 + random.nextInt(2);
 		for (int i = 0; i < count; i++) {
 			Tunnel tunnel = new Tunnel(x, y, z, random.nextFloat() * CaveBuilder.TAU, (random.nextFloat() - 0.5F) * 0.2F);
-			SpaghettiCave.tunnel(builder, random, tunnel, Math.max(1.3, radius * 0.7), 12 + random.nextInt(17), false);
+			SpaghettiCave.tunnel(builder, random, tunnel, 1.5, Math.max(0.5, radius * 0.6 - 0.5), 12 + random.nextInt(17), false);
 		}
 	}
 }

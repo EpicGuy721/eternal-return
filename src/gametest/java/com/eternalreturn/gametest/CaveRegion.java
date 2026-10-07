@@ -21,6 +21,10 @@ import java.util.Map;
  * block and gap is the carvers' doing), with a one-chunk ring around it so borders can be checked.
  * Measures what the cave tests need. Blocks are read from the chunks directly: asking the world
  * would generate them in full.
+ * <p>
+ * "Cave" means any air below the ground (the generator's own height for the column, before carving),
+ * or lava at the carvers' lava level. Carvers write cave air, but a chunk section (16 x 16 x 16) left
+ * with nothing but cave air reads back as plain air, which a giant cavern can do.
  */
 public final class CaveRegion {
 	/**
@@ -36,6 +40,7 @@ public final class CaveRegion {
 	public final int size;
 	private final Map<Long, Chunk> chunks = new HashMap<>();
 	private final BlockPos.Mutable pos = new BlockPos.Mutable();
+	private final Map<Long, Integer> surfaces = new HashMap<>();
 
 	// Measured over the inner square.
 	public long caveAir;
@@ -86,8 +91,16 @@ public final class CaveRegion {
 		return chunk == null ? Blocks.VOID_AIR.getDefaultState() : chunk.getBlockState(this.pos.set(x, y, z));
 	}
 
-	private static boolean isCave(BlockState state, int y, int lavaY) {
-		return state.isOf(Blocks.CAVE_AIR) || (state.isOf(Blocks.LAVA) && y <= lavaY);
+	/** Any air below the ground, or lava at the lava level (see the class comment). */
+	public boolean isCave(int x, int y, int z, int lavaY) {
+		BlockState state = this.at(x, y, z);
+		return (state.isAir() && y < this.surface(x, z)) || (state.isOf(Blocks.LAVA) && y <= lavaY);
+	}
+
+	/** The column's ground height before carving (cached; 0 before measure() runs). */
+	public int surface(int x, int z) {
+		return this.surfaces.computeIfAbsent(ChunkPos.toLong(x, z), key -> this.world.getChunkManager().getChunkGenerator()
+				.getHeight(x, z, Heightmap.Type.OCEAN_FLOOR_WG, this.world, this.world.getChunkManager().getNoiseConfig()));
 	}
 
 	/** Open fraction of the underground volume (below the generator's surface height). */
@@ -120,7 +133,7 @@ public final class CaveRegion {
 		int z1 = z0 + this.size * 16;
 		for (int x = x0; x < x1; x++) {
 			for (int z = z0; z < z1; z++) {
-				int surface = generator.getHeight(x, z, Heightmap.Type.OCEAN_FLOOR_WG, this.world, noise);
+				int surface = this.surface(x, z);
 				if (!this.at(x, bottom, z).isOf(Blocks.BEDROCK)) {
 					this.bedrockFloorGaps++;
 				}
@@ -144,15 +157,15 @@ public final class CaveRegion {
 							this.carvedLava++;
 						}
 					}
-					if (!state.isOf(Blocks.CAVE_AIR)) {
+					if (state.isOf(Blocks.CAVE_AIR) && y >= top - 8) {
+						this.caveAirTooHigh++;
+					}
+					if (!state.isAir() || !below) {
 						continue;
 					}
 					this.caveAir++;
 					if (y <= lavaY) {
 						this.caveAirAtOrBelowLavaLevel++;
-					}
-					if (y >= top - 8) {
-						this.caveAirTooHigh++;
 					}
 					this.checkWater(x + 1, y, z, seaLevel);
 					this.checkWater(x - 1, y, z, seaLevel);
@@ -187,7 +200,7 @@ public final class CaveRegion {
 	}
 
 	private boolean caveAtAxis(int axis, int a, int along, int y, int lavaY) {
-		return axis == 0 ? isCave(this.at(a, y, along), y, lavaY) : isCave(this.at(along, y, a), y, lavaY);
+		return axis == 0 ? this.isCave(a, y, along, lavaY) : this.isCave(along, y, a, lavaY);
 	}
 
 	/** Water next to a cave block: "open" when water fills its column from there up to sea level (an ocean, river or lake). */

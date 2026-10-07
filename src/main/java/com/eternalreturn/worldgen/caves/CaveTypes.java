@@ -15,6 +15,11 @@ import java.util.Map;
 
 /** Every cave type, in the order they are carved. A new type is one class plus one entry here. */
 public final class CaveTypes {
+	/**
+	 * Bump when a type's settings change meaning, so config files written for the old defaults are
+	 * reset once (see CaveTweaks.typesVersion). 2: 1.6.4 spaghetti systems, bell-curve caverns.
+	 */
+	public static final int SETTINGS_VERSION = 2;
 	public static final List<CaveType> ALL = List.of(
 			new SpaghettiCave(),
 			new RavineCave(),

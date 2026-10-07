@@ -53,8 +53,13 @@ public final class CaveBuilder {
 
 	/** Ellipsoid (see ChunkCarver.ellipsoid). Ignored when out of reach. */
 	public void ellipsoid(double x, double y, double z, double rx, double ry, double rz, double floor) {
+		this.ellipsoid(x, y, z, rx, ry, rz, floor, false);
+	}
+
+	/** Ellipsoid with the per-block water rule when perBlockFluids is set (for very big shapes). */
+	public void ellipsoid(double x, double y, double z, double rx, double ry, double rz, double floor, boolean perBlockFluids) {
 		if (this.inReach(x, z, Math.max(rx, rz)) && this.target.touches(x - rx - 1, x + rx + 1, z - rz - 1, z + rz + 1)) {
-			this.target.ellipsoid(x, y, z, rx, ry, rz, floor);
+			this.target.ellipsoid(x, y, z, rx, ry, rz, floor, perBlockFluids);
 		}
 	}
 

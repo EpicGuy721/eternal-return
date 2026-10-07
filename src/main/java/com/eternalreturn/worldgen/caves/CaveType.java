@@ -1,6 +1,7 @@
 package com.eternalreturn.worldgen.caves;
 
 import com.eternalreturn.config.EternalReturnConfig.CaveTypeSettings;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 
 /**
@@ -19,7 +20,8 @@ public interface CaveType {
 
 	/**
 	 * Carves one cave starting at x, y, z (y already within the configured depth range). Must use
-	 * only the given random, so the same start always gives the same cave.
+	 * only the given random, so the same start always gives the same cave. Returns a point inside the
+	 * cave for the start log (usually the start itself; a cavern's centre after moving it clear of the floor).
 	 */
-	void generate(CaveBuilder builder, Random random, double x, double y, double z, CaveTypeSettings settings);
+	Vec3d generate(CaveBuilder builder, Random random, double x, double y, double z, CaveTypeSettings settings);
 }

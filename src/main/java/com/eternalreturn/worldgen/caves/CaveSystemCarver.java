@@ -89,10 +89,10 @@ public class CaveSystemCarver extends Carver<CarverConfig> {
 				int x = source.getStartX() + typeRandom.nextInt(16);
 				int z = source.getStartZ() + typeRandom.nextInt(16);
 				int y = settings.minY + typeRandom.nextInt(Math.max(1, settings.maxY - settings.minY + 1));
+				net.minecraft.util.math.Vec3d inside = type.generate(builder, typeRandom, x + 0.5, y + 0.5, z + 0.5, settings);
 				if (ownChunk && caves.debugLogCaveStarts) {
-					CaveStartLog.log(type.id(), x, y, z);
+					CaveStartLog.log(type.id(), (int) Math.floor(inside.x), (int) Math.floor(inside.y), (int) Math.floor(inside.z));
 				}
-				type.generate(builder, typeRandom, x + 0.5, y + 0.5, z + 0.5, settings);
 			}
 		}
 		CaveTiming.add(System.nanoTime() - started, ownChunk);
@@ -121,7 +121,7 @@ public class CaveSystemCarver extends Carver<CarverConfig> {
 	}
 
 	/** SplitMix64 of a seed and a salt. */
-	static long mix(long seed, long salt) {
+	public static long mix(long seed, long salt) {
 		long z = seed + salt * 0x9E3779B97F4A7C15L;
 		z = (z ^ (z >>> 30)) * 0xBF58476D1CE4E5B9L;
 		z = (z ^ (z >>> 27)) * 0x94D049BB133111EBL;

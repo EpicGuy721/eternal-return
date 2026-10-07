@@ -24,7 +24,10 @@ import java.util.function.Predicate;
  * it cave air;</li>
  * <li>a shape is skipped in this chunk when water, or lava above the lava level, lies inside or next to
  * its box (Release 1.6.4's rule, which keeps caves from breaching oceans and rivers). Water just across
- * the chunk's edge is found from the generator's height map, since the neighbouring chunk may not exist yet.</li>
+ * the chunk's edge is found from the generator's height map, since the neighbouring chunk may not exist yet.
+ * Very big shapes use the per-block form instead: each block next to water (or such lava) is left
+ * standing and the rest is carved, so a giant cavern near the sea keeps a wall of rock rather than
+ * losing a whole lobe at a chunk border.</li>
  * </ul>
  * Decisions depend only on this chunk's blocks before carving and on the generator's noise, never on
  * neighbouring chunks' blocks, so the result is the same whichever order chunks generate in.
@@ -112,15 +115,24 @@ public final class ChunkCarver {
 
 	/** An ellipsoid with these radii, cut off below floor (a scaled y offset; -1 or less for none). */
 	public boolean ellipsoid(double x, double y, double z, double rx, double ry, double rz, double floor) {
-		return this.carve(x, y, z, rx, ry, rz, true, (dx, dy, dz, blockY) -> dy > floor && dx * dx + dy * dy + dz * dz < 1.0);
+		return this.ellipsoid(x, y, z, rx, ry, rz, floor, false);
+	}
+
+	/** As ellipsoid, choosing the per-block water rule (for very big shapes) or the whole-shape one. */
+	public boolean ellipsoid(double x, double y, double z, double rx, double ry, double rz, double floor, boolean perBlockFluids) {
+		return this.carve(x, y, z, rx, ry, rz, true, perBlockFluids, (dx, dy, dz, blockY) -> dy > floor && dx * dx + dy * dy + dz * dz < 1.0);
+	}
+
+	public boolean carve(double x, double y, double z, double rx, double ry, double rz, boolean withinCircle, Shape shape) {
+		return this.carve(x, y, z, rx, ry, rz, withinCircle, false, shape);
 	}
 
 	/**
 	 * Carves the blocks of a shape centred at x, y, z whose box is radius rx, ry, rz. withinCircle says
 	 * the shape never reaches past the unit circle horizontally, so columns outside it are skipped.
-	 * Returns whether anything was carved.
+	 * perBlockFluids picks the water rule (see the class comment). Returns whether anything was carved.
 	 */
-	public boolean carve(double x, double y, double z, double rx, double ry, double rz, boolean withinCircle, Shape shape) {
+	public boolean carve(double x, double y, double z, double rx, double ry, double rz, boolean withinCircle, boolean perBlockFluids, Shape shape) {
 		int boxMinX = MathHelper.floor(x - rx) - 1;
 		int boxMaxX = MathHelper.floor(x + rx) + 1;
 		int boxMinZ = MathHelper.floor(z - rz) - 1;
@@ -136,7 +148,7 @@ public final class ChunkCarver {
 		if (x0 > x1 || z0 > z1 || y0 > y1) {
 			return false;
 		}
-		if (this.hasFluidNear(x0, x1, y0, y1, z0, z1, boxMinX, boxMaxX, boxMinZ, boxMaxZ)) {
+		if (!perBlockFluids && this.hasFluidNear(x0, x1, y0, y1, z0, z1, boxMinX, boxMaxX, boxMinZ, boxMaxZ)) {
 			this.skippedForWater++;
 			return false;
 		}
@@ -151,7 +163,7 @@ public final class ChunkCarver {
 				}
 				for (int by = y1; by >= y0; by--) {
 					double dy = (by + 0.5 - y) / ry;
-					if (shape.contains(dx, dy, dz, by)) {
+					if (shape.contains(dx, dy, dz, by) && (!perBlockFluids || !this.touchesFluid(bx, by, bz))) {
 						carved |= this.carveBlock(bx, by, bz);
 					}
 				}
@@ -200,17 +212,49 @@ public final class ChunkCarver {
 	/** side: 0 west, 1 east, 2 north, 3 south; a0..a1 the block coordinates along that edge. */
 	private boolean edgeHasWater(int side, int a0, int a1, int yLow, int yHigh) {
 		for (int a = a0; a <= a1; a++) {
-			int index = side * 16 + (a - (side < 2 ? this.startZ : this.startX));
-			int top = this.edgeFloor[index];
-			if (top == Integer.MIN_VALUE) {
-				int columnX = side == 0 ? this.startX - 1 : side == 1 ? this.startX + 16 : a;
-				int columnZ = side == 2 ? this.startZ - 1 : side == 3 ? this.startZ + 16 : a;
-				top = this.neighbourWater.oceanFloorTop(columnX, columnZ);
-				this.edgeFloor[index] = top;
-			}
+			int top = this.edgeTop(side, a);
 			// Water fills that column from its floor top up to sea level.
 			if (top < this.seaLevel && yHigh >= top && yLow < this.seaLevel) {
 				return true;
+			}
+		}
+		return false;
+	}
+
+	/** Ocean-floor top of the column just outside the chunk on that side, at coordinate a along the edge. */
+	private int edgeTop(int side, int a) {
+		int index = side * 16 + (a - (side < 2 ? this.startZ : this.startX));
+		int top = this.edgeFloor[index];
+		if (top == Integer.MIN_VALUE) {
+			int columnX = side == 0 ? this.startX - 1 : side == 1 ? this.startX + 16 : a;
+			int columnZ = side == 2 ? this.startZ - 1 : side == 3 ? this.startZ + 16 : a;
+			top = this.neighbourWater.oceanFloorTop(columnX, columnZ);
+			this.edgeFloor[index] = top;
+		}
+		return top;
+	}
+
+	/** Per-block water rule: is any of the six neighbours water, or lava above the lava level? */
+	private boolean touchesFluid(int x, int y, int z) {
+		for (int i = 0; i < 6; i++) {
+			int nx = x + (i == 0 ? 1 : i == 1 ? -1 : 0);
+			int ny = y + (i == 2 ? 1 : i == 3 ? -1 : 0);
+			int nz = z + (i == 4 ? 1 : i == 5 ? -1 : 0);
+			if (ny < this.chunk.getBottomY() || ny >= this.chunk.getTopY()) {
+				continue;
+			}
+			boolean inside = nx >= this.startX && nx < this.startX + 16 && nz >= this.startZ && nz < this.startZ + 16;
+			if (inside) {
+				FluidState fluid = this.chunk.getFluidState(this.pos.set(nx, ny, nz));
+				if (!fluid.isEmpty() && (fluid.isIn(FluidTags.WATER) || ny > this.lavaY)) {
+					return true;
+				}
+			} else if (this.neighbourWater != null && ny < this.seaLevel) {
+				int side = nx < this.startX ? 0 : nx >= this.startX + 16 ? 1 : nz < this.startZ ? 2 : 3;
+				int top = this.edgeTop(side, side < 2 ? nz : nx);
+				if (top < this.seaLevel && ny >= top) {
+					return true;
+				}
 			}
 		}
 		return false;

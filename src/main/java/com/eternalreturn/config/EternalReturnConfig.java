@@ -199,11 +199,21 @@ public final class EternalReturnConfig {
 		public boolean debugLogCaveStarts = false;
 		/** Per type: enabled, weight (caves starting per 100 chunks), start depth range, radius range. */
 		public Map<String, CaveTypeSettings> types = CaveTypes.defaultSettings();
+		/**
+		 * Which version of the type settings this file holds. When the defaults change in a way old
+		 * numbers no longer fit (what a setting means, not just its value), the types are reset to the
+		 * new defaults once. Don't edit.
+		 */
+		public int typesVersion;
 
-		/** Adds any type missing from an older config file, with its defaults. */
+		/** Adds any type missing from an older config file, with its defaults; resets types written for older defaults. */
 		void complete() {
-			if (types == null) {
-				types = new LinkedHashMap<>();
+			if (types == null || typesVersion < CaveTypes.SETTINGS_VERSION) {
+				if (types != null) {
+					EternalReturn.LOGGER.info("Cave type settings were written for older defaults; resetting worldgen.caves.types to the current defaults");
+				}
+				types = CaveTypes.defaultSettings();
+				typesVersion = CaveTypes.SETTINGS_VERSION;
 			}
 			CaveTypes.defaultSettings().forEach(types::putIfAbsent);
 			if (debugForceCaveType == null) {
@@ -222,16 +232,26 @@ public final class EternalReturnConfig {
 		/** Radius range in blocks; what the radius means depends on the type (see docs/worldgen.md). */
 		public double minRadius;
 		public double maxRadius;
+		/**
+		 * Only for types whose radius follows a bell curve (large caverns): the most common radius. Most
+		 * caves land near it and a few reach far toward maxRadius. 0 for the other types.
+		 */
+		public double typicalRadius;
 
 		public CaveTypeSettings() {
 		}
 
 		public CaveTypeSettings(double weight, int minY, int maxY, double minRadius, double maxRadius) {
+			this(weight, minY, maxY, minRadius, maxRadius, 0.0);
+		}
+
+		public CaveTypeSettings(double weight, int minY, int maxY, double minRadius, double maxRadius, double typicalRadius) {
 			this.weight = weight;
 			this.minY = minY;
 			this.maxY = maxY;
 			this.minRadius = minRadius;
 			this.maxRadius = maxRadius;
+			this.typicalRadius = typicalRadius;
 		}
 	}
 
@@ -282,6 +302,7 @@ public final class EternalReturnConfig {
 
 		if (loaded == null) {
 			loaded = new EternalReturnConfig();
+			loaded.worldgen.caves.typesVersion = CaveTypes.SETTINGS_VERSION;
 		}
 		if (loaded.worldgen == null) {
 			loaded.worldgen = new WorldgenTweaks();

@@ -4,6 +4,7 @@ import com.eternalreturn.config.EternalReturnConfig.CaveTypeSettings;
 import com.eternalreturn.worldgen.caves.CaveBuilder;
 import com.eternalreturn.worldgen.caves.CaveType;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 
 /**
@@ -29,7 +30,8 @@ public final class ZigZagCave implements CaveType {
 	}
 
 	@Override
-	public void generate(CaveBuilder builder, Random random, double x, double y, double z, CaveTypeSettings settings) {
+	public Vec3d generate(CaveBuilder builder, Random random, double x, double y, double z, CaveTypeSettings settings) {
+		Vec3d start = new Vec3d(x, y, z);
 		double radius = CaveBuilder.radius(random, settings);
 		int segmentLength = 6 + random.nextInt(9);
 		float turn = (70.0F + random.nextFloat() * 40.0F) * MathHelper.RADIANS_PER_DEGREE;
@@ -47,10 +49,11 @@ public final class ZigZagCave implements CaveType {
 				y = builder.clampY(y + MathHelper.sin(pitch) * step, radius);
 				z += MathHelper.sin(yaw) * flat * step;
 				if (!builder.inReach(x, z, radius + 1)) {
-					return;
+					return start;
 				}
 				builder.ellipsoid(x, y, z, radius, radius, radius, -0.8);
 			}
 		}
+		return start;
 	}
 }

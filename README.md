@@ -109,10 +109,10 @@ Pick **World Type: Eternal Return** on the create-world screen (it is also in Mo
 
 **Caves.** Six types, about as much cave in all as Release 1.6.4 had (4.5% of the underground open):
 
-- spaghetti: systems of long, thin, winding tunnels, 1.6.4's caves;
+- spaghetti: Release 1.6.4's caves, same sizes: clusters of winding tunnels that swell in the middle, with round rooms;
 - ravines: tall, narrow canyons with jagged walls, some large, some open to the sky;
-- large caverns: rare big chambers (10 to 25 blocks across the main body) with lumpy walls and tunnels leading out;
-- vertical shafts and steep tunnels joining one level to the next;
+- large caverns: rare big chambers with lumpy walls and tunnels leading out, most 20 to 35 blocks in radius and a few far bigger (up to 80; one of radius 76 is nearly 200 blocks across);
+- vertical shafts (2.5 to 4.5 in radius) and steep tunnels joining one level to the next;
 - zig-zag tunnels of straight segments with sharp turns;
 - ribbed tunnels that bulge and pinch every few blocks.
 
@@ -221,7 +221,7 @@ Nether fish and infernal bait are fireproof. The new fish also count for the "fi
 - `fishing`: `fishRequireBait`; `baits` (item to `lureSeconds`, `nightLureSeconds`, `lava`); `wormDropChance`; `anglerfishMinWaterDepth` (default 10); `lavaFishingOutsideNether`.
 - `villagers`: `onlyFishermenBuy`; `fishPriceMultiplier` (default 2, applied to every fish a fisherman buys); and `fishermanTrades` (item to `level`, `count`, base `emeralds`, `maxUses`, `experience`; needs a restart).
 - `worldgen`: `debugTunnel` (off by default). Carves one straight 3x3 tunnel at y=20 along z=8 through every chunk on that row, to check that this mod's carvers run under the current world generator. Needs a restart, and only affects newly generated chunks.
-- `worldgen.caves` (Eternal Return worlds only; newly generated chunks only): `enabled` (the new caves); `oldCaves` (off: vanilla's, Moderner Beta's and other mods' cave carvers don't run there); `density` (multiplies every weight); per type under `types` (`spaghetti`, `ravine`, `large`, `vertical`, `zigzag`, `ribbed`): `enabled`, `weight` (caves starting per 100 chunks), `minY` and `maxY` (where a cave starts), `minRadius` and `maxRadius`. Debug: `debugForceCaveType` (a type id: only that type, at a high rate) and `debugLogCaveStarts` (writes `type,x,y,z` of every cave start to `eternalreturn-cave-starts.csv` in the game folder).
+- `worldgen.caves` (Eternal Return worlds only; newly generated chunks only): `enabled` (the new caves); `oldCaves` (off: vanilla's, Moderner Beta's and other mods' cave carvers don't run there); `density` (multiplies every weight); per type under `types` (`spaghetti`, `ravine`, `large`, `vertical`, `zigzag`, `ribbed`): `enabled`, `weight` (caves starting per 100 chunks), `minY` and `maxY` (where a cave starts), `minRadius` and `maxRadius`, and for `large` a `typicalRadius` (the most common size; a few caverns reach toward `maxRadius`). Config files from before the first cave tuning are reset to the new type defaults once (`typesVersion`). Debug: `debugForceCaveType` (a type id: only that type, at a high rate) and `debugLogCaveStarts` (writes `type,x,y,z` of every cave start to `eternalreturn-cave-starts.csv` in the game folder).
 - `mobs`: baby chance, baby speed, and baby creeper fuse and blast multipliers; armor and armor-enchant chances, each written as `base + perDifficulty x clamped local difficulty`; the underground-creeper toggle and its sky-light limit; jockey, fishing rod, ender pearl and sword chances; fishing rod pull strength; the boat-breaking toggle.
 
 Which items belong to each tier is controlled by tags in `data/eternalreturn/tags/item/`, so modded gear can be added with a datapack and no code changes. The same goes for mobs: `data/eternalreturn/tags/entity_type/` decides which mobs can be babies (`baby_variants`, which only works for skeleton-type mobs and creepers), which get the boosted armor (`armored_spawns`), and which can ride spiders (`jockey_riders`).
@@ -293,9 +293,9 @@ World type (needs Moderner Beta): create a creative world with World Type "Etern
 
 Caves (same world; a new world, since chunks generated before this update keep their old caves). `/gamemode spectator`, `/effect give @s night_vision infinite`, then `/tp @s X Y Z` puts you inside each cave, all within about 100 blocks of each other:
 
-33. `-1255 28 -1147`: spaghetti, a system of thin winding tunnels with flat floors; follow them up and down.
+33. `-1283 -11 -1127`: spaghetti, 1.6.4-style tunnels that swell in the middle, with flat floors; follow them up and down.
 34. `-1286 15 -1140`: a ravine, a narrow, very tall canyon with stepped, jagged walls.
-35. `-1200 -23 -1094`: a large cavern with uneven walls, a lumpy ceiling and tunnels leading off.
+35. `-1200 -23 -1094`: a large cavern with uneven walls, a lumpy ceiling and tunnels leading off. For a giant one, `/tp @s 356 -34 4290`: about 196 blocks across and 47 tall, with lava pools on the floor (far from the others).
 36. `-1275 51 -1129`: the top of a vertical shaft; look down, then follow it to the tunnels at the bottom.
 37. `-1350 11 -1152`: a zig-zag tunnel: straight runs with sharp alternating turns.
 38. `-1304 -3 -1146`: a ribbed tunnel that bulges and pinches every few blocks.

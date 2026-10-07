@@ -1,27 +1,20 @@
 {
   "seed": 173164,
   "slice_area": "384 x 384 blocks from -1472, -1344",
-  "default_open_share": "4.46%",
-  "default_open_share_by_band": "-64:2.1% -48:3.8% -32:5.2% -16:5.5% 0:6.7% 16:6.0% 32:4.6% 48:3.7% 64:2.8% 80:2.1% 96:1.6% 112:0.3%",
+  "default_open_share": "4.65%",
+  "default_open_share_by_band": "-64:3.7% -48:5.2% -32:6.7% -16:6.2% 0:7.6% 16:5.5% 32:3.9% 48:1.8% 64:1.4% 80:0.8% 96:1.3% 112:0.3%",
   "old_caves_open_share": "4.55%",
   "old_caves_open_share_by_band": "-64:3.4% -48:4.8% -32:5.8% -16:5.6% 0:6.8% 16:5.0% 32:3.7% 48:2.9% 64:3.1% 80:2.9% 96:2.0% 112:0.3%",
   "gallery_forced_open_share": {
-    "spaghetti": "5.34% open",
+    "spaghetti": "8.24% open",
     "ravine": "9.03% open",
-    "large": "4.06% open",
-    "vertical": "2.13% open",
+    "large": "3.49% open",
+    "vertical": "4.53% open",
     "zigzag": "2.58% open",
     "ribbed": "5.61% open"
   },
   "examples_near_spawn": {
     "spaghetti": [
-      {
-        "x": -1281,
-        "y": 72,
-        "z": -1161,
-        "cave_air_within_2_blocks": true,
-        "ground_y": 104
-      },
       {
         "x": -1283,
         "y": -11,
@@ -30,18 +23,25 @@
         "ground_y": 82
       },
       {
-        "x": -1255,
-        "y": 28,
-        "z": -1147,
-        "cave_air_within_2_blocks": true,
-        "ground_y": 88
+        "x": -1304,
+        "y": -58,
+        "z": -1121,
+        "cave_air_within_2_blocks": false,
+        "ground_y": 77
       },
       {
-        "x": -1316,
-        "y": -51,
-        "z": -1145,
-        "cave_air_within_2_blocks": false,
-        "ground_y": 79
+        "x": -1363,
+        "y": -9,
+        "z": -1107,
+        "cave_air_within_2_blocks": true,
+        "ground_y": 85
+      },
+      {
+        "x": -1308,
+        "y": 67,
+        "z": -1052,
+        "cave_air_within_2_blocks": true,
+        "ground_y": 102
       }
     ],
     "ravine": [
@@ -187,5 +187,82 @@
         "ground_y": 98
       }
     ]
+  },
+  "biggest_caverns_within_5000_blocks": [
+    {
+      "radius_counts": {
+        "under 20": 1008,
+        "20 to 35": 2262,
+        "35 to 50": 562,
+        "50 to 65": 70,
+        "65 and over": 16
+      }
+    },
+    {
+      "x": -3710,
+      "z": 2451,
+      "start_y": -27,
+      "radius": 80.0,
+      "ground_y": 46
+    },
+    {
+      "x": 1624,
+      "z": -299,
+      "start_y": 13,
+      "radius": 80.0,
+      "ground_y": 55
+    },
+    {
+      "x": 356,
+      "z": 4290,
+      "start_y": -37,
+      "radius": 76.5,
+      "ground_y": 90
+    },
+    {
+      "x": 2879,
+      "z": 1909,
+      "start_y": -1,
+      "radius": 75.8,
+      "ground_y": 59
+    },
+    {
+      "x": -22,
+      "z": 689,
+      "start_y": 1,
+      "radius": 75.5,
+      "ground_y": 57
+    },
+    {
+      "x": -4376,
+      "z": -2976,
+      "start_y": -15,
+      "radius": 72.4,
+      "ground_y": 69
+    },
+    {
+      "x": -3258,
+      "z": -751,
+      "start_y": -29,
+      "radius": 72.3,
+      "ground_y": 46
+    },
+    {
+      "x": -3464,
+      "z": 3620,
+      "start_y": -34,
+      "radius": 72.2,
+      "ground_y": 46
+    }
+  ],
+  "giant_cavern_checked": {
+    "x": 356,
+    "z": 4290,
+    "radius_drawn": 76.5,
+    "widest_open_run_east_west": 196,
+    "at_y": -34,
+    "open_from_y": -46,
+    "open_to_y": 1,
+    "stand_at": "356 -34 4290"
   }
 }

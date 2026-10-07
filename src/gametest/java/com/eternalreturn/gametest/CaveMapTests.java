@@ -2,7 +2,13 @@ package com.eternalreturn.gametest;
 
 import com.eternalreturn.EternalReturn;
 import com.eternalreturn.config.EternalReturnConfig;
+import com.eternalreturn.config.EternalReturnConfig.CaveTypeSettings;
 import com.eternalreturn.worldgen.caves.CaveStartLog;
+import com.eternalreturn.worldgen.caves.CaveSystemCarver;
+import com.eternalreturn.worldgen.caves.types.LargeCave;
+import net.minecraft.util.math.random.LocalRandom;
+import net.minecraft.util.math.random.Random;
+import net.minecraft.util.math.random.Xoroshiro128PlusPlusRandom;
 import com.eternalreturn.worldgen.caves.CaveType;
 import com.eternalreturn.worldgen.caves.CaveTypes;
 import com.google.gson.GsonBuilder;
@@ -121,6 +127,10 @@ public class CaveMapTests implements FabricGameTest {
 		}
 		ImageIO.write(gallerySheet(tiles), "png", out.resolve("gallery.png").toFile());
 
+		// ---- the biggest caverns over a wide area, found from the seed; the best one on land is generated and drawn
+		List<Map<String, Object>> giants = giantCaverns(world, newCaves);
+		Map<String, Object> giant = drawGiant(world, giants, out, lavaY);
+
 		Map<String, Object> stats = new LinkedHashMap<>();
 		stats.put("seed", world.getSeed());
 		stats.put("slice_area", size + " x " + size + " blocks from " + x0 + ", " + z0);
@@ -132,11 +142,168 @@ public class CaveMapTests implements FabricGameTest {
 		}
 		stats.put("gallery_forced_open_share", galleryStats);
 		stats.put("examples_near_spawn", examples);
+		stats.put("biggest_caverns_within_5000_blocks", giants);
+		stats.put("giant_cavern_checked", giant);
 		try (Writer writer = Files.newBufferedWriter(out.resolve("caves.json"))) {
 			new GsonBuilder().setPrettyPrinting().create().toJson(stats, writer);
 		}
 		EternalReturn.LOGGER.info("[cavemap] wrote {} | default open {} | examples {}", out, stats.get("default_open_share"), examples);
 		ctx.complete();
+	}
+
+	/** Search half-width in chunks: 5,000 blocks either side of 0,0. */
+	private static final int GIANT_SEARCH_CHUNKS = 312;
+
+	/**
+	 * The biggest caverns in a wide square, without generating it: replays the seed Moderner Beta hands
+	 * the cave carver for each chunk (its "early release" seeding: a legacy random seeded from the world
+	 * seed, two salts, then chunk x * salt + chunk z * salt ^ seed), then the carver's own draws for the
+	 * large type: whether a cavern starts, where, and its radius (LargeCave.radius, the first draw).
+	 * Exact for one cavern per chunk, which the default weight gives. Cross-checked against the
+	 * caverns actually logged in the land square.
+	 */
+	private static List<Map<String, Object>> giantCaverns(ServerWorld world, CaveRegion land) {
+		EternalReturnConfig.CaveTweaks caves = EternalReturnConfig.get().worldgen.caves;
+		CaveTypeSettings settings = caves.types.get("large");
+		double expected = settings.weight * caves.density / 100.0;
+		long seed = world.getSeed();
+		LocalRandom random = new LocalRandom(seed);
+		long saltX = random.nextLong();
+		long saltZ = random.nextLong();
+		List<double[]> found = new ArrayList<>();
+		for (int chunkX = -GIANT_SEARCH_CHUNKS; chunkX <= GIANT_SEARCH_CHUNKS; chunkX++) {
+			for (int chunkZ = -GIANT_SEARCH_CHUNKS; chunkZ <= GIANT_SEARCH_CHUNKS; chunkZ++) {
+				random.setSeed((long) chunkX * saltX + (long) chunkZ * saltZ ^ seed);
+				Random typeRandom = new Xoroshiro128PlusPlusRandom(CaveSystemCarver.mix(random.nextLong(), "large".hashCode()));
+				int count = (int) expected + (typeRandom.nextDouble() < expected - (int) expected ? 1 : 0);
+				if (count == 0) {
+					continue;
+				}
+				int x = chunkX * 16 + typeRandom.nextInt(16);
+				int z = chunkZ * 16 + typeRandom.nextInt(16);
+				int y = settings.minY + typeRandom.nextInt(Math.max(1, settings.maxY - settings.minY + 1));
+				found.add(new double[]{x, y, z, LargeCave.radius(typeRandom, settings)});
+			}
+		}
+		// Check the replay against the caverns the carver logged in the land square.
+		int x0 = land.chunkX0 * 16;
+		int z0 = land.chunkZ0 * 16;
+		int size = land.size * 16;
+		long predicted = found.stream().filter(c -> c[0] >= x0 && c[0] < x0 + size && c[2] >= z0 && c[2] < z0 + size).count();
+		long logged = CaveStartLog.recent().stream().filter(start -> start.type().equals("large")
+				&& start.x() >= x0 && start.x() < x0 + size && start.z() >= z0 && start.z() < z0 + size).count();
+		long matching = CaveStartLog.recent().stream().filter(start -> start.type().equals("large")
+				&& found.stream().anyMatch(c -> (int) c[0] == start.x() && (int) c[2] == start.z())).count();
+		EternalReturn.LOGGER.info("[cavemap] cavern search: {} caverns over {} chunks; land square predicted {}, logged {}, logged ones matching a prediction {}",
+				found.size(), (2 * GIANT_SEARCH_CHUNKS + 1) * (2 * GIANT_SEARCH_CHUNKS + 1), predicted, logged, matching);
+
+		found.sort((a, b) -> Double.compare(b[3], a[3]));
+		net.minecraft.world.gen.chunk.ChunkGenerator generator = world.getChunkManager().getChunkGenerator();
+		List<Map<String, Object>> result = new ArrayList<>();
+		for (double[] cavern : found) {
+			if (result.size() >= 8) {
+				break;
+			}
+			Map<String, Object> entry = new LinkedHashMap<>();
+			entry.put("x", (int) cavern[0]);
+			entry.put("z", (int) cavern[2]);
+			entry.put("start_y", (int) cavern[1]);
+			entry.put("radius", Math.round(cavern[3] * 10) / 10.0);
+			entry.put("ground_y", generator.getHeight((int) cavern[0], (int) cavern[2], net.minecraft.world.Heightmap.Type.OCEAN_FLOOR_WG,
+					world, world.getChunkManager().getNoiseConfig()) - 1);
+			result.add(entry);
+		}
+		Map<String, Long> bySize = new LinkedHashMap<>();
+		bySize.put("under 20", found.stream().filter(c -> c[3] < 20).count());
+		bySize.put("20 to 35", found.stream().filter(c -> c[3] >= 20 && c[3] < 35).count());
+		bySize.put("35 to 50", found.stream().filter(c -> c[3] >= 35 && c[3] < 50).count());
+		bySize.put("50 to 65", found.stream().filter(c -> c[3] >= 50 && c[3] < 65).count());
+		bySize.put("65 and over", found.stream().filter(c -> c[3] >= 65).count());
+		EternalReturn.LOGGER.info("[cavemap] cavern radii: {} | biggest: {}", bySize, result);
+		Map<String, Object> summary = new LinkedHashMap<>();
+		summary.put("radius_counts", bySize);
+		result.add(0, summary);
+		return result;
+	}
+
+	/**
+	 * Generates the biggest cavern found on land (ground above sea level) and draws a side view through
+	 * its centre (giant_cavern.png); returns where to stand in it and how big it came out.
+	 */
+	private static Map<String, Object> drawGiant(ServerWorld world, List<Map<String, Object>> giants, Path out, int lavaY) throws IOException {
+		Map<String, Object> pick = null;
+		for (Map<String, Object> entry : giants) {
+			if (entry.containsKey("radius") && ((Number) entry.get("ground_y")).intValue() >= 64) {
+				pick = entry;
+				break;
+			}
+		}
+		Map<String, Object> result = new LinkedHashMap<>();
+		if (pick == null) {
+			return result;
+		}
+		int x = ((Number) pick.get("x")).intValue();
+		int z = ((Number) pick.get("z")).intValue();
+		double radius = ((Number) pick.get("radius")).doubleValue();
+		int reach = (int) Math.ceil(radius * 1.6) + 8;
+		int chunks = (2 * reach) / 16 + 1;
+		CaveRegion region = new CaveRegion(world, (x - reach) >> 4, (z - reach) >> 4, chunks, null);
+		// Widest open run along x through the centre column, at each height; the tallest air run in the centre column.
+		int bestWidth = 0;
+		int bestY = 0;
+		for (int y = world.getBottomY() + 1; y < 100; y++) {
+			int width = 0;
+			int run = 0;
+			for (int dx = -reach; dx <= reach; dx++) {
+				run = region.isCave(x + dx, y, z, lavaY) ? run + 1 : 0;
+				width = Math.max(width, run);
+			}
+			if (width > bestWidth) {
+				bestWidth = width;
+				bestY = y;
+			}
+		}
+		int lowest = Integer.MAX_VALUE;
+		int highest = Integer.MIN_VALUE;
+		for (int y = world.getBottomY() + 1; y < 100; y++) {
+			if (region.isCave(x, y, z, lavaY)) {
+				lowest = Math.min(lowest, y);
+				highest = Math.max(highest, y);
+			}
+		}
+		int top = 100;
+		int bottom = world.getBottomY();
+		BufferedImage side = new BufferedImage(2 * reach + 1, top - bottom, BufferedImage.TYPE_INT_RGB);
+		for (int dx = -reach; dx <= reach; dx++) {
+			for (int y = bottom; y < top; y++) {
+				BlockState state = region.at(x + dx, y, z);
+				int rgb = region.isCave(x + dx, y, z, lavaY) ? (state.isOf(Blocks.LAVA) ? 0xFF7A00 : 0x1A1A1A) : colour(state, y, lavaY);
+				side.setRGB(dx + reach, top - 1 - y, rgb);
+			}
+		}
+		int scale = 3;
+		BufferedImage scaled = new BufferedImage(side.getWidth() * scale, side.getHeight() * scale + 22, BufferedImage.TYPE_INT_RGB);
+		Graphics2D g = scaled.createGraphics();
+		g.setColor(Color.WHITE);
+		g.fillRect(0, 0, scaled.getWidth(), scaled.getHeight());
+		g.setColor(Color.BLACK);
+		g.setFont(new Font(Font.SANS_SERIF, Font.BOLD, 14));
+		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+		g.drawString("Giant cavern, side view through z = " + z + ", x " + (x - reach) + " to " + (x + reach) + ", y " + bottom + " to " + top
+				+ " (radius drawn " + radius + ")", 4, 16);
+		g.drawImage(side, 0, 22, side.getWidth() * scale, side.getHeight() * scale, null);
+		g.dispose();
+		ImageIO.write(scaled, "png", out.resolve("giant_cavern.png").toFile());
+		result.put("x", x);
+		result.put("z", z);
+		result.put("radius_drawn", radius);
+		result.put("widest_open_run_east_west", bestWidth);
+		result.put("at_y", bestY);
+		result.put("open_from_y", lowest == Integer.MAX_VALUE ? null : lowest);
+		result.put("open_to_y", highest == Integer.MIN_VALUE ? null : highest);
+		result.put("stand_at", x + " " + bestY + " " + z);
+		EternalReturn.LOGGER.info("[cavemap] giant cavern checked: {}", result);
+		return result;
 	}
 
 	private static boolean nearCave(CaveRegion region, int x, int y, int z) {
@@ -246,7 +413,7 @@ public class CaveMapTests implements FabricGameTest {
 				int count = 0;
 				for (int y = GALLERY_LOW_Y; y < GALLERY_HIGH_Y; y++) {
 					BlockState state = region.at(x0 + x, y, z0 + z);
-					boolean cave = state.isOf(Blocks.CAVE_AIR) || (state.isOf(Blocks.LAVA) && y <= lavaY);
+					boolean cave = region.isCave(x0 + x, y, z0 + z, lavaY);
 					if (cave) {
 						highest = y;
 						count++;
