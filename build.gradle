@@ -13,6 +13,7 @@ sourceSets {
 
 loom {
 	splitEnvironmentSourceSets()
+	accessWidenerPath = file("src/main/resources/eternalreturn.accesswidener")
 
 	mods {
 		"eternalreturn" {
@@ -33,6 +34,8 @@ def worldmapSeed = "173164"
 // -PrecordFingerprints writes new baselines to src/gametest/resources/fingerprints instead.
 def fingerprintRecord = project.hasProperty("recordFingerprints")
 		? ["gametest.fingerprintRecord": file("src/gametest/resources/fingerprints").absolutePath] : [:]
+// -PgametestBatches=a,b runs only those batches (handy for re-running one check of a long suite).
+def batchOverride = project.hasProperty("gametestBatches") ? ["gametest.batches": project.property("gametestBatches").toString()] : [:]
 def gameTestRun = { String runName, String label, String dir, Map<String, String> props ->
 	loom.runs.create(runName) {
 		server()
@@ -41,7 +44,7 @@ def gameTestRun = { String runName, String label, String dir, Map<String, String
 		runDir "build/gametest/${dir}"
 		vmArg "-Dfabric-api.gametest"
 		vmArg "-Dfabric-api.gametest.report-file=${file("build/gametest/${dir}/report.xml")}"
-		(props + (props.containsKey("gametest.fingerprint") ? fingerprintRecord : [:])).each { key, value -> vmArg "-Deternalreturn.${key}=${value}" }
+		(props + (props.containsKey("gametest.fingerprint") ? fingerprintRecord : [:]) + (props.containsKey("gametest.batches") ? batchOverride : [:])).each { key, value -> vmArg "-Deternalreturn.${key}=${value}" }
 	}
 }
 gameTestRun("gametest", "Game Test (flat world)", "flat", [:])
@@ -60,16 +63,18 @@ gameTestRun("gametestVanilla", "Game Test (vanilla generator, debug tunnel on)",
 		["gametest.preset": "minecraft:normal", "gametest.batches": "worldgen,fingerprint", "gametest.debugTunnel": "true",
 		 "gametest.fingerprint": "vanilla_tunnel"])
 gameTestRun("gametestEternalReturn", "Game Test (Eternal Return preset)", "eternal_return",
-		["gametest.preset": "eternalreturn:eternal_return", "gametest.seed": worldmapSeed, "gametest.batches": "worldgen,worldgen_er", "gametest.debugTunnel": "true"])
-// Eternal Return with the new caves off and the old ones back must match the world as it was before the cave engine.
+		["gametest.preset": "eternalreturn:eternal_return", "gametest.seed": worldmapSeed, "gametest.batches": "worldgen,worldgen_er,ores", "gametest.debugTunnel": "true",
+		 "gametest.fingerprint": "ore_census"])
+// Eternal Return with the new caves off, the old ones back and biome stone off must match the world as it was before the cave engine.
 gameTestRun("gametestEternalReturnOldCaves", "Game Test (Eternal Return, old caves only, control)", "eternal_return_old_caves",
 		["gametest.preset": "eternalreturn:eternal_return", "gametest.seed": worldmapSeed, "gametest.batches": "fingerprint,cavestats", "gametest.debugTunnel": "true",
-		 "gametest.caves.enabled": "false", "gametest.caves.oldCaves": "true", "gametest.fingerprint": "eternal_return_old_caves"])
+		 "gametest.caves.enabled": "false", "gametest.caves.oldCaves": "true", "gametest.biomeStone": "false", "gametest.fingerprint": "eternal_return_old_caves"])
 // The cave engine: every type forced in turn, seams, chunk order, the carvable tag, density and timing.
+// Biome stone: the same squares with it on here and off in the twin (BiomeStoneTests).
 // The world has a twin dimension with the same generator, for the generated-first-or-last check.
 gameTestRun("gametestCaves", "Game Test (Eternal Return caves)", "caves",
 		["gametest.preset": "eternalreturn_test:eternal_return_twin", "gametest.seed": worldmapSeed, "gametest.caves.logStarts": "true",
-		 "gametest.batches": "caves,caves_spaghetti,caves_ravine,caves_large,caves_vertical,caves_zigzag,caves_ribbed,caves_spiral,caves_toroidal"])
+		 "gametest.batches": "caves,caves_spaghetti,caves_ravine,caves_large,caves_vertical,caves_zigzag,caves_ribbed,caves_spiral,caves_toroidal,biome_stone"])
 
 // The headless map tool: renders maps of a preset at a fixed seed into docs/worldgen-maps/<name>.
 // -PworldmapHalf=1024 renders a smaller area (faster); -PworldmapOut=<dir> writes to <dir>/<name> instead.
@@ -93,6 +98,11 @@ def worldmapOptions = [centre: "worldmapCentre", closeup: "worldmapCloseup", sli
 gameTestRun("worldmapCaves", "World map (caves)", "worldmap_caves",
 		["gametest.preset": "eternalreturn_test:eternal_return_twin", "gametest.seed": worldmapSeed, "gametest.batches": "cavemap",
 		 "gametest.caves.logStarts": "true", "worldmap.out": file("${findProperty("worldmapOut") ?: "docs/worldgen-maps"}/caves").absolutePath])
+
+// Biome stone map (StoneMapTests): a cut at y=30 coloured by block, and one checklist spot per host stone.
+gameTestRun("worldmapStone", "World map (biome stone)", "worldmap_stone",
+		["gametest.preset": "eternalreturn:eternal_return", "gametest.seed": worldmapSeed, "gametest.batches": "stonemap",
+		 "worldmap.out": file("${findProperty("worldmapOut") ?: "docs/worldgen-maps"}/stone").absolutePath])
 
 // Moderner Beta is a dev-runtime mod for every run; this one takes it off the classpath to prove
 // the mod and its data work without it.
@@ -121,7 +131,7 @@ tasks.register("runAllGametests") {
 tasks.register("generateWorldMaps") {
 	group = "verification"
 	description = "Renders the world maps in docs/worldgen-maps (Eternal Return preset and the two controls)."
-	dependsOn "runWorldmapEternalReturn", "runWorldmapBeta", "runWorldmapRelease164", "runWorldmapCaves"
+	dependsOn "runWorldmapEternalReturn", "runWorldmapBeta", "runWorldmapRelease164", "runWorldmapCaves", "runWorldmapStone"
 }
 
 repositories {

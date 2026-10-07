@@ -138,7 +138,7 @@ public class FishingTests implements FabricGameTest {
 		return counts.entrySet().stream().filter(e -> e.getKey().getDefaultStack().isIn(FishingItems.RAW_FISH)).mapToInt(Map.Entry::getValue).sum();
 	}
 
-	private static ServerPlayerEntity survivalPlayer(TestContext ctx, BlockPos rel) {
+	static ServerPlayerEntity survivalPlayer(TestContext ctx, BlockPos rel) {
 		ServerWorld world = ctx.getWorld();
 		ConnectedClientData data = ConnectedClientData.createDefault(new GameProfile(UUID.randomUUID(), "test-angler"), false);
 		ServerPlayerEntity player = new ServerPlayerEntity(world.getServer(), world, data.gameProfile(), data.syncedOptions());
@@ -151,7 +151,7 @@ public class FishingTests implements FabricGameTest {
 		return player;
 	}
 
-	private static void disconnect(ServerPlayerEntity player) {
+	static void disconnect(ServerPlayerEntity player) {
 		player.getServer().getPlayerManager().remove(player);
 	}
 

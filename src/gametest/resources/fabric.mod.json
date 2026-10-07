@@ -18,7 +18,11 @@
 			"com.eternalreturn.gametest.ControlFingerprintTests",
 			"com.eternalreturn.gametest.StructureTests",
 			"com.eternalreturn.gametest.CaveTests",
-			"com.eternalreturn.gametest.CaveMapTests"
+			"com.eternalreturn.gametest.CaveMapTests",
+			"com.eternalreturn.gametest.OreCensusTests",
+			"com.eternalreturn.gametest.BiomeStoneTests",
+			"com.eternalreturn.gametest.StoneBlockTests",
+			"com.eternalreturn.gametest.StoneMapTests"
 		]
 	},
 	"mixins": [

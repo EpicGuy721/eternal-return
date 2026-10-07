@@ -10,7 +10,7 @@ Requires JDK 21.
 ./gradlew build             # jar lands in build/libs/ (also compiles the tests, without running them)
 ./gradlew runClient         # dev client for testing
 ./gradlew runAllGametests   # every in-game test, on headless servers (a few minutes)
-./gradlew generateWorldMaps # maps of the world types and caves into docs/worldgen-maps/ (about 15 minutes)
+./gradlew generateWorldMaps # maps of the world types, caves and biome stone into docs/worldgen-maps/ (about 25 minutes)
 ```
 
 Uses Yarn mappings (`1.21.1+build.3`), Fabric Loader 0.19.5, Fabric API `0.116.17+1.21.1`, and the current Loom from the official Fabric template. The Gradle wrapper is copied from that template.
@@ -32,13 +32,13 @@ In-game tests live in `src/gametest`, a separate test mod that is never packed i
 | `runGametestModernerBeta164` | Moderner Beta, Release 1.6.4 | carving unchanged; cave density for comparison |
 | `runGametestModernerBetaBeta` | Moderner Beta, Beta 1.7.3 | carving unchanged |
 | `runGametestVanilla` | vanilla generator | worldgen checks (debug tunnel on, trial chambers present), carving unchanged |
-| `runGametestEternalReturn` | Eternal Return, seed 173164 | world height, biome list, no cave biomes, no deepslate, badlands surface, no trial chambers; debug tunnel on |
-| `runGametestEternalReturnOldCaves` | Eternal Return, new caves off, old caves on | carving matches the world from before the cave engine; cave density for comparison |
-| `runGametestCaves` | Eternal Return plus a twin dimension | every cave type, seams, chunk order, the carvable tag, density, timing |
+| `runGametestEternalReturn` | Eternal Return, seed 173164 | world height, biome list, no cave biomes, no deepslate, badlands surface, no trial chambers; ore counts per ore over squares in seven biomes match the recorded baseline (`src/gametest/resources/ores/`); debug tunnel on |
+| `runGametestEternalReturnOldCaves` | Eternal Return, new caves off, old caves on, biome stone off | carving matches the world from before the cave engine; cave density for comparison |
+| `runGametestCaves` | Eternal Return plus a twin dimension | every cave type, seams, chunk order, the carvable tag, density, timing; biome stone in every biome against the same chunks without it |
 
 "Carving unchanged" hashes 27 chunks generated up to the carving step and compares them with a baseline recorded before the cave engine (`src/gametest/resources/fingerprints/`; `./gradlew runAllGametests -PrecordFingerprints` records new ones). Each run writes `build/gametest/<world>/report.xml`. Test worlds enable only the datapacks a normal new world would, so Moderner Beta's optional "Reduced Height" and "Deepslate Blobs" packs stay off.
 
-The map tool runs the same way: `runWorldmapEternalReturn`, `runWorldmapBeta` and `runWorldmapRelease164` each generate one world at seed 173164 and save height, biome, land and side-view images plus `stats.json` to `docs/worldgen-maps/<preset>/`. Add `-PworldmapHalf=1024` for a 2048-block area instead of 4096. `runWorldmapCaves` saves cave slices at four depths (new caves next to the old ones on the same terrain), a gallery of every cave type, and real cave starts to `docs/worldgen-maps/caves/`. Details in [docs/worldgen.md](docs/worldgen.md).
+The map tool runs the same way: `runWorldmapEternalReturn`, `runWorldmapBeta` and `runWorldmapRelease164` each generate one world at seed 173164 and save height, biome, land and side-view images plus `stats.json` to `docs/worldgen-maps/<preset>/`. Add `-PworldmapHalf=1024` for a 2048-block area instead of 4096. `runWorldmapCaves` saves cave slices at four depths (new caves next to the old ones on the same terrain), a gallery of every cave type, and real cave starts to `docs/worldgen-maps/caves/`. `runWorldmapStone` saves a cut through the stone at y=30, coloured by block, plus one checklist spot per host stone, to `docs/worldgen-maps/stone/`. Details in [docs/worldgen.md](docs/worldgen.md).
 
 ## Features and where they live
 
@@ -85,9 +85,14 @@ The plan, status, terrain settings and maps are in [docs/worldgen.md](docs/world
 | No trial chambers in Eternal Return worlds | settings preset (`structure_modifiers.removed`) |
 | Cave engine: eight cave types, only in Eternal Return worlds | `com.eternalreturn.worldgen.caves` (`CaveSystemCarver`, `CaveTypes`, one class per type in `types/`); `worldgen/configured_carver/caves.json`; block tag `eternalreturn:carvable` |
 | Old caves off in Eternal Return worlds | `CarverContextMixin` (which world), `ConfiguredCarverMixin` (skips other carvers) |
+| Biome stone: each biome's stone from under the topsoil to bedrock, only in Eternal Return worlds | table `biome_stone` in `tools/worldgen/knobs.json`, written into the noise settings' surface rules by `build_preset.py`; `BiomeStoneCondition` (the on/off switch) |
+| Hardened sandstone and hardened packed ice | `com.eternalreturn.worldgen.stone.HardenedBlocks` (one entry per block); client models `HardenedBlockModels`; block tag `eternalreturn:hardened_stones` |
+| Ores in every host stone (temporary) | hardened blocks in `minecraft:stone_ore_replaceables` and `minecraft:base_stone_overworld`; red sandstone through `OreFeatureMixin` and `BiomeStoneOres`, Eternal Return worlds only |
+| Springs and glow lichen on the hardened blocks | `data/minecraft/worldgen/configured_feature/` (`spring_water`, `spring_lava_overworld`, `glow_lichen`) |
+| Host stones as stone materials | item tags `minecraft:stone_tool_materials`, `minecraft:stone_crafting_materials`; recipes `dispenser`, `dropper`, `lever`, `observer`, `piston` in `data/minecraft/recipe/` |
 | Full -64 to 320 height | noise settings |
 | Debug tunnel (off by default) | `DebugTunnelCarver`, `worldgen/configured_carver/debug_tunnel.json`, attached to overworld biomes in `WorldgenFeatures` |
-| World map tool (dev only) | `WorldmapTests`, `CaveMapTests` in `src/gametest` |
+| World map tool (dev only) | `WorldmapTests`, `CaveMapTests`, `StoneMapTests` in `src/gametest` |
 
 ### Fishing and villagers
 
@@ -105,7 +110,7 @@ The plan, status, terrain settings and maps are in [docs/worldgen.md](docs/world
 
 ### World type
 
-Pick **World Type: Eternal Return** on the create-world screen (it is also in Moderner Beta's own preset list, in its own category). Oceans and continents are laid out like Release 1.6.4, but the land rolls and climbs like Beta 1.7.3 almost everywhere: mostly rolling and hilly ground around y 65-90, hills to about y 115, mountains up to about y 180, with Beta-style cliffs and the odd overhang. Swamps stay flat and marshy, as in 1.6.4. Sea level is 63, bedrock is at -64, and everything below y=0 is ordinary stone with the usual ores: no deepslate layer and no lush caves, dripstone caves or deep dark. Biomes are Release 1.6.4's (with its hills and shores) plus birch forest, savanna, badlands and dark forest. There are no trial chambers. The Nether and the End are vanilla.
+Pick **World Type: Eternal Return** on the create-world screen (it is also in Moderner Beta's own preset list, in its own category). Oceans and continents are laid out like Release 1.6.4, but the land rolls and climbs like Beta 1.7.3 almost everywhere: mostly rolling and hilly ground around y 65-90, hills to about y 115, mountains up to about y 180, with Beta-style cliffs and the odd overhang. Swamps stay flat and marshy, as in 1.6.4. Sea level is 63, bedrock is at -64, and below y=0 the stone simply carries on (the biome's stone, see below) with the usual ores: no deepslate layer and no lush caves, dripstone caves or deep dark. Biomes are Release 1.6.4's (with its hills and shores) plus birch forest, savanna, badlands and dark forest. There are no trial chambers. The Nether and the End are vanilla.
 
 **Caves.** Eight types, a little more cave in all than Release 1.6.4 (5.3% of the underground open, against 4.5%):
 
@@ -117,6 +122,8 @@ Pick **World Type: Eternal Return** on the create-world screen (it is also in Mo
 - ribbed tunnels that bulge and pinch every few blocks;
 - spirals: a tunnel winding two to four turns down 30 to 70 blocks around a solid column (rare);
 - toroidal rooms: donut-shaped rooms around a pillar of rock, usually lying flat, sometimes tilted (rare).
+
+**Biome stone.** Under the topsoil, all the way down to bedrock, the stone matches the biome above it: andesite under forests, taiga and extreme hills; diorite under birch forests; granite under jungles and savannas; hardened sandstone under deserts; red sandstone under the badlands' terracotta bands; hardened packed ice under ice plains, frozen oceans and frozen rivers. Plains, oceans, rivers, beaches, mushroom islands, swamps and dark forests keep plain stone. Borders are sharp, with no blending. Hardened sandstone and hardened packed ice look like sandstone and packed ice but mine like stone (pickaxe needed, same hardness, no melting or sliding) and drop plain sandstone or packed ice, Silk Touch or not; you can only get the hardened blocks themselves from the creative inventory. For now the usual ores (coal, iron, gold and so on, in their stone texture) appear in every host stone. Since deserts and ice plains drop no cobblestone, sandstone, red sandstone, granite, diorite and andesite all work for stone tools, furnaces, brewing stands, dispensers, droppers, levers, observers and pistons (in every world).
 
 Caves stay out of oceans and rivers, and turn to lava at y -56 and below. Vanilla's and Moderner Beta's own caves and ravines no longer generate in Eternal Return worlds; `worldgen.caves.oldCaves` brings them back. Other world types keep their normal caves.
 
@@ -223,6 +230,7 @@ Nether fish and infernal bait are fireproof. The new fish also count for the "fi
 - `fishing`: `fishRequireBait`; `baits` (item to `lureSeconds`, `nightLureSeconds`, `lava`); `wormDropChance`; `anglerfishMinWaterDepth` (default 10); `lavaFishingOutsideNether`.
 - `villagers`: `onlyFishermenBuy`; `fishPriceMultiplier` (default 2, applied to every fish a fisherman buys); and `fishermanTrades` (item to `level`, `count`, base `emeralds`, `maxUses`, `experience`; needs a restart).
 - `worldgen`: `debugTunnel` (off by default). Carves one straight 3x3 tunnel at y=20 along z=8 through every chunk on that row, to check that this mod's carvers run under the current world generator. Needs a restart, and only affects newly generated chunks.
+- `worldgen.biomeStone` (on by default; Eternal Return worlds only, newly generated chunks only): each biome's stone under the topsoil. Off: plain stone everywhere.
 - `worldgen.caves` (Eternal Return worlds only; newly generated chunks only): `enabled` (the new caves); `oldCaves` (off: vanilla's, Moderner Beta's and other mods' cave carvers don't run there); `density` (multiplies every weight); per type under `types` (`spaghetti`, `ravine`, `large`, `vertical`, `zigzag`, `ribbed`, `spiral`, `toroidal`): `enabled`, `weight` (caves starting per 100 chunks), `minY` and `maxY` (where a cave starts), `minRadius` and `maxRadius`, and for `large` a `typicalRadius` (the most common size; a few caverns reach toward `maxRadius`); `spiral` and `toroidal` also have `minSize` and `maxSize` (the spiral's coil radius, the room's ring radius). Config files from before the first cave tuning are reset to the new type defaults once (`typesVersion`). Debug: `debugForceCaveType` (a type id: only that type, at a high rate) and `debugLogCaveStarts` (writes `type,x,y,z` of every cave start to `eternalreturn-cave-starts.csv` in the game folder).
 - `mobs`: baby chance, baby speed, and baby creeper fuse and blast multipliers; armor and armor-enchant chances, each written as `base + perDifficulty x clamped local difficulty`; the underground-creeper toggle and its sky-light limit; jockey, fishing rod, ender pearl and sword chances; fishing rod pull strength; the boat-breaking toggle.
 
@@ -238,7 +246,7 @@ Fishing data lives in the same place. The item tag `raw_fish` is what fishermen 
 - `generateEnchantments` is only taken over for capped items, items with inherent rules, or when shelves are biasing. Everything else uses vanilla's code untouched.
 - The enchanting and anvil screen tweaks are cosmetic and set to `require = 0`, so a UI mod that touches the same screens cannot crash the game over them.
 - Vanilla's 1% skeleton-only spider jockey roll is replaced by the mod's own roll (same default chance). A mod that edits that vanilla roll will see no effect.
-- Adds one entity, `eternalreturn:zombie_hook`, and 15 items, so the mod must be installed on both client and server.
+- Adds one entity, `eternalreturn:zombie_hook`, two blocks (`eternalreturn:hardened_sandstone`, `eternalreturn:hardened_packed_ice`) and 17 items, so the mod must be installed on both client and server.
 - Replaces the `minecraft:gameplay/fishing` loot table (fish now need bait and come from the extended fish table) and adds to the `minecraft:fishes` item tag. Mods that add fish to `minecraft:gameplay/fishing/fish` through Fabric's loot API still work, since that table is used unchanged inside the new one.
 - The trade filter recognizes vanilla's two buy-trade types, including inside the trade rebalance's per-biome wrappers. Buy trades that other mods add with their own trade classes are not detected and stay.
 - Sodium: no overlap.
@@ -246,6 +254,7 @@ Fishing data lives in the same place. The item tag `raw_fish` is what fishermen 
 - Without Moderner Beta: the Eternal Return world type and its noise settings are skipped at load (Fabric load conditions) and the optional tag entries are dropped, so the game starts and existing non-Eternal Return worlds load normally. A world created with the Eternal Return type needs Moderner Beta to open.
 - Adds tuff to the vanilla block tag `minecraft:stone_ore_replaceables` and replaces `minecraft:deepslate_ore_replaceables` with deepslate alone, so in every world, ores that generate inside tuff blobs use their stone variant instead of the deepslate one. A mod that adds blocks to `deepslate_ore_replaceables` may lose them, depending on load order. Adds the world type to `minecraft:normal` (the create-world list) and the preset to Moderner Beta's `selectable` category tag.
 - Caves: in Eternal Return worlds, only this mod's carvers run (vanilla's, Moderner Beta's and other mods' carvers are skipped) unless `worldgen.caves.oldCaves` is on. Other worlds are untouched (checked against fingerprints of vanilla and Moderner Beta worlds). A world counts as Eternal Return by its noise settings, so an Eternal Return world whose generator settings were replaced by hand would carve normally.
+- Biome stone: adds sandstone, red sandstone, granite, diorite and andesite to the item tags `minecraft:stone_tool_materials` and `minecraft:stone_crafting_materials`, and replaces vanilla's dispenser, dropper, lever, observer and piston recipes with versions taking that tag, in every world. A datapack replacing those recipes undoes this. Overrides the configured features `spring_water`, `spring_lava_overworld` and `glow_lichen` (only adding the two hardened blocks), and adds the hardened blocks to `minecraft:mineable/pickaxe`, `minecraft:base_stone_overworld` and `minecraft:stone_ore_replaceables`; none of this changes worlds without the hardened blocks. Red sandstone is not added to any ore tag: ores treat it as stone only in Eternal Return worlds. Uses an access widener for the surface-rule condition. With Moderner Beta installed, two small mixins into its surface pass (by class name, applied only when it is present) make that pass treat the host stones as stone in Eternal Return chunks; other presets are untouched.
 - Moderner Beta's optional "Reduced Height" datapack moves the overworld floor to y=0 for every world, which cuts off the bottom of Eternal Return worlds. Its "Deepslate Blobs" datapack adds deepslate back. Leave both off.
 - Nostalgic Tweaks: if you use its XP removal, this mod is already XP-free. If it has options that change the anvil or enchanting screens, check them alongside this.
 
@@ -290,7 +299,7 @@ World type (needs Moderner Beta): create a creative world with World Type "Etern
 28. `972 296`: an extreme hills peak, about y 171. `-736 -1274`: a savanna mountain, about y 161 (where the old 172-block pillar stood).
 29. `736 -400`: badlands with terracotta bands, at about y 69.
 30. `-2000 1176`: a mushroom island. `-288 -352`: ice plains. `-648 456`: dark forest.
-31. Anywhere: F3 never shows `lush_caves`, `dripstone_caves` or `deep_dark`. Dig down to y -60: stone all the way (with the usual granite, diorite, andesite and, below y 0, tuff blobs), bedrock at -64, ores like diamond and redstone in their normal stone texture, no deepslate.
+31. Anywhere: F3 never shows `lush_caves`, `dripstone_caves` or `deep_dark`. Dig down to y -60: the biome's stone all the way (with the usual granite, diorite, andesite and, below y 0, tuff blobs), bedrock at -64, ores like diamond and redstone in their normal stone texture, no deepslate.
 32. With World Type "Moderner Beta", its Customize screen lists Eternal Return in its own category, with its icon.
 
 Caves (same world; a new world, since chunks generated before this update keep their old caves). `/gamemode spectator`, `/effect give @s night_vision infinite`, then `/tp @s X Y Z` puts you inside each cave, all within about 150 blocks of each other:
@@ -304,3 +313,16 @@ Caves (same world; a new world, since chunks generated before this update keep t
 39. `-1298 37 -1181`: the top of a spiral; follow it down as it winds two to four turns around a solid column of rock.
 40. `-1166 -36 -1214`: inside a toroidal room; follow the ring round, with the pillar standing in the middle.
 41. Anywhere: no water pours into caves from oceans or rivers, caves at y -56 and below hold lava, and there are no trial chambers (`/locate structure minecraft:trial_chambers` finds none).
+
+Biome stone (same world, a new one if it was made before this update; survival for the drops, `/gamemode creative` to look around). `/tp @s X Y Z`, then dig straight down with a pickaxe; F3's "Targeted Block" names what you are looking at:
+
+42. `-760 64 -120` (plains): grass, dirt, then plain stone from y 61 (with andesite blobs). Stone drops cobblestone, as before.
+43. `264 68 -696` (forest): grass, dirt, then andesite from y 64, all the way down. Mining it drops andesite. A cave crosses the column at y 28.
+44. `200 73 -1208` (birch forest, under a birch tree): grass, dirt, then diorite from y 69. Drops diorite.
+45. `-760 68 136` (jungle): grass, dirt, then granite from y 64. Drops granite.
+46. `840 63 776` (desert): sand, then ordinary sandstone (the desert's topsoil) down to y 49, a diorite blob, then hardened sandstone from y 41. It looks the same as the sandstone above, but F3 names it `eternalreturn:hardened_sandstone` and it takes about twice as long to mine. It drops plain sandstone, with or without Silk Touch.
+47. `776 68 -632` (badlands): red sand, terracotta bands down to y 55, then red sandstone from y 54. Drops red sandstone.
+48. `-376 90 -376` (ice plains, on a snowy overhang): dig through the overhang into the hollow under it, then grass and dirt from y 74, then hardened packed ice from y 68 (an iron ore just above it). It looks like packed ice, drops packed ice (Silk Touch too), isn't slippery to walk on, and doesn't melt next to a torch.
+49. Hit hardened sandstone or hardened packed ice with your hand or a shovel: it breaks slowly and drops nothing. In the creative inventory, Natural Blocks shows Hardened Sandstone after Sandstone and Hardened Packed Ice after Packed Ice.
+50. Crafting: a stone pickaxe from three sandstone (or red sandstone, granite, diorite, andesite) and two sticks; a furnace from eight andesite; a lever from a stick and a piece of granite; a piston from planks, an iron ingot, redstone and diorite. Packed ice makes none of them.
+51. In any host stone: coal, iron, copper, gold, redstone, lapis and diamond ores turn up in their normal stone texture, as do granite, diorite, andesite, dirt and gravel blobs. The map at `docs/worldgen-maps/stone/stone_y30.png` shows a cut at y 30.

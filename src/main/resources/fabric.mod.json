@@ -11,8 +11,10 @@
 		"main": ["com.eternalreturn.EternalReturn"],
 		"client": ["com.eternalreturn.client.EternalReturnClient"]
 	},
+	"accessWidener": "eternalreturn.accesswidener",
 	"mixins": [
 		"eternalreturn.mixins.json",
+		"eternalreturn.modernerbeta.mixins.json",
 		{
 			"config": "eternalreturn.client.mixins.json",
 			"environment": "client"

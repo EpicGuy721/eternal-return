@@ -21,6 +21,7 @@ public class EternalReturnClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		EntityRendererRegistry.register(ModEntities.ZOMBIE_HOOK, ZombieHookEntityRenderer::new);
+		HardenedBlockModels.register();
 
 		ItemTooltipCallback.EVENT.register((stack, context, type, lines) -> {
 			if (lines.isEmpty() || EnchantLevels.isConcealed(stack)) {

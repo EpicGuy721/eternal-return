@@ -35,6 +35,10 @@ public abstract class TestServerMixin {
 		if (tunnel != null) {
 			EternalReturnConfig.get().worldgen.debugTunnel = Boolean.parseBoolean(tunnel);
 		}
+		String biomeStone = System.getProperty("eternalreturn.gametest.biomeStone");
+		if (biomeStone != null) {
+			EternalReturnConfig.get().worldgen.biomeStone = Boolean.parseBoolean(biomeStone);
+		}
 		EternalReturnConfig.CaveTweaks caves = EternalReturnConfig.get().worldgen.caves;
 		String enabled = System.getProperty("eternalreturn.gametest.caves.enabled");
 		if (enabled != null) {

@@ -1,5 +1,12 @@
 {
   "values": [
-    "#minecraft:overworld_carver_replaceables"
+    "#minecraft:overworld_carver_replaceables",
+    "#eternalreturn:hardened_stones",
+    "minecraft:red_sandstone",
+    "minecraft:sandstone",
+    "minecraft:packed_ice",
+    "minecraft:granite",
+    "minecraft:diorite",
+    "minecraft:andesite"
   ]
 }

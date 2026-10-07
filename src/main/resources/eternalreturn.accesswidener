@@ -1,0 +1,5 @@
+accessWidener v2 named
+
+# Biome stone's surface-rule condition (com.eternalreturn.worldgen.stone.BiomeStoneCondition) returns one.
+accessible class net/minecraft/world/gen/surfacebuilder/MaterialRules$BooleanSupplier
+accessible class net/minecraft/world/gen/surfacebuilder/MaterialRules$MaterialRuleContext

@@ -7,5 +7,41 @@
   "depth_weight": 1.2,
   "depth_offset": 0.2,
   "scale_weight": 0.45,
-  "height_scale_offset": 0.85
+  "height_scale_offset": 0.85,
+  "biome_stone": {
+    "minecraft:stone": [
+      "moderner_beta:late_beta_plains",
+      "minecraft:ocean",
+      "minecraft:river",
+      "minecraft:beach",
+      "minecraft:mushroom_fields",
+      "moderner_beta:early_release_swampland",
+      "minecraft:dark_forest"
+    ],
+    "minecraft:andesite": [
+      "minecraft:forest",
+      "moderner_beta:early_release_taiga",
+      "moderner_beta:early_release_extreme_hills"
+    ],
+    "minecraft:diorite": [
+      "minecraft:birch_forest"
+    ],
+    "minecraft:granite": [
+      "minecraft:jungle",
+      "minecraft:savanna"
+    ],
+    "eternalreturn:hardened_sandstone": [
+      "minecraft:desert"
+    ],
+    "minecraft:red_sandstone": [
+      "minecraft:badlands"
+    ],
+    "eternalreturn:hardened_packed_ice": [
+      "moderner_beta:early_release_ice_plains",
+      "moderner_beta:late_beta_ice_plains",
+      "minecraft:snowy_plains",
+      "minecraft:frozen_ocean",
+      "minecraft:frozen_river"
+    ]
+  }
 }

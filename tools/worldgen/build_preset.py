@@ -37,6 +37,9 @@ KNOBS = {
     'height_scale_offset': 0.0,
     'modify_only_positive_depth': False,
     'noise_top': 320,
+    # Biome stone: block id -> the biomes whose stone it replaces, from just under the topsoil down to
+    # bedrock (see docs/worldgen.md). Biomes under minecraft:stone, and any biome not listed, keep stone.
+    'biome_stone': {},
 }
 if len(sys.argv) > 1:
     KNOBS.update(json.load(open(sys.argv[1])))
@@ -117,6 +120,20 @@ write(f'data/{NS}/moderner_beta/settings_preset/eternal_return.json', preset)
 noise = mb_json('worldgen/noise_settings/overworld_256.json')
 noise['noise']['min_y'] = -64
 noise['noise']['height'] = KNOBS['noise_top'] + 64
+# Biome stone: after every topsoil, beach and badlands-band rule, so it only reaches what would stay
+# stone. Switched by the config setting worldgen.biomeStone (the eternalreturn:biome_stone_enabled
+# condition). No blending: each block takes the stone of the biome it is in.
+stone_rules = [{'type': 'minecraft:condition',
+                'if_true': {'type': 'minecraft:biome', 'biome_is': biomes},
+                'then_run': {'type': 'minecraft:block', 'result_state': {'Name': block}}}
+               for block, biomes in KNOBS['biome_stone'].items() if block != 'minecraft:stone' and biomes]
+# The host stones, for Moderner Beta's own surface pass (BiomeStoneSurface): it must take them for stone.
+write(f'data/{NS}/tags/block/biome_host_stones.json',
+      {'values': [block for block, biomes in KNOBS['biome_stone'].items() if block != 'minecraft:stone' and biomes]})
+if stone_rules:
+    noise['surface_rule']['sequence'].append({'type': 'minecraft:condition',
+                                              'if_true': {'type': f'{NS}:biome_stone_enabled'},
+                                              'then_run': {'type': 'minecraft:sequence', 'sequence': stone_rules}})
 write(f'data/{NS}/worldgen/noise_settings/eternal_return.json', {'fabric:load_conditions': LOAD_IF_MB, **noise})
 
 # ---------------------------------------------------------------- world preset

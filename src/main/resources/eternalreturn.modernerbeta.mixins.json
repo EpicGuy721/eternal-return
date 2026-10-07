@@ -1,0 +1,13 @@
+{
+	"required": false,
+	"package": "com.eternalreturn.mixin.compat",
+	"plugin": "com.eternalreturn.mixin.compat.ModernerBetaMixinPlugin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"ModernerBetaSurfaceExtraMixin",
+		"ModernerBetaSurfaceMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

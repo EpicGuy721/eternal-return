@@ -168,6 +168,12 @@ public final class EternalReturnConfig {
 		 * row. It checks that this mod's carvers run under the active world generator.
 		 */
 		public boolean debugTunnel = false;
+		/**
+		 * Biome stone: in Eternal Return worlds, the stone under each biome's topsoil, down to bedrock, is
+		 * that biome's stone (andesite under forests, hardened sandstone under deserts and so on; the table
+		 * is in docs/worldgen.md). Off: plain stone everywhere. Other worlds never change.
+		 */
+		public boolean biomeStone = true;
 		/** The cave engine (com.eternalreturn.worldgen.caves). Only Eternal Return worlds are affected. */
 		public CaveTweaks caves = new CaveTweaks();
 	}

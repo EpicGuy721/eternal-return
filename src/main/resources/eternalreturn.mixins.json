@@ -28,7 +28,9 @@
 		"villager.BuyItemFactoryAccessor",
 		"villager.VillagerEntityMixin",
 		"worldgen.CarverContextMixin",
-		"worldgen.ConfiguredCarverMixin"
+		"worldgen.ConfiguredCarverMixin",
+		"worldgen.OreFeatureMixin",
+		"worldgen.SurfaceBuilderMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

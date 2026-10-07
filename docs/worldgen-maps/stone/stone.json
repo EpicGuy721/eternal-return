@@ -1,0 +1,99 @@
+{
+  "seed": 173164,
+  "map": "y\u003d30, 640 x 640 blocks from -384, -1280",
+  "share_at_y30": {
+    "stone": "28.8%",
+    "andesite": "33.4%",
+    "diorite": "12.2%",
+    "granite": "7.6%",
+    "hardened_sandstone": "2.5%",
+    "red_sandstone": "3.4%",
+    "hardened_packed_ice": "1.7%",
+    "tuff": "0.0%",
+    "dirt": "1.9%",
+    "gravel": "1.5%",
+    "ores": "1.6%",
+    "cave (air)": "5.0%",
+    "water": "0.0%",
+    "lava": "0.0%",
+    "other": "0.4%"
+  },
+  "biome_columns_in_square": {
+    "minecraft:badlands": 20645,
+    "minecraft:beach": 16546,
+    "minecraft:birch_forest": 28049,
+    "minecraft:desert": 14990,
+    "minecraft:forest": 82621,
+    "minecraft:ocean": 129852,
+    "minecraft:river": 22719,
+    "minecraft:savanna": 6025,
+    "moderner_beta:early_release_extreme_hills": 71848,
+    "moderner_beta:early_release_ice_plains": 10113,
+    "moderner_beta:early_release_taiga": 6192
+  },
+  "checklist_spots": {
+    "stone": {
+      "biome": "moderner_beta:late_beta_plains",
+      "x": -760,
+      "z": -120,
+      "ground_y": 63,
+      "first_host_stone_y": 61,
+      "column_from_the_top": "grass_block from y\u003d63, dirt from y\u003d62, stone from y\u003d61, andesite from y\u003d59, stone from y\u003d53, andesite from y\u003d47, copper_ore from y\u003d46, stone from y\u003d45, andesite from y\u003d22, stone from y\u003d17, tuff from y\u003d-21, redstone_ore from y\u003d-22, tuff from y\u003d-24, stone from y\u003d-27, bedrock from y\u003d-61",
+      "drops": "cobblestone"
+    },
+    "andesite": {
+      "biome": "minecraft:forest",
+      "x": 264,
+      "z": -696,
+      "ground_y": 67,
+      "first_host_stone_y": 64,
+      "column_from_the_top": "grass_block from y\u003d67, dirt from y\u003d66, andesite from y\u003d64, cave_air from y\u003d28, andesite from y\u003d27, granite from y\u003d10, andesite from y\u003d4, diorite from y\u003d3, andesite from y\u003d-2, cave_air from y\u003d-45, andesite from y\u003d-50, tuff from y\u003d-59, bedrock from y\u003d-62",
+      "drops": "andesite"
+    },
+    "diorite": {
+      "biome": "minecraft:birch_forest",
+      "x": 200,
+      "z": -1208,
+      "ground_y": 79,
+      "first_host_stone_y": 69,
+      "column_from_the_top": "birch_leaves from y\u003d79, air from y\u003d76, grass_block from y\u003d72, dirt from y\u003d71, diorite from y\u003d69, coal_ore from y\u003d58, diorite from y\u003d56, granite from y\u003d50, diorite from y\u003d48, dirt from y\u003d25, diorite from y\u003d20, gravel from y\u003d15, diorite from y\u003d11, andesite from y\u003d7, diorite from y\u003d3, gravel from y\u003d-9, diorite from y\u003d-13, bedrock from y\u003d-61, diorite from y\u003d-62, bedrock from y\u003d-63",
+      "drops": "diorite"
+    },
+    "granite": {
+      "biome": "minecraft:jungle",
+      "x": -760,
+      "z": 136,
+      "ground_y": 69,
+      "first_host_stone_y": 64,
+      "column_from_the_top": "oak_leaves from y\u003d69, short_grass from y\u003d68, grass_block from y\u003d67, dirt from y\u003d66, granite from y\u003d64, dirt from y\u003d25, granite from y\u003d24, diorite from y\u003d19, granite from y\u003d14, gravel from y\u003d-6, cave_air from y\u003d-10, granite from y\u003d-13, tuff from y\u003d-26, granite from y\u003d-30, gold_ore from y\u003d-40, granite from y\u003d-42, bedrock from y\u003d-62",
+      "drops": "granite"
+    },
+    "hardened_sandstone": {
+      "biome": "minecraft:desert",
+      "x": 840,
+      "z": 776,
+      "ground_y": 62,
+      "first_host_stone_y": 41,
+      "column_from_the_top": "sand from y\u003d62, sandstone from y\u003d59, diorite from y\u003d48, hardened_sandstone from y\u003d41, granite from y\u003d33, hardened_sandstone from y\u003d26, andesite from y\u003d17, hardened_sandstone from y\u003d13, cave_air from y\u003d9, hardened_sandstone from y\u003d-2, tuff from y\u003d-29, hardened_sandstone from y\u003d-30, tuff from y\u003d-40, hardened_sandstone from y\u003d-42, redstone_ore from y\u003d-44, hardened_sandstone from y\u003d-46, bedrock from y\u003d-62",
+      "drops": "sandstone"
+    },
+    "red_sandstone": {
+      "biome": "minecraft:badlands",
+      "x": 776,
+      "z": -632,
+      "ground_y": 67,
+      "first_host_stone_y": 54,
+      "column_from_the_top": "red_sand from y\u003d67, orange_terracotta from y\u003d66, terracotta from y\u003d62, orange_terracotta from y\u003d61, yellow_terracotta from y\u003d60, white_terracotta from y\u003d58, light_gray_terracotta from y\u003d57, orange_terracotta from y\u003d56, terracotta from y\u003d55, red_sandstone from y\u003d54, dirt from y\u003d50, andesite from y\u003d46, red_sandstone from y\u003d40, dirt from y\u003d32, diorite from y\u003d27, red_sandstone from y\u003d22, andesite from y\u003d8",
+      "drops": "red_sandstone"
+    },
+    "hardened_packed_ice": {
+      "biome": "moderner_beta:early_release_ice_plains",
+      "x": -376,
+      "z": -376,
+      "ground_y": 89,
+      "first_host_stone_y": 68,
+      "column_from_the_top": "snow from y\u003d89, grass_block from y\u003d88, air from y\u003d87, grass_block from y\u003d74, dirt from y\u003d73, iron_ore from y\u003d70, hardened_packed_ice from y\u003d68, copper_ore from y\u003d54, hardened_packed_ice from y\u003d52, dirt from y\u003d44, hardened_packed_ice from y\u003d40, andesite from y\u003d39, granite from y\u003d33, hardened_packed_ice from y\u003d28, andesite from y\u003d23, hardened_packed_ice from y\u003d17, tuff from y\u003d-10, cave_air from y\u003d-12",
+      "drops": "packed_ice"
+    }
+  }
+}
