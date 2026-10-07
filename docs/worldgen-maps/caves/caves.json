@@ -1,14 +1,14 @@
 {
   "seed": 173164,
   "slice_area": "384 x 384 blocks from -1472, -1344",
-  "default_open_share": "4.65%",
-  "default_open_share_by_band": "-64:3.7% -48:5.2% -32:6.7% -16:6.2% 0:7.6% 16:5.5% 32:3.9% 48:1.8% 64:1.4% 80:0.8% 96:1.3% 112:0.3%",
+  "default_open_share": "5.14%",
+  "default_open_share_by_band": "-64:4.0% -48:6.1% -32:7.3% -16:6.9% 0:7.9% 16:6.5% 32:4.4% 48:2.2% 64:1.1% 80:0.8% 96:1.3% 112:0.3%",
   "old_caves_open_share": "4.55%",
   "old_caves_open_share_by_band": "-64:3.4% -48:4.8% -32:5.8% -16:5.6% 0:6.8% 16:5.0% 32:3.7% 48:2.9% 64:3.1% 80:2.9% 96:2.0% 112:0.3%",
   "gallery_forced_open_share": {
-    "spaghetti": "8.24% open",
+    "spaghetti": "7.55% open",
     "ravine": "9.03% open",
-    "large": "3.49% open",
+    "large": "5.05% open",
     "vertical": "4.53% open",
     "zigzag": "2.58% open",
     "ribbed": "5.61% open"
@@ -37,11 +37,11 @@
         "ground_y": 85
       },
       {
-        "x": -1308,
-        "y": 67,
-        "z": -1052,
+        "x": -1275,
+        "y": 61,
+        "z": -1050,
         "cave_air_within_2_blocks": true,
-        "ground_y": 102
+        "ground_y": 99
       }
     ],
     "ravine": [
@@ -129,32 +129,32 @@
     ],
     "zigzag": [
       {
-        "x": -1350,
-        "y": 11,
-        "z": -1152,
-        "cave_air_within_2_blocks": true,
-        "ground_y": 69
-      },
-      {
-        "x": -1210,
-        "y": 50,
-        "z": -1145,
-        "cave_air_within_2_blocks": true,
-        "ground_y": 78
-      },
-      {
-        "x": -1271,
-        "y": -50,
-        "z": -1224,
-        "cave_air_within_2_blocks": true,
-        "ground_y": 81
-      },
-      {
         "x": -1338,
         "y": 37,
         "z": -1196,
         "cave_air_within_2_blocks": true,
         "ground_y": 99
+      },
+      {
+        "x": -1229,
+        "y": 0,
+        "z": -1100,
+        "cave_air_within_2_blocks": true,
+        "ground_y": 65
+      },
+      {
+        "x": -1200,
+        "y": -37,
+        "z": -1162,
+        "cave_air_within_2_blocks": true,
+        "ground_y": 71
+      },
+      {
+        "x": -1266,
+        "y": 7,
+        "z": -1064,
+        "cave_air_within_2_blocks": true,
+        "ground_y": 81
       }
     ],
     "ribbed": [
@@ -173,18 +173,18 @@
         "ground_y": 92
       },
       {
-        "x": -1263,
-        "y": 5,
-        "z": -1190,
-        "cave_air_within_2_blocks": true,
-        "ground_y": 90
-      },
-      {
         "x": -1305,
         "y": 9,
         "z": -1211,
         "cave_air_within_2_blocks": true,
         "ground_y": 98
+      },
+      {
+        "x": -1245,
+        "y": -27,
+        "z": -1097,
+        "cave_air_within_2_blocks": true,
+        "ground_y": 77
       }
     ]
   },
@@ -259,10 +259,10 @@
     "x": 356,
     "z": 4290,
     "radius_drawn": 76.5,
-    "widest_open_run_east_west": 196,
-    "at_y": -34,
-    "open_from_y": -46,
-    "open_to_y": 1,
-    "stand_at": "356 -34 4290"
+    "widest_open_run_east_west": 189,
+    "at_y": -17,
+    "open_from_y": -35,
+    "open_to_y": 20,
+    "stand_at": "356 -17 4290"
   }
 }

@@ -107,11 +107,11 @@ The plan, status, terrain settings and maps are in [docs/worldgen.md](docs/world
 
 Pick **World Type: Eternal Return** on the create-world screen (it is also in Moderner Beta's own preset list, in its own category). Oceans and continents are laid out like Release 1.6.4, but the land rolls and climbs like Beta 1.7.3 almost everywhere: mostly rolling and hilly ground around y 65-90, hills to about y 115, mountains up to about y 180, with Beta-style cliffs and the odd overhang. Swamps stay flat and marshy, as in 1.6.4. Sea level is 63, bedrock is at -64, and everything below y=0 is ordinary stone with the usual ores: no deepslate layer and no lush caves, dripstone caves or deep dark. Biomes are Release 1.6.4's (with its hills and shores) plus birch forest, savanna, badlands and dark forest. There are no trial chambers. The Nether and the End are vanilla.
 
-**Caves.** Six types, about as much cave in all as Release 1.6.4 had (4.5% of the underground open):
+**Caves.** Six types, a little more cave in all than Release 1.6.4 (5.1% of the underground open, against 4.5%):
 
-- spaghetti: Release 1.6.4's caves, same sizes: clusters of winding tunnels that swell in the middle, with round rooms;
+- spaghetti: Release 1.6.4's caves, same sizes and forks: clusters of winding tunnels that swell in the middle and split in two, with round rooms;
 - ravines: tall, narrow canyons with jagged walls, some large, some open to the sky;
-- large caverns: rare big chambers with lumpy walls and tunnels leading out, most 20 to 35 blocks in radius and a few far bigger (up to 80; one of radius 76 is nearly 200 blocks across);
+- large caverns: rare big chambers with uneven walls, rolling floors and tunnels leading out, most 20 to 35 blocks in radius and a few far bigger (up to 80; one of radius 76 is about 190 blocks across);
 - vertical shafts (2.5 to 4.5 in radius) and steep tunnels joining one level to the next;
 - zig-zag tunnels of straight segments with sharp turns;
 - ribbed tunnels that bulge and pinch every few blocks.
@@ -293,10 +293,10 @@ World type (needs Moderner Beta): create a creative world with World Type "Etern
 
 Caves (same world; a new world, since chunks generated before this update keep their old caves). `/gamemode spectator`, `/effect give @s night_vision infinite`, then `/tp @s X Y Z` puts you inside each cave, all within about 100 blocks of each other:
 
-33. `-1283 -11 -1127`: spaghetti, 1.6.4-style tunnels that swell in the middle, with flat floors; follow them up and down.
+33. `-1283 -11 -1127`: spaghetti, 1.6.4-style tunnels that swell in the middle and fork; follow them up and down.
 34. `-1286 15 -1140`: a ravine, a narrow, very tall canyon with stepped, jagged walls.
-35. `-1200 -23 -1094`: a large cavern with uneven walls, a lumpy ceiling and tunnels leading off. For a giant one, `/tp @s 356 -34 4290`: about 196 blocks across and 47 tall, with lava pools on the floor (far from the others).
+35. `-1200 -23 -1094`: a large cavern with uneven walls, a rolling floor and tunnels leading off. For a giant one, `/tp @s 356 -17 4290`: about 190 blocks across and 55 tall (far from the others).
 36. `-1275 51 -1129`: the top of a vertical shaft; look down, then follow it to the tunnels at the bottom.
-37. `-1350 11 -1152`: a zig-zag tunnel: straight runs with sharp alternating turns.
+37. `-1338 37 -1196`: a zig-zag tunnel: straight runs with sharp alternating turns.
 38. `-1304 -3 -1146`: a ribbed tunnel that bulges and pinches every few blocks.
 39. Anywhere: no water pours into caves from oceans or rivers, caves at y -56 and below hold lava, and there are no trial chambers (`/locate structure minecraft:trial_chambers` finds none).

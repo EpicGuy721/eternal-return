@@ -65,28 +65,13 @@ public final class CaveBuilder {
 
 	/** Any shape (see ChunkCarver.carve). Ignored when out of reach. */
 	public void shape(double x, double y, double z, double rx, double ry, double rz, boolean withinCircle, ChunkCarver.Shape shape) {
-		if (this.inReach(x, z, Math.max(rx, rz)) && this.target.touches(x - rx - 1, x + rx + 1, z - rz - 1, z + rz + 1)) {
-			this.target.carve(x, y, z, rx, ry, rz, withinCircle, shape);
-		}
+		this.shape(x, y, z, rx, ry, rz, withinCircle, false, shape);
 	}
 
-	/**
-	 * A winding tunnel in the style of Release 1.6.4's caves, walked one block per step for length
-	 * steps: an ellipsoid of horizontal radius radius(step) and vertical radius radius * vScale at
-	 * every step, with a flat floor (Release 1.6.4 cut its tunnels at 0.7 of the radius below centre).
-	 * Stops early once out of reach.
-	 */
-	public void winding(Random random, Tunnel tunnel, int length, java.util.function.IntToDoubleFunction radius, double vScale,
-			float pitchKeep, float pitchNoise, float yawNoise) {
-		for (int i = 0; i < length; i++) {
-			double r = radius.applyAsDouble(i);
-			tunnel.step(1.0);
-			tunnel.wander(random, pitchKeep, 0.1F, pitchNoise, yawNoise);
-			tunnel.keepWithin(this, r * vScale);
-			if (!this.inReach(tunnel.x, tunnel.z, r + 1)) {
-				return;
-			}
-			this.ellipsoid(tunnel.x, tunnel.y, tunnel.z, r, r * vScale, r, -0.7);
+	/** Any shape, with the per-block water rule when perBlockFluids is set (for very big shapes). */
+	public void shape(double x, double y, double z, double rx, double ry, double rz, boolean withinCircle, boolean perBlockFluids, ChunkCarver.Shape shape) {
+		if (this.inReach(x, z, Math.max(rx, rz)) && this.target.touches(x - rx - 1, x + rx + 1, z - rz - 1, z + rz + 1)) {
+			this.target.carve(x, y, z, rx, ry, rz, withinCircle, perBlockFluids, shape);
 		}
 	}
 

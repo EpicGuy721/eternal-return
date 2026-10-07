@@ -195,16 +195,16 @@ Weight is caves starting per 100 chunks; spaghetti counts cave systems. Start y 
 
 | Type | Looks like | Weight | Start y | Radius |
 |---|---|---|---|---|
-| `spaghetti` | Release 1.6.4's caves, with its sizes and maths. A system is one chunk holding a cluster of starts (1.6.4's rand(rand(rand(40) + 1) + 1), at least one), each at its own spot and depth, deeper ones more likely. One start in four opens a round, flattened room (radius 2.5 to 8.5, half as tall) with one to four tunnels out of it. A tunnel runs 85 to 112 blocks, 1.5 blocks in radius at its ends and swelling to 1.5 to 4.5 in the middle; one in ten is widened up to four times. Flat floors, rough walls, one tunnel in six keeps its slope for longer. The one change from 1.6.4: one tunnel in five sends off a thinner side branch and carries on (1.6.4 split most tunnels in two). | 5 | -58 to 85 | 1.5 to 4.5 (radius at the ends, and at the widest for an ordinary tunnel) |
+| `spaghetti` | Release 1.6.4's caves, with its sizes and maths. A system is one chunk holding a cluster of starts (1.6.4's rand(rand(rand(40) + 1) + 1), at least one), each at its own spot and depth, deeper ones more likely. One start in four opens a round, flattened room (radius 2.5 to 8.5, half as tall) with one to four tunnels out of it. A tunnel runs 85 to 112 blocks, 1.5 blocks in radius at its ends and swelling to 1.5 to 4.5 in the middle; one in ten is widened up to four times. Flat floors, rough walls, one tunnel in six keeps its slope for longer. Every tunnel wider than 1 (most of them) forks somewhere in its middle half into two thinner tunnels heading left and right, as in 1.6.4: that, with many starts per system, is what makes the caves a maze. | 6.7 | -58 to 85 | 1.5 to 4.5 (radius at the ends, and at the widest for an ordinary tunnel) |
 | `ravine` | Release 1.6.4's ravines: long, narrow canyons three to four times as tall as they are wide, with vertical, jagged walls (the width changes every one to three blocks of height). One in four is a large ravine, wider, taller and grown both ways from its start. Shallow ones open to the surface. | 2 | -30 to 45 | 2.5 to 4.5 (half-width; large ×1.5) |
-| `large` | A big chamber: a flattened, stretched main body with lobes of different sizes and heights around it, so the walls are uneven and the ceiling lumpy, a mostly flat floor, and tunnels leading out. The radius follows a bell curve with a long tail (`typicalRadius` × e^(0.35 × a normal random), kept within the range): about a quarter are under 20, most are 20 to 35, one in seven is 35 to 50, about one in 45 passes 50 and one in 250 passes 65. Big caverns get more lobes and exits and grow less in height than in width: one of radius 76 came out 196 blocks across and 47 tall. The deepest have lava pools on the floor. | 1 | -48 to 15 | 12 to 80, typical 25 (main chamber) |
+| `large` | A big chamber: a stretched main body with lobes of different sizes and heights around it, so the walls are uneven, and three or more forking tunnels leading out. Floor and ceiling follow smooth noise (shapes about 24 and 12 blocks across): the floor rises into mounds and sinks into hollows, the ceiling bulges a little, so nothing is flat. The radius follows a bell curve with a long tail (`typicalRadius` × e^(0.35 × a normal random), kept within the range): about a quarter are under 20, most are 20 to 35, one in seven is 35 to 50, about one in 45 passes 50 and one in 250 passes 65. Big caverns get more lobes and exits and grow less in height than in width: one of radius 76 came out about 190 blocks across and 55 tall. The deepest have lava pools in their hollows. | 1 | -48 to 15 | 12 to 80, typical 25 (main chamber) |
 | `vertical` | Steep connections between levels. Three in five are shafts dropping 20 to 60 blocks with a slight drift and a bulging wall; the rest are steep tunnels at 50 to 75 degrees. Short side tunnels leave the top and bottom so they join the caves around them. | 8 | -20 to 60 (the top) | 2.5 to 4.5 |
-| `zigzag` | Constant-width tunnels made of equal straight segments (6 to 14 blocks) turning the same sharp angle (70 to 110 degrees) left and right in turn, each segment with its own gentle slope. | 7 | -50 to 50 | 1.5 to 2.5 |
-| `ribbed` | Gently curving tunnels whose width pulses 35 to 55 percent above and below the base every 5 to 9 blocks: wide bulges between rings of rock. | 7 | -50 to 50 | 2.0 to 3.5 (base) |
+| `zigzag` | Constant-width tunnels made of equal straight segments (6 to 14 blocks) turning the same sharp angle (70 to 110 degrees) left and right in turn, each segment with its own gentle slope. | 5 | -50 to 50 | 1.5 to 2.5 |
+| `ribbed` | Gently curving tunnels whose width pulses 35 to 55 percent above and below the base every 5 to 9 blocks: wide bulges between rings of rock. | 5 | -50 to 50 | 2.0 to 3.5 (base) |
 
 The settings that matter most for how much cave there is: `worldgen.caves.density` (multiplies every weight), the spaghetti weight (most of the cave volume) and its radius range, then the large-cave weight and `typicalRadius` (rare but big).
 
-The radius ranges and the meaning of the spaghetti weight changed after the first playtest (thicker 1.6.4 tunnels, bell-curve caverns, thicker shafts). Config files written before that are reset to the new type defaults once, through `worldgen.caves.typesVersion`.
+The type settings changed after playtests (thicker 1.6.4 tunnels, bell-curve caverns, thicker shafts, then 1.6.4's forks and frequency). Config files written for older defaults are reset to the new type defaults once, through `worldgen.caves.typesVersion`.
 
 ### Density
 
@@ -212,18 +212,18 @@ Share of the underground (everything below the ground surface) that is open, ove
 
 | Depth | New caves | Old caves, same terrain | Release 1.6.4 world |
 |---|---|---|---|
-| y -64 to -49 | 3.7% | 3.4% | 3.2% |
-| y -48 to -33 | 5.2% | 4.8% | 5.1% |
-| y -32 to -17 | 6.7% | 5.8% | 7.4% |
-| y -16 to -1 | 6.2% | 5.6% | 6.2% |
-| y 0 to 15 | 7.6% | 6.8% | 5.4% |
-| y 16 to 31 | 5.5% | 5.0% | 4.1% |
-| y 32 to 47 | 3.9% | 3.7% | 3.4% |
-| y 48 to 63 | 1.8% | 2.9% | 1.1% |
-| y 64 to 79 | 1.4% | 3.1% | 0.2% |
-| **All** | **4.65%** | **4.55%** | **4.53%** |
+| y -64 to -49 | 4.0% | 3.4% | 3.2% |
+| y -48 to -33 | 6.1% | 4.8% | 5.1% |
+| y -32 to -17 | 7.3% | 5.8% | 7.4% |
+| y -16 to -1 | 6.9% | 5.6% | 6.2% |
+| y 0 to 15 | 7.9% | 6.8% | 5.4% |
+| y 16 to 31 | 6.5% | 5.0% | 4.1% |
+| y 32 to 47 | 4.4% | 3.7% | 3.4% |
+| y 48 to 63 | 2.2% | 2.9% | 1.1% |
+| y 64 to 79 | 1.1% | 3.1% | 0.2% |
+| **All** | **5.14%** | **4.55%** | **4.53%** |
 
-"Old caves" are Moderner Beta's 1.6.4-style caves on the identical terrain (the twin dimension with the engine off); the Release 1.6.4 world is Moderner Beta's own preset (its terrain is lower, hence the empty top rows). The new caves carry about the same total: a little more below y 32 (1.6.4's starts favour low ground), a little less under hills and mountains.
+"Old caves" are Moderner Beta's 1.6.4-style caves on the identical terrain (the twin dimension with the engine off); the Release 1.6.4 world is Moderner Beta's own preset (its terrain is lower, hence the empty top rows). The new caves carry a little more in total (about a ninth more), mostly from 1.6.4's forking spaghetti at full frequency; they are a little emptier under hills and mountains.
 
 ### Timing
 
@@ -231,11 +231,11 @@ Chunk generation up to the carving step, one chunk at a time, same squares with 
 
 | | ms per chunk |
 |---|---|
-| No caves | 64.0 |
-| New caves | 69.3 |
-| Old caves (Moderner Beta's) | 70.3 |
+| No caves | 63.8 |
+| New caves | 70.4 |
+| Old caves (Moderner Beta's) | 69.0 |
 
-Time spent inside the cave carver: 5.9 ms per chunk (each chunk simulates the caves of the 289 chunks around it); two other runs gave 5.7 ms. Totals move by a few ms between runs with the machine's load. The new caves cost about the same as the old ones.
+Time spent inside the cave carver: 6.6 ms per chunk (each chunk simulates the caves of the 289 chunks around it); earlier runs gave 5.7 to 7.2 ms. Totals move by a few ms between runs with the machine's load. The new caves cost about the same as the old ones.
 
 ### Dev options
 

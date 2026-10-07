@@ -20,7 +20,7 @@ public final class RibbedCave implements CaveType {
 
 	@Override
 	public CaveTypeSettings defaults() {
-		return new CaveTypeSettings(7.0, -50, 50, 2.0, 3.5);
+		return new CaveTypeSettings(5.0, -50, 50, 2.0, 3.5);
 	}
 
 	@Override

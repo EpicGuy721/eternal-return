@@ -19,10 +19,11 @@ import net.minecraft.util.math.random.Xoroshiro128PlusPlusRandom;
  * <li>a tunnel runs 85 to 112 blocks, swelling from minRadius at its ends to minRadius + width in the
  * middle; width is 0 to (maxRadius - minRadius), weighted toward the middle, and one tunnel in ten is
  * widened up to four times;</li>
- * <li>flat floors, a quarter of the steps skipped (rough walls), one tunnel in six keeping its slope.</li>
+ * <li>flat floors, a quarter of the steps skipped (rough walls), one tunnel in six keeping its slope;</li>
+ * <li>every tunnel wider than 1 (most of them) splits, somewhere in its middle half, into two thinner
+ * tunnels heading off left and right, and ends there: the forks that make 1.6.4's caves a maze.</li>
  * </ul>
- * One change: 1.6.4 split most tunnels into two thinner ones halfway; here one tunnel in five sends
- * off a thinner side branch and carries on. Weight counts cave systems (1.6.4 had about 6.7 per 100 chunks).
+ * Weight counts cave systems (1.6.4 had about 6.7 per 100 chunks).
  */
 public final class SpaghettiCave implements CaveType {
 	@Override
@@ -32,7 +33,7 @@ public final class SpaghettiCave implements CaveType {
 
 	@Override
 	public CaveTypeSettings defaults() {
-		return new CaveTypeSettings(5.0, -58, 85, 1.5, 4.5);
+		return new CaveTypeSettings(6.7, -58, 85, 1.5, 4.5);
 	}
 
 	@Override
@@ -97,7 +98,8 @@ public final class SpaghettiCave implements CaveType {
 	public static void tunnel(CaveBuilder builder, Random random, Tunnel tunnel, double endRadius, double width, int length, boolean mayBranch) {
 		boolean steep = random.nextInt(6) == 0;
 		int branchAt = random.nextInt(Math.max(1, length / 2)) + length / 4;
-		boolean branches = mayBranch && width > 1.0 && random.nextInt(5) == 0;
+		// Release 1.6.4: every tunnel wider than 1 forks.
+		boolean branches = mayBranch && width > 1.0;
 		long branchSeed = random.nextLong();
 		walk(builder, random, tunnel, endRadius, width, 0, length, steep, branches ? branchAt : -1, branchSeed);
 	}
@@ -113,12 +115,18 @@ public final class SpaghettiCave implements CaveType {
 				return;
 			}
 			if (i == branchAt) {
-				// A thinner side tunnel (1.6.4's branch width) leaves at a right angle with its own random numbers.
+				// The fork: two thinner tunnels (1.6.4's branch width, 0.5 to 1) leave at right angles, left
+				// and right, each with its own random numbers, and this tunnel ends.
 				Random branchRandom = new Xoroshiro128PlusPlusRandom(branchSeed);
-				float side = branchRandom.nextBoolean() ? 1.0F : -1.0F;
-				double branchWidth = branchRandom.nextFloat() * 0.5F + 0.5F;
-				walk(builder, branchRandom, tunnel.copy(tunnel.yaw + side * CaveBuilder.TAU / 4, tunnel.pitch / 3.0F), endRadius, branchWidth,
-						i, length, steep, -1, 0L);
+				long leftSeed = branchRandom.nextLong();
+				long rightSeed = branchRandom.nextLong();
+				for (int side = -1; side <= 1; side += 2) {
+					Random sideRandom = new Xoroshiro128PlusPlusRandom(side < 0 ? leftSeed : rightSeed);
+					double branchWidth = sideRandom.nextFloat() * 0.5F + 0.5F;
+					walk(builder, sideRandom, tunnel.copy(tunnel.yaw + side * CaveBuilder.TAU / 4, tunnel.pitch / 3.0F), endRadius, branchWidth,
+							i, length, steep, -1, 0L);
+				}
+				return;
 			}
 			// Release 1.6.4 skipped a quarter of its steps, which roughens the walls.
 			if (random.nextInt(4) == 0) {

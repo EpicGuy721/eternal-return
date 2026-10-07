@@ -21,7 +21,7 @@ public final class ZigZagCave implements CaveType {
 
 	@Override
 	public CaveTypeSettings defaults() {
-		return new CaveTypeSettings(7.0, -50, 50, 1.5, 2.5);
+		return new CaveTypeSettings(5.0, -50, 50, 1.5, 2.5);
 	}
 
 	@Override

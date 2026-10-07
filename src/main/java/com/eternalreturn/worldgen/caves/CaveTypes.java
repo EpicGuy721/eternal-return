@@ -18,8 +18,9 @@ public final class CaveTypes {
 	/**
 	 * Bump when a type's settings change meaning, so config files written for the old defaults are
 	 * reset once (see CaveTweaks.typesVersion). 2: 1.6.4 spaghetti systems, bell-curve caverns.
+	 * 3: spaghetti at 1.6.4's frequency with its forks.
 	 */
-	public static final int SETTINGS_VERSION = 2;
+	public static final int SETTINGS_VERSION = 3;
 	public static final List<CaveType> ALL = List.of(
 			new SpaghettiCave(),
 			new RavineCave(),
