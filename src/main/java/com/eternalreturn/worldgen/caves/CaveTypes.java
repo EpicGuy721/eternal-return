@@ -5,6 +5,8 @@ import com.eternalreturn.worldgen.caves.types.LargeCave;
 import com.eternalreturn.worldgen.caves.types.RavineCave;
 import com.eternalreturn.worldgen.caves.types.RibbedCave;
 import com.eternalreturn.worldgen.caves.types.SpaghettiCave;
+import com.eternalreturn.worldgen.caves.types.SpiralCave;
+import com.eternalreturn.worldgen.caves.types.ToroidalCave;
 import com.eternalreturn.worldgen.caves.types.VerticalCave;
 import com.eternalreturn.worldgen.caves.types.ZigZagCave;
 import org.jetbrains.annotations.Nullable;
@@ -18,16 +20,18 @@ public final class CaveTypes {
 	/**
 	 * Bump when a type's settings change meaning, so config files written for the old defaults are
 	 * reset once (see CaveTweaks.typesVersion). 2: 1.6.4 spaghetti systems, bell-curve caverns.
-	 * 3: spaghetti at 1.6.4's frequency with its forks.
+	 * 3: spaghetti at 1.6.4's frequency with its forks. 4: spiral and toroidal room added.
 	 */
-	public static final int SETTINGS_VERSION = 3;
+	public static final int SETTINGS_VERSION = 4;
 	public static final List<CaveType> ALL = List.of(
 			new SpaghettiCave(),
 			new RavineCave(),
 			new LargeCave(),
 			new VerticalCave(),
 			new ZigZagCave(),
-			new RibbedCave());
+			new RibbedCave(),
+			new SpiralCave(),
+			new ToroidalCave());
 
 	private CaveTypes() {
 	}

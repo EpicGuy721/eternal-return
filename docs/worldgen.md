@@ -16,19 +16,19 @@ Inspired by TheMasterCaver's World. Many cave types:
 
 - spaghetti
 - ravine
-- maze
+- ~~maze~~ (dropped, not planned)
 - zig-zag
 - vertical
 - ribbed
-- random / combination
+- ~~random / combination~~ (dropped, not planned)
 - large
-- circular room
+- ~~circular room~~ (dropped, not planned)
 - spiral
 - toroidal room
 
 Cave stone depends on the biome (sandstone caves in deserts; granite, diorite, andesite and others elsewhere), and each stone has its own ore variants.
 
-Built so far: spaghetti, ravine, large, vertical, zig-zag and ribbed (see The cave engine below).
+Built: spaghetti, ravine, large, vertical, zig-zag, ribbed, spiral and toroidal room (see The cave engine below). Maze, combination and circular-room caves were dropped from the plan.
 
 No modern cave biomes (lush caves, dripstone caves, deep dark) and no deepslate. The full modern height (-64 to 320) is used.
 
@@ -54,7 +54,8 @@ The preset is all data. Without Moderner Beta installed, the world type and its 
 - Phase 1 (investigation): done. Findings below.
 - Phase 2 (preset, fish tags, terrain): done. Biome list, no cave biomes, no deepslate, full -64 to 320 height, terrain tuned in two passes (the second after playtesting).
 - Phase 3, part 1 (cave engine): done. The shared engine, debug tools and six tunnel types; the old caves are off in Eternal Return worlds; trial chambers removed there. Ores are still vanilla's.
-- Next: maze caves, combination caves and the room types (phase 3, part 2), then biome stone and ore variants.
+- Phase 3, part 2: done. Spiral and toroidal-room caves; maze, combination and circular-room caves dropped.
+- Next: biome stone and ore variants.
 
 ## The Eternal Return preset
 
@@ -162,9 +163,9 @@ Options: `-PworldmapOut=<dir>` writes to `<dir>/<preset>/` instead; `-PworldmapC
 
 `python tools/worldgen/compare_maps.py` rebuilds `overview.png` (height and land maps with the headline numbers) and `slices_compared.png` (the three side views). `python tools/worldgen/variants.py <variants.json>` renders a list of knob variants into `build/worldgen-variants/<name>/eternal_return/`, prints the stats for each, then restores the shipped preset; the `HALF`, `MAP_CENTRE`, `MAP_CLOSEUP` and `MAP_SLICE_Z` environment variables pass the options above.
 
-## The cave engine (phase 3, part 1)
+## The cave engine (phase 3)
 
-Six tunnel-style cave types, carved only in Eternal Return worlds. Maze caves, combination caves and the room types come next, then biome stone and ore variants. Code: `com.eternalreturn.worldgen.caves`.
+Eight cave types, carved only in Eternal Return worlds. Biome stone and ore variants come next. Code: `com.eternalreturn.worldgen.caves`.
 
 ### Which worlds, and the old caves
 
@@ -201,8 +202,10 @@ Weight is caves starting per 100 chunks; spaghetti counts cave systems. Start y 
 | `vertical` | Steep connections between levels. Three in five are shafts dropping 20 to 60 blocks with a slight drift and a bulging wall; the rest are steep tunnels at 50 to 75 degrees. Short side tunnels leave the top and bottom so they join the caves around them. | 8 | -20 to 60 (the top) | 2.5 to 4.5 |
 | `zigzag` | Constant-width tunnels made of equal straight segments (6 to 14 blocks) turning the same sharp angle (70 to 110 degrees) left and right in turn, each segment with its own gentle slope. | 5 | -50 to 50 | 1.5 to 2.5 |
 | `ribbed` | Gently curving tunnels whose width pulses 35 to 55 percent above and below the base every 5 to 9 blocks: wide bulges between rings of rock. | 5 | -50 to 50 | 2.0 to 3.5 (base) |
+| `spiral` | A helical tunnel winding two to four turns, clockwise or anticlockwise, around a vertical axis while dropping 30 to 70 blocks at a steady rate, with a solid column of rock in the middle. Each turn drops at least enough to leave rock between the coils. A forking tunnel leaves each end, so it joins the caves around it. | 0.6 | -20 to 60 (the top) | tube 2.0 to 3.0; size (coil radius, axis to the middle of the tube) 7 to 11, always at least the tube + 4 |
+| `toroidal` | A donut-shaped room lying flat (one in four tilted 15 to 35 degrees) around a pillar of rock standing in the hole from floor to ceiling. The ring's cross-section is a little wider than tall, with a flat floor; two or three forking tunnels lead out of the outer wall. | 0.5 | -45 to 30 | tube 3.5 to 5.5 (half the ring's width); size (ring radius, centre to the middle of the ring) 9 to 15, always at least the tube + 4 |
 
-The settings that matter most for how much cave there is: `worldgen.caves.density` (multiplies every weight), the spaghetti weight (most of the cave volume) and its radius range, then the large-cave weight and `typicalRadius` (rare but big).
+The settings that matter most for how much cave there is: `worldgen.caves.density` (multiplies every weight), the spaghetti weight (most of the cave volume) and its radius range, then the large-cave weight and `typicalRadius` (rare but big). Spirals and toroidal rooms are the rarest types (one per 170 and 200 chunks); their weights decide how often you find one, and `minSize`/`maxSize` their overall size.
 
 The type settings changed after playtests (thicker 1.6.4 tunnels, bell-curve caverns, thicker shafts, then 1.6.4's forks and frequency). Config files written for older defaults are reset to the new type defaults once, through `worldgen.caves.typesVersion`.
 
@@ -213,17 +216,17 @@ Share of the underground (everything below the ground surface) that is open, ove
 | Depth | New caves | Old caves, same terrain | Release 1.6.4 world |
 |---|---|---|---|
 | y -64 to -49 | 4.0% | 3.4% | 3.2% |
-| y -48 to -33 | 6.1% | 4.8% | 5.1% |
-| y -32 to -17 | 7.3% | 5.8% | 7.4% |
-| y -16 to -1 | 6.9% | 5.6% | 6.2% |
-| y 0 to 15 | 7.9% | 6.8% | 5.4% |
-| y 16 to 31 | 6.5% | 5.0% | 4.1% |
-| y 32 to 47 | 4.4% | 3.7% | 3.4% |
+| y -48 to -33 | 6.4% | 4.8% | 5.1% |
+| y -32 to -17 | 7.4% | 5.8% | 7.4% |
+| y -16 to -1 | 7.0% | 5.6% | 6.2% |
+| y 0 to 15 | 8.0% | 6.8% | 5.4% |
+| y 16 to 31 | 6.6% | 5.0% | 4.1% |
+| y 32 to 47 | 4.6% | 3.7% | 3.4% |
 | y 48 to 63 | 2.2% | 2.9% | 1.1% |
 | y 64 to 79 | 1.1% | 3.1% | 0.2% |
-| **All** | **5.14%** | **4.55%** | **4.53%** |
+| **All** | **5.27%** | **4.55%** | **4.53%** |
 
-"Old caves" are Moderner Beta's 1.6.4-style caves on the identical terrain (the twin dimension with the engine off); the Release 1.6.4 world is Moderner Beta's own preset (its terrain is lower, hence the empty top rows). The new caves carry a little more in total (about a ninth more), mostly from 1.6.4's forking spaghetti at full frequency; they are a little emptier under hills and mountains.
+"Old caves" are Moderner Beta's 1.6.4-style caves on the identical terrain (the twin dimension with the engine off); the Release 1.6.4 world is Moderner Beta's own preset (its terrain is lower, hence the empty top rows). The new caves carry a little more in total (about a sixth more), mostly from 1.6.4's forking spaghetti at full frequency; they are a little emptier under hills and mountains. The spirals and toroidal rooms add 0.13 points (5.14% without them).
 
 ### Timing
 
@@ -231,15 +234,15 @@ Chunk generation up to the carving step, one chunk at a time, same squares with 
 
 | | ms per chunk |
 |---|---|
-| No caves | 63.8 |
-| New caves | 70.4 |
-| Old caves (Moderner Beta's) | 69.0 |
+| No caves | 63.8 to 69.1 |
+| New caves | 68.2 to 71.0 |
+| Old caves (Moderner Beta's) | 68.1 to 72.4 |
 
-Time spent inside the cave carver: 6.6 ms per chunk (each chunk simulates the caves of the 289 chunks around it); earlier runs gave 5.7 to 7.2 ms. Totals move by a few ms between runs with the machine's load. The new caves cost about the same as the old ones.
+(Ranges over the last three runs; the totals move by several ms with the machine's load.) Time spent inside the cave carver: 6.9 to 7.2 ms per chunk with all eight types (each chunk simulates the caves of the 289 chunks around it); 5.7 to 7.2 ms with the first six in earlier runs. The spiral and toroidal room add nothing measurable: on identical terrain (overworld and twin, alternating which goes first, 432 chunks each) the carver took 10.35 and 10.44 ms per chunk with them, 10.50 and 10.25 without, in two runs. The new caves cost about the same as the old ones. Totals move by a few ms between runs with the machine's load. The new caves cost about the same as the old ones.
 
 ### Dev options
 
-- `debugForceCaveType`: a type id, and only that type is carved, at a high rate (spaghetti 25 systems per 100 chunks; vertical, zigzag and ribbed 60; ravine 10; large 4).
+- `debugForceCaveType`: a type id, and only that type is carved, at a high rate (spaghetti 25 systems per 100 chunks; vertical, zigzag and ribbed 60; spiral 20; toroidal 15; ravine 10; large 4).
 - `debugLogCaveStarts`: appends `type,x,y,z` for every cave start to `eternalreturn-cave-starts.csv` in the game folder as chunks generate. Teleport to any line to stand inside that cave.
 
 ### Cave maps
@@ -248,6 +251,7 @@ Time spent inside the cave carver: 6.6 ms per chunk (each chunk simulates the ca
 
 - `slices.png`: the land square cut at y -50, -20, 20 and 50, new caves next to the old ones on the same terrain (black = cave). `slice_y*.png` are the new-cave slices on their own.
 - `gallery.png`: each type forced in its own 128 x 128 block square, seen from above (colour = height of the highest cave block) and from the side.
+- `shapes.png`: one spiral and one toroidal room from the gallery squares, each drawn the way its shape shows: the spiral from the side (cave counted through it: the tube swings left and right as it drops, the column stands in the middle) and from above (coloured by height); the room cut flat through its middle (the ring around the pillar) and cut upright through its centre.
 - `giant_cavern.png`: a side view through the biggest cavern on land within 5,000 blocks of 0,0. The map tool finds it without generating the area: it replays the seed Moderner Beta hands the cave carver for each chunk and the cavern's radius draw, checks the replay against the caverns the carver actually logged, then generates that one cavern.
 - `caves.json`: the density numbers, real cave starts in the land square (used for the README checklist), the cavern radius counts and biggest caverns, and the giant cavern's measured size.
 
@@ -259,6 +263,7 @@ Removed in Eternal Return worlds only: the preset lists `minecraft:trial_chamber
 
 - `runGametestCaves` (Eternal Return with a twin dimension that has the same generator):
   - per type, forced, in a square of its own: caves exist; the open share is in a sane range; no gaps in the bedrock floor, no cave air at or below the lava level, no lava above it, nothing within 8 blocks of the top; no cave block touches an ocean, river or lake; cave borders line up across chunk edges as well as inside chunks; the same chunk generated first in one dimension and last in the other is identical; every logged start is of that type and in its depth range;
+  - shape checks for the two newest types, on every spiral and room lying wholly inside its square (found by replaying the seed, `CaveReplay`): each spiral is open along its planned helix (which drops at a steady rate) and the 3 x 3 column on its axis is solid; each toroidal room is open all round the middle of its ring and its hole (checked in the ring's own plane, so tilted rooms count) is solid rock;
   - every block of `eternalreturn:carvable` is carved, bedrock and obsidian aren't, a shape beside water is skipped, lava at and below the lava level;
   - default density and the timing above.
   - "Cave" in these checks is any air below the ground (the generator's own height for the column), or lava at the lava level. The carvers write cave air, but a 16 x 16 x 16 chunk section left with nothing but cave air reads back as plain air, which a giant cavern can do.

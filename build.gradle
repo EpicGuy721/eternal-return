@@ -69,7 +69,7 @@ gameTestRun("gametestEternalReturnOldCaves", "Game Test (Eternal Return, old cav
 // The world has a twin dimension with the same generator, for the generated-first-or-last check.
 gameTestRun("gametestCaves", "Game Test (Eternal Return caves)", "caves",
 		["gametest.preset": "eternalreturn_test:eternal_return_twin", "gametest.seed": worldmapSeed, "gametest.caves.logStarts": "true",
-		 "gametest.batches": "caves,caves_spaghetti,caves_ravine,caves_large,caves_vertical,caves_zigzag,caves_ribbed"])
+		 "gametest.batches": "caves,caves_spaghetti,caves_ravine,caves_large,caves_vertical,caves_zigzag,caves_ribbed,caves_spiral,caves_toroidal"])
 
 // The headless map tool: renders maps of a preset at a fixed seed into docs/worldgen-maps/<name>.
 // -PworldmapHalf=1024 renders a smaller area (faster); -PworldmapOut=<dir> writes to <dir>/<name> instead.

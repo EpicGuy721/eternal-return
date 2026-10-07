@@ -113,6 +113,7 @@ public class CaveMapTests implements FabricGameTest {
 		// ---- gallery: each type forced in its own square
 		List<BufferedImage> tiles = new ArrayList<>();
 		Map<String, Object> galleryStats = new LinkedHashMap<>();
+		Map<String, CaveRegion> galleryRegions = new LinkedHashMap<>();
 		String previous = caves.debugForceCaveType;
 		try {
 			for (int i = 0; i < CaveTypes.ALL.size(); i++) {
@@ -120,12 +121,14 @@ public class CaveMapTests implements FabricGameTest {
 				caves.debugForceCaveType = type.id();
 				CaveRegion region = new CaveRegion(world, 5000 + i * 200, 5000, GALLERY_CHUNKS, null).measure(lavaY, 64);
 				tiles.add(galleryTile(region, type.id(), lavaY));
+				galleryRegions.put(type.id(), region);
 				galleryStats.put(type.id(), String.format("%.2f%% open", region.openFraction() * 100));
 			}
 		} finally {
 			caves.debugForceCaveType = previous;
 		}
 		ImageIO.write(gallerySheet(tiles), "png", out.resolve("gallery.png").toFile());
+		Map<String, Object> shapes = shapeViews(world, galleryRegions.get("spiral"), galleryRegions.get("toroidal"), out, lavaY);
 
 		// ---- the biggest caverns over a wide area, found from the seed; the best one on land is generated and drawn
 		List<Map<String, Object>> giants = giantCaverns(world, newCaves);
@@ -141,6 +144,7 @@ public class CaveMapTests implements FabricGameTest {
 			stats.put("old_caves_open_share_by_band", oldCaves.bandSummary());
 		}
 		stats.put("gallery_forced_open_share", galleryStats);
+		stats.put("shape_views", shapes);
 		stats.put("examples_near_spawn", examples);
 		stats.put("biggest_caverns_within_5000_blocks", giants);
 		stats.put("giant_cavern_checked", giant);
@@ -149,6 +153,141 @@ public class CaveMapTests implements FabricGameTest {
 		}
 		EternalReturn.LOGGER.info("[cavemap] wrote {} | default open {} | examples {}", out, stats.get("default_open_share"), examples);
 		ctx.complete();
+	}
+
+	private static final int SHAPE_SCALE = 4;
+
+	/**
+	 * shapes.png: one spiral and one toroidal room from the forced gallery squares, found by replaying
+	 * the seed (CaveReplay), each drawn the way its shape shows best. The spiral: from the side, cave
+	 * counted through its width (the helix shows as a ribbon swinging left and right while it drops,
+	 * the solid column down the middle), and from above, coloured by height. The room: cut flat through
+	 * its middle (the ring around the pillar) and cut upright through its centre (the pillar between
+	 * the two halves of the ring).
+	 */
+	private static Map<String, Object> shapeViews(ServerWorld world, CaveRegion spirals, CaveRegion rooms, Path out, int lavaY) throws IOException {
+		Map<String, Object> result = new LinkedHashMap<>();
+		List<BufferedImage[]> rows = new ArrayList<>();
+		List<String> captions = new ArrayList<>();
+		if (spirals != null) {
+			CaveTypeSettings settings = EternalReturnConfig.get().worldgen.caves.types.get("spiral");
+			for (CaveReplay.Start start : CaveReplay.starts(world, "spiral", CaveTypes.byId("spiral").forcedWeight(), settings,
+					spirals.chunkX0, spirals.chunkZ0, spirals.size)) {
+				com.eternalreturn.worldgen.caves.types.SpiralCave.Plan plan = com.eternalreturn.worldgen.caves.types.SpiralCave.plan(start.random(), settings,
+						start.x() + 0.5, start.y() + 0.5, start.z() + 0.5, CaveReplay.minCentreY(world), CaveReplay.maxCentreY(world));
+				int reach = (int) Math.ceil(plan.coilRadius() + plan.tubeRadius() + 3);
+				if (!insideSquare(spirals, plan.centreX(), plan.centreZ(), reach)) {
+					continue;
+				}
+				int cx = (int) Math.floor(plan.centreX());
+				int cz = (int) Math.floor(plan.centreZ());
+				int top = (int) Math.ceil(plan.topY() + plan.tubeRadius() + 4);
+				int bottom = (int) Math.floor(plan.topY() - plan.drop() - plan.tubeRadius() - 4);
+				BufferedImage side = new BufferedImage(2 * reach + 1, top - bottom + 1, BufferedImage.TYPE_INT_RGB);
+				for (int dx = -reach; dx <= reach; dx++) {
+					for (int y = bottom; y <= top; y++) {
+						int count = 0;
+						for (int dz = -reach; dz <= reach; dz++) {
+							if (spirals.isCave(cx + dx, y, cz + dz, lavaY)) {
+								count++;
+							}
+						}
+						int v = count == 0 ? 0xA8 : Math.max(20, 150 - count * 12);
+						side.setRGB(dx + reach, top - y, count == 0 ? 0xA8A8A8 : (v << 16) | (v << 8) | v);
+					}
+				}
+				BufferedImage above = new BufferedImage(2 * reach + 1, 2 * reach + 1, BufferedImage.TYPE_INT_RGB);
+				for (int dx = -reach; dx <= reach; dx++) {
+					for (int dz = -reach; dz <= reach; dz++) {
+						int highest = Integer.MIN_VALUE;
+						for (int y = bottom; y <= top; y++) {
+							if (spirals.isCave(cx + dx, y, cz + dz, lavaY)) {
+								highest = y;
+							}
+						}
+						int rgb = 0xA8A8A8;
+						if (highest != Integer.MIN_VALUE) {
+							float t = Math.max(0, Math.min(1, (highest - bottom) / (float) (top - bottom)));
+							rgb = Color.getHSBColor(0.66F * (1 - t), 0.85F, 0.9F).getRGB();
+						}
+						above.setRGB(dx + reach, dz + reach, rgb);
+					}
+				}
+				rows.add(new BufferedImage[]{side, above});
+				captions.add(String.format("Spiral at %d %d: drops %.0f blocks (y %d to %d) over %.1f turns, coil radius %.1f, tube %.1f. Left: from the side, cave counted through it. Right: from above, blue = low, red = high.",
+						cx, cz, plan.drop(), (int) (plan.topY() - plan.drop()), (int) plan.topY(), plan.turns(), plan.coilRadius(), plan.tubeRadius()));
+				result.put("spiral", String.format("%d %d %d (top of the tube: %d %d %d)", cx, (int) plan.topY(), cz,
+						(int) Math.floor(plan.point(0).x), (int) Math.floor(plan.point(0).y), (int) Math.floor(plan.point(0).z)));
+				break;
+			}
+		}
+		if (rooms != null) {
+			CaveTypeSettings settings = EternalReturnConfig.get().worldgen.caves.types.get("toroidal");
+			for (CaveReplay.Start start : CaveReplay.starts(world, "toroidal", CaveTypes.byId("toroidal").forcedWeight(), settings,
+					rooms.chunkX0, rooms.chunkZ0, rooms.size)) {
+				com.eternalreturn.worldgen.caves.types.ToroidalCave.Plan plan = com.eternalreturn.worldgen.caves.types.ToroidalCave.plan(start.random(), settings,
+						start.x() + 0.5, start.y() + 0.5, start.z() + 0.5, CaveReplay.minCentreY(world), CaveReplay.maxCentreY(world));
+				int reach = (int) Math.ceil(plan.ringRadius() + plan.tubeRadius() + 4);
+				if (plan.tilt() != 0 || !insideSquare(rooms, plan.x(), plan.z(), reach)) {
+					continue;
+				}
+				int cx = (int) Math.floor(plan.x());
+				int cy = (int) Math.floor(plan.y());
+				int cz = (int) Math.floor(plan.z());
+				BufferedImage flat = new BufferedImage(2 * reach + 1, 2 * reach + 1, BufferedImage.TYPE_INT_RGB);
+				for (int dx = -reach; dx <= reach; dx++) {
+					for (int dz = -reach; dz <= reach; dz++) {
+						flat.setRGB(dx + reach, dz + reach, rooms.isCave(cx + dx, cy, cz + dz, lavaY) ? 0x1A1A1A : 0xA8A8A8);
+					}
+				}
+				int half = (int) Math.ceil(plan.verticalExtent() + 6);
+				BufferedImage upright = new BufferedImage(2 * reach + 1, 2 * half + 1, BufferedImage.TYPE_INT_RGB);
+				for (int dx = -reach; dx <= reach; dx++) {
+					for (int dy = -half; dy <= half; dy++) {
+						upright.setRGB(dx + reach, half - dy, rooms.isCave(cx + dx, cy + dy, cz, lavaY) ? 0x1A1A1A : 0xA8A8A8);
+					}
+				}
+				rows.add(new BufferedImage[]{flat, upright});
+				captions.add(String.format("Toroidal room at %d %d %d: ring radius %.1f, tube %.1f. Left: cut flat through its middle (y %d). Right: cut upright through its centre (z %d).",
+						cx, cy, cz, plan.ringRadius(), plan.tubeRadius(), cy, cz));
+				var inRing = plan.toWorld(plan.ringRadius(), 0, 0);
+				result.put("toroidal", String.format("centre %d %d %d, in the ring %d %d %d", cx, cy, cz,
+						(int) Math.floor(inRing.x), (int) Math.floor(inRing.y), (int) Math.floor(inRing.z)));
+				break;
+			}
+		}
+		if (rows.isEmpty()) {
+			return result;
+		}
+		int caption = 22;
+		int width = rows.stream().mapToInt(row -> (row[0].getWidth() + row[1].getWidth()) * SHAPE_SCALE + 12).max().orElse(1);
+		width = Math.max(width, 900);
+		int height = rows.stream().mapToInt(row -> Math.max(row[0].getHeight(), row[1].getHeight()) * SHAPE_SCALE + caption + 12).sum();
+		BufferedImage sheet = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		Graphics2D g = sheet.createGraphics();
+		g.setColor(Color.WHITE);
+		g.fillRect(0, 0, width, height);
+		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+		g.setFont(new Font(Font.SANS_SERIF, Font.PLAIN, 12));
+		int y = 0;
+		for (int i = 0; i < rows.size(); i++) {
+			BufferedImage[] row = rows.get(i);
+			g.setColor(Color.BLACK);
+			g.drawString(captions.get(i), 4, y + 15);
+			g.drawImage(row[0], 0, y + caption, row[0].getWidth() * SHAPE_SCALE, row[0].getHeight() * SHAPE_SCALE, null);
+			g.drawImage(row[1], row[0].getWidth() * SHAPE_SCALE + 12, y + caption, row[1].getWidth() * SHAPE_SCALE, row[1].getHeight() * SHAPE_SCALE, null);
+			y += Math.max(row[0].getHeight(), row[1].getHeight()) * SHAPE_SCALE + caption + 12;
+		}
+		g.dispose();
+		ImageIO.write(sheet, "png", out.resolve("shapes.png").toFile());
+		return result;
+	}
+
+	private static boolean insideSquare(CaveRegion region, double x, double z, int reach) {
+		int x0 = region.chunkX0 * 16;
+		int z0 = region.chunkZ0 * 16;
+		int size = region.size * 16;
+		return x - reach >= x0 && x + reach < x0 + size && z - reach >= z0 && z + reach < z0 + size;
 	}
 
 	/** Search half-width in chunks: 5,000 blocks either side of 0,0. */

@@ -237,12 +237,25 @@ public final class EternalReturnConfig {
 		 * caves land near it and a few reach far toward maxRadius. 0 for the other types.
 		 */
 		public double typicalRadius;
+		/**
+		 * A second size range, for types with two sizes: the spiral's coil radius (how far the tunnel
+		 * winds from its centre) and the toroidal room's ring radius (centre to the middle of the ring).
+		 * 0 for the other types.
+		 */
+		public double minSize;
+		public double maxSize;
 
 		public CaveTypeSettings() {
 		}
 
 		public CaveTypeSettings(double weight, int minY, int maxY, double minRadius, double maxRadius) {
 			this(weight, minY, maxY, minRadius, maxRadius, 0.0);
+		}
+
+		public CaveTypeSettings(double weight, int minY, int maxY, double minRadius, double maxRadius, double minSize, double maxSize) {
+			this(weight, minY, maxY, minRadius, maxRadius, 0.0);
+			this.minSize = minSize;
+			this.maxSize = maxSize;
 		}
 
 		public CaveTypeSettings(double weight, int minY, int maxY, double minRadius, double maxRadius, double typicalRadius) {

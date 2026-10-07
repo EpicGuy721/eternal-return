@@ -8,6 +8,8 @@ import com.eternalreturn.worldgen.caves.CaveTiming;
 import com.eternalreturn.worldgen.caves.CaveType;
 import com.eternalreturn.worldgen.caves.CaveTypes;
 import com.eternalreturn.worldgen.caves.ChunkCarver;
+import com.eternalreturn.worldgen.caves.types.SpiralCave;
+import com.eternalreturn.worldgen.caves.types.ToroidalCave;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -78,6 +80,136 @@ public class CaveTests implements FabricGameTest {
 		forcedType(ctx, "ribbed", 5, 0.002, 0.10);
 	}
 
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "caves_spiral", tickLimit = 400_000)
+	public void spiral(TestContext ctx) {
+		forcedType(ctx, "spiral", 6, 0.002, 0.10, CaveTests::spiralShapes);
+	}
+
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "caves_toroidal", tickLimit = 400_000)
+	public void toroidal(TestContext ctx) {
+		forcedType(ctx, "toroidal", 7, 0.002, 0.15, CaveTests::toroidalShapes);
+	}
+
+	/**
+	 * Every spiral that lies wholly inside the square (found by replaying the seed, see CaveReplay):
+	 * the tunnel is open along its planned helix, which drops at a steady rate, and the column around
+	 * its axis (3 x 3 blocks, from the bottom of the spiral to its top) is solid rock.
+	 */
+	private static String spiralShapes(CaveRegion region, int lavaY) {
+		CaveTypeSettings settings = EternalReturnConfig.get().worldgen.caves.types.get("spiral");
+		List<String> checked = new ArrayList<>();
+		String problem = null;
+		for (CaveReplay.Start start : CaveReplay.starts(region.world, "spiral", CaveTypes.byId("spiral").forcedWeight(), settings,
+				region.chunkX0, region.chunkZ0, region.size)) {
+			SpiralCave.Plan plan = SpiralCave.plan(start.random(), settings, start.x() + 0.5, start.y() + 0.5, start.z() + 0.5,
+					CaveReplay.minCentreY(region.world), CaveReplay.maxCentreY(region.world));
+			double reach = plan.coilRadius() + plan.tubeRadius() + 2;
+			if (!inside(region, plan.centreX(), plan.centreZ(), reach)) {
+				continue;
+			}
+			int open = 0;
+			int samples = 200;
+			for (int i = 0; i <= samples; i++) {
+				var point = plan.point((double) i / samples);
+				if (region.isCave((int) Math.floor(point.x), (int) Math.floor(point.y), (int) Math.floor(point.z), lavaY)) {
+					open++;
+				}
+			}
+			int solid = 0;
+			int column = 0;
+			int axisX = (int) Math.floor(plan.centreX());
+			int axisZ = (int) Math.floor(plan.centreZ());
+			for (int y = (int) Math.ceil(plan.topY() - plan.drop()); y <= (int) Math.floor(plan.topY()); y++) {
+				for (int dx = -1; dx <= 1; dx++) {
+					for (int dz = -1; dz <= 1; dz++) {
+						column++;
+						if (!region.isCave(axisX + dx, y, axisZ + dz, lavaY)) {
+							solid++;
+						}
+					}
+				}
+			}
+			double openShare = (double) open / (samples + 1);
+			double solidShare = (double) solid / column;
+			checked.add(String.format("%d,%d drop %.0f over %.1f turns, coil %.1f, tube %.1f: path open %.0f%%, column solid %.0f%%",
+					axisX, axisZ, plan.drop(), plan.turns(), plan.coilRadius(), plan.tubeRadius(), openShare * 100, solidShare * 100));
+			if (problem == null && (openShare < 0.8 || solidShare < 0.9)) {
+				problem = "spiral at " + axisX + "," + axisZ + ": path open " + openShare + ", column solid " + solidShare;
+			}
+		}
+		EternalReturn.LOGGER.info("[cave-test] spiral shapes: {}", checked);
+		return checked.isEmpty() ? "no spiral lay wholly inside the square" : problem;
+	}
+
+	/**
+	 * Every toroidal room wholly inside the square: open all round the middle of its ring, and the hole
+	 * (inside the ring, in the ring's own plane, so tilted rooms are checked properly) is solid rock: the pillar.
+	 */
+	private static String toroidalShapes(CaveRegion region, int lavaY) {
+		CaveTypeSettings settings = EternalReturnConfig.get().worldgen.caves.types.get("toroidal");
+		List<String> checked = new ArrayList<>();
+		String problem = null;
+		for (CaveReplay.Start start : CaveReplay.starts(region.world, "toroidal", CaveTypes.byId("toroidal").forcedWeight(), settings,
+				region.chunkX0, region.chunkZ0, region.size)) {
+			ToroidalCave.Plan plan = ToroidalCave.plan(start.random(), settings, start.x() + 0.5, start.y() + 0.5, start.z() + 0.5,
+					CaveReplay.minCentreY(region.world), CaveReplay.maxCentreY(region.world));
+			if (!inside(region, plan.x(), plan.z(), plan.ringRadius() + plan.tubeRadius() + 2)) {
+				continue;
+			}
+			int ringOpen = 0;
+			int ringSamples = 48;
+			for (int i = 0; i < ringSamples; i++) {
+				double angle = Math.PI * 2 * i / ringSamples;
+				var point = plan.toWorld(plan.ringRadius() * Math.cos(angle), 0.0, plan.ringRadius() * Math.sin(angle));
+				if (region.isCave((int) Math.floor(point.x), (int) Math.floor(point.y), (int) Math.floor(point.z), lavaY)) {
+					ringOpen++;
+				}
+			}
+			int pillarSolid = 0;
+			int pillarSamples = 0;
+			double hole = plan.ringRadius() - plan.tubeRadius() - 1.0;
+			for (double u = -hole; u <= hole; u += 1.0) {
+				for (double w = -hole; w <= hole; w += 1.0) {
+					if (u * u + w * w > hole * hole) {
+						continue;
+					}
+					for (double v = -plan.tubeHeight() * 0.6; v <= plan.tubeHeight() * 0.6; v += 1.0) {
+						var point = plan.toWorld(u, v, w);
+						pillarSamples++;
+						if (!region.isCave((int) Math.floor(point.x), (int) Math.floor(point.y), (int) Math.floor(point.z), lavaY)) {
+							pillarSolid++;
+						}
+					}
+				}
+			}
+			double ringShare = (double) ringOpen / ringSamples;
+			double pillarShare = (double) pillarSolid / Math.max(1, pillarSamples);
+			checked.add(String.format("%d,%d ring %.1f, tube %.1f, tilt %.0f deg: ring open %.0f%%, pillar solid %.0f%%",
+					(int) plan.x(), (int) plan.z(), plan.ringRadius(), plan.tubeRadius(), Math.toDegrees(plan.tilt()), ringShare * 100, pillarShare * 100));
+			if (problem == null && (ringShare < 0.85 || pillarShare < 0.9)) {
+				problem = "toroidal room at " + (int) plan.x() + "," + (int) plan.z() + ": ring open " + ringShare + ", pillar solid " + pillarShare;
+			}
+		}
+		EternalReturn.LOGGER.info("[cave-test] toroidal shapes: {}", checked);
+		return checked.isEmpty() ? "no toroidal room lay wholly inside the square" : problem;
+	}
+
+	private static boolean inside(CaveRegion region, double x, double z, double reach) {
+		int x0 = region.chunkX0 * 16;
+		int z0 = region.chunkZ0 * 16;
+		int size = region.size * 16;
+		return x - reach >= x0 && x + reach < x0 + size && z - reach >= z0 && z + reach < z0 + size;
+	}
+
+	/** A type-specific shape check over the measured square: null when it passes, else what went wrong. */
+	private interface ShapeCheck {
+		String check(CaveRegion region, int lavaY);
+	}
+
+	private static void forcedType(TestContext ctx, String type, int index, double minOpen, double maxOpen) {
+		forcedType(ctx, type, index, minOpen, maxOpen, null);
+	}
+
 	/**
 	 * Only one type, at its forced (high) frequency, in a square of its own far from the others:
 	 * caves exist; the open share of the underground is within [minOpen, maxOpen]; nothing is carved in
@@ -85,7 +217,7 @@ public class CaveTests implements FabricGameTest {
 	 * above the lava level; no cave block touches an ocean, river or lake; cave borders line up across
 	 * chunk edges; and a chunk generated first or last comes out identical (twin dimension).
 	 */
-	private static void forcedType(TestContext ctx, String type, int index, double minOpen, double maxOpen) {
+	private static void forcedType(TestContext ctx, String type, int index, double minOpen, double maxOpen, ShapeCheck shapeCheck) {
 		EternalReturnConfig.CaveTweaks caves = EternalReturnConfig.get().worldgen.caves;
 		String previous = caves.debugForceCaveType;
 		caves.debugForceCaveType = type;
@@ -135,6 +267,10 @@ public class CaveTests implements FabricGameTest {
 					type + ": caves don't line up across chunk borders (" + region.borderMismatchRate() + " vs " + region.interiorMismatchRate() + " inside chunks)");
 			ctx.assertTrue(orderDifferences == 0, type + ": " + orderDifferences + " blocks differ between a chunk generated first and last");
 			ctx.assertTrue(!starts.isEmpty() && outOfRange == 0, type + ": " + starts.size() + " logged starts, " + outOfRange + " of the wrong type or outside the depth range");
+			if (shapeCheck != null) {
+				String problem = shapeCheck.check(region, lavaY);
+				ctx.assertTrue(problem == null, type + ": " + problem);
+			}
 		} finally {
 			caves.debugForceCaveType = previous;
 		}
@@ -317,6 +453,36 @@ public class CaveTests implements FabricGameTest {
 				String.format("%.2f", msOn), String.format("%.2f", msOff), String.format("%.2f", msOld), on[1], String.format("%.2f", carverMs));
 		ctx.assertTrue(land.openFraction() > 0.005, "default settings carve almost nothing: " + land.openFraction());
 		ctx.assertTrue(carverMs < 20, "cave carver takes " + carverMs + " ms per chunk");
+
+		// The two newest types' cost: carver time on identical terrain (overworld and twin) with them on
+		// and off, alternating which world goes first over three squares.
+		CaveTypeSettings spiral = caves.types.get("spiral");
+		CaveTypeSettings toroidal = caves.types.get("toroidal");
+		long[] withNew = new long[2];
+		long[] withoutNew = new long[2];
+		try {
+			for (int round = 0; round < 3; round++) {
+				int chunkX0 = 1600 + round * 100;
+				for (int pass = 0; pass < 2; pass++) {
+					boolean newOn = (round + pass) % 2 == 0;
+					spiral.enabled = newOn;
+					toroidal.enabled = newOn;
+					long nanosBefore = CaveTiming.nanos();
+					long chunksBefore = CaveTiming.chunks();
+					new CaveRegion(pass == 0 ? world : twin, chunkX0, 1600, 10, null);
+					long[] bucket = newOn ? withNew : withoutNew;
+					bucket[0] += CaveTiming.nanos() - nanosBefore;
+					bucket[1] += CaveTiming.chunks() - chunksBefore;
+				}
+			}
+		} finally {
+			spiral.enabled = true;
+			toroidal.enabled = true;
+		}
+		double msWithNew = withNew[1] == 0 ? 0 : withNew[0] / 1e6 / withNew[1];
+		double msWithoutNew = withoutNew[1] == 0 ? 0 : withoutNew[0] / 1e6 / withoutNew[1];
+		EternalReturn.LOGGER.info("[cave-timing] cave carver time, same squares: all eight types {} ms/chunk, without spiral and toroidal {} ms/chunk ({} chunks each)",
+				String.format("%.2f", msWithNew), String.format("%.2f", msWithoutNew), withNew[1]);
 		ctx.complete();
 	}
 
