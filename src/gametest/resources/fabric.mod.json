@@ -22,7 +22,8 @@
 			"com.eternalreturn.gametest.OreCensusTests",
 			"com.eternalreturn.gametest.BiomeStoneTests",
 			"com.eternalreturn.gametest.StoneBlockTests",
-			"com.eternalreturn.gametest.StoneMapTests"
+			"com.eternalreturn.gametest.StoneMapTests",
+			"com.eternalreturn.gametest.OreVariantTests"
 		]
 	},
 	"mixins": [

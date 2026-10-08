@@ -1,6 +1,7 @@
 package com.eternalreturn.gametest;
 
 import com.eternalreturn.EternalReturn;
+import com.eternalreturn.compat.ModernerBetaHooks;
 import com.eternalreturn.config.EternalReturnConfig;
 import com.eternalreturn.worldgen.stone.BiomeStoneSurface;
 import com.eternalreturn.worldgen.stone.HardenedBlocks;
@@ -217,6 +218,33 @@ public class BiomeStoneTests implements FabricGameTest {
 				"moderner_beta:early_release_ice_plains")) {
 			ctx.assertTrue(tallies.containsKey(biome) && tallies.get(biome).twinStone > 2000, "too little of " + biome + " sampled");
 		}
+		ctx.complete();
+	}
+
+	/**
+	 * The hooks into Moderner Beta's surface pass (com.eternalreturn.mixin.compat) are applied whenever
+	 * Moderner Beta is installed, and run when an Eternal Return chunk's surface is built. If Moderner Beta
+	 * changes and a hook's target goes missing, the game still starts (the hook is skipped with a warning),
+	 * and this test fails loudly.
+	 */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = GameTestWorld.ETERNAL_RETURN_BATCH, tickLimit = 100_000)
+	public void modernerBetaHooksApplied(TestContext ctx) {
+		if (!GameTestWorld.isModernerBetaLoaded()) {
+			ctx.complete();
+			return;
+		}
+		ctx.assertTrue(Boolean.TRUE.equals(ModernerBetaHooks.APPLIED.get("ModernerBetaSurfaceMixin"))
+						&& Boolean.TRUE.equals(ModernerBetaHooks.APPLIED.get("ModernerBetaSurfaceExtraMixin")),
+				"a hook into Moderner Beta's surface pass was not applied (its target changed?): " + ModernerBetaHooks.APPLIED);
+		long passes = ModernerBetaHooks.SURFACE_PASSES.get();
+		long checks = ModernerBetaHooks.SUITABLE_CHECKS.get();
+		for (int cx = 0; cx < 3; cx++) {
+			ctx.getWorld().getChunk(7000 + cx, 7000, ChunkStatus.SURFACE, true);
+		}
+		EternalReturn.LOGGER.info("[biome-stone] Moderner Beta hooks applied {}; surface passes {} -> {}, surface checks {} -> {}",
+				ModernerBetaHooks.APPLIED, passes, ModernerBetaHooks.SURFACE_PASSES.get(), checks, ModernerBetaHooks.SUITABLE_CHECKS.get());
+		ctx.assertTrue(ModernerBetaHooks.SURFACE_PASSES.get() >= passes + 3, "the surface-pass hook did not run for new chunks");
+		ctx.assertTrue(ModernerBetaHooks.SUITABLE_CHECKS.get() > checks, "the surface-check hook did not run for new chunks");
 		ctx.complete();
 	}
 

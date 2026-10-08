@@ -6,7 +6,6 @@ import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroups;
 import net.minecraft.item.ItemStack;
@@ -31,7 +30,8 @@ import java.util.Map;
  * Each one is a single entry in DEFINITIONS: its id, the block it looks like (its model and texture are
  * that block's own, served by the client's model loader) and what it drops. Its name is "Hardened" plus
  * the base block's name (one language line for all). A new one also goes in the block tag
- * eternalreturn:hardened_stones, which brings it into pickaxe mining, stone blobs, carving and ores.
+ * eternalreturn:hardened_stones, which brings it into pickaxe mining, stone blobs and carving, and, to get
+ * ores, in the hosts of src/main/resources/eternalreturn/ore_variants.json.
  */
 public final class HardenedBlocks {
 	public record Definition(String name, Block base, Item drop, Identifier model) {
@@ -49,7 +49,7 @@ public final class HardenedBlocks {
 	public static void register() {
 		for (Definition definition : DEFINITIONS) {
 			Block block = Registry.register(Registries.BLOCK, EternalReturn.id(definition.name()), new HardenedBlock(definition));
-			Item item = Registry.register(Registries.ITEM, EternalReturn.id(definition.name()), new HardenedBlockItem(block));
+			Item item = Registry.register(Registries.ITEM, EternalReturn.id(definition.name()), new NamedBlockItem(block));
 			BLOCKS.put(definition.name(), block);
 			ItemGroupEvents.modifyEntriesEvent(ItemGroups.NATURAL).register(entries -> entries.addAfter(definition.base(), item));
 		}
@@ -85,17 +85,6 @@ public final class HardenedBlocks {
 		@Override
 		protected List<ItemStack> getDroppedStacks(BlockState state, LootContextParameterSet.Builder builder) {
 			return List.of(new ItemStack(this.definition.drop()));
-		}
-	}
-
-	public static class HardenedBlockItem extends BlockItem {
-		public HardenedBlockItem(Block block) {
-			super(block, new Item.Settings());
-		}
-
-		@Override
-		public Text getName(ItemStack stack) {
-			return this.getBlock().getName();
 		}
 	}
 }

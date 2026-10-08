@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "#eternalreturn:ore_variants/iron",
+    "#eternalreturn:ore_variants/copper",
+    "#eternalreturn:ore_variants/lapis"
+  ]
+}

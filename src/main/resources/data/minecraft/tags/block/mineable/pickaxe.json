@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "#eternalreturn:hardened_stones"
+    "#eternalreturn:hardened_stones",
+    "#eternalreturn:ore_variants"
   ]
 }

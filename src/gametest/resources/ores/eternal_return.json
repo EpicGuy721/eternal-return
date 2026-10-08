@@ -12,16 +12,16 @@
   "minecraft:desert": {
     "_square_from_chunk": 4900045,
     "coal_ore": 1056,
-    "copper_ore": 1005,
+    "copper_ore": 1001,
     "diamond_ore": 386,
-    "gold_ore": 388,
-    "iron_ore": 1099,
+    "gold_ore": 384,
+    "iron_ore": 1100,
     "lapis_ore": 374,
     "redstone_ore": 584
   },
   "moderner_beta:early_release_ice_plains": {
     "_square_from_chunk": -2700027,
-    "coal_ore": 2415,
+    "coal_ore": 2414,
     "copper_ore": 1788,
     "diamond_ore": 424,
     "gold_ore": 474,
@@ -69,13 +69,62 @@
     "lapis_ore": 370,
     "redstone_ore": 574
   },
+  "moderner_beta:early_release_extreme_hills": {
+    "_square_from_chunk": -1900051,
+    "coal_ore": 2114,
+    "copper_ore": 1665,
+    "diamond_ore": 383,
+    "gold_ore": 357,
+    "iron_ore": 1221,
+    "lapis_ore": 411,
+    "redstone_ore": 588
+  },
+  "minecraft:savanna": {
+    "_square_from_chunk": -3500047,
+    "coal_ore": 3590,
+    "copper_ore": 1884,
+    "diamond_ore": 394,
+    "gold_ore": 431,
+    "iron_ore": 1449,
+    "lapis_ore": 431,
+    "redstone_ore": 571
+  },
+  "moderner_beta:early_release_taiga": {
+    "_square_from_chunk": -5100019,
+    "coal_ore": 2534,
+    "copper_ore": 1743,
+    "diamond_ore": 384,
+    "gold_ore": 406,
+    "iron_ore": 1352,
+    "lapis_ore": 440,
+    "redstone_ore": 571
+  },
   "all": {
-    "coal_ore": 10952,
-    "copper_ore": 9496,
-    "diamond_ore": 2749,
-    "gold_ore": 3295,
-    "iron_ore": 8650,
-    "lapis_ore": 2688,
-    "redstone_ore": 4133
+    "coal_ore": 19189,
+    "copper_ore": 14784,
+    "diamond_ore": 3910,
+    "gold_ore": 4485,
+    "iron_ore": 12673,
+    "lapis_ore": 3970,
+    "redstone_ore": 5863
+  },
+  "emerald_survey": {
+    "centre_ground_y": 142,
+    "centre_x": 456,
+    "centre_z": 2248,
+    "chunks": 576,
+    "columns_with_ground_at_or_above_y95": 23327,
+    "emerald_ore": 259
+  },
+  "checks": {
+    "stone_ores_inside_host_stone": 47381
+  },
+  "variants_open_to_caves_by_host": {},
+  "biome_stone_off": {
+    "host_stone_blocks_besides_blobs": 0,
+    "square_centre_x": -312,
+    "square_centre_z": -1912,
+    "vanilla_ores": 3164,
+    "variants": 0
   }
 }

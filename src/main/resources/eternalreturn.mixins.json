@@ -29,7 +29,9 @@
 		"villager.VillagerEntityMixin",
 		"worldgen.CarverContextMixin",
 		"worldgen.ConfiguredCarverMixin",
+		"worldgen.LakeFeatureMixin",
 		"worldgen.OreFeatureMixin",
+		"worldgen.ScatteredOreFeatureMixin",
 		"worldgen.SurfaceBuilderMixin"
 	],
 	"injectors": {

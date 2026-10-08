@@ -1,6 +1,7 @@
 package com.eternalreturn.gametest;
 
 import com.eternalreturn.EternalReturn;
+import com.eternalreturn.worldgen.ores.OreVariants;
 import com.eternalreturn.worldgen.stone.HardenedBlocks;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.block.Block;
@@ -58,9 +59,11 @@ public class StoneBlockTests implements FabricGameTest {
 			ctx.assertTrue(state.isOpaqueFullCube(ctx.getWorld(), BlockPos.ORIGIN) && stone.isOpaqueFullCube(ctx.getWorld(), BlockPos.ORIGIN), name + " not opaque");
 			ctx.assertTrue(block.getSlipperiness() == Blocks.STONE.getSlipperiness(), name + " slippery " + block.getSlipperiness());
 			ctx.assertTrue(!state.hasRandomTicks(), name + " ticks (could melt)");
-			for (TagKey<Block> tag : List.of(BlockTags.PICKAXE_MINEABLE, BlockTags.BASE_STONE_OVERWORLD, BlockTags.STONE_ORE_REPLACEABLES, CARVABLE)) {
+			for (TagKey<Block> tag : List.of(BlockTags.PICKAXE_MINEABLE, BlockTags.BASE_STONE_OVERWORLD, CARVABLE)) {
 				ctx.assertTrue(state.isIn(tag), name + " not in " + tag.id());
 			}
+			// Ores reach it as a host stone with its own ore variants, not through the vanilla stone ore tag.
+			ctx.assertTrue(OreVariants.isHost(state) && !state.isIn(BlockTags.STONE_ORE_REPLACEABLES), name + " is not an ore host, or is in the vanilla stone ore tag");
 			ctx.assertTrue(block.getDefaultMapColor() == definition.base().getDefaultMapColor(), name + " map colour");
 		}
 		for (Block host : List.of(Blocks.RED_SANDSTONE, Blocks.SANDSTONE, Blocks.GRANITE, Blocks.DIORITE, Blocks.ANDESITE)) {

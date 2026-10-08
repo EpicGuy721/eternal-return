@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "eternalreturn:ore_variants/diamond_from_smelting_diamond_ore_variants"
+      }
+    },
+    "has_ore": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "#eternalreturn:ore_variants/diamond"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_ore"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "eternalreturn:ore_variants/diamond_from_smelting_diamond_ore_variants"
+    ]
+  }
+}

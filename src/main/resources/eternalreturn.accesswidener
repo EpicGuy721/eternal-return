@@ -3,3 +3,6 @@ accessWidener v2 named
 # Biome stone's surface-rule condition (com.eternalreturn.worldgen.stone.BiomeStoneCondition) returns one.
 accessible class net/minecraft/world/gen/surfacebuilder/MaterialRules$BooleanSupplier
 accessible class net/minecraft/world/gen/surfacebuilder/MaterialRules$MaterialRuleContext
+
+# Ore variants copy their vanilla ore's experience (com.eternalreturn.worldgen.ores.OreVariants).
+accessible field net/minecraft/block/ExperienceDroppingBlock experienceDropped Lnet/minecraft/util/math/intprovider/IntProvider;

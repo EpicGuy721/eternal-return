@@ -1,5 +1,6 @@
 package com.eternalreturn.mixin.compat;
 
+import com.eternalreturn.compat.ModernerBetaHooks;
 import com.eternalreturn.worldgen.stone.BiomeStoneSurface;
 import net.minecraft.world.ChunkRegion;
 import net.minecraft.world.chunk.Chunk;
@@ -23,6 +24,7 @@ public abstract class ModernerBetaSurfaceExtraMixin {
 	@Inject(method = "provideSurfaceExtra", at = @At("RETURN"), remap = false)
 	private void eternalreturn$afterSurfacePass(ChunkRegion region, StructureAccessor structures, Chunk chunk, @Coerce Object biomeSource,
 			NoiseConfig noiseConfig, CallbackInfo ci) {
+		ModernerBetaHooks.SURFACE_PASSES.incrementAndGet();
 		BiomeStoneSurface.afterSurfacePass(chunk);
 	}
 }

@@ -25,5 +25,6 @@
 	"createWorld.customize.modern_beta.preset.desc.eternalreturn.eternal_return": "Beta 1.7.3's wild terrain on Release 1.6.4's continents and oceans, using the full modern world height. No modern cave biomes or deepslate.",
 	"createWorld.customize.modern_beta.preset_category.name.eternalreturn.eternal_return": "Eternal Return",
 	"createWorld.customize.modern_beta.preset_category.desc.eternalreturn.eternal_return": "The world generation of the Eternal Return total conversion.",
-	"block.eternalreturn.hardened": "Hardened %s"
+	"block.eternalreturn.hardened": "Hardened %s",
+	"block.eternalreturn.ore_variant": "%s %s"
 }

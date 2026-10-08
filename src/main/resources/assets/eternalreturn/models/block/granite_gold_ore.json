@@ -1,0 +1,10 @@
+{
+  "parent": "eternalreturn:block/ore_variant",
+  "textures": {
+    "top": "minecraft:block/granite",
+    "bottom": "minecraft:block/granite",
+    "side": "minecraft:block/granite",
+    "particle": "minecraft:block/granite",
+    "overlay": "eternalreturn:block/ore_overlay/gold"
+  }
+}

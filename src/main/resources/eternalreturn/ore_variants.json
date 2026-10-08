@@ -1,0 +1,31 @@
+{
+  "_comment": "Ore variants: every ore in every host stone (block eternalreturn:<host>_<ore>_ore). The game reads this at startup to register the blocks; tools/ores/build_ores.py reads it to write their models, textures, loot tables, recipes and tags. Adding an ore or a host is one entry here plus a rerun of the script. An ore copies its vanilla block's behaviour; its overlay is the shared pattern in tools/ores/pattern.txt coloured with its palette (h highlight, l light, m mid, d dark). A host gives the block it replaces and its textures per face (all, or top/bottom/side).",
+  "ores": {
+    "coal": {"block": "minecraft:coal_ore", "deepslate": "minecraft:deepslate_coal_ore",
+      "palette": {"h": "#6a6a6a", "l": "#464646", "m": "#262626", "d": "#0c0c0c"}},
+    "iron": {"block": "minecraft:iron_ore", "deepslate": "minecraft:deepslate_iron_ore",
+      "palette": {"h": "#f4dcc8", "l": "#d8af93", "m": "#a8846b", "d": "#4e3526"}},
+    "copper": {"block": "minecraft:copper_ore", "deepslate": "minecraft:deepslate_copper_ore",
+      "palette": {"h": "#7fe0b8", "l": "#ee8a5c", "m": "#b9532f", "d": "#4f200e"}},
+    "gold": {"block": "minecraft:gold_ore", "deepslate": "minecraft:deepslate_gold_ore",
+      "palette": {"h": "#ffffb5", "l": "#fcee4b", "m": "#e0b524", "d": "#6e4606"}},
+    "redstone": {"block": "minecraft:redstone_ore", "deepslate": "minecraft:deepslate_redstone_ore",
+      "palette": {"h": "#ff8a8a", "l": "#ff1010", "m": "#b40000", "d": "#5a0000"}},
+    "lapis": {"block": "minecraft:lapis_ore", "deepslate": "minecraft:deepslate_lapis_ore",
+      "palette": {"h": "#8eaef5", "l": "#3567d6", "m": "#1a44a8", "d": "#0b2160"}},
+    "diamond": {"block": "minecraft:diamond_ore", "deepslate": "minecraft:deepslate_diamond_ore",
+      "palette": {"h": "#e4ffff", "l": "#5ce8ee", "m": "#1c9e99", "d": "#06423f"}},
+    "emerald": {"block": "minecraft:emerald_ore", "deepslate": "minecraft:deepslate_emerald_ore",
+      "palette": {"h": "#b8ffd0", "l": "#21e06a", "m": "#049a35", "d": "#014d18"}}
+  },
+  "hosts": {
+    "andesite": {"block": "minecraft:andesite", "textures": {"all": "minecraft:block/andesite"}},
+    "diorite": {"block": "minecraft:diorite", "textures": {"all": "minecraft:block/diorite"}},
+    "granite": {"block": "minecraft:granite", "textures": {"all": "minecraft:block/granite"}},
+    "red_sandstone": {"block": "minecraft:red_sandstone", "textures": {"top": "minecraft:block/red_sandstone_top",
+      "bottom": "minecraft:block/red_sandstone_bottom", "side": "minecraft:block/red_sandstone"}},
+    "hardened_sandstone": {"block": "eternalreturn:hardened_sandstone", "textures": {"top": "minecraft:block/sandstone_top",
+      "bottom": "minecraft:block/sandstone_bottom", "side": "minecraft:block/sandstone"}},
+    "hardened_packed_ice": {"block": "eternalreturn:hardened_packed_ice", "textures": {"all": "minecraft:block/packed_ice"}}
+  }
+}

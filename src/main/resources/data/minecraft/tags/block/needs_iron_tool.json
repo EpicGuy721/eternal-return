@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "#eternalreturn:ore_variants/gold",
+    "#eternalreturn:ore_variants/redstone",
+    "#eternalreturn:ore_variants/diamond",
+    "#eternalreturn:ore_variants/emerald"
+  ]
+}
