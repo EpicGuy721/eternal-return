@@ -4,14 +4,14 @@ vanilla game files (read from the Minecraft jar in the Gradle cache, so run a Gr
 Usage: python tools/ores/build_ores.py
 
 Writes, for every host x ore (block eternalreturn:<host>_<ore>_ore):
-- the ore's overlay texture: the shared pattern (tools/ores/pattern.txt) in the ore's palette;
+- the ore's overlay texture, copied from its overlay image (tools/ores/overlays/<ore>.png);
 - block and item models (host texture per face with the overlay on top) and the blockstate;
 - the loot table: vanilla's for the stone ore, with Silk Touch giving the variant;
 - block and item tags: eternalreturn:ore_variants (all) and eternalreturn:ore_variants/<ore>, the vanilla
   <ore>_ores tags, and the needs_*_tool tags the vanilla ore is in;
 - smelting and blasting recipes copied from the vanilla ore's (same result, experience and time), taking
   the item tag eternalreturn:ore_variants/<ore>, with their recipe-book advancements;
-- docs/worldgen-maps/ores/contact_sheet.png (every ore on every host and on plain stone) and pattern.png.
+- docs/worldgen-maps/ores/contact_sheet.png (every ore on every host and on plain stone) and overlays.png.
 See docs/worldgen.md, Ore variants. Do not hand-edit the generated files.
 """
 import glob
@@ -28,8 +28,6 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 RES = os.path.join(ROOT, 'src', 'main', 'resources')
 NS = 'eternalreturn'
 TABLE = json.load(open(os.path.join(RES, NS, 'ore_variants.json'), encoding='utf-8'))
-PATTERN = [line.rstrip('\n') for line in open(os.path.join(os.path.dirname(__file__), 'pattern.txt'), encoding='utf-8') if line.strip()]
-assert len(PATTERN) == 16 and all(len(row) == 16 for row in PATTERN), 'pattern.txt must be 16 rows of 16 characters'
 
 JARS = glob.glob(os.path.expanduser('~/.gradle/caches/fabric-loom/1.21.1/minecraft-client.jar'))
 if not JARS:
@@ -67,13 +65,14 @@ def faces(host):
 
 
 def overlay(ore):
-    palette = ore['palette']
-    image = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
-    for y, row in enumerate(PATTERN):
-        for x, role in enumerate(row):
-            if role != '.':
-                colour = palette[role].lstrip('#')
-                image.putpixel((x, y), (int(colour[0:2], 16), int(colour[2:4], 16), int(colour[4:6], 16), 255))
+    """The ore's overlay image: 16 x 16, each pixel either fully opaque or fully transparent."""
+    image = Image.open(os.path.join(ROOT, ore['overlay'])).convert('RGBA')
+    assert image.size == (16, 16), f'{ore["overlay"]} is {image.size}, not 16 x 16'
+    alphas = {pixel[3] for pixel in image.getdata()}
+    assert alphas <= {0, 255}, f'{ore["overlay"]} has half-transparent pixels ({sorted(alphas)})'
+    assert 255 in alphas, f'{ore["overlay"]} is empty'
+    # Transparent pixels carry no colour, so mipmapped edges pick up no stray colour.
+    image.putdata([pixel if pixel[3] else (0, 0, 0, 0) for pixel in image.getdata()])
     return image
 
 
@@ -185,7 +184,7 @@ for ore_name, ore in TABLE['ores'].items():
             'requirements': [['has_the_recipe', 'has_ore']],
             'rewards': {'recipes': [f'{NS}:{recipe_id}']}})
 
-# ---------------------------------------------------------------- contact sheet and pattern
+# ---------------------------------------------------------------- contact sheet and overlays
 SCALE = 6
 TILE = 16 * SCALE
 GAP = 6
@@ -226,5 +225,5 @@ for i, ore_name in enumerate(TABLE['ores']):
     backdrop = Image.new('RGBA', (16, 16), (128, 128, 128, 255))
     swatch.paste(Image.alpha_composite(backdrop, overlays[ore_name]).resize((TILE, TILE), Image.NEAREST).convert('RGB'), (x, 4))
     draw.text((x, TILE + 10), ore_name, fill=(255, 255, 255), font=font)
-swatch.save(os.path.join(docs, 'pattern.png'))
+swatch.save(os.path.join(docs, 'overlays.png'))
 print(f'{sum(len(v) for v in variants.values())} ore variants written ({len(TABLE["hosts"])} hosts x {len(TABLE["ores"])} ores)')

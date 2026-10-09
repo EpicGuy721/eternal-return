@@ -1,22 +1,22 @@
 {
-  "_comment": "Ore variants: every ore in every host stone (block eternalreturn:<host>_<ore>_ore). The game reads this at startup to register the blocks; tools/ores/build_ores.py reads it to write their models, textures, loot tables, recipes and tags. Adding an ore or a host is one entry here plus a rerun of the script. An ore copies its vanilla block's behaviour; its overlay is the shared pattern in tools/ores/pattern.txt coloured with its palette (h highlight, l light, m mid, d dark). A host gives the block it replaces and its textures per face (all, or top/bottom/side).",
+  "_comment": "Ore variants: every ore in every host stone (block eternalreturn:<host>_<ore>_ore). The game reads this at startup to register the blocks; tools/ores/build_ores.py reads it to write their models, textures, loot tables, recipes and tags. Adding an ore or a host is one entry here plus a rerun of the script. An ore copies its vanilla block's behaviour; its overlay is a 16x16 image with transparency (path from the repository root), drawn over the host's texture. A host gives the block it replaces and its textures per face (all, or top/bottom/side).",
   "ores": {
     "coal": {"block": "minecraft:coal_ore", "deepslate": "minecraft:deepslate_coal_ore",
-      "palette": {"h": "#6a6a6a", "l": "#464646", "m": "#262626", "d": "#0c0c0c"}},
+      "overlay": "tools/ores/overlays/coal.png"},
     "iron": {"block": "minecraft:iron_ore", "deepslate": "minecraft:deepslate_iron_ore",
-      "palette": {"h": "#f4dcc8", "l": "#d8af93", "m": "#a8846b", "d": "#4e3526"}},
+      "overlay": "tools/ores/overlays/iron.png"},
     "copper": {"block": "minecraft:copper_ore", "deepslate": "minecraft:deepslate_copper_ore",
-      "palette": {"h": "#7fe0b8", "l": "#ee8a5c", "m": "#b9532f", "d": "#4f200e"}},
+      "overlay": "tools/ores/overlays/copper.png"},
     "gold": {"block": "minecraft:gold_ore", "deepslate": "minecraft:deepslate_gold_ore",
-      "palette": {"h": "#ffffb5", "l": "#fcee4b", "m": "#e0b524", "d": "#6e4606"}},
+      "overlay": "tools/ores/overlays/gold.png"},
     "redstone": {"block": "minecraft:redstone_ore", "deepslate": "minecraft:deepslate_redstone_ore",
-      "palette": {"h": "#ff8a8a", "l": "#ff1010", "m": "#b40000", "d": "#5a0000"}},
+      "overlay": "tools/ores/overlays/redstone.png"},
     "lapis": {"block": "minecraft:lapis_ore", "deepslate": "minecraft:deepslate_lapis_ore",
-      "palette": {"h": "#8eaef5", "l": "#3567d6", "m": "#1a44a8", "d": "#0b2160"}},
+      "overlay": "tools/ores/overlays/lapis.png"},
     "diamond": {"block": "minecraft:diamond_ore", "deepslate": "minecraft:deepslate_diamond_ore",
-      "palette": {"h": "#e4ffff", "l": "#5ce8ee", "m": "#1c9e99", "d": "#06423f"}},
+      "overlay": "tools/ores/overlays/diamond.png"},
     "emerald": {"block": "minecraft:emerald_ore", "deepslate": "minecraft:deepslate_emerald_ore",
-      "palette": {"h": "#b8ffd0", "l": "#21e06a", "m": "#049a35", "d": "#014d18"}}
+      "overlay": "tools/ores/overlays/emerald.png"}
   },
   "hosts": {
     "andesite": {"block": "minecraft:andesite", "textures": {"all": "minecraft:block/andesite"}},

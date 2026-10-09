@@ -51,7 +51,8 @@ import java.util.Objects;
  * sounds, tool tier and tags; the same drops and experience (vanilla's loot table with the same random
  * seeds, plain and with Fortune III, and real mining by a survival player), with Silk Touch giving the
  * variant itself; the same smelting and blasting; pick-block, creative tab and name; redstone variants
- * light up. Plus the textures: every ore's overlay has exactly the same shape.
+ * light up. Plus the textures: every ore has a 16 x 16 overlay with only fully opaque or fully
+ * transparent pixels, and every variant has its blockstate and models.
  */
 public class OreVariantTests implements FabricGameTest {
 	/** Loot seeds 1 to SEEDS (seed 0 means "no seed" to the loot code, which then uses each table's own random sequence). */
@@ -275,9 +276,7 @@ public class OreVariantTests implements FabricGameTest {
 	}
 
 	@GameTest(templateName = EMPTY_STRUCTURE)
-	public void overlaysShareOneShape(TestContext ctx) throws IOException {
-		boolean[] shape = null;
-		String first = null;
+	public void overlaysAreValid(TestContext ctx) throws IOException {
 		for (OreVariants.Ore ore : OreVariants.ores()) {
 			BufferedImage image;
 			try (InputStream in = OreVariantTests.class.getResourceAsStream("/assets/eternalreturn/textures/block/ore_overlay/" + ore.name() + ".png")) {
@@ -285,21 +284,13 @@ public class OreVariantTests implements FabricGameTest {
 				image = ImageIO.read(in);
 			}
 			ctx.assertTrue(image.getWidth() == 16 && image.getHeight() == 16, ore.name() + " overlay is " + image.getWidth() + "x" + image.getHeight());
-			boolean[] mask = new boolean[256];
 			int opaque = 0;
 			for (int i = 0; i < 256; i++) {
 				int alpha = image.getRGB(i % 16, i / 16) >>> 24;
 				ctx.assertTrue(alpha == 0 || alpha == 255, ore.name() + " overlay has half-transparent pixels");
-				mask[i] = alpha == 255;
-				opaque += mask[i] ? 1 : 0;
+				opaque += alpha == 255 ? 1 : 0;
 			}
 			ctx.assertTrue(opaque > 20 && opaque < 128, ore.name() + " overlay covers " + opaque + " pixels");
-			if (shape == null) {
-				shape = mask;
-				first = ore.name();
-			} else {
-				ctx.assertTrue(java.util.Arrays.equals(shape, mask), ore.name() + " overlay has a different shape from " + first);
-			}
 		}
 		for (OreVariants.Variant variant : OreVariants.variants()) {
 			String path = Registries.BLOCK.getId(variant.block()).getPath();
