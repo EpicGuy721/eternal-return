@@ -165,6 +165,15 @@ forced['modifyOnlyPositiveDepth'] = KNOBS['modify_only_positive_depth']
 # flat-topped block; a raised, rolling highland (and higher hills) suits them better, like vanilla's meadows.
 forced['heightOverrides']['minecraft:cherry_grove'] = '0.35;0.6'
 forced['heightOverrides']['minecraft:cherry_grove*hills'] = '0.6;0.7'
+# Ocean heights, as Moderner Beta's Release 1.17.1 preset sets them. Its height table only covers the
+# biomes it believes a world can produce, which misses the deep cold, deep frozen and deep lukewarm
+# oceans and the deep warm one (warm_ocean*deep) that the ocean climate step makes; without these lines
+# they get the default land height and rise into hills that still report an ocean biome.
+for ocean in ['ocean', 'cold_ocean', 'lukewarm_ocean', 'warm_ocean', 'frozen_ocean']:
+    forced['heightOverrides']['minecraft:' + ocean] = '-1.0;0.2'
+for ocean in ['deep_ocean', 'deep_cold_ocean', 'deep_lukewarm_ocean', 'deep_frozen_ocean']:
+    forced['heightOverrides']['minecraft:' + ocean] = '-1.8;0.2'
+forced['heightOverrides']['minecraft:warm_ocean*deep'] = '-1.0;0.2'
 
 preset['name'] = {'color': 'gold', 'translate': f'createWorld.customize.modern_beta.preset.name.{NS}.eternal_return'}
 preset['description'] = {'translate': f'createWorld.customize.modern_beta.preset.desc.{NS}.eternal_return'}

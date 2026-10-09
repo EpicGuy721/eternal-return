@@ -24,7 +24,8 @@
 			"com.eternalreturn.gametest.StoneBlockTests",
 			"com.eternalreturn.gametest.StoneMapTests",
 			"com.eternalreturn.gametest.OreVariantTests",
-			"com.eternalreturn.gametest.MineshaftAndOceanTests"
+			"com.eternalreturn.gametest.MineshaftAndOceanTests",
+			"com.eternalreturn.gametest.CoastTests"
 		]
 	},
 	"mixins": [

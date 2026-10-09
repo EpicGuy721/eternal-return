@@ -32,7 +32,7 @@ In-game tests live in `src/gametest`, a separate test mod that is never packed i
 | `runGametestModernerBeta164` | Moderner Beta, Release 1.6.4 | carving unchanged; cave density for comparison |
 | `runGametestModernerBetaBeta` | Moderner Beta, Beta 1.7.3 | carving unchanged |
 | `runGametestVanilla` | vanilla generator | worldgen checks (debug tunnel on, trial chambers present), carving unchanged |
-| `runGametestEternalReturn` | Eternal Return, seed 173164 | mineshaft woods by biome (and real ones built from them), all nine oceans, cherry groves and ocean monuments present, world height, biome list, no cave biomes, no deepslate, badlands surface, no trial chambers; ore counts per ore over squares in ten biomes within 1% of the baseline recorded before the ore variants (`src/gametest/resources/ores/`), no stone-textured ore inside host stone, variants open to caves in every host, an emerald survey of the highest extreme hills, Moderner Beta hooks applied; debug tunnel on |
+| `runGametestEternalReturn` | Eternal Return, seed 173164 | mineshaft woods by biome (and real ones built from them), all nine oceans, cherry groves and ocean monuments present, no ocean biomes on dry land, world height, biome list, no cave biomes, no deepslate, badlands surface, no trial chambers; ore counts per ore over squares in ten biomes within 1% of the baseline recorded before the ore variants (`src/gametest/resources/ores/`), no stone-textured ore inside host stone, variants open to caves in every host, an emerald survey of the highest extreme hills, Moderner Beta hooks applied; debug tunnel on |
 | `runGametestEternalReturnOldCaves` | Eternal Return, new caves off, old caves on, biome stone off | carving matches the world from before the cave engine; cave density for comparison |
 | `runGametestCaves` | Eternal Return plus a twin dimension | every cave type, seams, chunk order, the carvable tag, density, timing; biome stone in every biome against the same chunks without it |
 
@@ -321,7 +321,7 @@ Caves (same world; a new world, since chunks generated before this update keep t
 
 36. `-1283 -11 -1127`: spaghetti, 1.6.4-style tunnels that swell in the middle and fork; follow them up and down.
 37. `-1286 15 -1140`: a ravine, a narrow, very tall canyon with stepped, jagged walls.
-38. `-1200 -23 -1094`: a large cavern with uneven walls, a rolling floor and tunnels leading off. For a giant one, `/tp @s -3710 -10 2451` (far from the others).
+38. `-1200 -23 -1094`: a large cavern with uneven walls, a rolling floor and tunnels leading off. For a giant one, `/tp @s 356 -17 4290`: about 190 blocks across and 55 tall (far from the others).
 39. `-1275 51 -1129`: the top of a vertical shaft; look down, then follow it to the tunnels at the bottom.
 40. `-1338 37 -1196`: a zig-zag tunnel: straight runs with sharp alternating turns.
 41. `-1304 -3 -1146`: a ribbed tunnel that bulges and pinches every few blocks.

@@ -674,7 +674,17 @@
         "moderner_beta:early_release_ice_plains*hills": "0.3;1.3",
         "moderner_beta:early_release_taiga*hills": "0.3;0.8",
         "minecraft:cherry_grove": "0.35;0.6",
-        "minecraft:cherry_grove*hills": "0.6;0.7"
+        "minecraft:cherry_grove*hills": "0.6;0.7",
+        "minecraft:ocean": "-1.0;0.2",
+        "minecraft:cold_ocean": "-1.0;0.2",
+        "minecraft:lukewarm_ocean": "-1.0;0.2",
+        "minecraft:warm_ocean": "-1.0;0.2",
+        "minecraft:frozen_ocean": "-1.0;0.2",
+        "minecraft:deep_ocean": "-1.8;0.2",
+        "minecraft:deep_cold_ocean": "-1.8;0.2",
+        "minecraft:deep_lukewarm_ocean": "-1.8;0.2",
+        "minecraft:deep_frozen_ocean": "-1.8;0.2",
+        "minecraft:warm_ocean*deep": "-1.0;0.2"
       },
       "modifyOnlyPositiveDepth": true,
       "scaleOffset": 0.85,

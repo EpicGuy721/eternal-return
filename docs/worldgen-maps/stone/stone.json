@@ -50,9 +50,9 @@
       "biome": "minecraft:forest",
       "x": -632,
       "z": 392,
-      "ground_y": 72,
+      "ground_y": 74,
       "first_host_stone_y": 65,
-      "column_from_the_top": "oak_leaves from y\u003d72, air from y\u003d71, grass_block from y\u003d69, dirt from y\u003d68, andesite from y\u003d65, granite from y\u003d37, andesite from y\u003d31, cave_air from y\u003d12, andesite from y\u003d-7, andesite_iron_ore from y\u003d-8, andesite from y\u003d-9, cave_air from y\u003d-35, tuff from y\u003d-39, andesite from y\u003d-41, tuff from y\u003d-53, andesite from y\u003d-57, bedrock from y\u003d-62",
+      "column_from_the_top": "oak_leaves from y\u003d74, air from y\u003d72, grass_block from y\u003d69, dirt from y\u003d68, andesite from y\u003d65, granite from y\u003d37, andesite from y\u003d31, cave_air from y\u003d12, andesite from y\u003d-7, andesite_iron_ore from y\u003d-8, andesite from y\u003d-9, cave_air from y\u003d-35, tuff from y\u003d-39, andesite from y\u003d-41, tuff from y\u003d-53, andesite from y\u003d-57, bedrock from y\u003d-62",
       "drops": "andesite"
     },
     "diorite": {
@@ -68,9 +68,9 @@
       "biome": "minecraft:jungle",
       "x": 1032,
       "z": 328,
-      "ground_y": 89,
+      "ground_y": 80,
       "first_host_stone_y": 67,
-      "column_from_the_top": "jungle_leaves from y\u003d89, air from y\u003d86, vine from y\u003d79, air from y\u003d74, fern from y\u003d70, grass_block from y\u003d69, dirt from y\u003d68, granite from y\u003d67, gravel from y\u003d50, granite from y\u003d47, cave_air from y\u003d-24, granite from y\u003d-28, tuff from y\u003d-34, granite from y\u003d-40, bedrock from y\u003d-62",
+      "column_from_the_top": "vine from y\u003d80, jungle_leaves from y\u003d79, air from y\u003d78, oak_leaves from y\u003d71, grass_block from y\u003d69, dirt from y\u003d68, granite from y\u003d67, gravel from y\u003d50, granite from y\u003d47, cave_air from y\u003d-24, granite from y\u003d-28, tuff from y\u003d-34, granite from y\u003d-40, bedrock from y\u003d-62",
       "drops": "granite"
     },
     "hardened_sandstone": {

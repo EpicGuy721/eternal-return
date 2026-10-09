@@ -5,52 +5,48 @@
   "area_blocks": "4096 x 4096 centred on 0,0",
   "world_height": "-64 to 320",
   "sea_level": 63,
-  "water_share": 0.521,
+  "water_share": 0.587,
   "ocean_biome_share": 0.448,
   "land_height": {
     "p5": 64,
     "p50": 72,
-    "p90": 92,
-    "p99": 113,
+    "p90": 93,
+    "p99": 115,
     "max": 177
   },
   "water_depth": {
-    "p5": 0,
-    "p50": 12,
-    "p90": 17,
-    "p99": 19,
-    "max": 23
+    "p5": 1,
+    "p50": 15,
+    "p90": 28,
+    "p99": 32,
+    "max": 34
   },
-  "land_roughness_blocks_per_4": 2.22,
+  "land_roughness_blocks_per_4": 2.242,
   "landmasses": {
-    "count_over_1_chunk": 122,
-    "count_over_256x256": 9,
-    "largest_blocks": 5625040,
-    "largest_share_of_land": 0.701
+    "count_over_1_chunk": 82,
+    "count_over_256x256": 5,
+    "largest_blocks": 5617024,
+    "largest_share_of_land": 0.81
   },
   "terrain_mix": {
     "window_blocks": 32,
-    "land_windows": 6748,
-    "flat": 0.161,
-    "rolling": 0.391,
-    "hilly": 0.376,
-    "mountains": 0.071,
-    "extreme": 0.001,
+    "land_windows": 5889,
+    "flat": 0.155,
+    "rolling": 0.388,
+    "hilly": 0.381,
+    "mountains": 0.075,
+    "extreme": 0.002,
     "median_relief_by_biome": {
       "badlands": 18,
-      "beach": 24,
+      "beach": 26,
       "birch_forest": 19,
-      "cherry_grove": 18,
+      "cherry_grove": 17,
       "dark_forest": 16,
-      "deep_cold_ocean": 18,
-      "deep_frozen_ocean": 20,
-      "deep_lukewarm_ocean": 14,
       "desert": 17,
       "forest": 17,
       "jungle": 20,
       "river": 27,
       "savanna": 23,
-      "warm_ocean": 17,
       "early_release_extreme_hills": 24,
       "early_release_ice_plains": 19,
       "early_release_swampland": 2,
@@ -90,12 +86,12 @@
   "closeup_centre": "-1792, -768",
   "weirdness": {
     "chunks_sampled": 576,
-    "land_columns_with_overhang": 0.017,
-    "air_blocks_under_ground_per_land_column": 0.349,
+    "land_columns_with_overhang": 0.015,
+    "air_blocks_under_ground_per_land_column": 0.28,
     "tallest_ground_y": 135
   },
   "timing_ms": {
-    "sampling": 435850,
-    "chunks": 178217
+    "chunks": 89003,
+    "sampling": 245472
   }
 }
