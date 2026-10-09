@@ -3,16 +3,16 @@
   "slice_area": "384 x 384 blocks from -1472, -1344",
   "default_open_share": "5.27%",
   "default_open_share_by_band": "-64:4.0% -48:6.4% -32:7.4% -16:7.0% 0:8.0% 16:6.6% 32:4.6% 48:2.2% 64:1.1% 80:0.8% 96:1.3% 112:0.3%",
-  "old_caves_open_share": "4.55%",
-  "old_caves_open_share_by_band": "-64:3.4% -48:4.8% -32:5.8% -16:5.6% 0:6.8% 16:5.0% 32:3.7% 48:2.9% 64:3.1% 80:2.9% 96:2.0% 112:0.3%",
+  "old_caves_open_share": "0.57%",
+  "old_caves_open_share_by_band": "-64:0.3% -48:0.9% -32:0.9% -16:0.5% 0:0.5% 16:0.6% 32:0.3% 48:0.3% 64:0.7% 80:0.8% 96:1.5% 112:0.3%",
   "gallery_forced_open_share": {
     "spaghetti": "7.55% open",
     "ravine": "9.03% open",
-    "large": "5.05% open",
+    "large": "4.09% open",
     "vertical": "4.53% open",
     "zigzag": "2.58% open",
-    "ribbed": "5.61% open",
-    "spiral": "3.01% open",
+    "ribbed": "5.17% open",
+    "spiral": "2.69% open",
     "toroidal": "3.29% open"
   },
   "shape_views": {
@@ -248,7 +248,7 @@
       "z": 2451,
       "start_y": -27,
       "radius": 80.0,
-      "ground_y": 46
+      "ground_y": 71
     },
     {
       "x": 1624,
@@ -262,14 +262,14 @@
       "z": 4290,
       "start_y": -37,
       "radius": 76.5,
-      "ground_y": 90
+      "ground_y": 91
     },
     {
       "x": 2879,
       "z": 1909,
       "start_y": -1,
       "radius": 75.8,
-      "ground_y": 59
+      "ground_y": 62
     },
     {
       "x": -22,
@@ -283,7 +283,7 @@
       "z": -2976,
       "start_y": -15,
       "radius": 72.4,
-      "ground_y": 69
+      "ground_y": 67
     },
     {
       "x": -3258,
@@ -301,13 +301,13 @@
     }
   ],
   "giant_cavern_checked": {
-    "x": 356,
-    "z": 4290,
-    "radius_drawn": 76.5,
-    "widest_open_run_east_west": 189,
-    "at_y": -17,
-    "open_from_y": -35,
-    "open_to_y": 20,
-    "stand_at": "356 -17 4290"
+    "x": -3710,
+    "z": 2451,
+    "radius_drawn": 80.0,
+    "widest_open_run_east_west": 149,
+    "at_y": -10,
+    "open_from_y": -53,
+    "open_to_y": 17,
+    "stand_at": "-3710 -10 2451"
   }
 }

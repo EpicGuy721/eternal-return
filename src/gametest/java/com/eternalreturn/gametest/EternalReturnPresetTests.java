@@ -21,9 +21,11 @@ import java.util.TreeSet;
 
 /** Checks for a world made with the Eternal Return preset (the gametestEternalReturn run). */
 public class EternalReturnPresetTests implements FabricGameTest {
-	/** The Release 1.6.4 overworld biomes (as Moderner Beta names them) plus the four later additions. */
+	/** The Release 1.6.4 overworld biomes (as Moderner Beta names them), the five later additions, and every modern ocean. */
 	private static final Set<String> EXPECTED_BIOMES = Set.of(
 			"minecraft:ocean", "minecraft:frozen_ocean", "minecraft:river", "minecraft:frozen_river", "minecraft:beach",
+			"minecraft:deep_ocean", "minecraft:warm_ocean", "minecraft:lukewarm_ocean", "minecraft:deep_lukewarm_ocean",
+			"minecraft:cold_ocean", "minecraft:deep_cold_ocean", "minecraft:deep_frozen_ocean", "minecraft:cherry_grove",
 			"minecraft:desert", "minecraft:forest", "minecraft:jungle", "minecraft:mushroom_fields",
 			"moderner_beta:late_beta_plains", "moderner_beta:early_release_extreme_hills", "moderner_beta:early_release_taiga",
 			"moderner_beta:early_release_swampland", "moderner_beta:early_release_ice_plains",

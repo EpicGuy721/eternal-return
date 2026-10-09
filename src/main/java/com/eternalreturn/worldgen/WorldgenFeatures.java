@@ -44,9 +44,20 @@ public final class WorldgenFeatures {
 	 */
 	public static void register() {
 		BiomeModifications.addCarver(
-				BiomeSelectors.foundInOverworld().and(context -> EternalReturnConfig.get().worldgen.debugTunnel),
+				overworld().and(context -> EternalReturnConfig.get().worldgen.debugTunnel),
 				GenerationStep.Carver.AIR,
 				DEBUG_TUNNEL);
-		BiomeModifications.addCarver(BiomeSelectors.foundInOverworld(), GenerationStep.Carver.AIR, CAVES);
+		BiomeModifications.addCarver(overworld(), GenerationStep.Carver.AIR, CAVES);
+	}
+
+	/**
+	 * Every overworld biome. Moderner Beta's list of the biomes a world can produce misses the deep
+	 * cold, deep frozen and deep lukewarm oceans its ocean climate step makes (Eternal Return has them), so
+	 * those are named outright; they are vanilla overworld biomes anyway, so nothing changes elsewhere.
+	 */
+	private static java.util.function.Predicate<net.fabricmc.fabric.api.biome.v1.BiomeSelectionContext> overworld() {
+		return BiomeSelectors.foundInOverworld().or(BiomeSelectors.includeByKey(
+				net.minecraft.world.biome.BiomeKeys.DEEP_COLD_OCEAN, net.minecraft.world.biome.BiomeKeys.DEEP_FROZEN_OCEAN,
+				net.minecraft.world.biome.BiomeKeys.DEEP_LUKEWARM_OCEAN));
 	}
 }

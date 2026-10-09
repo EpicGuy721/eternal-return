@@ -30,8 +30,13 @@
 		"worldgen.CarverContextMixin",
 		"worldgen.ConfiguredCarverMixin",
 		"worldgen.LakeFeatureMixin",
+		"worldgen.MineshaftPartMixin",
+		"worldgen.MineshaftPiecesMixin",
+		"worldgen.MineshaftStructureAccessor",
+		"worldgen.MineshaftStructureMixin",
 		"worldgen.OreFeatureMixin",
 		"worldgen.ScatteredOreFeatureMixin",
+		"worldgen.StructureMixin",
 		"worldgen.SurfaceBuilderMixin"
 	],
 	"injectors": {

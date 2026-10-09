@@ -2450,7 +2450,8 @@
                   "moderner_beta:late_beta_ice_plains",
                   "minecraft:snowy_plains",
                   "minecraft:frozen_ocean",
-                  "minecraft:frozen_river"
+                  "minecraft:frozen_river",
+                  "minecraft:deep_frozen_ocean"
                 ]
               },
               "then_run": {

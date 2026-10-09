@@ -50,7 +50,9 @@ public class BiomeStoneTests implements FabricGameTest {
 	public static Map<String, Block> expectedTable() {
 		Map<String, Block> table = new LinkedHashMap<>();
 		for (String biome : List.of("moderner_beta:late_beta_plains", "minecraft:ocean", "minecraft:river", "minecraft:beach",
-				"minecraft:mushroom_fields", "moderner_beta:early_release_swampland", "minecraft:dark_forest")) {
+				"minecraft:mushroom_fields", "moderner_beta:early_release_swampland", "minecraft:dark_forest", "minecraft:cherry_grove",
+				"minecraft:deep_ocean", "minecraft:cold_ocean", "minecraft:deep_cold_ocean", "minecraft:lukewarm_ocean", "minecraft:deep_lukewarm_ocean",
+				"minecraft:warm_ocean")) {
 			table.put(biome, Blocks.STONE);
 		}
 		table.put("minecraft:forest", Blocks.ANDESITE);
@@ -62,7 +64,7 @@ public class BiomeStoneTests implements FabricGameTest {
 		table.put("minecraft:desert", HardenedBlocks.get("hardened_sandstone"));
 		table.put("minecraft:badlands", Blocks.RED_SANDSTONE);
 		for (String biome : List.of("moderner_beta:early_release_ice_plains", "moderner_beta:late_beta_ice_plains", "minecraft:snowy_plains",
-				"minecraft:frozen_ocean", "minecraft:frozen_river")) {
+				"minecraft:frozen_ocean", "minecraft:deep_frozen_ocean", "minecraft:frozen_river")) {
 			table.put(biome, HardenedBlocks.get("hardened_packed_ice"));
 		}
 		return table;

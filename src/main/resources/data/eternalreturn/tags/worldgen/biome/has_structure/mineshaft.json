@@ -1,0 +1,24 @@
+{
+  "values": [
+    {
+      "id": "moderner_beta:early_release_extreme_hills",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:early_release_ice_plains",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:late_beta_ice_plains",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:early_release_swampland",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:late_beta_plains",
+      "required": false
+    }
+  ]
+}

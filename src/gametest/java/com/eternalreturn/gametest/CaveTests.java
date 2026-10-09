@@ -50,6 +50,50 @@ public class CaveTests implements FabricGameTest {
 	/** The world's lava level for carvers: 8 blocks above the floor (configured_carver/caves.json). */
 	private static final int LAVA_ABOVE_BOTTOM = 8;
 
+	/**
+	 * Every biome the Eternal Return map can produce carries the cave carver (it is attached to every
+	 * overworld biome the world's biome source lists), and so does the biome at every 64th block over a
+	 * wide area: a biome missing from that list would get no caves at all.
+	 */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "caves", tickLimit = 100_000)
+	public void everyBiomeCarriesTheCaveCarver(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		net.minecraft.world.gen.chunk.ChunkGenerator generator = world.getChunkManager().getChunkGenerator();
+		net.minecraft.world.gen.noise.NoiseConfig noise = world.getChunkManager().getNoiseConfig();
+		java.util.Set<String> listed = new java.util.TreeSet<>();
+		java.util.Set<String> missing = new java.util.TreeSet<>();
+		java.util.function.Consumer<net.minecraft.registry.entry.RegistryEntry<net.minecraft.world.biome.Biome>> check = biome -> {
+			String id = BiomeStoneTests.id(biome);
+			boolean carves = false;
+			for (net.minecraft.registry.entry.RegistryEntry<net.minecraft.world.gen.carver.ConfiguredCarver<?>> carver
+					: biome.value().getGenerationSettings().getCarversForStep(net.minecraft.world.gen.GenerationStep.Carver.AIR)) {
+				carves |= carver.matchesKey(com.eternalreturn.worldgen.WorldgenFeatures.CAVES);
+			}
+			if (!carves) {
+				missing.add(id);
+			}
+		};
+		for (net.minecraft.registry.entry.RegistryEntry<net.minecraft.world.biome.Biome> biome : generator.getBiomeSource().getBiomes()) {
+			listed.add(BiomeStoneTests.id(biome));
+			check.accept(biome);
+		}
+		java.util.Set<String> seen = new java.util.TreeSet<>();
+		for (int x = -6000; x <= 6000; x += 64) {
+			for (int z = -6000; z <= 6000; z += 64) {
+				net.minecraft.registry.entry.RegistryEntry<net.minecraft.world.biome.Biome> biome = generator.getBiomeSource().getBiome(
+						net.minecraft.world.biome.source.BiomeCoords.fromBlock(x), net.minecraft.world.biome.source.BiomeCoords.fromBlock(64),
+						net.minecraft.world.biome.source.BiomeCoords.fromBlock(z), noise.getMultiNoiseSampler());
+				if (seen.add(BiomeStoneTests.id(biome))) {
+					check.accept(biome);
+				}
+			}
+		}
+		seen.removeAll(listed);
+		EternalReturn.LOGGER.info("[cave-test] biomes the biome source lists: {} | seen but not listed: {} | without the cave carver: {}", listed, seen, missing);
+		ctx.assertTrue(missing.isEmpty(), "biomes without the cave carver: " + missing + " (seen but not listed by the biome source: " + seen + ")");
+		ctx.complete();
+	}
+
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "caves_spaghetti", tickLimit = 400_000)
 	public void spaghetti(TestContext ctx) {
 		forcedType(ctx, "spaghetti", 0, 0.002, 0.15);

@@ -514,8 +514,9 @@ public class WorldmapTests implements FabricGameTest {
 
 	static {
 		Object[][] palette = {
-				{"ocean", 0x000070}, {"frozen_ocean", 0x7070D6}, {"deep_ocean", 0x000030}, {"cold_ocean", 0x202070}, {"lukewarm_ocean", 0x000090},
-				{"warm_ocean", 0x0000AC}, {"river", 0x0000FF}, {"frozen_river", 0xA0A0FF}, {"beach", 0xFADE55}, {"snowy_beach", 0xFAF0C0},
+				{"ocean", 0x000070}, {"frozen_ocean", 0x7070D6}, {"deep_ocean", 0x000030}, {"cold_ocean", 0x202070}, {"lukewarm_ocean", 0x0060B0},
+				{"warm_ocean", 0x00A0B0}, {"deep_lukewarm_ocean", 0x003C70}, {"deep_cold_ocean", 0x181840}, {"deep_frozen_ocean", 0x404090},
+				{"cherry_grove", 0xFF9FD0}, {"river", 0x0000FF}, {"frozen_river", 0xA0A0FF}, {"beach", 0xFADE55}, {"snowy_beach", 0xFAF0C0},
 				{"desert", 0xFA9418}, {"forest", 0x056621}, {"birch_forest", 0x307444}, {"dark_forest", 0x40511A}, {"jungle", 0x537B09},
 				{"savanna", 0xBDB25F}, {"badlands", 0xD94515}, {"plains", 0x8DB360}, {"swamp", 0x07F9B2}, {"taiga", 0x0B6659},
 				{"snowy_plains", 0xFFFFFF}, {"snowy_taiga", 0x31554A}, {"mushroom_fields", 0xFF00FF}, {"windswept_hills", 0x606060},

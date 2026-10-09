@@ -73,18 +73,68 @@ pipeline = preset['biomeSettings']['moderner_beta:fractal_layers']['pipeline']
 CLASSIC = ['minecraft:desert', 'minecraft:forest', 'moderner_beta:early_release_extreme_hills',
            'moderner_beta:early_release_swampland', 'moderner_beta:late_beta_plains',
            'moderner_beta:early_release_taiga', 'minecraft:jungle']
-ADDED = ['minecraft:birch_forest', 'minecraft:savanna', 'minecraft:badlands', 'minecraft:dark_forest']
-# Each 1.6.4 biome twice, each added biome once: the added four make up about a fifth of temperate land.
+ADDED = ['minecraft:birch_forest', 'minecraft:savanna', 'minecraft:badlands', 'minecraft:dark_forest', 'minecraft:cherry_grove']
+# Each 1.6.4 biome twice, each added biome once: the added five make up about a quarter of temperate land.
 step(pipeline, 'biome_pool', 'moderner_beta:random_biome')['biomes'] = CLASSIC + CLASSIC + ADDED
 
+WITH_HILLS = ['minecraft:birch_forest', 'minecraft:savanna', 'minecraft:badlands', 'minecraft:cherry_grove']
 hills = step(pipeline, 'hills', 'moderner_beta:biome_replacement')['targets']
-for biome in ['minecraft:birch_forest', 'minecraft:savanna', 'minecraft:badlands']:
+for biome in WITH_HILLS:
     hills[biome] = {'type': 'biome', 'value': biome + '*hills'}
 for s in pipeline:
     if s['type'] == 'moderner_beta:conditional_overlay' and s.get('onMatch', {}).get('value') == 'hills':
         for term in s['predicate']['terms']:
             if term.get('condition') == 'moderner_beta:in_set':
-                term['biomes'] += ['minecraft:birch_forest', 'minecraft:savanna', 'minecraft:badlands']
+                term['biomes'] += WITH_HILLS
+
+# ---------------------------------------------------------------- oceans: deep oceans and ocean temperatures
+# Taken from Moderner Beta's Release 1.17.1 preset (the 1.7 deep ocean layer and the 1.13 ocean climate).
+# Deep ocean: ocean whose four neighbours are ocean, right after the mushroom island layer, as in 1.7.
+OCEANS = ['minecraft:ocean', 'minecraft:deep_ocean']
+mushroom = next(i for i, s in enumerate(pipeline) if s['type'] == 'moderner_beta:conditional_overlay'
+                and s.get('onMatch', {}).get('value') == 'minecraft:mushroom_fields')
+pipeline.insert(mushroom + 1, {
+    'type': 'moderner_beta:conditional_overlay', 'parent': 'land', 'id': 'land',
+    'onMatch': {'type': 'biome', 'value': 'minecraft:deep_ocean'},
+    'otherwise': {'type': 'biome', 'value': 'minecraft:the_void*null'},
+    'predicate': {'condition': 'moderner_beta:all_of', 'terms': [
+        {'biome': 'minecraft:ocean', 'condition': 'moderner_beta:single_match'},
+        {'condition': 'moderner_beta:identical_neighbor', 'diagonal': False, 'requiredCount': 4}]},
+    'seed': 0})
+
+
+def ocean_means_any_ocean(node):
+    """Later layers that look for ocean next to land (shores) see deep ocean as ocean too."""
+    if isinstance(node, dict):
+        for key, value in list(node.items()):
+            if key == 'neighborPredicate' and value == {'biome': 'minecraft:ocean', 'condition': 'moderner_beta:single_match'}:
+                node[key] = {'biomes': OCEANS, 'condition': 'moderner_beta:in_set'}
+            elif key == 'biomes' and isinstance(value, list) and 'minecraft:ocean' in value and 'minecraft:deep_ocean' not in value:
+                value.append('minecraft:deep_ocean')
+            else:
+                ocean_means_any_ocean(value)
+    elif isinstance(node, list):
+        for value in node:
+            ocean_means_any_ocean(value)
+
+
+for s in pipeline[mushroom + 2:]:
+    ocean_means_any_ocean(s)
+    if s['type'] == 'moderner_beta:mix_river' and 'minecraft:deep_ocean' not in s['ignoredBiomes']:
+        s['ignoredBiomes'].append('minecraft:deep_ocean')
+# Ocean temperature, last: an ocean noise picks frozen, cold, plain, lukewarm or warm for every ocean and
+# deep ocean (deep warm becomes deep lukewarm, and warm and frozen soften next to land). The frozen oceans
+# 1.6.4 puts beside its ice plains are left as they are.
+pipeline += [
+    {'type': 'moderner_beta:mapped_noise', 'id': 'ocean_climate', 'amplitudes': [1.0], 'scale': 8.0, 'seed': 2, 'useSaltedSeed': False,
+     'values': [{'biome': 'minecraft:frozen_ocean', 'value': -0.4}, {'biome': 'minecraft:cold_ocean', 'value': -0.2},
+                {'biome': 'minecraft:ocean', 'value': 0.0}, {'biome': 'minecraft:warm_ocean', 'value': 0.4},
+                {'biome': 'minecraft:lukewarm_ocean', 'value': 0.2}]},
+    {'type': 'moderner_beta:stacked_zoom', 'parent': 'ocean_climate', 'id': 'ocean_climate', 'level': 6, 'seed': 2001,
+     'seedModifier': 1, 'zoomType': 'modal'},
+    {'type': 'moderner_beta:apply_ocean_climate', 'parent': 'land', 'id': 'land', 'oceanClimate': 'ocean_climate',
+     'applyCoasts': True, 'seed': 0},
+]
 
 # ---------------------------------------------------------------- caves: no modern cave biomes
 preset['caveBiomeSettings'] = {'moderner_beta:provider': 'moderner_beta:none'}
@@ -111,6 +161,10 @@ forced['depthOffset'] = KNOBS['depth_offset']
 forced['scaleWeight'] = KNOBS['scale_weight']
 forced['scaleOffset'] = KNOBS['height_scale_offset']
 forced['modifyOnlyPositiveDepth'] = KNOBS['modify_only_positive_depth']
+# Cherry groves: Moderner Beta gives them a plateau height (1.5;0.6), which these knobs turn into a sheer
+# flat-topped block; a raised, rolling highland (and higher hills) suits them better, like vanilla's meadows.
+forced['heightOverrides']['minecraft:cherry_grove'] = '0.35;0.6'
+forced['heightOverrides']['minecraft:cherry_grove*hills'] = '0.6;0.7'
 
 preset['name'] = {'color': 'gold', 'translate': f'createWorld.customize.modern_beta.preset.name.{NS}.eternal_return'}
 preset['description'] = {'translate': f'createWorld.customize.modern_beta.preset.desc.{NS}.eternal_return'}

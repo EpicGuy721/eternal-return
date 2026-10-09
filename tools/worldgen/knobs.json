@@ -16,7 +16,14 @@
       "minecraft:beach",
       "minecraft:mushroom_fields",
       "moderner_beta:early_release_swampland",
-      "minecraft:dark_forest"
+      "minecraft:dark_forest",
+      "minecraft:deep_ocean",
+      "minecraft:cold_ocean",
+      "minecraft:deep_cold_ocean",
+      "minecraft:lukewarm_ocean",
+      "minecraft:deep_lukewarm_ocean",
+      "minecraft:warm_ocean",
+      "minecraft:cherry_grove"
     ],
     "minecraft:andesite": [
       "minecraft:forest",
@@ -41,7 +48,8 @@
       "moderner_beta:late_beta_ice_plains",
       "minecraft:snowy_plains",
       "minecraft:frozen_ocean",
-      "minecraft:frozen_river"
+      "minecraft:frozen_river",
+      "minecraft:deep_frozen_ocean"
     ]
   }
 }
