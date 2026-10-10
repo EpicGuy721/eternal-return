@@ -44,12 +44,13 @@ public final class HostileCatches {
 	}
 
 	/**
-	 * Rolls for a hostile catch at the hook and, if one bites and there is room for it, spawns it.
+	 * Rolls for a hostile catch at the hook (Slayer on the rod adds to the chance) and, if one bites and
+	 * there is room for it, spawns it.
 	 * Returns whether a mob was caught (then no items come up).
 	 */
-	public static boolean tryCatch(ServerWorld world, FishingBobberEntity hook, PlayerEntity angler, Random random) {
+	public static boolean tryCatch(ServerWorld world, FishingBobberEntity hook, PlayerEntity angler, ItemStack rod, Random random) {
 		EternalReturnConfig.FishingTweaks cfg = EternalReturnConfig.get().fishing;
-		if (world.getDifficulty() == Difficulty.PEACEFUL || random.nextDouble() >= cfg.hostileCatchChance) {
+		if (world.getDifficulty() == Difficulty.PEACEFUL || random.nextDouble() >= Slayer.hostileCatchChance(rod, cfg.hostileCatchChance, random)) {
 			return false;
 		}
 		String id = pick(cfg.hostileCatches, world.getBiome(hook.getBlockPos()).isIn(OceanSpawns.OCEAN_WATERS), random);

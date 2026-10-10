@@ -188,8 +188,13 @@ public class VillagerNeedsTests implements FabricGameTest {
 			roofed.discard();
 			throw e;
 		}
-		// Sunlight a few ticks on, once the roof's shadow is in the light data.
-		ctx.runAtTick(ctx.getTick() + 10, () -> {
+		// Sunlight once the roof's shadow is in the light data (a few ticks, longer when the server is busy).
+		boolean[] done = {false};
+		ctx.runAtEveryTick(() -> {
+			if (done[0] || world.isSkyVisible(BlockPos.ofFloored(roofed.getEyePos()))) {
+				return;
+			}
+			done[0] = true;
 			missFor(walker, Need.SUNLIGHT, 3.0);
 			walker.age = 20;
 			roofed.age = 20;

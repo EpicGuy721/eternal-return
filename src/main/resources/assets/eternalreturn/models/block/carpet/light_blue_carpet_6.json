@@ -1,0 +1,6 @@
+{
+  "parent": "eternalreturn:block/carpet_layers_6",
+  "textures": {
+    "wool": "minecraft:block/light_blue_wool"
+  }
+}

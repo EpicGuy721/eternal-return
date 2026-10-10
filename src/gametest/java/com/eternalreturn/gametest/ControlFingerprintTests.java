@@ -152,7 +152,7 @@ public class ControlFingerprintTests implements FabricGameTest {
 						for (int x = 0; x < 16; x++) {
 							for (int z = 0; z < 16; z++) {
 								BlockState state = chunk.getBlockState(pos.set(chunkX * 16 + x, y, chunkZ * 16 + z));
-								long code = stateCodes.computeIfAbsent(state, s -> (long) s.toString().hashCode() * 0x9E3779B97F4A7C15L);
+								long code = stateCodes.computeIfAbsent(state, s -> (long) stateName(s).hashCode() * 0x9E3779B97F4A7C15L);
 								hash = hash * 31 + code;
 							}
 						}
@@ -163,5 +163,17 @@ public class ControlFingerprintTests implements FabricGameTest {
 			}
 		}
 		return hashes;
+	}
+
+	/**
+	 * A state as the baselines recorded it. Carpets have a layers property now (CarpetLayers); a one-layer
+	 * carpet is exactly vanilla's carpet, so it is written without it.
+	 */
+	private static String stateName(BlockState state) {
+		String name = state.toString();
+		if (state.getBlock() instanceof net.minecraft.block.CarpetBlock && state.get(com.eternalreturn.blocks.CarpetLayers.LAYERS) == 1) {
+			return name.replace("[layers=1]", "");
+		}
+		return name;
 	}
 }

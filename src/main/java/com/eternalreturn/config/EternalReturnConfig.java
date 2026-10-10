@@ -57,6 +57,7 @@ public final class EternalReturnConfig {
 	public FishingTweaks fishing = new FishingTweaks();
 	public VillagerTweaks villagers = new VillagerTweaks();
 	public WorldgenTweaks worldgen = new WorldgenTweaks();
+	public SurvivalTweaks survival = new SurvivalTweaks();
 
 	public static final class BookshelfBias {
 		public boolean enabled = true;
@@ -237,6 +238,35 @@ public final class EternalReturnConfig {
 		public boolean healWithFood = true;
 		/** Chance, every 2 seconds while hurt, that it eats. */
 		public double eatChance = 0.25;
+	}
+
+	/** Beds, beacons, animals and a few mob rules (com.eternalreturn.survival). */
+	public static final class SurvivalTweaks {
+		/** False: however many players sleep, the night never skips; beds only set the respawn point. */
+		public boolean bedsSkipNight = false;
+		/** How many beds each player remembers; when the newest is gone, respawning uses the next one that works. */
+		public int rememberedBeds = 3;
+		/** No monster spawns naturally (nor phantoms or patrols) inside a working beacon's area. */
+		public boolean beaconsBlockMonsters = true;
+		/** Animals (the creature spawn group) spawn naturally only inside a working beacon's area; new land still gets its animals. */
+		public boolean animalsOnlySpawnNearBeacons = true;
+		/** Farm animals (entity tag eternalreturn:grazers) get hungry, graze or take food by hand, and starve without. */
+		public boolean animalsGetHungry = true;
+		/** Days without food before an animal grazes when it can, or takes food by hand outside breeding. */
+		public double hungryAfterDays = 0.5;
+		/** Chance each second that a hungry animal tries to graze where it stands. */
+		public double grazeChance = 0.125;
+		/** Days without food before an animal starts to lose health. */
+		public double daysBeforeStarving = 3.0;
+		/** A starving animal loses a point of health this often. */
+		public int starveDamageSeconds = 30;
+		/** When a herd animal (entity tag eternalreturn:herd_animals) is hurt, the same kind around it flees too. */
+		public boolean herdPanic = true;
+		public double herdPanicRadius = 16.0;
+		/** A blinded mob notices and follows targets only this close (its follow range, in blocks). */
+		public double blindFollowRange = 2.0;
+		/** Mobs from monster spawners drop no items (their experience, and anything they picked up, still drop). */
+		public boolean spawnerMobsDropNothing = true;
 	}
 
 	/** Overworld generation (see docs/worldgen.md). Changes need a restart, and only affect newly generated chunks. */

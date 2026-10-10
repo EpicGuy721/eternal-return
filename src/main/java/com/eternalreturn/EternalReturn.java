@@ -1,8 +1,10 @@
 package com.eternalreturn;
 
+import com.eternalreturn.blocks.CutBlocks;
 import com.eternalreturn.config.EternalReturnConfig;
 import com.eternalreturn.fishing.FishingItems;
 import com.eternalreturn.fishing.FishingLoot;
+import com.eternalreturn.fishing.Slayer;
 import com.eternalreturn.fishing.Thriftiness;
 import com.eternalreturn.fishing.Worms;
 import com.eternalreturn.mobs.ModEntities;
@@ -33,6 +35,8 @@ public class EternalReturn implements ModInitializer {
 		FishingItems.register();
 		FishingLoot.register();
 		Thriftiness.register();
+		Slayer.register();
+		CutBlocks.register();
 		Worms.register();
 		TradeRules.registerFishermanTrades();
 		WorldgenFeatures.register();

@@ -151,6 +151,8 @@ public class OceanLifeTests implements FabricGameTest {
 		pool(ctx, "minecraft:ocean", true);
 		BlockPos at = ctx.getAbsolutePos(new BlockPos(3, 2, 3));
 		Random random = Random.create(42);
+		// The test framework marks finished tests with beacons, which keep monsters from spawning around them.
+		com.eternalreturn.survival.BeaconZones.clear(world);
 		int alone = 0;
 		int guardians = 0;
 		for (int i = 0; i < 400; i++) {
@@ -165,6 +167,7 @@ public class OceanLifeTests implements FabricGameTest {
 		natural.initialize(world, world.getLocalDifficulty(at), SpawnReason.NATURAL, null);
 		world.spawnEntity(natural);
 		int near = 0;
+		com.eternalreturn.survival.BeaconZones.clear(world);
 		for (int i = 0; i < 400; i++) {
 			near += SpawnRestriction.canSpawn(EntityType.ELDER_GUARDIAN, world, SpawnReason.NATURAL, at, random) ? 1 : 0;
 		}

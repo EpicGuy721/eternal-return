@@ -272,6 +272,8 @@ public class MobFeatureTests implements FabricGameTest {
 		BlockPos open = ctx.getAbsolutePos(new BlockPos(6, 1, 6));
 		ServerWorld world = ctx.getWorld();
 		eventually(ctx, () -> {
+			// The test framework marks finished tests with beacons, which keep monsters from spawning around them.
+			com.eternalreturn.survival.BeaconZones.clear(world);
 			check(ctx, world.getLightLevel(net.minecraft.world.LightType.SKY, inside) == 0, "box interior should have no sky light yet");
 			check(ctx, SpawnRestriction.canSpawn(EntityType.CREEPER, world, SpawnReason.NATURAL, inside, world.getRandom()), "creeper should spawn in the sealed box");
 			for (int i = 0; i < 50; i++) {

@@ -1,6 +1,6 @@
 # Eternal Return (Fabric 1.21.1)
 
-A total conversion for Minecraft. So far it covers three systems: a rework of enchanting built around capacity, material identity, and libraries of books instead of XP; tougher overworld mobs (baby skeletons and creepers, better-armed zombies and skeletons, new jockeys, cave-only creepers); and fishing as the emerald economy (bait, eleven new fish, lava fishing in the Nether, and fishermen as the only villagers who still pay emeralds); and villagers with needs (sleep, gossip, exercise, sunlight, work-life balance) and shop hours. Worldgen has its own world type, Eternal Return: Release 1.6.4's continents and oceans with rolling, hilly Beta-style land and a new cave system, built on Moderner Beta.
+A total conversion for Minecraft. So far it covers three systems: a rework of enchanting built around capacity, material identity, and libraries of books instead of XP; tougher overworld mobs (baby skeletons and creepers, better-armed zombies and skeletons, new jockeys, cave-only creepers); and fishing as the emerald economy (bait, eleven new fish, lava fishing in the Nether, and fishermen as the only villagers who still pay emeralds); villagers with needs (sleep, gossip, exercise, sunlight, work-life balance) and shop hours; survival rules (beds that only set the respawn point and are remembered, beacons that keep monsters out and let animals return, animals that graze or starve and panic as a herd, spawner mobs that drop nothing); and building blocks (wool and concrete stairs and slabs, carpets that stack). Worldgen has its own world type, Eternal Return: Release 1.6.4's continents and oceans with rolling, hilly Beta-style land and a new cave system, built on Moderner Beta.
 
 ## Building
 
@@ -25,7 +25,7 @@ In-game tests live in `src/gametest`, a separate test mod that is never packed i
 
 | Task | World | What runs |
 |---|---|---|
-| `runGametest` | flat | the mob, fishing and trade suites (with guardian spawn lists and limits, prismarine, monsters on the hook and overfishing), villager needs (how each is met, price rises on emerald trades only, refusals, shop hours, sleep privacy, healing, saving), a check that the Eternal Return world type loaded, the hardened blocks, and every ore variant against its vanilla ore (drops, Fortune, Silk Touch, experience, tool tier, smelting, tags, creative tab, redstone light, overlay textures) |
+| `runGametest` | flat | the mob, fishing and trade suites (with guardian spawn lists and limits, prismarine, monsters on the hook and overfishing), villager needs (how each is met, price rises on emerald trades only, refusals, shop hours, sleep privacy, healing, saving), survival (no night skip, remembered beds and respawning at the one before, beacon areas through the real spawn rules, grazing and starving, feeding by hand, herd panic, blind follow range, a real spawner's mobs dropping nothing, Growth and Slayer, every stairs and slab with its tags and recipes, stacking and dropping carpets), a check that the Eternal Return world type loaded, the hardened blocks, and every ore variant against its vanilla ore (drops, Fortune, Silk Touch, experience, tool tier, smelting, tags, creative tab, redstone light, overlay textures) |
 | `runGametestNoModernerBeta` | flat, Moderner Beta removed | the same suites, and a check that the world type is skipped cleanly |
 | `runGametestModernerBeta` | Moderner Beta, Release 1.6.4 amplified | worldgen checks (debug tunnel on, trial chambers present), carving unchanged |
 | `runGametestModernerBetaTunnelOff` | same | the same with the debug tunnel off |
@@ -57,6 +57,7 @@ The map tool runs the same way: `runWorldmapEternalReturn`, `runWorldmapBeta` an
 | Fortune on hoes multiplies crops | `BlockMixin` + `FortuneHelper` |
 | Fortune on shears multiplies wool | `fortune.json` + `SheepEntityMixin` + `ShearsDispenserBehaviorMixin` |
 | Curse of Invisibility | `invisibility_curse.json`; hiding in `ItemStackMixin`, `ItemMixin`, tooltip code |
+| Growth (armor: +1 max health per level) | `growth.json` (vanilla attribute effect) |
 
 ### Mobs
 
@@ -103,6 +104,7 @@ The plan, status, terrain settings and maps are in [docs/worldgen.md](docs/world
 | Feature | Implementation |
 |---|---|
 | Fish only bite with bait | `Bait`, `BaitLootCondition`, `FishingBobberEntityMixin`; `minecraft:gameplay/fishing` loot table replaced |
+| Slayer (rod: more monsters on the hook) | `slayer.json` (effect `eternalreturn:hostile_catch_chance`), `Slayer`, used by `HostileCatches` |
 | Thriftiness (rod keeps its bait) | `thriftiness.json` (effect `eternalreturn:bait_saving_chance`), `Thriftiness`, `Bait.consumeAfterCatch` |
 | Eleven new fish | `FishingItems`; loot table `eternalreturn:gameplay/fishing/fish` |
 | Worms from digging | `Worms`; block tag `drops_worms` |
@@ -113,6 +115,19 @@ The plan, status, terrain settings and maps are in [docs/worldgen.md](docs/world
 | Overfished spots bite slower | `Overfishing`, hooked in `FishingBobberEntityMixin` |
 | Villagers stop paying emeralds, except fishermen for fish | `TradeRules`, `VillagerEntityMixin`, `BuyItemFactoryAccessor` |
 | Villager needs, shop hours, healing with food | `VillagerNeeds`; `VillagerEntityMixin` (ticking, saving, gossip, trading, prices), `SleepTaskMixin` (privacy); messages in `lang/en_us.json` |
+
+### Survival and blocks
+
+| Feature | Implementation |
+|---|---|
+| Beds don't skip the night; the last 3 beds are remembered for respawning | `BedMemory`; `SleepManagerMixin`, `ServerWorldSleepMixin`, `survival/ServerPlayerEntityMixin` |
+| Beacons keep monsters out and let animals spawn; animals spawn nowhere else | `BeaconZones`; `BeaconBlockEntityMixin`, `SpawnRestrictionMixin`, `PhantomSpawnerMixin`, `PatrolSpawnerMixin` |
+| Animals get hungry, graze, take food by hand, starve | `AnimalHunger`; `AnimalEntityMixin`, `SheepGrazingMixin`, `HorseFoodMixin`, `MobEntitySurvivalMixin`; tags `grazers` (entity), `grazing_plants` (block) |
+| Herds panic together | `HerdPanic`, `LivingEntitySurvivalMixin`; entity tag `herd_animals` |
+| Blindness cuts a mob's follow range | `BlindMobs`, `LivingEntitySurvivalMixin` |
+| Spawner mobs drop no items | `SpawnerMobs`; `MobSpawnerLogicMixin`, `MobEntitySurvivalMixin`, `LivingEntitySurvivalMixin` |
+| Wool and concrete stairs and slabs | `com.eternalreturn.blocks.CutBlocks`; resources generated by `tools/blocks/build_blocks.py` |
+| Carpets stack up to 16 layers | `CarpetLayers`, `CarpetBlockMixin`; vanilla carpet blockstates and loot tables replaced by `tools/blocks/build_blocks.py` |
 
 ## How the systems behave
 
@@ -173,6 +188,8 @@ A single Sharpness V book turns the bottom slot's typical Sharpness I into III a
 
 **Curse of Invisibility.** Hides the enchantment list, the glint, and the capacity line. The book itself still shows the curse so you know what you are applying. Found in loot and trades like the other curses.
 
+**Growth.** A new armor enchantment, levels I to V: each level adds half a heart (1 point) of max health, on each piece that has it, so Growth V on all four pieces is ten extra hearts. Enchanting tables, loot and librarians offer it like other armor enchantments, and its levels count toward the piece's capacity.
+
 ### Mobs
 
 **Babies.** 5% of skeletons, strays and creepers spawn as babies: half size and 50% faster, otherwise the same as adults (same health, drops and XP). Skeletons and strays get the baby-zombie body proportions, and baby skeletons that freeze become baby strays. Baby creepers have half the fuse (0.75 s instead of 1.5 s) and about a third of the blast power: a zombie two blocks away takes a scratch where an adult's blast kills it. Saved as `IsBaby`, the same key baby zombies use.
@@ -225,6 +242,8 @@ A single Sharpness V book turns the bottom slot's typical Sharpness I into III a
 
 Nether fish and infernal bait are fireproof. The new fish also count for the "fish caught" statistic and can be fed to dolphins.
 
+**Slayer.** A new fishing rod enchantment, levels I to V: each level adds 5% to the chance that a bite is a monster (3% without it; Slayer V makes it 28%). It turns up like Thriftiness and also counts toward the rod's capacity.
+
 **Thriftiness.** A new fishing rod enchantment, levels I to V. Each catch has a 10% chance per level (50% at V) to leave your bait unused, in water and lava alike. It turns up in enchanting tables, loot, and librarian trades like any other rod enchantment, and its levels count toward the rod's 7-point capacity, so Thriftiness V and Lure V can't share a rod.
 
 **Prismarine.** Prismarine shards (1-3) and crystals (1-2) can come up anywhere you fish in water, bait or not: about 12% of catches without bait, 2% with (Luck of the Sea makes them a little more likely). With ocean monuments gone from Eternal Return worlds, fishing and guardians are where prismarine comes from.
@@ -255,6 +274,28 @@ Villagers that existed before this update, and babies until they grow up, start 
 
 **Healing.** A hurt villager with food in its inventory (bread, carrots, potatoes or beetroot, which farmers gather and share) now and then eats one, about one chance in four every 2 seconds, healing by the food's value (bread 5, a carrot 3, a potato or beetroot 1).
 
+### Survival
+
+**Beds.** Sleeping never skips the night, however many players sleep: a bed only sets your respawn point (by day too, as in vanilla), and you get up when you like (morning wakes you as usual). Lying down still resets the phantom timer. Each player remembers the last 3 beds that set their spawn point. If you die and your bed is gone (or blocked), you respawn at the bed before it, then the one before that; only if none of the three works do you go to world spawn. Respawn anchors and spawn points set by command are left alone.
+
+**Beacons.** A working beacon (a pyramid and a clear beam) covers the same area its effects reach: 20, 30, 40 or 50 blocks each way for a 1 to 4 tier pyramid, from that far below the beacon up to the sky. No monster spawns naturally inside it, and no phantoms or pillager patrols come there. Spawners still work.
+
+**Animals.** Animals (cows, pigs, sheep, chickens, horses, rabbits, wolves, foxes and the rest of the creature spawn group) no longer spawn naturally once the land has been generated, except inside a beacon's area. New land still comes with its animals, and breeding works everywhere: once a herd is gone, it's gone.
+
+**Hunger.** Farm animals (cows, mooshrooms, sheep, pigs, chickens, rabbits, goats, horses, donkeys, mules, llamas and camels; entity tag `eternalreturn:grazers`) remember when they last ate. Half a day after a meal they graze when they can: a plant where they stand (grass, ferns, flowers) or the grass block under them, which turns to dirt, as sheep already do (with mobGriefing off they eat without changing the block). Feeding one its breeding food counts as a meal, and a hungry animal takes it even when it wouldn't for breeding (already in love, resting after breeding, or a horse at full health). After 3 days without food an animal loses a point of health every 30 seconds until it eats or dies. So a pen needs grass, or someone to feed it. Animals that existed before this update start fed.
+
+**Herd panic.** Hurt a cow and every cow within 16 blocks runs, as if you had hit it too. The same goes for pigs, sheep, chickens, rabbits, horses, donkeys and mules (entity tag `eternalreturn:herd_animals`), each with its own kind.
+
+**Blindness.** A blinded mob only notices and follows a target within 2 blocks (vanilla ignores blindness on mobs). Its follow range also limits how far it plans a path, so it shuffles about.
+
+**Spawners.** Mobs from monster spawners drop no items: no loot and none of the gear they spawned with. They still drop experience, and anything they picked up (a lost sword, say).
+
+### Blocks
+
+**Stairs and slabs.** Every color of wool and concrete has stairs and a slab (`eternalreturn:white_wool_stairs`, `eternalreturn:red_concrete_slab` and so on), after the full block in the Colored Blocks tab. Crafted like any stairs (6 blocks make 4) and slab (3 make 6); concrete ones also come from the stonecutter (1 block makes 1 stairs or 2 slabs). They behave like their block: wool ones burn, are quick to cut with shears and muffle sculk; concrete ones need a pickaxe.
+
+**Carpets.** Placing a carpet on top of the same carpet adds a layer, like snow: up to 16 layers, a full block. Each layer is 1/16 of a block high and breaking it gives back one carpet per layer. A different color doesn't stack. Moss carpet stacks too.
+
 ## Configuration
 
 `config/eternalreturn.json` is generated on first launch.
@@ -266,6 +307,7 @@ Villagers that existed before this update, and babies until they grow up, start 
 - `bookshelfBias`: the multipliers above, plus `booksCanUnlockNonTableEnchantments` (off by default) to let shelved books make the table offer treasure enchantments like Frost Walker.
 - `fortune`: toggles for hoes and shears.
 - `fishing`: `fishRequireBait`; `baits` (item to `lureSeconds`, `nightLureSeconds`, `lava`); `wormDropChance`; `anglerfishMinWaterDepth` (default 10); `lavaFishingOutsideNether`; `hostileCatchChance` (default 0.03) and `hostileCatches` (mob to `weight` and `oceanOnly`; the ids are mob ids, or `drowned_guardian_jockey` / `drowned_elder_guardian_jockey`); `overfishing` (`enabled`, `radius` 6, `freeCatches` 3, `slowdownPerCatch` 0.5, `maxSlowdown` 4, `recoveryMinutes` 5).
+- `survival`: `bedsSkipNight` (off), `rememberedBeds` (3), `beaconsBlockMonsters`, `animalsOnlySpawnNearBeacons`, `animalsGetHungry`, `hungryAfterDays` (0.5), `grazeChance` (per second, 0.125), `daysBeforeStarving` (3), `starveDamageSeconds` (30), `herdPanic` and `herdPanicRadius` (16), `blindFollowRange` (2), `spawnerMobsDropNothing`.
 - `villagers`: `onlyFishermenBuy`; `fishPriceMultiplier` (default 2, applied to every fish a fisherman buys); and `fishermanTrades` (item to `level`, `count`, base `emeralds`, `maxUses`, `experience`; needs a restart); `needs`: `enabled`, `daysBeforePriceRise` (2), `emeraldsPerMissingNeed` (5), `daysBeforeRefusal` (7), `maxOtherAdultsInSight` (1), `exerciseBlocks` (8), `minWorkstationDistance` (8), `closedAtNight`, `nightStart` (13000) and `nightEnd` (23000), `healWithFood` and `eatChance` (0.25).
 - `worldgen`: `debugTunnel` (off by default). Carves one straight 3x3 tunnel at y=20 along z=8 through every chunk on that row, to check that this mod's carvers run under the current world generator. Needs a restart, and only affects newly generated chunks.
 - `worldgen.biomeStone` (on by default; Eternal Return worlds only, newly generated chunks only): each biome's stone under the topsoil. Off: plain stone everywhere.
@@ -298,6 +340,9 @@ Fishing data lives in the same place. The item tag `raw_fish` is what fishermen 
 - Biome stone: adds sandstone, red sandstone, granite, diorite and andesite to the item tags `minecraft:stone_tool_materials` and `minecraft:stone_crafting_materials`, and replaces vanilla's dispenser, dropper, lever, observer and piston recipes with versions taking that tag, in every world. A datapack replacing those recipes undoes this. Overrides the configured features `spring_water`, `spring_lava_overworld` and `glow_lichen` (only adding the two hardened blocks), and adds the hardened blocks to `minecraft:mineable/pickaxe`, `minecraft:base_stone_overworld` and `minecraft:stone_ore_replaceables`; none of this changes worlds without the hardened blocks. Red sandstone is not added to any ore tag: ores treat it as stone only in Eternal Return worlds. Uses an access widener for the surface-rule condition. With Moderner Beta installed, two small mixins into its surface pass (by class name, applied only when it is present) make that pass treat the host stones as stone in Eternal Return chunks; other presets are untouched.
 - Moderner Beta's optional "Reduced Height" datapack moves the overworld floor to y=0 for every world, which cuts off the bottom of Eternal Return worlds. Its "Deepslate Blobs" datapack adds deepslate back. Leave both off.
 - Nostalgic Tweaks: if you use its XP removal, this mod is already XP-free. If it has options that change the anvil or enchanting screens, check them alongside this.
+
+- Carpets: every carpet block gets a `layers` property (1 to 16). A one-layer carpet is exactly vanilla's, so worlds, structures and commands that place carpets are unchanged. A resource pack that replaces a carpet's blockstate file draws stacked carpets with its own model, one layer high; this mod's own files cover vanilla and old-style packs that only change textures.
+- Beds: with night skipping off, the "players sleeping" counter isn't shown on servers.
 
 ## Quick test checklist
 
@@ -392,3 +437,17 @@ Ore variants (same world, made after this update; `/gamemode spectator` and `/ef
 68. Smelt or blast any variant: the same result, experience and time as its vanilla ore.
 69. Creative inventory, Natural Blocks: after each deepslate ore come its six variants. Or `/give @s eternalreturn:granite_iron_ore` (any of `andesite`, `diorite`, `granite`, `red_sandstone`, `hardened_sandstone`, `hardened_packed_ice`, then `_`, then `coal`, `iron`, `copper`, `gold`, `redstone`, `lapis`, `diamond` or `emerald`, then `_ore`), for example `/give @s eternalreturn:hardened_sandstone_gold_ore 16` or `/give @s eternalreturn:hardened_packed_ice_lapis_ore 16`.
 70. Old-style pack on and off: with Golden Days (or any old-style pack) on, the host stone under each ore shows the pack's texture and the ore blobs keep this mod's old-style overlays. Turn it off in Options, Resource Packs (move it back to Available, then Done): the host stones go back to vanilla's textures, the ore blobs stay the same, and vanilla's own stone ores show vanilla's modern textures again.
+
+Survival and blocks (any world, survival mode):
+
+71. Beds: sleep in a bed at night: the night goes on (get up whenever). Right-click three more beds by day ("You can sleep only at night", but each sets your spawn). Break the newest bed, then `/kill @s`: you wake at the bed before it. Break that one too and die again: the one before.
+72. Beacons: build a working beacon (a 3 x 3 iron pyramid is enough). At night around it nothing hostile spawns within 20 blocks; outside, monsters do. Phantoms leave you alone inside it.
+73. Animals: kill every cow around: none come back (breeding still works). Inside a beacon's area on grass, animals turn up again now and then.
+74. Hunger: pen a cow on stone and `/time add 80000`: it loses health every 30 seconds until you feed it wheat (it eats even right after breeding). A cow penned on grass grazes the grass to dirt and stays healthy while there's grass left.
+75. Herd panic: hit a sheep in a flock: the whole flock bolts. Hit a pig next to them: only pigs run.
+76. Blindness: `/effect give` a zombie blindness (or throw a splash potion of Blindness): it ignores you unless you are within 2 blocks.
+77. Spawners: kill zombies from a dungeon spawner: experience but no rotten flesh, armor or other items. Zombies that spawn naturally still drop theirs.
+78. Growth: `/enchant @s eternalreturn:growth 5` holding a helmet, then wear it: five extra half-hearts (two and a half hearts).
+79. Slayer: `/enchant @s eternalreturn:slayer 5` on a rod, fish in the ocean: about one bite in four is a monster.
+80. Stairs and slabs: craft white wool stairs (6 wool) and slabs (3 wool); put white concrete in a stonecutter: stairs and slabs. Shears cut wool stairs fast; concrete slabs need a pickaxe to drop.
+81. Carpets: place a carpet, then keep placing the same carpet on top: it thickens a sixteenth at a time to a full block. Break it: one carpet per layer.

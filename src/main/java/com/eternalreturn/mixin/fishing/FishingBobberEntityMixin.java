@@ -163,7 +163,7 @@ public abstract class FishingBobberEntityMixin extends ProjectileEntity implemen
 		PlayerEntity owner = this.getPlayerOwner();
 		Overfishing.recordCatch(this.getWorld(), this.getPos());
 		if (owner != null && !this.eternalreturn$inLava() && this.getWorld() instanceof ServerWorld world
-				&& HostileCatches.tryCatch(world, (FishingBobberEntity) (Object) this, owner, this.random)) {
+				&& HostileCatches.tryCatch(world, (FishingBobberEntity) (Object) this, owner, rod, this.random)) {
 			Bait.consumeAfterCatch(owner, this.eternalreturn$bait, rod, this.random);
 			return new ObjectArrayList<>();
 		}

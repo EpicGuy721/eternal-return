@@ -1,0 +1,6 @@
+{
+  "parent": "eternalreturn:block/carpet_layers_8",
+  "textures": {
+    "wool": "minecraft:block/purple_wool"
+  }
+}

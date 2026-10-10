@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "#eternalreturn:hardened_stones",
-    "#eternalreturn:ore_variants"
+    "#eternalreturn:ore_variants",
+    "#eternalreturn:concrete_cut_blocks"
   ]
 }

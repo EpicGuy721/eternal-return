@@ -35,5 +35,9 @@
 	"villager.eternalreturn.need.gossip": "Gossip: none for %1$s days. It needs a gathering place where it meets other villagers.",
 	"villager.eternalreturn.need.exercise": "Exercise: none for %1$s days. It needs room to walk %2$s blocks in one go.",
 	"villager.eternalreturn.need.sunlight": "Sunlight: none for %1$s days. It needs to see the sky in the daytime.",
-	"villager.eternalreturn.need.work_life": "Work-life balance: missing for %1$s days. Its workstation is less than %3$s blocks from its bed."
+	"villager.eternalreturn.need.work_life": "Work-life balance: missing for %1$s days. Its workstation is less than %3$s blocks from its bed.",
+	"enchantment.eternalreturn.growth": "Growth",
+	"enchantment.eternalreturn.slayer": "Slayer",
+	"block.eternalreturn.stairs": "%s Stairs",
+	"block.eternalreturn.slab": "%s Slab"
 }

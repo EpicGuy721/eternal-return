@@ -1,0 +1,52 @@
+{
+  "variants": {
+    "layers=1": {
+      "model": "minecraft:block/pink_carpet"
+    },
+    "layers=2": {
+      "model": "eternalreturn:block/carpet/pink_carpet_2"
+    },
+    "layers=3": {
+      "model": "eternalreturn:block/carpet/pink_carpet_3"
+    },
+    "layers=4": {
+      "model": "eternalreturn:block/carpet/pink_carpet_4"
+    },
+    "layers=5": {
+      "model": "eternalreturn:block/carpet/pink_carpet_5"
+    },
+    "layers=6": {
+      "model": "eternalreturn:block/carpet/pink_carpet_6"
+    },
+    "layers=7": {
+      "model": "eternalreturn:block/carpet/pink_carpet_7"
+    },
+    "layers=8": {
+      "model": "eternalreturn:block/carpet/pink_carpet_8"
+    },
+    "layers=9": {
+      "model": "eternalreturn:block/carpet/pink_carpet_9"
+    },
+    "layers=10": {
+      "model": "eternalreturn:block/carpet/pink_carpet_10"
+    },
+    "layers=11": {
+      "model": "eternalreturn:block/carpet/pink_carpet_11"
+    },
+    "layers=12": {
+      "model": "eternalreturn:block/carpet/pink_carpet_12"
+    },
+    "layers=13": {
+      "model": "eternalreturn:block/carpet/pink_carpet_13"
+    },
+    "layers=14": {
+      "model": "eternalreturn:block/carpet/pink_carpet_14"
+    },
+    "layers=15": {
+      "model": "eternalreturn:block/carpet/pink_carpet_15"
+    },
+    "layers=16": {
+      "model": "eternalreturn:block/carpet/pink_carpet_16"
+    }
+  }
+}

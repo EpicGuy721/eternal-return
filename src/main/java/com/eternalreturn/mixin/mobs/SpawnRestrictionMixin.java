@@ -1,6 +1,7 @@
 package com.eternalreturn.mixin.mobs;
 
 import com.eternalreturn.config.EternalReturnConfig;
+import com.eternalreturn.survival.BeaconZones;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
@@ -30,6 +31,11 @@ public abstract class SpawnRestrictionMixin {
 			if (cfg.creepersOnlySpawnUnderground && world.getLightLevel(LightType.SKY, pos) > cfg.creeperMaxSkyLight) {
 				cir.setReturnValue(false);
 			}
+		}
+		// Beacons: no monsters inside their area, animals only there (BeaconZones).
+		if (spawnReason == SpawnReason.NATURAL && !BeaconZones.allowsNaturalSpawn(world.toServerWorld(), type, pos)) {
+			cir.setReturnValue(false);
+			return;
 		}
 		// Natural elder guardians (see OceanSpawns): rarer than their spawn weight alone, and never two close together.
 		if (type == EntityType.ELDER_GUARDIAN && spawnReason == SpawnReason.NATURAL) {
