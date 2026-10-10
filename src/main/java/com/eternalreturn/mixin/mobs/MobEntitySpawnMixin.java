@@ -8,6 +8,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.mob.ElderGuardianEntity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.Monster;
 import net.minecraft.entity.vehicle.BoatEntity;
@@ -21,6 +22,7 @@ import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -40,6 +42,9 @@ public abstract class MobEntitySpawnMixin extends LivingEntity {
 	@Unique
 	private int eternalreturn$ticksInBoat;
 
+	@Shadow
+	private boolean persistent;
+
 	protected MobEntitySpawnMixin(EntityType<? extends LivingEntity> entityType, World world) {
 		super(entityType, world);
 	}
@@ -48,6 +53,10 @@ public abstract class MobEntitySpawnMixin extends LivingEntity {
 	private void eternalreturn$rollBaby(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason,
 			EntityData entityData, CallbackInfoReturnable<EntityData> cir) {
 		BabyVariants.rollOnSpawn((MobEntity) (Object) this, world.getRandom());
+		// Elder guardians make themselves persistent; the ones spawning in open water (OceanSpawns) despawn like other monsters.
+		if ((Object) this instanceof ElderGuardianEntity && spawnReason == SpawnReason.NATURAL) {
+			this.persistent = false;
+		}
 	}
 
 	@Inject(method = "writeCustomDataToNbt", at = @At("TAIL"))

@@ -6,6 +6,7 @@ import com.eternalreturn.fishing.FishingLoot;
 import com.eternalreturn.fishing.Thriftiness;
 import com.eternalreturn.fishing.Worms;
 import com.eternalreturn.mobs.ModEntities;
+import com.eternalreturn.mobs.OceanSpawns;
 import com.eternalreturn.villager.TradeRules;
 import com.eternalreturn.worldgen.WorldgenFeatures;
 import com.eternalreturn.worldgen.ores.OreVariants;
@@ -28,6 +29,7 @@ public class EternalReturn implements ModInitializer {
 	public void onInitialize() {
 		EternalReturnConfig.load();
 		ModEntities.register();
+		OceanSpawns.register();
 		FishingItems.register();
 		FishingLoot.register();
 		Thriftiness.register();

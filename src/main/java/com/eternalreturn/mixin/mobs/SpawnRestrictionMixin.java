@@ -5,6 +5,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.SpawnRestriction;
+import net.minecraft.entity.mob.ElderGuardianEntity;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.LightType;
@@ -26,6 +28,14 @@ public abstract class SpawnRestrictionMixin {
 		if (type == EntityType.CREEPER && spawnReason == SpawnReason.NATURAL) {
 			EternalReturnConfig.MobTweaks cfg = EternalReturnConfig.get().mobs;
 			if (cfg.creepersOnlySpawnUnderground && world.getLightLevel(LightType.SKY, pos) > cfg.creeperMaxSkyLight) {
+				cir.setReturnValue(false);
+			}
+		}
+		// Natural elder guardians (see OceanSpawns): rarer than their spawn weight alone, and never two close together.
+		if (type == EntityType.ELDER_GUARDIAN && spawnReason == SpawnReason.NATURAL) {
+			EternalReturnConfig.MobTweaks cfg = EternalReturnConfig.get().mobs;
+			if (random.nextDouble() >= cfg.elderGuardianSpawnChance
+					|| !world.getEntitiesByClass(ElderGuardianEntity.class, new Box(pos).expand(cfg.elderGuardianSpacing), elder -> true).isEmpty()) {
 				cir.setReturnValue(false);
 			}
 		}

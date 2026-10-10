@@ -758,25 +758,10 @@
     "moderner_beta:provider": "moderner_beta:noise_3d",
     "moderner_beta:sea_level": 63,
     "moderner_beta:structure_modifiers": {
-      "overrides": {
-        "moderner_beta:ocean_shrine": {
-          "placement": {
-            "type": "minecraft:random_spread",
-            "salt": 357,
-            "separation": 16,
-            "spacing": 64,
-            "spread_type": "triangular"
-          },
-          "structures": [
-            {
-              "structure": "moderner_beta:ocean_shrine",
-              "weight": 1
-            }
-          ]
-        }
-      },
+      "overrides": {},
       "removed": [
-        "minecraft:trial_chambers"
+        "minecraft:trial_chambers",
+        "minecraft:ocean_monuments"
       ]
     },
     "moderner_beta:surface_properties": {

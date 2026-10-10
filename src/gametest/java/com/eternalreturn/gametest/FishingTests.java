@@ -164,8 +164,13 @@ public class FishingTests implements FabricGameTest {
 		Map<Item, Integer> none = sample(ctx, water, null, 3000);
 		check(ctx, fishCount(none) == 0, "no bait must catch no fish: " + none);
 		check(ctx, n(none, Items.LILY_PAD) + n(none, Items.BONE) + n(none, Items.STICK) > 0, "no bait still catches junk: " + none);
+		// Prismarine: weight 2 next to junk 10 and treasure 5 (about 12% without bait, 2% with), shards a little more often than crystals.
+		int shards = n(none, Items.PRISMARINE_SHARD);
+		int crystals = n(none, Items.PRISMARINE_CRYSTALS);
+		check(ctx, shards > 150 && crystals > 100 && shards + crystals < 550, "prismarine without bait: " + shards + " shards, " + crystals + " crystals in 3000");
 
 		Map<Item, Integer> worm = sample(ctx, water, FishingItems.WORM, 3000);
+		check(ctx, n(worm, Items.PRISMARINE_SHARD) + n(worm, Items.PRISMARINE_CRYSTALS) > 20, "prismarine with bait too: " + worm);
 		double ratio = (double) n(worm, FishingItems.PERCH) / Math.max(1, n(worm, Items.COD));
 		check(ctx, ratio > 0.75 && ratio < 1.33, "perch should be as common as cod, perch/cod = " + ratio + " " + worm);
 		check(ctx, n(worm, FishingItems.PIKE) > 0, "pike anywhere");

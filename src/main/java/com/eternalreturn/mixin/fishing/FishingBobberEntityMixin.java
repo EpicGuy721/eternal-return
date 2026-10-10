@@ -3,6 +3,8 @@ package com.eternalreturn.mixin.fishing;
 import com.eternalreturn.duck.BaitedHook;
 import com.eternalreturn.fishing.Bait;
 import com.eternalreturn.fishing.FishingLoot;
+import com.eternalreturn.fishing.HostileCatches;
+import com.eternalreturn.fishing.Overfishing;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -128,7 +130,14 @@ public abstract class FishingBobberEntityMixin extends ProjectileEntity implemen
 	private int eternalreturn$baitLure(int lureTicks) {
 		PlayerEntity owner = this.getPlayerOwner();
 		int reduction = owner == null ? lureTicks : lureTicks + Bait.lureTicks(Bait.find(owner, this.eternalreturn$inLava()), this.getWorld());
-		return Math.min(reduction, Math.max(0, this.waitCountdown - MIN_WAIT_TICKS));
+		reduction = Math.min(reduction, Math.max(0, this.waitCountdown - MIN_WAIT_TICKS));
+		// An overfished spot: the wait left after Lure and bait grows (Overfishing).
+		double slowdown = Overfishing.waitMultiplier(this.getWorld(), this.getPos());
+		if (slowdown > 1.0) {
+			int wait = this.waitCountdown - reduction;
+			reduction = this.waitCountdown - (int) Math.round(wait * slowdown);
+		}
+		return reduction;
 	}
 
 	@Inject(method = "use", at = @At("HEAD"))
@@ -143,11 +152,21 @@ public abstract class FishingBobberEntityMixin extends ProjectileEntity implemen
 		return original.call(lookup, this.eternalreturn$inLava() ? FishingLoot.LAVA_FISHING : key);
 	}
 
-	/** Bait is used up by a catch, not by casting, and Thriftiness on the rod can save it. */
+	/**
+	 * A bite was reeled in. It counts against this spot (Overfishing), and in water it may be a monster
+	 * instead of items (HostileCatches). Bait is used up by a catch, not by casting, and Thriftiness on
+	 * the rod can save it.
+	 */
 	@ModifyExpressionValue(method = "use", at = @At(value = "INVOKE",
 			target = "Lnet/minecraft/loot/LootTable;generateLoot(Lnet/minecraft/loot/context/LootContextParameterSet;)Lit/unimi/dsi/fastutil/objects/ObjectArrayList;"))
 	private ObjectArrayList<ItemStack> eternalreturn$consumeBait(ObjectArrayList<ItemStack> loot, @Local(argsOnly = true) ItemStack rod) {
 		PlayerEntity owner = this.getPlayerOwner();
+		Overfishing.recordCatch(this.getWorld(), this.getPos());
+		if (owner != null && !this.eternalreturn$inLava() && this.getWorld() instanceof ServerWorld world
+				&& HostileCatches.tryCatch(world, (FishingBobberEntity) (Object) this, owner, this.random)) {
+			Bait.consumeAfterCatch(owner, this.eternalreturn$bait, rod, this.random);
+			return new ObjectArrayList<>();
+		}
 		if (owner != null && !loot.isEmpty()) {
 			Bait.consumeAfterCatch(owner, this.eternalreturn$bait, rod, this.random);
 		}

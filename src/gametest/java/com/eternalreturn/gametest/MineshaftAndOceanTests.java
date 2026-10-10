@@ -157,7 +157,7 @@ public class MineshaftAndOceanTests implements FabricGameTest {
 	}
 
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = GameTestWorld.ETERNAL_RETURN_BATCH, tickLimit = 2_000_000)
-	public void oceanVariantsCherryGrovesAndMonuments(TestContext ctx) {
+	public void oceanVariantsAndCherryGroves(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
 		ChunkGenerator generator = world.getChunkManager().getChunkGenerator();
 		NoiseConfig noise = world.getChunkManager().getNoiseConfig();
@@ -179,11 +179,8 @@ public class MineshaftAndOceanTests implements FabricGameTest {
 		int total = samples;
 		biomes.entrySet().stream().sorted((a, b) -> b.getValue() - a.getValue())
 				.forEach(entry -> share.put(entry.getKey(), String.format("%.2f%%", entry.getValue() * 100.0 / total)));
-		List<Found> monuments = starts(world, StructureSetKeys.OCEAN_MONUMENTS, StructureKeys.MONUMENT);
-		monuments.sort((a, b) -> Long.compare(distance(a.chunk()), distance(b.chunk())));
-		List<String> monumentSpots = monuments.stream().limit(6).map(found -> found.start().getBoundingBox().getCenter().toShortString() + " in " + found.biome()).toList();
-		EternalReturn.LOGGER.info("[oceans] biomes over {} x {} blocks: {} | ocean monuments {} e.g. {} | nearest cherry grove {}", RADIUS * 32, RADIUS * 32, share,
-				monuments.size(), monumentSpots, cherry == null ? "none" : cherry[0] + ", " + cherry[1]);
+		EternalReturn.LOGGER.info("[oceans] biomes over {} x {} blocks: {} | nearest cherry grove {}", RADIUS * 32, RADIUS * 32, share,
+				cherry == null ? "none" : cherry[0] + ", " + cherry[1]);
 		// For the in-game checklist: the highest ground within 3000 blocks, and the nearest stretch of some biomes.
 		int[] top = {0, 0, Integer.MIN_VALUE};
 		String topBiome = "?";
@@ -214,7 +211,6 @@ public class MineshaftAndOceanTests implements FabricGameTest {
 			ctx.assertTrue(biomes.getOrDefault(ocean, 0) > 0, "no " + ocean + " within " + RADIUS * 16 + " blocks: " + share);
 		}
 		ctx.assertTrue(biomes.getOrDefault("minecraft:cherry_grove", 0) > 0, "no cherry grove: " + share);
-		ctx.assertTrue(!monuments.isEmpty(), "no ocean monument within " + RADIUS + " chunks");
 		ctx.complete();
 	}
 

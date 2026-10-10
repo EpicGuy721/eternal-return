@@ -139,9 +139,12 @@ pipeline += [
 # ---------------------------------------------------------------- caves: no modern cave biomes
 preset['caveBiomeSettings'] = {'moderner_beta:provider': 'moderner_beta:none'}
 
-# ---------------------------------------------------------------- structures: no trial chambers (Eternal Return worlds only)
+# ---------------------------------------------------------------- structures (Eternal Return worlds only)
+# No trial chambers and no ocean monuments (guardians spawn in the open ocean instead). Moderner Beta's
+# ocean shrines exist only through this override in its presets, so dropping it drops them.
 cs = preset['chunkSettings']
-cs['moderner_beta:structure_modifiers']['removed'] = ['minecraft:trial_chambers']
+cs['moderner_beta:structure_modifiers']['removed'] = ['minecraft:trial_chambers', 'minecraft:ocean_monuments']
+cs['moderner_beta:structure_modifiers']['overrides'].pop('moderner_beta:ocean_shrine')
 
 # ---------------------------------------------------------------- terrain
 cs['moderner_beta:deepslate_generation']['enabled'] = False

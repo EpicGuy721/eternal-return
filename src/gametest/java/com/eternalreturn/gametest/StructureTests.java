@@ -3,6 +3,7 @@ package com.eternalreturn.gametest;
 import com.eternalreturn.EternalReturn;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.ServerWorld;
@@ -10,6 +11,7 @@ import net.minecraft.structure.StructureSet;
 import net.minecraft.structure.StructureSetKeys;
 import net.minecraft.test.GameTest;
 import net.minecraft.test.TestContext;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.ProtoChunk;
 import net.minecraft.world.chunk.UpgradeData;
@@ -17,6 +19,7 @@ import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.chunk.placement.RandomSpreadStructurePlacement;
 import net.minecraft.world.gen.chunk.placement.StructurePlacementCalculator;
 import net.minecraft.world.gen.structure.Structure;
+import net.minecraft.world.gen.structure.StructureKeys;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -69,5 +72,29 @@ public class StructureTests implements FabricGameTest {
 			ctx.assertTrue(setActive && trialStarts > 0, "control world should have trial chambers, found " + trialStarts + " (set active: " + setActive + ")");
 		}
 		ctx.complete();
+	}
+
+	/**
+	 * Ocean monuments and Moderner Beta's ocean shrines: Eternal Return worlds place neither (no
+	 * structure set the world places holds them); vanilla still places monuments, which shows the check
+	 * sees them. Moderner Beta's other presets are only logged.
+	 */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = GameTestWorld.WORLDGEN_BATCH, tickLimit = 200)
+	public void noOceanMonumentsOrShrinesInEternalReturn(TestContext ctx) {
+		StructurePlacementCalculator calculator = ctx.getWorld().getChunkManager().getStructurePlacementCalculator();
+		boolean monuments = places(calculator, StructureKeys.MONUMENT);
+		boolean shrines = places(calculator, RegistryKey.of(RegistryKeys.STRUCTURE, Identifier.of("moderner_beta", "ocean_shrine")));
+		EternalReturn.LOGGER.info("[structure-test] preset={} places ocean monuments={} ocean shrines={}", GameTestWorld.presetProperty(), monuments, shrines);
+		if (GameTestWorld.ETERNAL_RETURN_PRESET.equals(GameTestWorld.presetProperty())) {
+			ctx.assertTrue(!monuments && !shrines, "Eternal Return world places ocean monuments " + monuments + ", ocean shrines " + shrines);
+		} else if ("minecraft:normal".equals(GameTestWorld.presetProperty())) {
+			ctx.assertTrue(monuments, "vanilla world should place ocean monuments");
+		}
+		ctx.complete();
+	}
+
+	private static boolean places(StructurePlacementCalculator calculator, RegistryKey<Structure> structure) {
+		return calculator.getStructureSets().stream()
+				.anyMatch(set -> set.value().structures().stream().anyMatch(entry -> entry.structure().matchesKey(structure)));
 	}
 }

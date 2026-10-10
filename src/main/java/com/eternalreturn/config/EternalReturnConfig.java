@@ -114,6 +114,19 @@ public final class EternalReturnConfig {
 		public double skeletonSwordChance = 0.1;
 
 		public boolean monstersBreakOutOfBoats = true;
+
+		/**
+		 * Guardians and elder guardians spawn in ocean biomes (biome tag eternalreturn:ocean_waters) like other
+		 * monsters, with these weights in the monster spawn list (drowned have 95 there, the whole list
+		 * about 515). Like vanilla's, they mostly spawn where the sky is hidden; under open sky only one
+		 * try in 20 passes. Read when the world loads.
+		 */
+		public int guardianSpawnWeight = 4;
+		public int elderGuardianSpawnWeight = 1;
+		/** On top of its weight, a natural elder guardian spawn goes ahead only this often... */
+		public double elderGuardianSpawnChance = 0.25;
+		/** ...and only with no other elder guardian within this many blocks. */
+		public int elderGuardianSpacing = 96;
 	}
 
 	public static final class FishingTweaks {
@@ -130,6 +143,42 @@ public final class EternalReturnConfig {
 		public int anglerfishMinWaterDepth = 10;
 		/** Lava fishing works in ultrawarm dimensions (the Nether). True allows it in any lava. */
 		public boolean lavaFishingOutsideNether = false;
+		/**
+		 * Chance for a catch in water to be a hostile mob instead of items (never on Peaceful). The mob
+		 * comes up at the hook and goes for the angler. Bait is used up as for any catch.
+		 */
+		public double hostileCatchChance = 0.03;
+		/** Which mob it is: id -> weight, and whether it only bites in ocean biomes (eternalreturn:ocean_waters). */
+		public Map<String, HostileCatch> hostileCatches = defaultHostileCatches();
+		/** Fishing the same spot again and again makes bites come slower there for a while. */
+		public Overfishing overfishing = new Overfishing();
+	}
+
+	public static final class HostileCatch {
+		public int weight;
+		public boolean oceanOnly;
+
+		public HostileCatch() {
+		}
+
+		HostileCatch(int weight, boolean oceanOnly) {
+			this.weight = weight;
+			this.oceanOnly = oceanOnly;
+		}
+	}
+
+	/**
+	 * Every catch counts against the spot it came from and fades away over recoveryMinutes. Where the
+	 * catches within radius blocks add up to more than freeCatches, the wait for a bite there grows by
+	 * slowdownPerCatch (0.5 = half as long again) for each catch over, up to maxSlowdown times as long.
+	 */
+	public static final class Overfishing {
+		public boolean enabled = true;
+		public double radius = 6.0;
+		public double freeCatches = 3.0;
+		public double slowdownPerCatch = 0.5;
+		public double maxSlowdown = 4.0;
+		public double recoveryMinutes = 5.0;
 	}
 
 	public static final class BaitStats {
@@ -423,6 +472,17 @@ public final class EternalReturnConfig {
 		m.put("eternalreturn:glow_bait", new BaitStats(5, 15, false));
 		m.put("minecraft:glistering_melon_slice", new BaitStats(5, 0, false));
 		m.put("eternalreturn:infernal_bait", new BaitStats(5, 0, true));
+		return m;
+	}
+
+	/** drowned_guardian_jockey and drowned_elder_guardian_jockey are a drowned with a trident riding one. */
+	private static Map<String, HostileCatch> defaultHostileCatches() {
+		Map<String, HostileCatch> m = new LinkedHashMap<>();
+		m.put("drowned", new HostileCatch(60, false));
+		m.put("guardian", new HostileCatch(20, true));
+		m.put("drowned_guardian_jockey", new HostileCatch(10, true));
+		m.put("elder_guardian", new HostileCatch(3, true));
+		m.put("drowned_elder_guardian_jockey", new HostileCatch(1, true));
 		return m;
 	}
 
