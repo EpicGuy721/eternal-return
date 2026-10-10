@@ -37,6 +37,12 @@
         },
         {
           "type": "minecraft:loot_table",
+          "value": "eternalreturn:gameplay/fishing/prismarine_blocks",
+          "weight": 1,
+          "quality": 1
+        },
+        {
+          "type": "minecraft:loot_table",
           "value": "eternalreturn:gameplay/fishing/fish",
           "weight": 85,
           "quality": -1,

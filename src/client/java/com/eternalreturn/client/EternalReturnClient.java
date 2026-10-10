@@ -4,6 +4,7 @@ import com.eternalreturn.logic.EnchantCaps;
 import com.eternalreturn.logic.EnchantLevels;
 import com.eternalreturn.logic.InherentEnchantments;
 import com.eternalreturn.mobs.ModEntities;
+import com.eternalreturn.survival.ArmorWeight;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
@@ -35,6 +36,16 @@ public class EternalReturnClient implements ClientModInitializer {
 				int used = EnchantCaps.pointsUsed(stack);
 				extra.add(Text.translatable("tooltip.eternalreturn.capacity", used, cap)
 						.formatted(used > cap ? Formatting.RED : Formatting.DARK_GRAY));
+			}
+
+			// Armor weight: how much a piece slows its wearer (ArmorWeight).
+			if (stack.getItem() instanceof net.minecraft.item.ArmorItem) {
+				double weight = ArmorWeight.weight(stack);
+				if (weight > 0.0) {
+					extra.add(Text.translatable("tooltip.eternalreturn.weight", String.format(java.util.Locale.ROOT, "%.1f", weight * 100.0)).formatted(Formatting.DARK_GRAY));
+				} else if (ArmorWeight.isWeightless(stack)) {
+					extra.add(Text.translatable("tooltip.eternalreturn.weightless").formatted(Formatting.DARK_GRAY));
+				}
 			}
 
 			Map<RegistryEntry<Enchantment>, Integer> inherent = InherentEnchantments.inherentPortion(stack);

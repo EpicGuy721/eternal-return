@@ -1,0 +1,16 @@
+{
+  "values": [
+    "minecraft:desert",
+    "minecraft:badlands",
+    "minecraft:eroded_badlands",
+    "minecraft:wooded_badlands",
+    {
+      "id": "moderner_beta:beta_desert",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:pe_desert",
+      "required": false
+    }
+  ]
+}

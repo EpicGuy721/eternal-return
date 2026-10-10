@@ -128,6 +128,14 @@ public final class EternalReturnConfig {
 		public double elderGuardianSpawnChance = 0.25;
 		/** ...and only with no other elder guardian within this many blocks. */
 		public int elderGuardianSpacing = 96;
+
+		/** Slimes: besides vanilla's sizes 1, 2 and 4, a spawning slime is size 8 this often, and size 16 this often. */
+		public double slimeSize8Chance = 0.08;
+		public double slimeSize16Chance = 0.02;
+		/** Slimes also spawn at night in any overworld biome while it rains (on top of swamps and slime chunks). */
+		public boolean slimesInNightRain = true;
+		/** Fish (cod, salmon, tropical fish, pufferfish) and squids spawn as babies this often (eternalreturn:baby_variants). */
+		public double waterBabyChance = 0.15;
 	}
 
 	public static final class FishingTweaks {
@@ -267,6 +275,31 @@ public final class EternalReturnConfig {
 		public double blindFollowRange = 2.0;
 		/** Mobs from monster spawners drop no items (their experience, and anything they picked up, still drop). */
 		public boolean spawnerMobsDropNothing = true;
+		/**
+		 * Armor weight: armor material -> the share of walking speed a full set takes away (0.30 = 30%, as
+		 * much as Slowness II). Split over the pieces: helmet 15%, chestplate 40%, leggings 30%, boots 15%.
+		 * Materials not listed weigh nothing. Weightless on a piece makes it weigh nothing.
+		 */
+		public Map<String, Double> armorWeight = defaultArmorWeight();
+		/** Snow layers and snow blocks fall like sand when nothing holds them up. */
+		public boolean snowFalls = true;
+		/**
+		 * Crops grow at full speed only in their ideal biomes (biome tags eternalreturn:ideal_biomes/<crop>);
+		 * elsewhere each growth step happens only this often (0.25 = four times slower).
+		 */
+		public double cropGrowthOutsideIdealBiome = 0.25;
+	}
+
+	private static Map<String, Double> defaultArmorWeight() {
+		Map<String, Double> m = new LinkedHashMap<>();
+		m.put("minecraft:leather", 0.03);
+		m.put("minecraft:turtle", 0.03);
+		m.put("minecraft:chainmail", 0.08);
+		m.put("minecraft:iron", 0.15);
+		m.put("minecraft:netherite", 0.15);
+		m.put("minecraft:gold", 0.20);
+		m.put("minecraft:diamond", 0.30);
+		return m;
 	}
 
 	/** Overworld generation (see docs/worldgen.md). Changes need a restart, and only affect newly generated chunks. */
@@ -288,6 +321,12 @@ public final class EternalReturnConfig {
 		 * makes it. Other worlds never change.
 		 */
 		public boolean roundOverhangs = true;
+		/**
+		 * In Eternal Return worlds only strongholds, mineshafts, nether fossils and end cities are placed, in
+		 * every dimension (structure-like features such as geodes and dungeons stay). Blazes spawn in soul
+		 * sand valleys and basalt deltas there instead of fortresses. Other worlds never change.
+		 */
+		public boolean onlyEssentialStructures = true;
 		/** The cave engine (com.eternalreturn.worldgen.caves). Only Eternal Return worlds are affected. */
 		public CaveTweaks caves = new CaveTweaks();
 	}

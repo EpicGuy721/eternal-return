@@ -1,0 +1,39 @@
+{
+  "values": [
+    "minecraft:taiga",
+    "minecraft:old_growth_pine_taiga",
+    "minecraft:old_growth_spruce_taiga",
+    "minecraft:snowy_taiga",
+    "minecraft:windswept_hills",
+    "minecraft:windswept_forest",
+    "minecraft:windswept_gravelly_hills",
+    {
+      "id": "moderner_beta:early_release_taiga",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:late_beta_taiga",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:beta_taiga",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:pe_taiga",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:beta_oak_taiga",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:early_release_extreme_hills",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:late_beta_extreme_hills",
+      "required": false
+    }
+  ]
+}

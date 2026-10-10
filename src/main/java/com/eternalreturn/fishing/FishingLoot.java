@@ -2,7 +2,11 @@ package com.eternalreturn.fishing;
 
 import com.eternalreturn.EternalReturn;
 import com.eternalreturn.config.EternalReturnConfig;
+import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
+import net.minecraft.entity.EntityType;
+import net.minecraft.loot.LootPool;
 import net.minecraft.loot.LootTable;
+import net.minecraft.loot.entry.LootTableEntry;
 import net.minecraft.loot.condition.LootConditionType;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleTypes;
@@ -24,7 +28,15 @@ public final class FishingLoot {
 	private FishingLoot() {
 	}
 
+	/** Drowned also drop prismarine (loot table eternalreturn:entities/drowned_prismarine, added as a pool to theirs). */
+	public static final RegistryKey<LootTable> DROWNED_PRISMARINE = RegistryKey.of(RegistryKeys.LOOT_TABLE, EternalReturn.id("entities/drowned_prismarine"));
+
 	public static void register() {
+		LootTableEvents.MODIFY.register((key, table, source, registries) -> {
+			if (key.equals(EntityType.DROWNED.getLootTableId())) {
+				table.pool(LootPool.builder().with(LootTableEntry.builder(DROWNED_PRISMARINE)));
+			}
+		});
 	}
 
 	/** Lava fishing works in ultrawarm dimensions (the Nether), or anywhere if the config allows it. */

@@ -9,11 +9,13 @@ import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.mob.AbstractSkeletonEntity;
 import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.mob.WaterCreatureEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.random.Random;
 
 /**
- * Baby skeletons, strays and creepers. The flag itself lives in a tracked data entry added by
+ * Baby skeletons, strays and creepers, and baby fish and squids (WaterCreatureEntityMixin; drawn at half
+ * size by LivingEntityRendererMixin). The flag itself lives in a tracked data entry added by
  * AbstractSkeletonEntityMixin and CreeperEntityMixin; vanilla's isBaby() hooks then halve the
  * hitbox, shadow and eye height and raise the voice pitch on their own.
  */
@@ -24,12 +26,13 @@ public final class BabyVariants {
 	}
 
 	public static boolean supportsBaby(Entity entity) {
-		return entity instanceof AbstractSkeletonEntity || entity instanceof CreeperEntity;
+		return entity instanceof AbstractSkeletonEntity || entity instanceof CreeperEntity
+				|| entity instanceof WaterCreatureEntity && entity.getType().isIn(MobTags.BABY_VARIANTS);
 	}
 
 	public static void rollOnSpawn(MobEntity mob, Random random) {
-		if (supportsBaby(mob) && !mob.isBaby() && mob.getType().isIn(MobTags.BABY_VARIANTS)
-				&& random.nextFloat() < EternalReturnConfig.get().mobs.babyChance) {
+		double chance = mob instanceof WaterCreatureEntity ? EternalReturnConfig.get().mobs.waterBabyChance : EternalReturnConfig.get().mobs.babyChance;
+		if (supportsBaby(mob) && !mob.isBaby() && mob.getType().isIn(MobTags.BABY_VARIANTS) && random.nextFloat() < chance) {
 			mob.setBaby(true);
 		}
 	}

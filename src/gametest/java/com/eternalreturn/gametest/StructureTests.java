@@ -12,6 +12,7 @@ import net.minecraft.structure.StructureSetKeys;
 import net.minecraft.test.GameTest;
 import net.minecraft.test.TestContext;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.ProtoChunk;
 import net.minecraft.world.chunk.UpgradeData;
@@ -89,6 +90,35 @@ public class StructureTests implements FabricGameTest {
 			ctx.assertTrue(!monuments && !shrines, "Eternal Return world places ocean monuments " + monuments + ", ocean shrines " + shrines);
 		} else if ("minecraft:normal".equals(GameTestWorld.presetProperty())) {
 			ctx.assertTrue(monuments, "vanilla world should place ocean monuments");
+		}
+		ctx.complete();
+	}
+
+	/**
+	 * Eternal Return worlds place only strongholds, mineshafts, nether fossils and end cities, in every
+	 * dimension, and let blazes spawn outside fortresses; other worlds keep villages and fortresses.
+	 */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = GameTestWorld.WORLDGEN_BATCH, tickLimit = 200)
+	public void onlyEssentialStructuresInEternalReturn(TestContext ctx) {
+		java.util.Map<String, java.util.List<String>> placed = new java.util.TreeMap<>();
+		for (ServerWorld dimension : ctx.getWorld().getServer().getWorlds()) {
+			java.util.List<String> structures = new java.util.ArrayList<>();
+			for (var set : dimension.getChunkManager().getStructurePlacementCalculator().getStructureSets()) {
+				set.value().structures().forEach(entry -> structures.add(entry.structure().getKey().map(key -> key.getValue().toString()).orElse("?")));
+			}
+			placed.put(dimension.getRegistryKey().getValue().toString(), structures);
+		}
+		EternalReturn.LOGGER.info("[structure-test] preset={} structures placed per dimension {}", GameTestWorld.presetProperty(), placed);
+		java.util.Set<String> kept = java.util.Set.of("minecraft:stronghold", "minecraft:mineshaft", "minecraft:mineshaft_mesa", "minecraft:nether_fossil", "minecraft:end_city");
+		if (GameTestWorld.ETERNAL_RETURN_PRESET.equals(GameTestWorld.presetProperty())) {
+			java.util.List<String> extra = placed.values().stream().flatMap(java.util.List::stream).filter(id -> !kept.contains(id)).distinct().toList();
+			ctx.assertTrue(extra.isEmpty(), "Eternal Return world places " + extra);
+			ctx.assertTrue(placed.getOrDefault("minecraft:overworld", java.util.List.of()).contains("minecraft:stronghold"), "strongholds stay");
+			ctx.assertTrue(placed.getOrDefault("minecraft:the_nether", java.util.List.of()).contains("minecraft:nether_fossil"), "nether fossils stay");
+			ctx.assertTrue(com.eternalreturn.mobs.Blazes.mayFreeSpawn(ctx.getWorld(), ctx.getAbsolutePos(BlockPos.ORIGIN)), "blazes spawn outside fortresses here");
+		} else if ("minecraft:normal".equals(GameTestWorld.presetProperty())) {
+			ctx.assertTrue(placed.get("minecraft:overworld").contains("minecraft:village_plains") && placed.get("minecraft:the_nether").contains("minecraft:fortress"),
+					"vanilla keeps villages and fortresses");
 		}
 		ctx.complete();
 	}

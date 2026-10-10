@@ -2,6 +2,12 @@
   "values": [
     "minecraft:skeleton",
     "minecraft:stray",
-    "minecraft:creeper"
+    "minecraft:creeper",
+    "minecraft:cod",
+    "minecraft:salmon",
+    "minecraft:tropical_fish",
+    "minecraft:pufferfish",
+    "minecraft:squid",
+    "minecraft:glow_squid"
   ]
 }

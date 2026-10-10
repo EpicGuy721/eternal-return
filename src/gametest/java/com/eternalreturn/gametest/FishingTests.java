@@ -167,7 +167,9 @@ public class FishingTests implements FabricGameTest {
 		// Prismarine: weight 2 next to junk 10 and treasure 5 (about 12% without bait, 2% with), shards a little more often than crystals.
 		int shards = n(none, Items.PRISMARINE_SHARD);
 		int crystals = n(none, Items.PRISMARINE_CRYSTALS);
-		check(ctx, shards > 150 && crystals > 100 && shards + crystals < 550, "prismarine without bait: " + shards + " shards, " + crystals + " crystals in 3000");
+		check(ctx, shards > 120 && crystals > 80 && shards + crystals < 550, "prismarine without bait: " + shards + " shards, " + crystals + " crystals in 3000");
+		int blocks = n(none, Items.PRISMARINE) + n(none, Items.DARK_PRISMARINE) + n(none, Items.SEA_LANTERN);
+		check(ctx, blocks > 60 && blocks < 300 && n(none, Items.SEA_LANTERN) > 0, "prismarine blocks and sea lanterns, rarely: " + blocks + " in 3000");
 
 		Map<Item, Integer> worm = sample(ctx, water, FishingItems.WORM, 3000);
 		check(ctx, n(worm, Items.PRISMARINE_SHARD) + n(worm, Items.PRISMARINE_CRYSTALS) > 20, "prismarine with bait too: " + worm);

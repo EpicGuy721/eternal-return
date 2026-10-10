@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:fishing",
+  "pools": [
+    {
+      "rolls": 1.0,
+      "bonus_rolls": 0.0,
+      "entries": [
+        {"type": "minecraft:item", "name": "minecraft:prismarine", "weight": 3},
+        {"type": "minecraft:item", "name": "minecraft:dark_prismarine", "weight": 2},
+        {"type": "minecraft:item", "name": "minecraft:sea_lantern", "weight": 1}
+      ]
+    }
+  ],
+  "random_sequence": "eternalreturn:gameplay/fishing/prismarine_blocks"
+}

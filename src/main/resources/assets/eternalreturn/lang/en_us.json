@@ -39,5 +39,14 @@
 	"enchantment.eternalreturn.growth": "Growth",
 	"enchantment.eternalreturn.slayer": "Slayer",
 	"block.eternalreturn.stairs": "%s Stairs",
-	"block.eternalreturn.slab": "%s Slab"
+	"block.eternalreturn.slab": "%s Slab",
+	"item.eternalreturn.scroll": "Scroll",
+	"item.eternalreturn.scroll.of": "Scroll of %s",
+	"item.eternalreturn.scroll.hint": "Left-click to read: learn to craft its enchanted book",
+	"item.eternalreturn.scroll.learned": "You learned to craft %s books",
+	"item.eternalreturn.scroll.known": "You already know how to craft %s books",
+	"item.eternalreturn.scroll.unknown": "There is no recipe for %s books",
+	"enchantment.eternalreturn.weightless": "Weightless",
+	"tooltip.eternalreturn.weight": "Weight: %s%% slower",
+	"tooltip.eternalreturn.weightless": "Weightless"
 }

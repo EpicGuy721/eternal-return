@@ -1,0 +1,34 @@
+{
+  "values": [
+    "minecraft:snowy_plains",
+    "minecraft:ice_spikes",
+    "minecraft:grove",
+    "minecraft:snowy_slopes",
+    "minecraft:snowy_taiga",
+    "minecraft:frozen_river",
+    {
+      "id": "moderner_beta:early_release_ice_plains",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:late_beta_ice_plains",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:beta_tundra",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:pe_tundra",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:beta_ice_desert",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:pe_ice_desert",
+      "required": false
+    }
+  ]
+}

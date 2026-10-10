@@ -29,7 +29,8 @@
 			"com.eternalreturn.gametest.OverhangTests",
 			"com.eternalreturn.gametest.OceanLifeTests",
 			"com.eternalreturn.gametest.VillagerNeedsTests",
-			"com.eternalreturn.gametest.SurvivalTests"
+			"com.eternalreturn.gametest.SurvivalTests",
+			"com.eternalreturn.gametest.WorldRulesTests"
 		]
 	},
 	"mixins": [

@@ -1,0 +1,30 @@
+{
+  "values": [
+    "minecraft:forest",
+    "minecraft:flower_forest",
+    "minecraft:birch_forest",
+    "minecraft:old_growth_birch_forest",
+    "minecraft:dark_forest",
+    "minecraft:cherry_grove",
+    {
+      "id": "moderner_beta:beta_forest",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:pe_forest",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:beta_seasonal_forest",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:pe_seasonal_forest",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:beta_oak_forest",
+      "required": false
+    }
+  ]
+}

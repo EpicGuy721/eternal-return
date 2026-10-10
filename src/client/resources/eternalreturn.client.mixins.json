@@ -5,7 +5,8 @@
 	"client": [
 		"AnvilScreenMixin",
 		"EnchantmentScreenMixin",
-		"mobs.CreeperEntityRendererMixin"
+		"mobs.CreeperEntityRendererMixin",
+		"mobs.LivingEntityRendererMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

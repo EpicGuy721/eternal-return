@@ -1,0 +1,24 @@
+{
+  "values": [
+    "minecraft:forest",
+    "minecraft:dark_forest",
+    "minecraft:taiga",
+    "minecraft:old_growth_spruce_taiga",
+    {
+      "id": "moderner_beta:beta_seasonal_forest",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:pe_seasonal_forest",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:early_release_taiga",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:late_beta_taiga",
+      "required": false
+    }
+  ]
+}

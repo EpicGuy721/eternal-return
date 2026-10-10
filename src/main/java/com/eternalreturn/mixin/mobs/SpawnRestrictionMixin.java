@@ -1,6 +1,8 @@
 package com.eternalreturn.mixin.mobs;
 
 import com.eternalreturn.config.EternalReturnConfig;
+import com.eternalreturn.mobs.Blazes;
+import com.eternalreturn.mobs.Slimes;
 import com.eternalreturn.survival.BeaconZones;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -34,6 +36,16 @@ public abstract class SpawnRestrictionMixin {
 		}
 		// Beacons: no monsters inside their area, animals only there (BeaconZones).
 		if (spawnReason == SpawnReason.NATURAL && !BeaconZones.allowsNaturalSpawn(world.toServerWorld(), type, pos)) {
+			cir.setReturnValue(false);
+			return;
+		}
+		// Slimes in the rain at night, any biome (Slimes).
+		if (type == EntityType.SLIME && spawnReason == SpawnReason.NATURAL && Slimes.rainSpawn(world.toServerWorld(), pos)) {
+			cir.setReturnValue(true);
+			return;
+		}
+		// Blazes outside nether fortresses (Blazes).
+		if (type == EntityType.BLAZE && spawnReason == SpawnReason.NATURAL && !Blazes.mayFreeSpawn(world.toServerWorld(), pos)) {
 			cir.setReturnValue(false);
 			return;
 		}

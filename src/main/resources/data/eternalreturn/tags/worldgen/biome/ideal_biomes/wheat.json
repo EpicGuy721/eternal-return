@@ -1,0 +1,37 @@
+{
+  "values": [
+    "minecraft:plains",
+    "minecraft:sunflower_plains",
+    "minecraft:meadow",
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    {
+      "id": "moderner_beta:late_beta_plains",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:beta_plains",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:pe_plains",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:beta_savanna",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:pe_savanna",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:beta_shrubland",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:pe_shrubland",
+      "required": false
+    }
+  ]
+}

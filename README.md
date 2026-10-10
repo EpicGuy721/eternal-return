@@ -25,14 +25,14 @@ In-game tests live in `src/gametest`, a separate test mod that is never packed i
 
 | Task | World | What runs |
 |---|---|---|
-| `runGametest` | flat | the mob, fishing and trade suites (with guardian spawn lists and limits, prismarine, monsters on the hook and overfishing), villager needs (how each is met, price rises on emerald trades only, refusals, shop hours, sleep privacy, healing, saving), survival (no night skip, remembered beds and respawning at the one before, beacon areas through the real spawn rules, grazing and starving, feeding by hand, herd panic, blind follow range, a real spawner's mobs dropping nothing, Growth and Slayer, every stairs and slab with its tags and recipes, stacking and dropping carpets), a check that the Eternal Return world type loaded, the hardened blocks, and every ore variant against its vanilla ore (drops, Fortune, Silk Touch, experience, tool tier, smelting, tags, creative tab, redstone light, overlay textures) |
+| `runGametest` | flat | the mob, fishing and trade suites (with guardian spawn lists and limits, prismarine, monsters on the hook and overfishing), villager needs (how each is met, price rises on emerald trades only, refusals, shop hours, sleep privacy, healing, saving), survival (no night skip, remembered beds and respawning at the one before, beacon areas through the real spawn rules, grazing and starving, feeding by hand, herd panic, blind follow range, a real spawner's mobs dropping nothing, Growth and Slayer, every stairs and slab with its tags and recipes, stacking and dropping carpets), armor weight and Weightless, drowned prismarine, baby fish and squids, bigger and rain slimes, blazes, falling snow, crop biomes, scrolls and book recipes, a check that the Eternal Return world type loaded, the hardened blocks, and every ore variant against its vanilla ore (drops, Fortune, Silk Touch, experience, tool tier, smelting, tags, creative tab, redstone light, overlay textures) |
 | `runGametestNoModernerBeta` | flat, Moderner Beta removed | the same suites, and a check that the world type is skipped cleanly |
 | `runGametestModernerBeta` | Moderner Beta, Release 1.6.4 amplified | worldgen checks (debug tunnel on, trial chambers present), carving unchanged |
 | `runGametestModernerBetaTunnelOff` | same | the same with the debug tunnel off |
 | `runGametestModernerBeta164` | Moderner Beta, Release 1.6.4 | carving unchanged; cave density for comparison |
 | `runGametestModernerBetaBeta` | Moderner Beta, Beta 1.7.3 | carving unchanged |
 | `runGametestVanilla` | vanilla generator | worldgen checks (debug tunnel on, trial chambers present), carving unchanged |
-| `runGametestEternalReturn` | Eternal Return, seed 173164 | mineshaft woods by biome (and real ones built from them), all nine oceans and cherry groves present, no ocean monuments or ocean shrines, no ocean biomes on dry land, overhangs without flat bottoms, world height, biome list, no cave biomes, no deepslate, badlands surface, no trial chambers; ore counts per ore over squares in ten biomes within 1% of the baseline recorded before the ore variants (`src/gametest/resources/ores/`), no stone-textured ore inside host stone, variants open to caves in every host, an emerald survey of the highest extreme hills, Moderner Beta hooks applied; debug tunnel on |
+| `runGametestEternalReturn` | Eternal Return, seed 173164 | only essential structures in every dimension, blazes outside fortresses, mineshaft woods by biome (and real ones built from them), all nine oceans and cherry groves present, no ocean monuments or ocean shrines, no ocean biomes on dry land, overhangs without flat bottoms, world height, biome list, no cave biomes, no deepslate, badlands surface, no trial chambers; ore counts per ore over squares in ten biomes within 1% of the baseline recorded before the ore variants (`src/gametest/resources/ores/`), no stone-textured ore inside host stone, variants open to caves in every host, an emerald survey of the highest extreme hills, Moderner Beta hooks applied; debug tunnel on |
 | `runGametestEternalReturnOldCaves` | Eternal Return, new caves off, old caves on, biome stone off | carving matches the world from before the cave engine; cave density for comparison |
 | `runGametestCaves` | Eternal Return plus a twin dimension | every cave type, seams, chunk order, the carvable tag, density, timing; biome stone in every biome against the same chunks without it |
 
@@ -58,6 +58,8 @@ The map tool runs the same way: `runWorldmapEternalReturn`, `runWorldmapBeta` an
 | Fortune on shears multiplies wool | `fortune.json` + `SheepEntityMixin` + `ShearsDispenserBehaviorMixin` |
 | Curse of Invisibility | `invisibility_curse.json`; hiding in `ItemStackMixin`, `ItemMixin`, tooltip code |
 | Growth (armor: +1 max health per level) | `growth.json` (vanilla attribute effect) |
+| Weightless (armor weighs nothing) | `weightless.json`, read by `ArmorWeight` |
+| Librarians sell scrolls; scrolls teach enchanted book recipes | `com.eternalreturn.scrolls` (`Scrolls`, `ScrollItem`); `EnchantBookFactoryMixin`, `ServerPlayNetworkHandlerMixin` (left click), `CraftingScreenHandlerMixin` and `CrafterBlockMixin` (locked recipes); recipes generated by `tools/scrolls/build_scrolls.py` from `tools/scrolls/scrolls.json` |
 
 ### Mobs
 
@@ -72,6 +74,10 @@ The map tool runs the same way: `runWorldmapEternalReturn`, `runWorldmapBeta` an
 | Zombies throw ender pearls | `ThrowPearlGoal`, `Ballistics` (aiming) |
 | Skeletons draw a sword up close | `SkeletonSidearm`, `AbstractSkeletonEntityMixin` |
 | Monsters break out of boats | `MobEntitySpawnMixin` |
+| Baby fish and squids | `BabyVariants`, `WaterCreatureEntityMixin`; client `LivingEntityRendererMixin`; tag `baby_variants` |
+| Bigger slimes; slimes in the rain at night | `Slimes`, `SlimeEntityMixin`, `SpawnRestrictionMixin` |
+| Blazes outside fortresses (Eternal Return worlds) | `Blazes`, `SpawnRestrictionMixin` |
+| Drowned drop prismarine | loot table `eternalreturn:entities/drowned_prismarine`, added to the drowned's by `FishingLoot` |
 | Guardians and elder guardians in every ocean | `OceanSpawns` (biome tag `ocean_waters`); `SpawnRestrictionMixin` (elder guardian limits), `MobEntitySpawnMixin` and `MobEntityAccessor` (they despawn) |
 
 ### Worldgen
@@ -84,6 +90,7 @@ The plan, status, terrain settings and maps are in [docs/worldgen.md](docs/world
 | Biome list: Release 1.6.4 plus birch forest, savanna, badlands, dark forest, cherry grove and every modern ocean | biome layers in the settings preset |
 | No lush caves, dripstone caves or deep dark | settings preset (`caveBiomeSettings`: none) |
 | No deepslate | settings preset (`deepslate_generation` off); tuff moved from block tag `minecraft:deepslate_ore_replaceables` to `minecraft:stone_ore_replaceables`, so ores in tuff blobs stay stone ores |
+| Only strongholds, mineshafts, nether fossils and end cities in Eternal Return worlds (all three dimensions) | `EternalReturnServer`, `MinecraftServerMixin`, `StructurePlacementCalculatorMixin` |
 | No trial chambers, ocean monuments or ocean shrines in Eternal Return worlds | settings preset (`structure_modifiers`: trial chambers and monuments removed, Moderner Beta's ocean shrine override dropped) |
 | Cave engine: eight cave types, only in Eternal Return worlds | `com.eternalreturn.worldgen.caves` (`CaveSystemCarver`, `CaveTypes`, one class per type in `types/`); `worldgen/configured_carver/caves.json`; block tag `eternalreturn:carvable` |
 | Old caves off in Eternal Return worlds | `CarverContextMixin` (which world), `ConfiguredCarverMixin` (skips other carvers) |
@@ -110,7 +117,7 @@ The plan, status, terrain settings and maps are in [docs/worldgen.md](docs/world
 | Worms from digging | `Worms`; block tag `drops_worms` |
 | Chum, glow bait, infernal bait | recipes in `data/eternalreturn/recipe/` |
 | Lava fishing in the Nether | `FishingBobberEntityMixin`, `FishingLoot`; loot table `eternalreturn:gameplay/lava_fishing` |
-| Prismarine shards and crystals from fishing | loot table `eternalreturn:gameplay/fishing/prismarine` |
+| Prismarine shards and crystals from fishing; rarely prismarine, dark prismarine and sea lanterns | loot tables `eternalreturn:gameplay/fishing/prismarine`, `.../prismarine_blocks` |
 | Monsters on the hook: drowned, guardians, elder guardians, drowned riding them | `HostileCatches`, hooked in `FishingBobberEntityMixin`; `DrownedEntityMixin` (the guardian swims, the drowned throws) |
 | Overfished spots bite slower | `Overfishing`, hooked in `FishingBobberEntityMixin` |
 | Villagers stop paying emeralds, except fishermen for fish | `TradeRules`, `VillagerEntityMixin`, `BuyItemFactoryAccessor` |
@@ -125,6 +132,9 @@ The plan, status, terrain settings and maps are in [docs/worldgen.md](docs/world
 | Animals get hungry, graze, take food by hand, starve | `AnimalHunger`; `AnimalEntityMixin`, `SheepGrazingMixin`, `HorseFoodMixin`, `MobEntitySurvivalMixin`; tags `grazers` (entity), `grazing_plants` (block) |
 | Herds panic together | `HerdPanic`, `LivingEntitySurvivalMixin`; entity tag `herd_animals` |
 | Blindness cuts a mob's follow range | `BlindMobs`, `LivingEntitySurvivalMixin` |
+| Armor weight | `ArmorWeight`, `PlayerEntitySurvivalMixin`; tooltip in the client |
+| Snow falls | `SnowFall`, `SnowBlockMixin`, `AbstractBlockSnowMixin` |
+| Crops grow fastest in their ideal biomes | `CropBiomes`, `CropGrowthMixin`; biome tags `eternalreturn:ideal_biomes/<crop>` |
 | Spawner mobs drop no items | `SpawnerMobs`; `MobSpawnerLogicMixin`, `MobEntitySurvivalMixin`, `LivingEntitySurvivalMixin` |
 | Wool and concrete stairs and slabs | `com.eternalreturn.blocks.CutBlocks`; resources generated by `tools/blocks/build_blocks.py` |
 | Carpets stack up to 16 layers | `CarpetLayers`, `CarpetBlockMixin`; vanilla carpet blockstates and loot tables replaced by `tools/blocks/build_blocks.py` |
@@ -133,7 +143,7 @@ The plan, status, terrain settings and maps are in [docs/worldgen.md](docs/world
 
 ### World type
 
-Pick **World Type: Eternal Return** on the create-world screen (it is also in Moderner Beta's own preset list, in its own category). Oceans and continents are laid out like Release 1.6.4, but the land rolls and climbs like Beta 1.7.3 almost everywhere: mostly rolling and hilly ground around y 65-90, hills to about y 115, mountains up to about y 180, with Beta-style cliffs and the odd overhang (whose underside arches and bulges rather than lying flat, see [docs/worldgen.md](docs/worldgen.md)). Swamps stay flat and marshy, as in 1.6.4. Sea level is 63, bedrock is at -64, and below y=0 the stone simply carries on (the biome's stone, see below) with the usual ores: no deepslate layer and no lush caves, dripstone caves or deep dark. Biomes are Release 1.6.4's (with its hills and shores) plus birch forest, savanna, badlands, dark forest and cherry grove, and every modern ocean: deep oceans, and warm, lukewarm, cold and frozen oceans (with deep versions), as in 1.13 and later. There are no ocean monuments, Moderner Beta ocean shrines or trial chambers; guardians roam the open sea instead (see Mobs). The Nether and the End are vanilla.
+Pick **World Type: Eternal Return** on the create-world screen (it is also in Moderner Beta's own preset list, in its own category). Oceans and continents are laid out like Release 1.6.4, but the land rolls and climbs like Beta 1.7.3 almost everywhere: mostly rolling and hilly ground around y 65-90, hills to about y 115, mountains up to about y 180, with Beta-style cliffs and the odd overhang (whose underside arches and bulges rather than lying flat, see [docs/worldgen.md](docs/worldgen.md)). Swamps stay flat and marshy, as in 1.6.4. Sea level is 63, bedrock is at -64, and below y=0 the stone simply carries on (the biome's stone, see below) with the usual ores: no deepslate layer and no lush caves, dripstone caves or deep dark. Biomes are Release 1.6.4's (with its hills and shores) plus birch forest, savanna, badlands, dark forest and cherry grove, and every modern ocean: deep oceans, and warm, lukewarm, cold and frozen oceans (with deep versions), as in 1.13 and later. The only structures are strongholds, mineshafts, nether fossils and end cities, in the overworld, the Nether and the End alike: no villages, temples, outposts, ruins, shipwrecks, monuments, mansions, ancient cities, trail ruins, igloos, ruined portals, trial chambers, nether fortresses or bastions. Structure-like features (dungeons, geodes, fossils, desert wells) stay. So there are no villagers except cured zombie villagers; guardians roam the open sea and blazes the soul sand valleys and basalt deltas instead (see Mobs). The Nether and the End are vanilla.
 
 **Caves.** Eight types, a little more cave in all than Release 1.6.4 (5.3% of the underground open, against 4.5%):
 
@@ -187,6 +197,10 @@ A single Sharpness V book turns the bottom slot's typical Sharpness I into III a
 **Fortune.** Hoes with Fortune apply the ore formula (multiply by up to Fortune + 1) to fully grown wheat, beetroot, and cocoa. Carrots, potatoes, and nether wart already scale with Fortune in vanilla, so they are left out to avoid double scaling; add them to `fortune_crop_drops` if you want it. Shears accept Fortune through the anvil and apply the ore formula to wool, from players and dispensers.
 
 **Curse of Invisibility.** Hides the enchantment list, the glint, and the capacity line. The book itself still shows the curse so you know what you are applying. Found in loot and trades like the other curses.
+
+**Scrolls.** Librarians no longer sell enchanted books: where they would, they sell a scroll of that enchantment (a level I book's price in emeralds, plus a piece of paper). Left-click with a scroll in your main hand to read it: it's used up and you learn the recipe for that enchantment's book. The recipe makes a level I book from a book in the middle, ringed by diamonds, amethyst shards and one to three items that suit the enchantment (a blaze rod for Fire Aspect, blue ice for Frost Walker, three arrows for Multishot). Higher levels come from combining books in the anvil, as before. Book recipes only craft for a player who has learned them (crafters never make them), and a scroll you have already read stays in your hand. Every enchantment has one, this mod's included, except the disabled ones (Mending). The table of themed items is `tools/scrolls/scrolls.json`.
+
+**Weightless.** A new armor enchantment, one level: the piece weighs nothing (see Armor weight).
 
 **Growth.** A new armor enchantment, levels I to V: each level adds half a heart (1 point) of max health, on each piece that has it, so Growth V on all four pieces is ten extra hearts. Enchanting tables, loot and librarians offer it like other armor enchantments, and its levels count toward the piece's capacity.
 
@@ -288,6 +302,20 @@ Villagers that existed before this update, and babies until they grow up, start 
 
 **Blindness.** A blinded mob only notices and follows a target within 2 blocks (vanilla ignores blindness on mobs). Its follow range also limits how far it plans a path, so it shuffles about.
 
+**Armor weight.** Armor slows you down. A full set of diamond takes 30% off your walking speed, as much as Slowness II; iron and netherite 15% (Slowness I); gold 20%; chainmail 8%; leather and turtle shell 3%. The chestplate carries 40% of a set's weight, leggings 30%, helmet and boots 15% each, and the tooltip shows each piece's share. Weightless takes a piece's weight off.
+
+**Baby fish and squids.** 15% of cod, salmon, tropical fish, pufferfish, squids and glow squids spawn as babies: half the size, a little faster, and they stay small.
+
+**Slimes.** A new slime is sometimes size 8 (8%) or even 16 (2%), on top of vanilla's 1, 2 and 4; they split down through the sizes as usual. While it rains at night, slimes spawn on the surface in any overworld biome, besides swamps and slime chunks as before.
+
+**Blazes.** In Eternal Return worlds there are no nether fortresses, so blazes spawn in soul sand valleys and basalt deltas instead; blaze rods (and so eyes of ender and the End) stay within reach. Wither skeletons came only from fortresses, so they (and the Wither) are gone there. Other worlds are unchanged.
+
+**Drowned** drop prismarine shards and crystals now and then (Looting helps).
+
+**Snow** falls like sand when nothing holds it up: a snow block placed in the air, or a snow layer whose block is mined away, drops to the ground (a layer keeps its layers) instead of vanishing.
+
+**Crops.** Each crop grows at full speed only in its ideal biomes; elsewhere it grows four times slower (bone meal works as usual): wheat in plains, meadows and savannas; carrots in forests and cherry groves; potatoes in taigas and windswept hills; beetroots in snowy and icy biomes; melons and cocoa in jungles; pumpkins in forests and taigas; sugar cane in swamps and along rivers and beaches; cactus in deserts and badlands; sweet berries in taigas and groves; nether wart anywhere in the Nether. Moderner Beta's matching biomes count too. The lists are the biome tags `eternalreturn:ideal_biomes/<crop>`.
+
 **Spawners.** Mobs from monster spawners drop no items: no loot and none of the gear they spawned with. They still drop experience, and anything they picked up (a lost sword, say).
 
 ### Blocks
@@ -307,13 +335,14 @@ Villagers that existed before this update, and babies until they grow up, start 
 - `bookshelfBias`: the multipliers above, plus `booksCanUnlockNonTableEnchantments` (off by default) to let shelved books make the table offer treasure enchantments like Frost Walker.
 - `fortune`: toggles for hoes and shears.
 - `fishing`: `fishRequireBait`; `baits` (item to `lureSeconds`, `nightLureSeconds`, `lava`); `wormDropChance`; `anglerfishMinWaterDepth` (default 10); `lavaFishingOutsideNether`; `hostileCatchChance` (default 0.03) and `hostileCatches` (mob to `weight` and `oceanOnly`; the ids are mob ids, or `drowned_guardian_jockey` / `drowned_elder_guardian_jockey`); `overfishing` (`enabled`, `radius` 6, `freeCatches` 3, `slowdownPerCatch` 0.5, `maxSlowdown` 4, `recoveryMinutes` 5).
-- `survival`: `bedsSkipNight` (off), `rememberedBeds` (3), `beaconsBlockMonsters`, `animalsOnlySpawnNearBeacons`, `animalsGetHungry`, `hungryAfterDays` (0.5), `grazeChance` (per second, 0.125), `daysBeforeStarving` (3), `starveDamageSeconds` (30), `herdPanic` and `herdPanicRadius` (16), `blindFollowRange` (2), `spawnerMobsDropNothing`.
+- `survival`: `bedsSkipNight` (off), `rememberedBeds` (3), `beaconsBlockMonsters`, `animalsOnlySpawnNearBeacons`, `animalsGetHungry`, `hungryAfterDays` (0.5), `grazeChance` (per second, 0.125), `daysBeforeStarving` (3), `starveDamageSeconds` (30), `herdPanic` and `herdPanicRadius` (16), `blindFollowRange` (2), `spawnerMobsDropNothing`; `armorWeight` (material to a full set's slowdown), `snowFalls`, `cropGrowthOutsideIdealBiome` (0.25).
 - `villagers`: `onlyFishermenBuy`; `fishPriceMultiplier` (default 2, applied to every fish a fisherman buys); and `fishermanTrades` (item to `level`, `count`, base `emeralds`, `maxUses`, `experience`; needs a restart); `needs`: `enabled`, `daysBeforePriceRise` (2), `emeraldsPerMissingNeed` (5), `daysBeforeRefusal` (7), `maxOtherAdultsInSight` (1), `exerciseBlocks` (8), `minWorkstationDistance` (8), `closedAtNight`, `nightStart` (13000) and `nightEnd` (23000), `healWithFood` and `eatChance` (0.25).
 - `worldgen`: `debugTunnel` (off by default). Carves one straight 3x3 tunnel at y=20 along z=8 through every chunk on that row, to check that this mod's carvers run under the current world generator. Needs a restart, and only affects newly generated chunks.
 - `worldgen.biomeStone` (on by default; Eternal Return worlds only, newly generated chunks only): each biome's stone under the topsoil. Off: plain stone everywhere.
+- `worldgen.onlyEssentialStructures` (on by default; Eternal Return worlds only): only strongholds, mineshafts, nether fossils and end cities, in all three dimensions, and blazes outside fortresses.
 - `worldgen.roundOverhangs` (on by default; Eternal Return worlds only, newly generated chunks only): overhang undersides arch and bulge instead of lying almost flat. Off: the terrain as Moderner Beta makes it.
 - `worldgen.caves` (Eternal Return worlds only; newly generated chunks only): `enabled` (the new caves); `oldCaves` (off: vanilla's, Moderner Beta's and other mods' cave carvers don't run there); `density` (multiplies every weight); per type under `types` (`spaghetti`, `ravine`, `large`, `vertical`, `zigzag`, `ribbed`, `spiral`, `toroidal`): `enabled`, `weight` (caves starting per 100 chunks), `minY` and `maxY` (where a cave starts), `minRadius` and `maxRadius`, and for `large` a `typicalRadius` (the most common size; a few caverns reach toward `maxRadius`); `spiral` and `toroidal` also have `minSize` and `maxSize` (the spiral's coil radius, the room's ring radius). Config files from before the first cave tuning are reset to the new type defaults once (`typesVersion`). Debug: `debugForceCaveType` (a type id: only that type, at a high rate) and `debugLogCaveStarts` (writes `type,x,y,z` of every cave start to `eternalreturn-cave-starts.csv` in the game folder).
-- `mobs`: baby chance, baby speed, and baby creeper fuse and blast multipliers; armor and armor-enchant chances, each written as `base + perDifficulty x clamped local difficulty`; the underground-creeper toggle and its sky-light limit; jockey, fishing rod, ender pearl and sword chances; fishing rod pull strength; the boat-breaking toggle; `guardianSpawnWeight` (4) and `elderGuardianSpawnWeight` (1) in ocean biomes (0 turns them off; read when the world loads), `elderGuardianSpawnChance` (0.25) and `elderGuardianSpacing` (96 blocks).
+- `mobs`: baby chance, baby speed, and baby creeper fuse and blast multipliers; armor and armor-enchant chances, each written as `base + perDifficulty x clamped local difficulty`; the underground-creeper toggle and its sky-light limit; jockey, fishing rod, ender pearl and sword chances; fishing rod pull strength; the boat-breaking toggle; `guardianSpawnWeight` (4) and `elderGuardianSpawnWeight` (1) in ocean biomes (0 turns them off; read when the world loads), `elderGuardianSpawnChance` (0.25) and `elderGuardianSpacing` (96 blocks); `slimeSize8Chance` (0.08), `slimeSize16Chance` (0.02), `slimesInNightRain`; `waterBabyChance` (0.15).
 
 Which items belong to each tier is controlled by tags in `data/eternalreturn/tags/item/`, so modded gear can be added with a datapack and no code changes. The same goes for mobs: `data/eternalreturn/tags/entity_type/` decides which mobs can be babies (`baby_variants`, which only works for skeleton-type mobs and creepers), which get the boosted armor (`armored_spawns`), and which can ride spiders (`jockey_riders`).
 
@@ -451,3 +480,11 @@ Survival and blocks (any world, survival mode):
 79. Slayer: `/enchant @s eternalreturn:slayer 5` on a rod, fish in the ocean: about one bite in four is a monster.
 80. Stairs and slabs: craft white wool stairs (6 wool) and slabs (3 wool); put white concrete in a stonecutter: stairs and slabs. Shears cut wool stairs fast; concrete slabs need a pickaxe to drop.
 81. Carpets: place a carpet, then keep placing the same carpet on top: it thickens a sixteenth at a time to a full block. Break it: one carpet per layer.
+82. Armor weight: put on a full diamond set and sprint beside a friend in leather: you fall behind (as with Slowness II). The tooltip says how much each piece slows you. `/enchant @s eternalreturn:weightless` on the chestplate: noticeably quicker.
+83. Scrolls: trade with a librarian (cure a zombie villager in an Eternal Return world): it sells a Scroll of something, not a book. Left-click with it: "You learned to craft ... books", and the scroll is gone. Put a book in the middle of a crafting table, ring it with diamonds, amethyst and the themed items (the recipe book shows it now): a level I book. Before reading the scroll, the same layout gives nothing.
+84. Snow: place a snow block in the air: it falls. Mine the block under a snow layer: the layer drops instead of vanishing.
+85. Crops: plant wheat in a plains and in a desert (water both): the desert field takes about four times as long.
+86. Slimes: `/weather rain` at night in plains: slimes turn up on the surface. Now and then a huge one.
+87. Fish: watch a school of cod or a squid: some are half-size babies.
+88. Drowned: kill a few: now and then a prismarine shard or crystal. Fishing: prismarine, dark prismarine and sea lanterns come up rarely.
+89. Structures (new Eternal Return world): `/locate structure minecraft:village_plains`, `minecraft:fortress` or `minecraft:bastion_remnant` find nothing; `/locate structure minecraft:stronghold` and `minecraft:nether_fossil` (in the Nether) do. Blazes roam soul sand valleys and basalt deltas.
