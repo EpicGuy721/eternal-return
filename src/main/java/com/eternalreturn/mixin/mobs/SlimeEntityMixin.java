@@ -11,11 +11,15 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** Bigger slimes (Slimes.maybeGrow). */
+/** Bigger slimes (Slimes.maybeGrow), and slimes with a skeleton on top (ZombieHabits). */
 @Mixin(SlimeEntity.class)
 public abstract class SlimeEntityMixin {
 	@Inject(method = "initialize", at = @At("TAIL"))
 	private void eternalreturn$bigger(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason reason, EntityData data, CallbackInfoReturnable<EntityData> cir) {
-		Slimes.maybeGrow((SlimeEntity) (Object) this, world.getRandom());
+		SlimeEntity slime = (SlimeEntity) (Object) this;
+		Slimes.maybeGrow(slime, world.getRandom());
+		if (slime.getType() == net.minecraft.entity.EntityType.SLIME && slime.getSize() >= 2) {
+			com.eternalreturn.mobs.ZombieHabits.trySkeletonRider(slime, world, difficulty, reason, com.eternalreturn.config.EternalReturnConfig.get().mobs.slimeSkeletonChance);
+		}
 	}
 }

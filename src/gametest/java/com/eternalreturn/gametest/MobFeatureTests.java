@@ -235,8 +235,9 @@ public class MobFeatureTests implements FabricGameTest {
 				MobEntity mob = create(ctx, type, new BlockPos(1, 1, 1), SpawnReason.NATURAL);
 				ItemStack boots = mob.getEquippedStack(EquipmentSlot.FEET);
 				check(ctx, !boots.isEmpty(), type.getUntranslatedName() + " should always get armor at chance 1");
-				int total = EnchantmentHelper.getEnchantments(boots).getSize();
-				int inherent = InherentEnchantments.inherentPortion(boots).size();
+				// Levels, not counts: a roll of the inherent enchantment raises its level (gold boots: Fire Protection I to II).
+				int total = EnchantmentHelper.getEnchantments(boots).getEnchantmentEntries().stream().mapToInt(e -> e.getIntValue()).sum();
+				int inherent = InherentEnchantments.inherentPortion(boots).values().stream().mapToInt(Integer::intValue).sum();
 				check(ctx, total > inherent, type.getUntranslatedName() + " boots should be enchanted beyond inherent: " + boots.getEnchantments());
 			}
 			MobEntity creeper = create(ctx, EntityType.CREEPER, new BlockPos(1, 1, 1), SpawnReason.NATURAL);

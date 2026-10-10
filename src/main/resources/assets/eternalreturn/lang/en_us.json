@@ -48,5 +48,12 @@
 	"item.eternalreturn.scroll.unknown": "There is no recipe for %s books",
 	"enchantment.eternalreturn.weightless": "Weightless",
 	"tooltip.eternalreturn.weight": "Weight: %s%% slower",
-	"tooltip.eternalreturn.weightless": "Weightless"
+	"tooltip.eternalreturn.weightless": "Weightless",
+	"enchantment.eternalreturn.soulbound": "Soulbound",
+	"entity.eternalreturn.web": "Web",
+	"block.eternalreturn.obsidian_pressure_plate": "Obsidian Pressure Plate",
+	"item.eternalreturn.glass_item_frame": "Glass Item Frame",
+	"item.eternalreturn.glowing_glass_item_frame": "Glowing Glass Item Frame",
+	"entity.eternalreturn.glass_item_frame": "Glass Item Frame",
+	"entity.eternalreturn.glowing_glass_item_frame": "Glowing Glass Item Frame"
 }

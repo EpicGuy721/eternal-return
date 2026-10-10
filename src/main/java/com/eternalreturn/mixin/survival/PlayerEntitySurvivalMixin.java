@@ -17,4 +17,13 @@ public abstract class PlayerEntitySurvivalMixin {
 			ArmorWeight.update(self);
 		}
 	}
+
+	/** Soulbound items leave the inventory before it drops (Soulbound). */
+	@Inject(method = "dropInventory", at = @At("HEAD"))
+	private void eternalreturn$keepSoulbound(CallbackInfo ci) {
+		PlayerEntity self = (PlayerEntity) (Object) this;
+		if (!self.getWorld().isClient && !self.getWorld().getGameRules().getBoolean(net.minecraft.world.GameRules.KEEP_INVENTORY)) {
+			com.eternalreturn.survival.Soulbound.keep(self);
+		}
+	}
 }

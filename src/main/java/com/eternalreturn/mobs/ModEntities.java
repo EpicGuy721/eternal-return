@@ -1,6 +1,7 @@
 package com.eternalreturn.mobs;
 
 import com.eternalreturn.EternalReturn;
+import com.eternalreturn.mobs.entity.WebEntity;
 import com.eternalreturn.mobs.entity.ZombieHookEntity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
@@ -19,6 +20,16 @@ public final class ModEntities {
 					.disableSaving()
 					.disableSummon()
 					.build(EternalReturn.id("zombie_hook").toString()));
+
+	/** A ball of web a spider flings (WebEntity). */
+	public static final EntityType<WebEntity> WEB = Registry.register(
+			Registries.ENTITY_TYPE,
+			EternalReturn.id("web"),
+			EntityType.Builder.<WebEntity>create(WebEntity::new, SpawnGroup.MISC)
+					.dimensions(0.3F, 0.3F)
+					.maxTrackingRange(4)
+					.trackingTickInterval(10)
+					.build(EternalReturn.id("web").toString()));
 
 	private ModEntities() {
 	}

@@ -1,6 +1,8 @@
 package com.eternalreturn;
 
 import com.eternalreturn.blocks.CutBlocks;
+import com.eternalreturn.blocks.Frames;
+import com.eternalreturn.blocks.Redstone;
 import com.eternalreturn.config.EternalReturnConfig;
 import com.eternalreturn.fishing.FishingItems;
 import com.eternalreturn.fishing.FishingLoot;
@@ -41,6 +43,8 @@ public class EternalReturn implements ModInitializer {
 		Thriftiness.register();
 		Slayer.register();
 		CutBlocks.register();
+		Redstone.register();
+		Frames.register();
 		Scrolls.register();
 		ScrollLoot.register();
 		Slimes.register();

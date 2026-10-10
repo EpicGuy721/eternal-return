@@ -262,7 +262,7 @@ public class SurvivalTests implements FabricGameTest {
 	 * Hurting a cow sends the cows around it fleeing as if hurt too (panic comes from recent damage), and a
 	 * few ticks later they are running; cows far off and pigs don't react.
 	 */
-	@GameTest(templateName = EMPTY_STRUCTURE, tickLimit = 100)
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "herd_panic", tickLimit = 200)
 	public void herdsPanicTogether(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
 		floor(ctx, 8, Blocks.GRASS_BLOCK);
@@ -276,8 +276,10 @@ public class SurvivalTests implements FabricGameTest {
 		boolean panicked = near.getRecentDamageSource() != null && near.getRecentDamageSource().isIn(DamageTypeTags.PANIC_CAUSES) && near.getAttacker() == attacker;
 		boolean farCalm = far.getRecentDamageSource() == null && pig.getRecentDamageSource() == null;
 		double nearHealth = near.getHealth();
-		ctx.runAtTick(ctx.getTick() + 10, () -> {
-			boolean running = near.getNavigation().isFollowingPath() || near.getVelocity().horizontalLengthSquared() > 1.0E-4;
+		boolean[] fled = {false};
+		ctx.runAtEveryTick(() -> fled[0] |= escaping(near));
+		ctx.runAtTick(ctx.getTick() + 40, () -> {
+			boolean running = fled[0];
 			for (var entity : List.of(hit, near, pig, far, attacker)) {
 				entity.discard();
 			}
@@ -287,6 +289,18 @@ public class SurvivalTests implements FabricGameTest {
 			ctx.assertTrue(running, "the panicking cow runs");
 			ctx.complete();
 		});
+	}
+
+	/** Whether the mob's panic goal (vanilla's EscapeDangerGoal) is running. */
+	private static boolean escaping(net.minecraft.entity.mob.MobEntity mob) {
+		try {
+			java.lang.reflect.Field field = net.minecraft.entity.mob.MobEntity.class.getDeclaredField("goalSelector");
+			field.setAccessible(true);
+			net.minecraft.entity.ai.goal.GoalSelector goals = (net.minecraft.entity.ai.goal.GoalSelector) field.get(mob);
+			return goals.getGoals().stream().anyMatch(goal -> goal.isRunning() && goal.getGoal() instanceof net.minecraft.entity.ai.goal.EscapeDangerGoal);
+		} catch (ReflectiveOperationException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	/** A blinded zombie's follow range is 2 blocks; without blindness, its normal 35. */

@@ -1,6 +1,16 @@
 package com.eternalreturn.mixin.mobs;
 
+import com.eternalreturn.config.EternalReturnConfig;
 import com.eternalreturn.mobs.SpawnGear;
+import com.eternalreturn.mobs.ZombieHabits;
+import com.eternalreturn.mobs.ai.MineTowardTargetGoal;
+import com.eternalreturn.mobs.ai.ZombieEatMeatGoal;
+import net.minecraft.entity.EntityData;
+import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.ai.goal.ActiveTargetGoal;
+import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.world.ServerWorldAccess;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import com.eternalreturn.mobs.ai.ReelInTargetGoal;
 import com.eternalreturn.mobs.ai.ThrowPearlGoal;
 import net.minecraft.entity.EntityType;
@@ -28,10 +38,23 @@ public abstract class ZombieEntityMixin extends HostileEntity {
 	private void eternalreturn$addItemGoals(CallbackInfo ci) {
 		this.goalSelector.add(3, new ReelInTargetGoal(this));
 		this.goalSelector.add(3, new ThrowPearlGoal(this));
+		ZombieEntity self = (ZombieEntity) (Object) this;
+		this.goalSelector.add(2, new MineTowardTargetGoal(self));
+		this.goalSelector.add(4, new ZombieEatMeatGoal(self));
+		// Adults hunt farm animals, after players and villagers (ZombieHabits).
+		this.targetSelector.add(5, new ActiveTargetGoal<>(this, AnimalEntity.class, 10, true, false,
+				animal -> !self.isBaby() && animal.getType().isIn(ZombieHabits.ZOMBIE_PREY) && EternalReturnConfig.get().mobs.zombiesHuntAnimals));
+	}
+
+	@Inject(method = "initialize", at = @At("RETURN"))
+	private void eternalreturn$animalJockey(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason reason, EntityData data,
+			CallbackInfoReturnable<EntityData> cir) {
+		ZombieHabits.tryAnimalJockey((ZombieEntity) (Object) this, world, difficulty, reason);
 	}
 
 	@Inject(method = "initEquipment", at = @At("TAIL"))
 	private void eternalreturn$rollRodAndPearl(Random random, LocalDifficulty localDifficulty, CallbackInfo ci) {
 		SpawnGear.rollZombieExtras(this, random);
+		ZombieHabits.rollDiggingTool((ZombieEntity) (Object) this, random);
 	}
 }

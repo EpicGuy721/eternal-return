@@ -1,6 +1,7 @@
 package com.eternalreturn.mixin.survival;
 
 import com.eternalreturn.survival.BlindMobs;
+import com.eternalreturn.survival.Food;
 import com.eternalreturn.survival.HerdPanic;
 import com.eternalreturn.survival.SpawnerMobs;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
@@ -24,7 +25,20 @@ public abstract class LivingEntitySurvivalMixin {
 	private void eternalreturn$herdPanic(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
 		if (cir.getReturnValueZ()) {
 			HerdPanic.attacked((LivingEntity) (Object) this, source);
+			Food.interrupt((LivingEntity) (Object) this);
 		}
+	}
+
+	/** The client hears of damage here: stop eating on its side too, so the two agree (Food). */
+	@Inject(method = "onDamaged", at = @At("TAIL"))
+	private void eternalreturn$interruptClient(DamageSource source, CallbackInfo ci) {
+		Food.interrupt((LivingEntity) (Object) this);
+	}
+
+	@Inject(method = "eatFood", at = @At("HEAD"))
+	private void eternalreturn$rawFood(net.minecraft.world.World world, net.minecraft.item.ItemStack stack, net.minecraft.component.type.FoodComponent food,
+			CallbackInfoReturnable<net.minecraft.item.ItemStack> cir) {
+		Food.ate((LivingEntity) (Object) this, stack);
 	}
 
 	/** A blinded mob notices and follows targets only within a couple of blocks (BlindMobs). */

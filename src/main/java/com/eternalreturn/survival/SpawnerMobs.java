@@ -23,6 +23,7 @@ public final class SpawnerMobs {
 
 	/** From the spawner, just before the mob (and any riders) go into the world. */
 	public static void mark(Entity entity) {
+		armZombies(entity);
 		if (!EternalReturnConfig.get().survival.spawnerMobsDropNothing) {
 			return;
 		}
@@ -32,6 +33,22 @@ public final class SpawnerMobs {
 				for (EquipmentSlot slot : EquipmentSlot.values()) {
 					mob.setEquipmentDropChance(slot, 0.0F);
 				}
+			}
+		}
+	}
+
+	/**
+	 * Zombies from spawners (dungeons) always hold a pickaxe, stone or iron, at any depth, so they dig
+	 * toward players they can't reach (MineTowardTargetGoal; mobs.spawnerZombiesDig).
+	 */
+	static void armZombies(Entity entity) {
+		if (!EternalReturnConfig.get().mobs.spawnerZombiesDig) {
+			return;
+		}
+		for (Entity part : entity.streamSelfAndPassengers().toList()) {
+			if (part instanceof net.minecraft.entity.mob.ZombieEntity zombie) {
+				zombie.equipStack(EquipmentSlot.MAINHAND, new net.minecraft.item.ItemStack(zombie.getRandom().nextBoolean()
+						? net.minecraft.item.Items.IRON_PICKAXE : net.minecraft.item.Items.STONE_PICKAXE));
 			}
 		}
 	}

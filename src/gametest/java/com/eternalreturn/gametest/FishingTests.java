@@ -329,7 +329,8 @@ public class FishingTests implements FabricGameTest {
 				double hookY = hook.getY();
 				hook.use(player.getMainHandStack());
 				Box around = new Box(ctx.getAbsolutePos(BlockPos.ORIGIN)).expand(10);
-				List<ItemEntity> caught = ctx.getWorld().getEntitiesByType(EntityType.ITEM, around, e -> true);
+				// Building the pool can knock the test frame's start button off: that isn't a catch.
+				List<ItemEntity> caught = ctx.getWorld().getEntitiesByType(EntityType.ITEM, around, e -> !e.getStack().isOf(Items.STONE_BUTTON));
 				int baitLeft = bait == null ? 0 : player.getInventory().main.get(9).getCount();
 				ctx.runAtTick(ctx.getTick() + 25, () -> {
 					fishing.hostileCatchChance = hostileChance;
@@ -363,7 +364,7 @@ public class FishingTests implements FabricGameTest {
 			EternalReturnConfig.get().fishing = saved;
 			check(ctx, r.hookY() > r.surfaceY() + 0.2, "hook should float in the lava, not rest on the floor, y " + r.hookY() + " vs block " + r.surfaceY());
 			check(ctx, !r.caught().isEmpty(), "something should come out of the lava");
-			check(ctx, r.caught().stream().allMatch(ItemEntity::isInvulnerable), "lava catches are protected from burning");
+			check(ctx, r.caught().stream().allMatch(ItemEntity::isInvulnerable), "lava catches are protected from burning: " + r.caught().stream().map(e -> e.getStack() + " inv " + e.isInvulnerable() + " at " + e.getBlockPos()).toList());
 			check(ctx, r.survivedOrCollected(), "the catch burned up: " + r.caught());
 			check(ctx, r.baitLeft() == 2, "one infernal bait used, left " + r.baitLeft());
 		});
@@ -452,7 +453,9 @@ public class FishingTests implements FabricGameTest {
 				continue;
 			}
 			int offers = 0;
-			for (int sampleNo = 0; sampleNo < 15; sampleNo++) {
+			// Fishermen have many fish trades to pick from: enough of them that each fish turns up.
+			int samples = profession == VillagerProfession.FISHERMAN ? 40 : 15;
+			for (int sampleNo = 0; sampleNo < samples; sampleNo++) {
 				VillagerEntity villager = EntityType.VILLAGER.create(world);
 				villager.setVillagerData(villager.getVillagerData().withProfession(profession).withLevel(1));
 				villager.getOffers();
@@ -479,7 +482,7 @@ public class FishingTests implements FabricGameTest {
 			}
 			check(ctx, offers > 0, profession.id() + " has no trades left at all");
 		}
-		check(ctx, koiAtMaster == 15, "every master fisherman buys koi for 10 emeralds, got " + koiAtMaster);
+		check(ctx, koiAtMaster == 40, "every master fisherman buys koi for 10 emeralds, got " + koiAtMaster);
 		for (Item fish : List.of(Items.COD, Items.SALMON, FishingItems.PERCH, FishingItems.PIKE, FishingItems.TUNA, FishingItems.SOULFIN)) {
 			check(ctx, fishBought.containsKey(fish), "no fisherman ever bought " + fish + ": " + fishBought);
 		}

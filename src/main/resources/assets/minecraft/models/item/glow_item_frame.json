@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "eternalreturn:item/glow_item_frame_border",
+    "layer1": "eternalreturn:item/glow_item_frame_inside"
+  }
+}

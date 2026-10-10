@@ -99,4 +99,11 @@ public abstract class AbstractSkeletonEntityMixin extends HostileEntity {
 	private Hand eternalreturn$swordInMainHandWins(LivingEntity entity, Item item, Operation<Hand> original) {
 		return entity.getMainHandStack().isIn(ItemTags.SWORDS) ? Hand.MAIN_HAND : original.call(entity, item);
 	}
+
+	/** On a phantom or slime (ZombieHabits), the mount moves on its own and the skeleton only shoots. */
+	@Override
+	public boolean shouldControlVehicles() {
+		return !(this.getVehicle() instanceof net.minecraft.entity.mob.PhantomEntity || this.getVehicle() instanceof net.minecraft.entity.mob.SlimeEntity)
+				&& super.shouldControlVehicles();
+	}
 }

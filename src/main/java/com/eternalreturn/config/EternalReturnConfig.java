@@ -58,6 +58,7 @@ public final class EternalReturnConfig {
 	public VillagerTweaks villagers = new VillagerTweaks();
 	public WorldgenTweaks worldgen = new WorldgenTweaks();
 	public SurvivalTweaks survival = new SurvivalTweaks();
+	public RedstoneTweaks redstone = new RedstoneTweaks();
 
 	public static final class BookshelfBias {
 		public boolean enabled = true;
@@ -136,6 +137,21 @@ public final class EternalReturnConfig {
 		public boolean slimesInNightRain = true;
 		/** Fish (cod, salmon, tropical fish, pufferfish) and squids spawn as babies this often (eternalreturn:baby_variants). */
 		public double waterBabyChance = 0.15;
+
+		/** Spiders fling a web at their target about this often (seconds); 0 turns it off. */
+		public int spiderWebCooldownSeconds = 6;
+		/** Zombies spawning below y 0 hold a pickaxe or shovel this often, and dig toward targets they can't reach. */
+		public double miningZombieChance = 0.15;
+		/** Zombies from monster spawners (dungeons) always hold a pickaxe, at any depth. */
+		public boolean spawnerZombiesDig = true;
+		/** Adult zombies hunt farm animals (entity tag eternalreturn:zombie_prey). */
+		public boolean zombiesHuntAnimals = true;
+		/** Baby zombies spawn riding a cow, pig or sheep this often. */
+		public double babyZombieAnimalJockeyChance = 0.05;
+		/** Phantoms spawn carrying a skeleton this often. */
+		public double phantomSkeletonChance = 0.1;
+		/** Slimes of size 2 and up spawn with a skeleton on top this often. */
+		public double slimeSkeletonChance = 0.05;
 	}
 
 	public static final class FishingTweaks {
@@ -248,6 +264,16 @@ public final class EternalReturnConfig {
 		public double eatChance = 0.25;
 	}
 
+	/** Redstone additions (com.eternalreturn.blocks.Redstone, ChainLinks). */
+	public static final class RedstoneTweaks {
+		/** Dispensers place block items that have no dispenser behaviour of their own. */
+		public boolean dispensersPlaceBlocks = true;
+		/** Pistons move blocks with data (chests, furnaces...), except those in eternalreturn:immovable_block_entities. */
+		public boolean pistonsMoveBlockEntities = true;
+		/** Chains link the blocks at their ends when pistons move them; chains stick to slime and honey only where they visibly join. */
+		public boolean chainsLinkBlocks = true;
+	}
+
 	/** Beds, beacons, animals and a few mob rules (com.eternalreturn.survival). */
 	public static final class SurvivalTweaks {
 		/** False: however many players sleep, the night never skips; beds only set the respawn point. */
@@ -288,6 +314,14 @@ public final class EternalReturnConfig {
 		 * elsewhere each growth step happens only this often (0.25 = four times slower).
 		 */
 		public double cropGrowthOutsideIdealBiome = 0.25;
+		/** Getting hurt stops eating and drinking. */
+		public boolean hitsInterruptEating = true;
+		/** Raw food (item tag eternalreturn:raw_foods) poisons for 5 seconds this often. */
+		public double rawFoodPoisonChance = 0.7;
+		/** Pigs have litters of 2 or 3 (2 to 5 if a parent ate a golden carrot). */
+		public boolean pigLitters = true;
+		/** A baby animal fed a poisonous potato is poisoned, and stays a baby for good, this often. */
+		public double poisonousPotatoStuntChance = 0.5;
 	}
 
 	private static Map<String, Double> defaultArmorWeight() {

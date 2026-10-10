@@ -1,6 +1,8 @@
 package com.eternalreturn.mixin.survival;
 
+import com.eternalreturn.duck.JockeyMount;
 import com.eternalreturn.survival.AnimalHunger;
+import com.eternalreturn.survival.Farming;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.PassiveEntity;
@@ -16,14 +18,69 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Animal hunger (AnimalHunger): when it last ate, ticking, saving, and feeding by hand. */
+/** Animal hunger (AnimalHunger): when it last ate, ticking, saving, and feeding by hand; and jockey mounts despawning. */
 @Mixin(AnimalEntity.class)
-public abstract class AnimalEntityMixin extends PassiveEntity implements AnimalHunger.Holder {
+public abstract class AnimalEntityMixin extends PassiveEntity implements AnimalHunger.Holder, JockeyMount, Farming.Holder {
 	@Unique
 	private static final String FED_KEY = "EternalReturnLastFed";
 
 	@Unique
 	private long eternalreturn$lastFed = Long.MIN_VALUE;
+
+	/** Spawned as a mount for a hostile rider (a polar bear under a stray, a cow under a baby zombie): despawns like the rider. */
+	@Unique
+	private boolean eternalreturn$jockeyMount;
+
+	@Override
+	public boolean eternalreturn$isJockeyMount() {
+		return this.eternalreturn$jockeyMount;
+	}
+
+	@Override
+	public void eternalreturn$setJockeyMount(boolean mount) {
+		this.eternalreturn$jockeyMount = mount;
+	}
+
+	@Unique
+	private boolean eternalreturn$goldenFed;
+	@Unique
+	private boolean eternalreturn$stunted;
+
+	@Override
+	public boolean eternalreturn$goldenFed() {
+		return this.eternalreturn$goldenFed;
+	}
+
+	@Override
+	public void eternalreturn$setGoldenFed(boolean fed) {
+		this.eternalreturn$goldenFed = fed;
+	}
+
+	@Override
+	public boolean eternalreturn$stunted() {
+		return this.eternalreturn$stunted;
+	}
+
+	@Override
+	public void eternalreturn$setStunted(boolean stunted) {
+		this.eternalreturn$stunted = stunted;
+		if (stunted && this.getBreedingAge() >= 0) {
+			this.setBreedingAge(-1);
+		}
+	}
+
+	/** Pig litters (Farming): the rest of the litter after the first piglet. */
+	@Inject(method = "breed(Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/entity/passive/AnimalEntity;)V", at = @At("TAIL"))
+	private void eternalreturn$litter(net.minecraft.server.world.ServerWorld world, AnimalEntity other, CallbackInfo ci) {
+		Farming.litter(world, (AnimalEntity) (Object) this, other);
+	}
+
+	@Inject(method = "canImmediatelyDespawn", at = @At("HEAD"), cancellable = true)
+	private void eternalreturn$mountDespawns(double distanceSquared, org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable<Boolean> cir) {
+		if (this.eternalreturn$jockeyMount) {
+			cir.setReturnValue(true);
+		}
+	}
 
 	protected AnimalEntityMixin(EntityType<? extends PassiveEntity> entityType, World world) {
 		super(entityType, world);
@@ -48,6 +105,9 @@ public abstract class AnimalEntityMixin extends PassiveEntity implements AnimalH
 	@Inject(method = "eat", at = @At("HEAD"))
 	private void eternalreturn$fedByHand(PlayerEntity player, Hand hand, ItemStack stack, CallbackInfo ci) {
 		AnimalHunger.fed((AnimalEntity) (Object) this);
+		if (stack.isOf(net.minecraft.item.Items.GOLDEN_CARROT)) {
+			this.eternalreturn$goldenFed = true;
+		}
 	}
 
 	@Inject(method = "writeCustomDataToNbt", at = @At("TAIL"))
@@ -55,10 +115,18 @@ public abstract class AnimalEntityMixin extends PassiveEntity implements AnimalH
 		if (this.eternalreturn$lastFed != Long.MIN_VALUE) {
 			nbt.putLong(FED_KEY, this.eternalreturn$lastFed);
 		}
+		if (this.eternalreturn$jockeyMount) {
+			nbt.putBoolean("EternalReturnJockeyMount", true);
+		}
+		if (this.eternalreturn$stunted) {
+			nbt.putBoolean("EternalReturnStunted", true);
+		}
 	}
 
 	@Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
 	private void eternalreturn$loadFed(NbtCompound nbt, CallbackInfo ci) {
 		this.eternalreturn$lastFed = nbt.contains(FED_KEY, NbtElement.LONG_TYPE) ? nbt.getLong(FED_KEY) : Long.MIN_VALUE;
+		this.eternalreturn$jockeyMount = nbt.getBoolean("EternalReturnJockeyMount");
+		this.eternalreturn$stunted = nbt.getBoolean("EternalReturnStunted");
 	}
 }

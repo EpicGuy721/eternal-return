@@ -1,0 +1,20 @@
+{
+  "values": [
+    "minecraft:spawner",
+    "minecraft:trial_spawner",
+    "minecraft:vault",
+    "minecraft:end_gateway",
+    "minecraft:end_portal",
+    "minecraft:command_block",
+    "minecraft:chain_command_block",
+    "minecraft:repeating_command_block",
+    "minecraft:structure_block",
+    "minecraft:jigsaw",
+    "minecraft:beacon",
+    "minecraft:conduit",
+    "minecraft:moving_piston",
+    "minecraft:sculk_catalyst",
+    "minecraft:sculk_shrieker",
+    "minecraft:enchanting_table"
+  ]
+}

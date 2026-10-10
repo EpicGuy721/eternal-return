@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "#": {
+      "item": "minecraft:glass_pane"
+    },
+    "L": {
+      "item": "minecraft:leather"
+    }
+  },
+  "pattern": [
+    "###",
+    "#L#",
+    "###"
+  ],
+  "result": {
+    "count": 1,
+    "id": "eternalreturn:glass_item_frame"
+  }
+}

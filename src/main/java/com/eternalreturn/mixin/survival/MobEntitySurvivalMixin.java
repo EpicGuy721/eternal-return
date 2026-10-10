@@ -66,8 +66,19 @@ public abstract class MobEntitySurvivalMixin extends LivingEntity implements Spa
 	 */
 	@Inject(method = "interact", at = @At("RETURN"), cancellable = true)
 	private void eternalreturn$feedHungry(PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
-		if (this.getWorld().isClient || !((Object) this instanceof AnimalEntity animal) || animal instanceof AbstractHorseEntity
-				|| cir.getReturnValue().isAccepted() || !AnimalHunger.isHungry(animal)) {
+		if (this.getWorld().isClient || !((Object) this instanceof AnimalEntity animal) || cir.getReturnValue().isAccepted()) {
+			return;
+		}
+		ItemStack held = player.getStackInHand(hand);
+		// A baby fed a poisonous potato (Farming).
+		if (animal.isBaby() && held.isOf(net.minecraft.item.Items.POISONOUS_POTATO)) {
+			held.decrementUnlessCreative(1, player);
+			animal.playSound(SoundEvents.ENTITY_GENERIC_EAT, 1.0F, 1.0F);
+			com.eternalreturn.survival.Farming.poisonousPotato(animal);
+			cir.setReturnValue(ActionResult.SUCCESS);
+			return;
+		}
+		if (animal instanceof AbstractHorseEntity || !AnimalHunger.isHungry(animal)) {
 			return;
 		}
 		ItemStack stack = player.getStackInHand(hand);
