@@ -39,6 +39,7 @@
 		"survival.BeaconBlockEntityAccessor",
 		"survival.BeaconBlockEntityMixin",
 		"survival.CropGrowthMixin",
+		"survival.FallingBlockEntityMixin",
 		"survival.HorseFoodMixin",
 		"survival.LivingEntityAccessor",
 		"survival.LivingEntitySurvivalMixin",

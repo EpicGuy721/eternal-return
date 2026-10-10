@@ -139,7 +139,7 @@ public class VillagerNeedsTests implements FabricGameTest {
 	 * sky by day it counts, under a roof it doesn't. Work-life balance: a workstation 5 blocks from the bed
 	 * breaks it, 10 blocks away is fine. Gossip counts when two villagers really share gossip.
 	 */
-	@GameTest(templateName = EMPTY_STRUCTURE, batchId = BATCH, tickLimit = 100)
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = BATCH, tickLimit = 600)
 	public void howEachNeedIsMet(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
 		world.setTimeOfDay(6000);

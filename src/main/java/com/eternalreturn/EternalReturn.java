@@ -11,6 +11,7 @@ import com.eternalreturn.mobs.ModEntities;
 import com.eternalreturn.mobs.Blazes;
 import com.eternalreturn.mobs.OceanSpawns;
 import com.eternalreturn.mobs.Slimes;
+import com.eternalreturn.scrolls.ScrollLoot;
 import com.eternalreturn.scrolls.Scrolls;
 import com.eternalreturn.villager.TradeRules;
 import com.eternalreturn.worldgen.WorldgenFeatures;
@@ -41,6 +42,7 @@ public class EternalReturn implements ModInitializer {
 		Slayer.register();
 		CutBlocks.register();
 		Scrolls.register();
+		ScrollLoot.register();
 		Slimes.register();
 		Blazes.register();
 		Worms.register();

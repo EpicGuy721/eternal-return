@@ -294,6 +294,10 @@ public class FishingTests implements FabricGameTest {
 
 	/** Casts a real hook into the pool and reels it in once something bites. */
 	private static void catchCycle(TestContext ctx, Block fluid, Item bait, Consumer<CatchResult> verify) {
+		// These check the items that come up: no monster catches (HostileCatches) while they run.
+		EternalReturnConfig.FishingTweaks fishing = EternalReturnConfig.get().fishing;
+		double hostileChance = fishing.hostileCatchChance;
+		fishing.hostileCatchChance = 0.0;
 		ctx.getWorld().setTimeOfDay(18000);
 		pool(ctx, fluid);
 		ServerPlayerEntity player = survivalPlayer(ctx, new BlockPos(1, 2, 4));
@@ -328,6 +332,7 @@ public class FishingTests implements FabricGameTest {
 				List<ItemEntity> caught = ctx.getWorld().getEntitiesByType(EntityType.ITEM, around, e -> true);
 				int baitLeft = bait == null ? 0 : player.getInventory().main.get(9).getCount();
 				ctx.runAtTick(ctx.getTick() + 25, () -> {
+					fishing.hostileCatchChance = hostileChance;
 					verify.accept(new CatchResult(player, hookY, surfaceY, caught, baitLeft));
 					disconnect(player);
 					ctx.complete();

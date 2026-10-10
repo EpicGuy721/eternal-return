@@ -249,6 +249,69 @@ public class WorldRulesTests implements FabricGameTest {
 	}
 
 	/**
+	 * Falling snow adds to the snow it lands on: 3 layers onto 2 make 5; a snow block (8 layers) onto 3
+	 * makes a full layer of 8 with 3 more on top.
+	 */
+	@GameTest(templateName = EMPTY_STRUCTURE, tickLimit = 200)
+	public void fallingSnowPilesUp(TestContext ctx) {
+		for (int x = 0; x <= 4; x++) {
+			for (int z = 0; z <= 4; z++) {
+				ctx.setBlockState(x, 0, z, Blocks.STONE);
+			}
+		}
+		ctx.setBlockState(1, 1, 1, Blocks.SNOW.getDefaultState().with(net.minecraft.block.SnowBlock.LAYERS, 2));
+		ctx.setBlockState(3, 1, 3, Blocks.SNOW.getDefaultState().with(net.minecraft.block.SnowBlock.LAYERS, 3));
+		ctx.setBlockState(1, 5, 1, Blocks.SNOW.getDefaultState().with(net.minecraft.block.SnowBlock.LAYERS, 3));
+		ctx.setBlockState(3, 6, 3, Blocks.SNOW_BLOCK);
+		ctx.waitAndRun(80, () -> {
+			BlockState small = ctx.getBlockState(new BlockPos(1, 1, 1));
+			BlockState full = ctx.getBlockState(new BlockPos(3, 1, 3));
+			BlockState top = ctx.getBlockState(new BlockPos(3, 2, 3));
+			ctx.assertTrue(small.isOf(Blocks.SNOW) && small.get(net.minecraft.block.SnowBlock.LAYERS) == 5, "3 layers onto 2 make 5, found " + small);
+			ctx.assertTrue(full.isOf(Blocks.SNOW) && full.get(net.minecraft.block.SnowBlock.LAYERS) == 8, "a snow block onto 3 layers fills that block, found " + full);
+			ctx.assertTrue(top.isOf(Blocks.SNOW) && top.get(net.minecraft.block.SnowBlock.LAYERS) == 3, "and 3 layers pile on top, found " + top);
+			ctx.assertTrue(ctx.getWorld().getEntitiesByClass(ItemEntity.class, new Box(ctx.getAbsolutePos(BlockPos.ORIGIN)).expand(6),
+					item -> item.getStack().isOf(Items.SNOWBALL) || item.getStack().isOf(Items.SNOW)).isEmpty(), "no snow breaks into items");
+			ctx.complete();
+		});
+	}
+
+	/** Stronghold libraries hold a scroll about one chest in five, end cities one in ten; every scroll has an enchantment, never a disabled one. */
+	@GameTest(templateName = EMPTY_STRUCTURE)
+	public void scrollsInChests(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		int library = countScrolls(ctx, net.minecraft.loot.LootTables.STRONGHOLD_LIBRARY_CHEST, 1000);
+		int endCity = countScrolls(ctx, net.minecraft.loot.LootTables.END_CITY_TREASURE_CHEST, 1000);
+		int village = countScrolls(ctx, net.minecraft.loot.LootTables.VILLAGE_ARMORER_CHEST, 300);
+		ctx.assertTrue(library > 140 && library < 260, "stronghold library chests with a scroll: " + library + " of 1000");
+		ctx.assertTrue(endCity > 60 && endCity < 140, "end city chests with a scroll: " + endCity + " of 1000");
+		ctx.assertTrue(village == 0, "other chests have none: " + village);
+		ctx.complete();
+	}
+
+	private static int countScrolls(TestContext ctx, net.minecraft.registry.RegistryKey<net.minecraft.loot.LootTable> key, int chests) {
+		ServerWorld world = ctx.getWorld();
+		var table = world.getServer().getReloadableRegistries().getLootTable(key);
+		int found = 0;
+		for (int i = 0; i < chests; i++) {
+			var params = new net.minecraft.loot.context.LootContextParameterSet.Builder(world)
+					.add(net.minecraft.loot.context.LootContextParameters.ORIGIN, net.minecraft.util.math.Vec3d.ofCenter(ctx.getAbsolutePos(BlockPos.ORIGIN)))
+					.build(net.minecraft.loot.context.LootContextTypes.CHEST);
+			boolean any = false;
+			for (ItemStack stack : table.generateLoot(params)) {
+				if (stack.isOf(Scrolls.SCROLL)) {
+					RegistryEntry<Enchantment> enchantment = Scrolls.enchantment(stack);
+					ctx.assertTrue(enchantment != null && !EternalReturnConfig.get().disabledEnchantments.contains(enchantment.getKey().orElseThrow().getValue().toString()),
+							"a chest scroll needs an allowed enchantment: " + stack);
+					any = true;
+				}
+			}
+			found += any ? 1 : 0;
+		}
+		return found;
+	}
+
+	/**
 	 * Wheat is at home in plains and not in a desert: over many random ticks in the desert it grows about
 	 * a quarter as often as in plains. Melons grow fully in jungles.
 	 */

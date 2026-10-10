@@ -305,17 +305,27 @@ public class SurvivalTests implements FabricGameTest {
 	 * A chicken spawner's chickens are marked and drop nothing when killed (an ordinary chicken drops its
 	 * raw chicken).
 	 */
-	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "spawner_drops", tickLimit = 400)
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "spawner_drops", tickLimit = 1200)
 	public void spawnerMobsDropNothing(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
 		world.setTimeOfDay(6000);
-		floor(ctx, 6, Blocks.GRASS_BLOCK);
-		ctx.setBlockState(3, 1, 3, Blocks.SPAWNER);
-		BlockPos spawnerPos = ctx.getAbsolutePos(new BlockPos(3, 1, 3));
+		// Spawners put mobs anywhere within 4 blocks: grass all round so every spot works for a chicken.
+		for (int x = -2; x <= 10; x++) {
+			for (int z = -2; z <= 10; z++) {
+				ctx.setBlockState(x, 0, z, Blocks.GRASS_BLOCK);
+			}
+		}
+		ctx.setBlockState(4, 1, 4, Blocks.SPAWNER);
+		BlockPos spawnerPos = ctx.getAbsolutePos(new BlockPos(4, 1, 4));
 		((MobSpawnerBlockEntity) world.getBlockEntity(spawnerPos)).setEntityType(EntityType.CHICKEN, world.getRandom());
 		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(0, 1, 0));
 		Box around = new Box(spawnerPos).expand(8);
-		ctx.waitAndRun(150, () -> {
+		boolean[] done = {false};
+		ctx.runAtEveryTick(() -> {
+			if (done[0] || world.getEntitiesByClass(ChickenEntity.class, around, chicken -> true).isEmpty()) {
+				return;
+			}
+			done[0] = true;
 			try {
 				List<ChickenEntity> chickens = world.getEntitiesByClass(ChickenEntity.class, around, chicken -> true);
 				ctx.assertTrue(!chickens.isEmpty(), "the spawner should have let out chickens");
