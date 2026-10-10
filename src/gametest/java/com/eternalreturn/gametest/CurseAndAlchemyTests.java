@@ -232,16 +232,22 @@ public class CurseAndAlchemyTests implements FabricGameTest {
 		zombie.setBaby(false);
 		zombie.equipStack(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));
 		zombie.setPersistent();
+		// The goal can be ticked once more after its light is gone (the selector checks shouldContinue every other tick).
+		new com.eternalreturn.mobs.ai.BreakLightsGoal(zombie).tick();
 		ctx.setBlockState(new BlockPos(5, 1, 5), Blocks.TORCH);
 		ctx.setBlockState(new BlockPos(0, 1, 5), Blocks.GLOWSTONE);
 		boolean[] done = {false};
 		ctx.runAtEveryTick(() -> {
 			if (!done[0] && ctx.getBlockState(new BlockPos(5, 1, 5)).isAir()) {
 				done[0] = true;
-				rule.set(saved, ctx.getWorld().getServer());
-				ctx.killAllEntities();
-				ctx.expectBlock(Blocks.GLOWSTONE, new BlockPos(0, 1, 5));
-				ctx.complete();
+				// Let the zombie tick on a while after the light is gone (it once crashed there).
+				ctx.runAtTick(ctx.getTick() + 10, () -> {
+					rule.set(saved, ctx.getWorld().getServer());
+					ctx.assertTrue(zombie.isAlive(), "the zombie carried on");
+					ctx.killAllEntities();
+					ctx.expectBlock(Blocks.GLOWSTONE, new BlockPos(0, 1, 5));
+					ctx.complete();
+				});
 			}
 		});
 	}
@@ -263,9 +269,13 @@ public class CurseAndAlchemyTests implements FabricGameTest {
 		ctx.runAtEveryTick(() -> {
 			if (!done[0] && ctx.getBlockState(new BlockPos(5, 1, 4)).isAir()) {
 				done[0] = true;
-				rule.set(saved, ctx.getWorld().getServer());
-				ctx.killAllEntities();
-				ctx.complete();
+				// Let the zombie tick on a while after the light is gone (it once crashed there).
+				ctx.runAtTick(ctx.getTick() + 10, () -> {
+					rule.set(saved, ctx.getWorld().getServer());
+					ctx.assertTrue(zombie.isAlive(), "the zombie carried on");
+					ctx.killAllEntities();
+					ctx.complete();
+				});
 			}
 		});
 	}

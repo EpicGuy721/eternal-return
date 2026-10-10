@@ -101,6 +101,10 @@ public class BreakLightsGoal extends Goal {
 
 	@Override
 	public void tick() {
+		// Runs every tick, but the selector only checks shouldContinue every other one: the light may be gone already.
+		if (this.target == null) {
+			return;
+		}
 		this.giveUp--;
 		World world = this.zombie.getWorld();
 		this.zombie.getLookControl().lookAt(this.target.getX() + 0.5, this.target.getY() + 0.5, this.target.getZ() + 0.5);
