@@ -28,6 +28,7 @@
 		"mobs.SpiderEntityMixin",
 		"mobs.ZombieEntityMixin",
 		"villager.BuyItemFactoryAccessor",
+		"villager.SleepTaskMixin",
 		"villager.VillagerEntityMixin",
 		"worldgen.CarverContextMixin",
 		"worldgen.ConfiguredCarverMixin",

@@ -208,6 +208,35 @@ public final class EternalReturnConfig {
 		 * "emeralds" is before fishPriceMultiplier. Needs a restart.
 		 */
 		public Map<String, FishTrade> fishermanTrades = defaultFishTrades();
+		/** Villagers' needs, their shop hours and healing with food (see VillagerNeeds). */
+		public VillagerNeedSettings needs = new VillagerNeedSettings();
+	}
+
+	/**
+	 * Every villager has five needs: sleep, gossip, exercise, sunlight and work-life balance. Each one
+	 * missed for daysBeforePriceRise days adds emeraldsPerMissingNeed to every trade paid in emeralds;
+	 * any one missed for daysBeforeRefusal days and the villager won't trade at all. Days are Minecraft
+	 * days (24,000 ticks of the day clock, so sleeping through a night counts as a night passing).
+	 */
+	public static final class VillagerNeedSettings {
+		public boolean enabled = true;
+		public double daysBeforePriceRise = 2.0;
+		public int emeraldsPerMissingNeed = 5;
+		public double daysBeforeRefusal = 7.0;
+		/** Sleep: a villager won't lie down while it can see more than this many other adult villagers. */
+		public int maxOtherAdultsInSight = 1;
+		/** Exercise: blocks a villager must cover in one walk (straight-line distance from where it set off). */
+		public double exerciseBlocks = 8.0;
+		/** Work-life balance: a workstation closer than this to the villager's bed breaks it. */
+		public double minWorkstationDistance = 8.0;
+		/** Shops close at night: no trading from nightStart to nightEnd on the day clock (13000 is dusk, 23000 dawn). */
+		public boolean closedAtNight = true;
+		public int nightStart = 13000;
+		public int nightEnd = 23000;
+		/** A hurt villager with food in its inventory (bread, carrots, potatoes, beetroot) eats one now and then, healing by the food's value. */
+		public boolean healWithFood = true;
+		/** Chance, every 2 seconds while hurt, that it eats. */
+		public double eatChance = 0.25;
 	}
 
 	/** Overworld generation (see docs/worldgen.md). Changes need a restart, and only affect newly generated chunks. */

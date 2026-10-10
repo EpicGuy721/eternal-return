@@ -26,5 +26,14 @@
 	"createWorld.customize.modern_beta.preset_category.name.eternalreturn.eternal_return": "Eternal Return",
 	"createWorld.customize.modern_beta.preset_category.desc.eternalreturn.eternal_return": "The world generation of the Eternal Return total conversion.",
 	"block.eternalreturn.hardened": "Hardened %s",
-	"block.eternalreturn.ore_variant": "%s %s"
+	"block.eternalreturn.ore_variant": "%s %s",
+	"villager.eternalreturn.closed": "%s: \"Sorry, we're closed for the night. Come back in the morning.\"",
+	"villager.eternalreturn.refuses": "%s won't trade until its needs are met (one has been missed for %s days or more):",
+	"villager.eternalreturn.prices_up": "%s is unhappy and charges %s more emeralds per trade:",
+	"villager.eternalreturn.unhappy": "%s is unhappy (prices go up after %s days):",
+	"villager.eternalreturn.need.sleep": "Sleep: none for %1$s days. It needs a bed where it can't see more than %4$s other adult villager.",
+	"villager.eternalreturn.need.gossip": "Gossip: none for %1$s days. It needs a gathering place where it meets other villagers.",
+	"villager.eternalreturn.need.exercise": "Exercise: none for %1$s days. It needs room to walk %2$s blocks in one go.",
+	"villager.eternalreturn.need.sunlight": "Sunlight: none for %1$s days. It needs to see the sky in the daytime.",
+	"villager.eternalreturn.need.work_life": "Work-life balance: missing for %1$s days. Its workstation is less than %3$s blocks from its bed."
 }

@@ -1,6 +1,6 @@
 # Eternal Return (Fabric 1.21.1)
 
-A total conversion for Minecraft. So far it covers three systems: a rework of enchanting built around capacity, material identity, and libraries of books instead of XP; tougher overworld mobs (baby skeletons and creepers, better-armed zombies and skeletons, new jockeys, cave-only creepers); and fishing as the emerald economy (bait, eleven new fish, lava fishing in the Nether, and fishermen as the only villagers who still pay emeralds). Worldgen has its own world type, Eternal Return: Release 1.6.4's continents and oceans with rolling, hilly Beta-style land and a new cave system, built on Moderner Beta.
+A total conversion for Minecraft. So far it covers three systems: a rework of enchanting built around capacity, material identity, and libraries of books instead of XP; tougher overworld mobs (baby skeletons and creepers, better-armed zombies and skeletons, new jockeys, cave-only creepers); and fishing as the emerald economy (bait, eleven new fish, lava fishing in the Nether, and fishermen as the only villagers who still pay emeralds); and villagers with needs (sleep, gossip, exercise, sunlight, work-life balance) and shop hours. Worldgen has its own world type, Eternal Return: Release 1.6.4's continents and oceans with rolling, hilly Beta-style land and a new cave system, built on Moderner Beta.
 
 ## Building
 
@@ -25,7 +25,7 @@ In-game tests live in `src/gametest`, a separate test mod that is never packed i
 
 | Task | World | What runs |
 |---|---|---|
-| `runGametest` | flat | the mob, fishing and trade suites (with guardian spawn lists and limits, prismarine, monsters on the hook and overfishing), a check that the Eternal Return world type loaded, the hardened blocks, and every ore variant against its vanilla ore (drops, Fortune, Silk Touch, experience, tool tier, smelting, tags, creative tab, redstone light, overlay textures) |
+| `runGametest` | flat | the mob, fishing and trade suites (with guardian spawn lists and limits, prismarine, monsters on the hook and overfishing), villager needs (how each is met, price rises on emerald trades only, refusals, shop hours, sleep privacy, healing, saving), a check that the Eternal Return world type loaded, the hardened blocks, and every ore variant against its vanilla ore (drops, Fortune, Silk Touch, experience, tool tier, smelting, tags, creative tab, redstone light, overlay textures) |
 | `runGametestNoModernerBeta` | flat, Moderner Beta removed | the same suites, and a check that the world type is skipped cleanly |
 | `runGametestModernerBeta` | Moderner Beta, Release 1.6.4 amplified | worldgen checks (debug tunnel on, trial chambers present), carving unchanged |
 | `runGametestModernerBetaTunnelOff` | same | the same with the debug tunnel off |
@@ -112,6 +112,7 @@ The plan, status, terrain settings and maps are in [docs/worldgen.md](docs/world
 | Monsters on the hook: drowned, guardians, elder guardians, drowned riding them | `HostileCatches`, hooked in `FishingBobberEntityMixin`; `DrownedEntityMixin` (the guardian swims, the drowned throws) |
 | Overfished spots bite slower | `Overfishing`, hooked in `FishingBobberEntityMixin` |
 | Villagers stop paying emeralds, except fishermen for fish | `TradeRules`, `VillagerEntityMixin`, `BuyItemFactoryAccessor` |
+| Villager needs, shop hours, healing with food | `VillagerNeeds`; `VillagerEntityMixin` (ticking, saving, gossip, trading, prices), `SleepTaskMixin` (privacy); messages in `lang/en_us.json` |
 
 ## How the systems behave
 
@@ -236,6 +237,24 @@ Nether fish and infernal bait are fireproof. The new fish also count for the "fi
 
 **Villagers.** When a villager unlocks new trades, any trade where it would pay you emeralds is left out of the pick, except fishermen buying raw fish. This also applies with the experimental Villager Trade Rebalance on. Villagers still get two trades per level where enough are left, but levels that only ever offered buying unlock nothing (the butcher from journeyman up, for example). Villagers that already rolled their trades keep them, so test with new ones.
 
+**Villager needs.** Every villager has five needs, and remembers when each was last met:
+
+| Need | Met when | What it takes |
+|---|---|---|
+| Sleep | it sleeps in its bed | Privacy: a villager won't lie down while it can see more than one other adult villager, so it needs a house (two to a room is fine, a dormitory isn't) |
+| Gossip | it gossips with another villager | A gathering place where villagers meet (a bell does it); two villagers share gossip at most once a minute |
+| Exercise | it walks 8 blocks in one go | Room to roam: the 8 blocks are a straight line from where the walk began, so pacing around a small pen doesn't count |
+| Sunlight | it sees the sky in the daytime | Getting outside: not kept underground or under a roof all day |
+| Work-life balance | its workstation is at least 8 blocks from its bed (checked every second) | Work and home apart: a workstation right next to the bed breaks it for as long as it stays there |
+
+A need missed for 2 days adds 5 emeralds to every trade it sells for emeralds, per need (two missed needs: +10). A need missed for 7 days and the villager won't trade at all. Trades where the villager pays you (fishermen buying fish) don't change. When you try to trade, the villager tells you in chat about every need it has missed for a day or more, what it takes, and whether prices are up or it refuses; it shakes its head when it refuses. Days are the day clock's, so sleeping through a night counts as a night passing.
+
+Villagers that existed before this update, and babies until they grow up, start with every need met, so nothing changes for 2 days. Wandering traders have no needs.
+
+**Shop hours.** Villagers don't trade at night (from dusk, 13000 on the day clock, to dawn, 23000): "Sorry, we're closed for the night."
+
+**Healing.** A hurt villager with food in its inventory (bread, carrots, potatoes or beetroot, which farmers gather and share) now and then eats one, about one chance in four every 2 seconds, healing by the food's value (bread 5, a carrot 3, a potato or beetroot 1).
+
 ## Configuration
 
 `config/eternalreturn.json` is generated on first launch.
@@ -247,7 +266,7 @@ Nether fish and infernal bait are fireproof. The new fish also count for the "fi
 - `bookshelfBias`: the multipliers above, plus `booksCanUnlockNonTableEnchantments` (off by default) to let shelved books make the table offer treasure enchantments like Frost Walker.
 - `fortune`: toggles for hoes and shears.
 - `fishing`: `fishRequireBait`; `baits` (item to `lureSeconds`, `nightLureSeconds`, `lava`); `wormDropChance`; `anglerfishMinWaterDepth` (default 10); `lavaFishingOutsideNether`; `hostileCatchChance` (default 0.03) and `hostileCatches` (mob to `weight` and `oceanOnly`; the ids are mob ids, or `drowned_guardian_jockey` / `drowned_elder_guardian_jockey`); `overfishing` (`enabled`, `radius` 6, `freeCatches` 3, `slowdownPerCatch` 0.5, `maxSlowdown` 4, `recoveryMinutes` 5).
-- `villagers`: `onlyFishermenBuy`; `fishPriceMultiplier` (default 2, applied to every fish a fisherman buys); and `fishermanTrades` (item to `level`, `count`, base `emeralds`, `maxUses`, `experience`; needs a restart).
+- `villagers`: `onlyFishermenBuy`; `fishPriceMultiplier` (default 2, applied to every fish a fisherman buys); and `fishermanTrades` (item to `level`, `count`, base `emeralds`, `maxUses`, `experience`; needs a restart); `needs`: `enabled`, `daysBeforePriceRise` (2), `emeraldsPerMissingNeed` (5), `daysBeforeRefusal` (7), `maxOtherAdultsInSight` (1), `exerciseBlocks` (8), `minWorkstationDistance` (8), `closedAtNight`, `nightStart` (13000) and `nightEnd` (23000), `healWithFood` and `eatChance` (0.25).
 - `worldgen`: `debugTunnel` (off by default). Carves one straight 3x3 tunnel at y=20 along z=8 through every chunk on that row, to check that this mod's carvers run under the current world generator. Needs a restart, and only affects newly generated chunks.
 - `worldgen.biomeStone` (on by default; Eternal Return worlds only, newly generated chunks only): each biome's stone under the topsoil. Off: plain stone everywhere.
 - `worldgen.roundOverhangs` (on by default; Eternal Return worlds only, newly generated chunks only): overhang undersides arch and bulge instead of lying almost flat. Off: the terrain as Moderner Beta makes it.
@@ -310,63 +329,66 @@ Fishing and villagers (in survival):
 20. `/give @s eternalreturn:koi` and the other fish names to see the new textures. Fish are in Food & Drinks after the pufferfish, and bait is in Tools & Utilities after the fishing rod.
 21. Nether, with infernal bait: cast into a lava lake. The hook floats, lava pops trail toward it, and the catch flies out without burning. Magma eels are the common fish.
 22. A new fisherman buys fish at double price (15 perch or 15 cod for 2 emeralds at novice). A master fisherman buys koi for 10 emeralds. New masons, farmers, librarians, etc. buy nothing. Villagers that rolled their trades before this update keep their old prices.
-23. A Lure V rod with any bait still gets bites, fast.
-24. `/enchant @s eternalreturn:thriftiness 5` on a rod, then fish with a stack of worms: roughly half the catches leave the stack unchanged.
-25. Anglerfish: with glow bait, fish in open ocean (in the Eternal Return test world below, `/tp @s 24 63 0` has 13 blocks of water) and an anglerfish turns up now and then. Cast into shallow water near a shore: none.
-26. Monsters on the line: set `hostileCatchChance` to 1.0 in the config's `fishing` section and restart. In a river or lake every bite is a drowned, yanked out toward you. In an ocean it can also be a guardian, a drowned with a trident riding a guardian, or (rarely) an elder guardian, alone or ridden; the guardian swims around while the drowned throws its trident. A worm is used up each time.
-27. Overfishing: with worms, fish one spot and reel in six fish in a row. Bites take visibly longer (about 2.5 times as long by the sixth). Walk 10 blocks along the shore and they come quickly again; or wait 5 minutes at the first spot.
-28. Prismarine: fish without bait for a while: about one catch in eight is prismarine shards or crystals.
+23. Villager needs: right-click a villager around midday. A content one just trades. `/time add 50000` (two days and a bit) with it shut in a dark 1 x 2 hole: right-click it and chat lists its missed needs (sleep, gossip, exercise, sunlight) and says its prices are up; emerald prices are 20 higher. `/time add 120000` more and it shakes its head and refuses. Let it out into a village with a bell, a house of its own and a workstation 8 or more blocks from its bed: once it has slept, gossiped, had a walk and seen the sun, it is happy again.
+24. Shop hours: right-click any villager at night: "Sorry, we're closed for the night." Same villager in the morning: it trades.
+25. Healing: punch a villager once or twice and throw it some bread: it picks it up, and every few seconds while hurt it eats a piece and heals.
+26. A Lure V rod with any bait still gets bites, fast.
+27. `/enchant @s eternalreturn:thriftiness 5` on a rod, then fish with a stack of worms: roughly half the catches leave the stack unchanged.
+28. Anglerfish: with glow bait, fish in open ocean (in the Eternal Return test world below, `/tp @s 24 63 0` has 13 blocks of water) and an anglerfish turns up now and then. Cast into shallow water near a shore: none.
+29. Monsters on the line: set `hostileCatchChance` to 1.0 in the config's `fishing` section and restart. In a river or lake every bite is a drowned, yanked out toward you. In an ocean it can also be a guardian, a drowned with a trident riding a guardian, or (rarely) an elder guardian, alone or ridden; the guardian swims around while the drowned throws its trident. A worm is used up each time.
+30. Overfishing: with worms, fish one spot and reel in six fish in a row. Bites take visibly longer (about 2.5 times as long by the sixth). Walk 10 blocks along the shore and they come quickly again; or wait 5 minutes at the first spot.
+31. Prismarine: fish without bait for a while: about one catch in eight is prismarine shards or crystals.
 
 World type (needs Moderner Beta): create a creative world with World Type "Eternal Return" and seed `173164`, then `/tp @s X 320 Z` to each spot and fly down. Heights are from the test world.
 
-29. Anywhere on land: rolling hills and short climbs most of the way, not long flat stretches broken by sudden giant mountains. No 200-block spires, and floating rock is rare.
-30. `2376 2344`: the highest ground within 3,000 blocks of spawn, a savanna peak at about y 161.
-31. `968 -2296`: high extreme hills, about y 143 (where the emerald survey looks). `712 -568`: rolling extreme hills. `/tp @s 734 65 -592` puts you on the ground under an extreme hills overhang whose underside is about 30 blocks up: look up and around, it arches and bulges instead of lying flat (on worlds made before this update, overhang undersides are almost flat).
-32. `-1208 584`: badlands with terracotta bands, at about y 71.
-33. `-2040 1160`: a mushroom island. `-376 -376`: ice plains (a snowy overhang). `1416 264`: dark forest. `-608 192`: a cherry grove, a raised, hilly stretch of pink cherry trees and petals.
-34. Anywhere: F3 never shows `lush_caves`, `dripstone_caves` or `deep_dark`. Dig down to y -60: the biome's stone all the way (with the usual granite, diorite, andesite and, below y 0, tuff blobs), bedrock at -64, ores like diamond and redstone in their normal stone texture, no deepslate.
-35. With World Type "Moderner Beta", its Customize screen lists Eternal Return in its own category, with its icon.
+32. Anywhere on land: rolling hills and short climbs most of the way, not long flat stretches broken by sudden giant mountains. No 200-block spires, and floating rock is rare.
+33. `2376 2344`: the highest ground within 3,000 blocks of spawn, a savanna peak at about y 161.
+34. `968 -2296`: high extreme hills, about y 143 (where the emerald survey looks). `712 -568`: rolling extreme hills. `/tp @s 734 65 -592` puts you on the ground under an extreme hills overhang whose underside is about 30 blocks up: look up and around, it arches and bulges instead of lying flat (on worlds made before this update, overhang undersides are almost flat).
+35. `-1208 584`: badlands with terracotta bands, at about y 71.
+36. `-2040 1160`: a mushroom island. `-376 -376`: ice plains (a snowy overhang). `1416 264`: dark forest. `-608 192`: a cherry grove, a raised, hilly stretch of pink cherry trees and petals.
+37. Anywhere: F3 never shows `lush_caves`, `dripstone_caves` or `deep_dark`. Dig down to y -60: the biome's stone all the way (with the usual granite, diorite, andesite and, below y 0, tuff blobs), bedrock at -64, ores like diamond and redstone in their normal stone texture, no deepslate.
+38. With World Type "Moderner Beta", its Customize screen lists Eternal Return in its own category, with its icon.
 
 Oceans and structures (same world; a new one if it was made before this update). `/tp @s X Y Z`, in spectator mode with night vision underwater:
 
-36. Oceans, all at sea level (y 63): `392 63 -376` warm ocean (sand floor, coral and sea pickles); `200 63 -248` lukewarm; `-504 63 456` cold; `-632 63 1096` frozen (icebergs and ice); `136 63 136` deep ocean, deeper than the rest; `-568 63 968` deep frozen. F3 names each biome.
-37. `/locate structure minecraft:monument` and `/locate structure moderner_beta:ocean_shrine`: neither finds anything. Fly low over a deep ocean (`136 63 136` in the test world) for a while, best at night or under ice: now and then a guardian (very rarely an elder guardian, with Mining Fatigue when you get near). In other world types, monuments are still there.
-38. `/locate structure minecraft:mineshaft` from inside a biome, then `/tp` there in spectator mode: the supports and planks are that biome's wood. In the test world: oak `-401 26 -568` (under ice plains), birch `-401 -26 -759`, spruce `817 -33 1133`, jungle `3 -1 -1354`, acacia `1828 -46 -18`, dark oak `1304 -38 -302`, cherry `-539 12 -1664` (the centre of each mineshaft; look around for the corridors).
+39. Oceans, all at sea level (y 63): `392 63 -376` warm ocean (sand floor, coral and sea pickles); `200 63 -248` lukewarm; `-504 63 456` cold; `-632 63 1096` frozen (icebergs and ice); `136 63 136` deep ocean, deeper than the rest; `-568 63 968` deep frozen. F3 names each biome.
+40. `/locate structure minecraft:monument` and `/locate structure moderner_beta:ocean_shrine`: neither finds anything. Fly low over a deep ocean (`136 63 136` in the test world) for a while, best at night or under ice: now and then a guardian (very rarely an elder guardian, with Mining Fatigue when you get near). In other world types, monuments are still there.
+41. `/locate structure minecraft:mineshaft` from inside a biome, then `/tp` there in spectator mode: the supports and planks are that biome's wood. In the test world: oak `-401 26 -568` (under ice plains), birch `-401 -26 -759`, spruce `817 -33 1133`, jungle `3 -1 -1354`, acacia `1828 -46 -18`, dark oak `1304 -38 -302`, cherry `-539 12 -1664` (the centre of each mineshaft; look around for the corridors).
 
 Caves (same world; a new world, since chunks generated before this update keep their old caves). `/gamemode spectator`, `/effect give @s night_vision infinite`, then `/tp @s X Y Z` puts you inside each cave, all within about 150 blocks of each other:
 
-39. `-1283 -11 -1127`: spaghetti, 1.6.4-style tunnels that swell in the middle and fork; follow them up and down.
-40. `-1286 15 -1140`: a ravine, a narrow, very tall canyon with stepped, jagged walls.
-41. `-1200 -23 -1094`: a large cavern with uneven walls, a rolling floor and tunnels leading off. For a giant one, `/tp @s 356 -17 4290`: about 190 blocks across and 55 tall (far from the others).
-42. `-1275 51 -1129`: the top of a vertical shaft; look down, then follow it to the tunnels at the bottom.
-43. `-1338 37 -1196`: a zig-zag tunnel: straight runs with sharp alternating turns.
-44. `-1304 -3 -1146`: a ribbed tunnel that bulges and pinches every few blocks.
-45. `-1298 37 -1181`: the top of a spiral; follow it down as it winds two to four turns around a solid column of rock.
-46. `-1166 -36 -1214`: inside a toroidal room; follow the ring round, with the pillar standing in the middle.
-47. Anywhere: no water pours into caves from oceans or rivers, caves at y -56 and below hold lava, and there are no trial chambers (`/locate structure minecraft:trial_chambers` finds none).
+42. `-1283 -11 -1127`: spaghetti, 1.6.4-style tunnels that swell in the middle and fork; follow them up and down.
+43. `-1286 15 -1140`: a ravine, a narrow, very tall canyon with stepped, jagged walls.
+44. `-1200 -23 -1094`: a large cavern with uneven walls, a rolling floor and tunnels leading off. For a giant one, `/tp @s 356 -17 4290`: about 190 blocks across and 55 tall (far from the others).
+45. `-1275 51 -1129`: the top of a vertical shaft; look down, then follow it to the tunnels at the bottom.
+46. `-1338 37 -1196`: a zig-zag tunnel: straight runs with sharp alternating turns.
+47. `-1304 -3 -1146`: a ribbed tunnel that bulges and pinches every few blocks.
+48. `-1298 37 -1181`: the top of a spiral; follow it down as it winds two to four turns around a solid column of rock.
+49. `-1166 -36 -1214`: inside a toroidal room; follow the ring round, with the pillar standing in the middle.
+50. Anywhere: no water pours into caves from oceans or rivers, caves at y -56 and below hold lava, and there are no trial chambers (`/locate structure minecraft:trial_chambers` finds none).
 
 Biome stone (same world, a new one if it was made before this update; survival for the drops, `/gamemode creative` to look around). `/tp @s X Y Z`, then dig straight down with a pickaxe; F3's "Targeted Block" names what you are looking at:
 
-48. `-376 74 -952` (plains): grass, dirt, a coal ore, then plain stone from y 68 (with granite, gravel and dirt blobs further down). Stone drops cobblestone, as before.
-49. `-632 76 392` (forest): dig down through the oak, then grass, dirt, then andesite from y 65, all the way down (a granite blob at y 32 to 37, a cave at y 12). Mining it drops andesite.
-50. `-504 80 -696` (birch forest): grass, dirt, then diorite from y 76. Drops diorite.
-51. `1032 90 328` (jungle, on the canopy): dig down through the tree, then grass, dirt, then granite from y 67. Drops granite.
-52. `264 68 -696` (desert): sand, then ordinary sandstone (the desert's topsoil) down to y 54, an andesite blob, then hardened sandstone from y 51. It looks the same as the sandstone above, but F3 names it `eternalreturn:hardened_sandstone` and it takes about twice as long to mine. It drops plain sandstone, with or without Silk Touch.
-53. `-1208 71 584` (badlands): terracotta bands, then red sandstone from y 48. Drops red sandstone.
-54. `-376 90 -376` (ice plains, on a snowy overhang): dig through the overhang into the hollow under it, then grass and dirt from y 74, then hardened packed ice from y 68. It looks like packed ice, drops packed ice (Silk Touch too), isn't slippery to walk on, and doesn't melt next to a torch.
-55. Hit hardened sandstone or hardened packed ice with your hand or a shovel: it breaks slowly and drops nothing. In the creative inventory, Natural Blocks shows Hardened Sandstone after Sandstone and Hardened Packed Ice after Packed Ice.
-56. Crafting: a stone pickaxe from three sandstone (or red sandstone, granite, diorite, andesite) and two sticks; a furnace from eight andesite; a lever from a stick and a piece of granite; a piston from planks, an iron ingot, redstone and diorite. Packed ice makes none of them.
-57. In any host stone, granite, diorite, andesite, dirt and gravel blobs turn up as before. The map at `docs/worldgen-maps/stone/stone_y30.png` shows a cut at y 30.
+51. `-376 74 -952` (plains): grass, dirt, a coal ore, then plain stone from y 68 (with granite, gravel and dirt blobs further down). Stone drops cobblestone, as before.
+52. `-632 76 392` (forest): dig down through the oak, then grass, dirt, then andesite from y 65, all the way down (a granite blob at y 32 to 37, a cave at y 12). Mining it drops andesite.
+53. `-504 80 -696` (birch forest): grass, dirt, then diorite from y 76. Drops diorite.
+54. `1032 90 328` (jungle, on the canopy): dig down through the tree, then grass, dirt, then granite from y 67. Drops granite.
+55. `264 68 -696` (desert): sand, then ordinary sandstone (the desert's topsoil) down to y 54, an andesite blob, then hardened sandstone from y 51. It looks the same as the sandstone above, but F3 names it `eternalreturn:hardened_sandstone` and it takes about twice as long to mine. It drops plain sandstone, with or without Silk Touch.
+56. `-1208 71 584` (badlands): terracotta bands, then red sandstone from y 48. Drops red sandstone.
+57. `-376 90 -376` (ice plains, on a snowy overhang): dig through the overhang into the hollow under it, then grass and dirt from y 74, then hardened packed ice from y 68. It looks like packed ice, drops packed ice (Silk Touch too), isn't slippery to walk on, and doesn't melt next to a torch.
+58. Hit hardened sandstone or hardened packed ice with your hand or a shovel: it breaks slowly and drops nothing. In the creative inventory, Natural Blocks shows Hardened Sandstone after Sandstone and Hardened Packed Ice after Packed Ice.
+59. Crafting: a stone pickaxe from three sandstone (or red sandstone, granite, diorite, andesite) and two sticks; a furnace from eight andesite; a lever from a stick and a piece of granite; a piston from planks, an iron ingot, redstone and diorite. Packed ice makes none of them.
+60. In any host stone, granite, diorite, andesite, dirt and gravel blobs turn up as before. The map at `docs/worldgen-maps/stone/stone_y30.png` shows a cut at y 30.
 
 Ore variants (same world, made after this update; `/gamemode spectator` and `/effect give @s night_vision infinite`, then `/tp @s X Y Z` puts you in a cave with the ore in the wall next to you; `/gamemode survival` there to mine it):
 
-58. `-657 -4 361` (forest): andesite iron ore under your feet. Mine it with a stone pickaxe: raw iron. A wooden pickaxe gets nothing.
-59. `-482 -27 -724` (birch forest): diorite gold ore under your feet. An iron pickaxe gives raw gold; Silk Touch gives Diorite Gold Ore itself. `-526 12 -720`: diorite lapis ore just north of you.
-60. `995 -45 288` (jungle): granite gold ore just west of you, at `994 -45 288`; `1013 -55 299`: granite redstone ore under your feet. Walk on it or right-click it and it lights up with red specks, like redstone ore.
-61. `-1203 -4 599` (badlands): red sandstone gold ore under your feet. Badlands have about twice the gold of other biomes.
-62. `237 20 -724` (desert): hardened sandstone iron ore just north of you, at `237 20 -725`; `229 -51 -734`: hardened sandstone diamond ore just west of you.
-63. `-387 -2 -383` (ice plains): hardened packed ice iron ore west of you; `-354 -29 -391`: hardened packed ice diamond ore under your feet.
-64. Emerald: andesite emerald ore turns up only in high extreme hills (y 95 and up), around `968 150 -2296` for example (fly around the peaks); it is rare.
-65. Smelt or blast any variant: the same result, experience and time as its vanilla ore.
-66. Creative inventory, Natural Blocks: after each deepslate ore come its six variants. Or `/give @s eternalreturn:granite_iron_ore` (any of `andesite`, `diorite`, `granite`, `red_sandstone`, `hardened_sandstone`, `hardened_packed_ice`, then `_`, then `coal`, `iron`, `copper`, `gold`, `redstone`, `lapis`, `diamond` or `emerald`, then `_ore`), for example `/give @s eternalreturn:hardened_sandstone_gold_ore 16` or `/give @s eternalreturn:hardened_packed_ice_lapis_ore 16`.
-67. Old-style pack on and off: with Golden Days (or any old-style pack) on, the host stone under each ore shows the pack's texture and the ore blobs keep this mod's old-style overlays. Turn it off in Options, Resource Packs (move it back to Available, then Done): the host stones go back to vanilla's textures, the ore blobs stay the same, and vanilla's own stone ores show vanilla's modern textures again.
+61. `-657 -4 361` (forest): andesite iron ore under your feet. Mine it with a stone pickaxe: raw iron. A wooden pickaxe gets nothing.
+62. `-482 -27 -724` (birch forest): diorite gold ore under your feet. An iron pickaxe gives raw gold; Silk Touch gives Diorite Gold Ore itself. `-526 12 -720`: diorite lapis ore just north of you.
+63. `995 -45 288` (jungle): granite gold ore just west of you, at `994 -45 288`; `1013 -55 299`: granite redstone ore under your feet. Walk on it or right-click it and it lights up with red specks, like redstone ore.
+64. `-1203 -4 599` (badlands): red sandstone gold ore under your feet. Badlands have about twice the gold of other biomes.
+65. `237 20 -724` (desert): hardened sandstone iron ore just north of you, at `237 20 -725`; `229 -51 -734`: hardened sandstone diamond ore just west of you.
+66. `-387 -2 -383` (ice plains): hardened packed ice iron ore west of you; `-354 -29 -391`: hardened packed ice diamond ore under your feet.
+67. Emerald: andesite emerald ore turns up only in high extreme hills (y 95 and up), around `968 150 -2296` for example (fly around the peaks); it is rare.
+68. Smelt or blast any variant: the same result, experience and time as its vanilla ore.
+69. Creative inventory, Natural Blocks: after each deepslate ore come its six variants. Or `/give @s eternalreturn:granite_iron_ore` (any of `andesite`, `diorite`, `granite`, `red_sandstone`, `hardened_sandstone`, `hardened_packed_ice`, then `_`, then `coal`, `iron`, `copper`, `gold`, `redstone`, `lapis`, `diamond` or `emerald`, then `_ore`), for example `/give @s eternalreturn:hardened_sandstone_gold_ore 16` or `/give @s eternalreturn:hardened_packed_ice_lapis_ore 16`.
+70. Old-style pack on and off: with Golden Days (or any old-style pack) on, the host stone under each ore shows the pack's texture and the ore blobs keep this mod's old-style overlays. Turn it off in Options, Resource Packs (move it back to Available, then Done): the host stones go back to vanilla's textures, the ore blobs stay the same, and vanilla's own stone ores show vanilla's modern textures again.
