@@ -1,0 +1,22 @@
+{
+  "description": {
+    "translate": "enchantment.eternalreturn.reeling"
+  },
+  "supported_items": "#eternalreturn:enchantable/ranged",
+  "weight": 2,
+  "max_level": 5,
+  "min_cost": {
+    "base": 10,
+    "per_level_above_first": 9
+  },
+  "max_cost": {
+    "base": 60,
+    "per_level_above_first": 9
+  },
+  "anvil_cost": 4,
+  "slots": [
+    "mainhand"
+  ],
+  "effects": {},
+  "exclusive_set": "minecraft:punch"
+}

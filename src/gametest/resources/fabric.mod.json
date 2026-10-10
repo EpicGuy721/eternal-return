@@ -31,7 +31,8 @@
 			"com.eternalreturn.gametest.VillagerNeedsTests",
 			"com.eternalreturn.gametest.SurvivalTests",
 			"com.eternalreturn.gametest.WorldRulesTests",
-			"com.eternalreturn.gametest.MobsAndMachinesTests"
+			"com.eternalreturn.gametest.MobsAndMachinesTests",
+			"com.eternalreturn.gametest.CurseAndAlchemyTests"
 		]
 	},
 	"mixins": [

@@ -41,6 +41,7 @@ public abstract class ZombieEntityMixin extends HostileEntity {
 		ZombieEntity self = (ZombieEntity) (Object) this;
 		this.goalSelector.add(2, new MineTowardTargetGoal(self));
 		this.goalSelector.add(4, new ZombieEatMeatGoal(self));
+		this.goalSelector.add(5, new com.eternalreturn.mobs.ai.BreakLightsGoal(self));
 		// Adults hunt farm animals, after players and villagers (ZombieHabits).
 		this.targetSelector.add(5, new ActiveTargetGoal<>(this, AnimalEntity.class, 10, true, false,
 				animal -> !self.isBaby() && animal.getType().isIn(ZombieHabits.ZOMBIE_PREY) && EternalReturnConfig.get().mobs.zombiesHuntAnimals));
@@ -50,6 +51,7 @@ public abstract class ZombieEntityMixin extends HostileEntity {
 	private void eternalreturn$animalJockey(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason reason, EntityData data,
 			CallbackInfoReturnable<EntityData> cir) {
 		ZombieHabits.tryAnimalJockey((ZombieEntity) (Object) this, world, difficulty, reason);
+		com.eternalreturn.mobs.HeadGear.roll((ZombieEntity) (Object) this, world.getRandom());
 	}
 
 	@Inject(method = "initEquipment", at = @At("TAIL"))

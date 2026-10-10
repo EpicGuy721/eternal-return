@@ -207,12 +207,18 @@ public class MobsAndMachinesTests implements FabricGameTest {
 		// A helmet so it doesn't burn in the daylight before it gets there.
 		hungry.equipStack(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));
 		hungry.setHealth(4.0F);
-		Vec3d at = Vec3d.ofBottomCenter(ctx.getAbsolutePos(new BlockPos(6, 1, 2)));
+		Vec3d at = Vec3d.ofBottomCenter(ctx.getAbsolutePos(new BlockPos(6, 1, 2))).add(0.4, 0.0, 0.4);
 		var beef = new net.minecraft.entity.ItemEntity(world, at.x, at.y, at.z, new ItemStack(Items.BEEF));
 		beef.setPickupDelayInfinite();
 		world.spawnEntity(beef);
+		// An animal left near by another test would have it hunting instead (its own test, zombiesHuntAnimals).
+		EternalReturnConfig.MobTweaks cfg = EternalReturnConfig.get().mobs;
+		boolean hunt = cfg.zombiesHuntAnimals;
+		cfg.zombiesHuntAnimals = false;
+		hungry.setTarget(null);
 		ctx.runAtEveryTick(() -> {
-			if (hungry.getHealth() > 4.0F && !beef.isAlive()) {
+			if (hungry.getHealth() > 4.0F && !beef.isAlive() && !cfg.zombiesHuntAnimals) {
+				cfg.zombiesHuntAnimals = hunt;
 				hungry.discard();
 				ctx.complete();
 			}

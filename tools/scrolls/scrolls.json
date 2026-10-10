@@ -179,5 +179,22 @@
   "eternalreturn:soulbound": [
     "minecraft:ghast_tear",
     "minecraft:ender_eye"
+  ],
+  "eternalreturn:launch": [
+    "minecraft:slime_block",
+    "minecraft:feather"
+  ],
+  "eternalreturn:reeling": [
+    "minecraft:fishing_rod",
+    "minecraft:lead"
+  ],
+  "eternalreturn:spread_of_ailments": [
+    "minecraft:fermented_spider_eye",
+    "minecraft:glass_bottle"
+  ],
+  "eternalreturn:ascension_curse": [
+    "minecraft:phantom_membrane",
+    "minecraft:feather",
+    "minecraft:ender_pearl"
   ]
 }

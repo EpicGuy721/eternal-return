@@ -71,9 +71,15 @@ public class ZombieEatMeatGoal extends Goal {
 			return;
 		}
 		this.zombie.getLookControl().lookAt(this.meat);
-		if (this.zombie.squaredDistanceTo(this.meat) > 2.25) {
+		double distance = this.zombie.squaredDistanceTo(this.meat);
+		if (distance > 4.0) {
 			if (this.zombie.getNavigation().isIdle()) {
-				this.zombie.getNavigation().startMovingTo(this.meat, 1.0);
+				// A path can end in the block next to the meat, short of it: from close by, step straight at it.
+				if (distance < 9.0) {
+					this.zombie.getMoveControl().moveTo(this.meat.getX(), this.meat.getY(), this.meat.getZ(), 1.0);
+				} else {
+					this.zombie.getNavigation().startMovingTo(this.meat, 1.0);
+				}
 			}
 			return;
 		}

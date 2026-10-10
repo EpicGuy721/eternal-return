@@ -1,0 +1,17 @@
+{
+  "values": [
+    "minecraft:lantern",
+    "minecraft:soul_lantern",
+    "minecraft:glowstone",
+    "minecraft:sea_lantern",
+    "minecraft:jack_o_lantern",
+    "minecraft:shroomlight",
+    "minecraft:end_rod",
+    "minecraft:redstone_lamp",
+    "minecraft:ochre_froglight",
+    "minecraft:verdant_froglight",
+    "minecraft:pearlescent_froglight",
+    "#minecraft:candles",
+    "#minecraft:beds"
+  ]
+}

@@ -2,6 +2,8 @@ package com.eternalreturn;
 
 import com.eternalreturn.blocks.CutBlocks;
 import com.eternalreturn.blocks.Frames;
+import com.eternalreturn.items.PhilosophersStone;
+import com.eternalreturn.mobs.WitherSkeletons;
 import com.eternalreturn.blocks.Redstone;
 import com.eternalreturn.config.EternalReturnConfig;
 import com.eternalreturn.fishing.FishingItems;
@@ -45,6 +47,8 @@ public class EternalReturn implements ModInitializer {
 		CutBlocks.register();
 		Redstone.register();
 		Frames.register();
+		PhilosophersStone.register();
+		WitherSkeletons.register();
 		Scrolls.register();
 		ScrollLoot.register();
 		Slimes.register();

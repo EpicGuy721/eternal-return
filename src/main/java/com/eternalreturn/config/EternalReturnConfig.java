@@ -59,6 +59,7 @@ public final class EternalReturnConfig {
 	public WorldgenTweaks worldgen = new WorldgenTweaks();
 	public SurvivalTweaks survival = new SurvivalTweaks();
 	public RedstoneTweaks redstone = new RedstoneTweaks();
+	public ExtraEnchantmentTweaks enchantmentsExtra = new ExtraEnchantmentTweaks();
 
 	public static final class BookshelfBias {
 		public boolean enabled = true;
@@ -152,6 +153,14 @@ public final class EternalReturnConfig {
 		public double phantomSkeletonChance = 0.1;
 		/** Slimes of size 2 and up spawn with a skeleton on top this often. */
 		public double slimeSkeletonChance = 0.05;
+		/** Zombies and skeletons in birch forests and cherry groves wear a beehive this often (3 angry bees when it dies). */
+		public double beehiveHeadChance = 0.1;
+		/** Zombies and skeletons anywhere wear TNT this often (it explodes when they die). */
+		public double tntHeadChance = 0.001;
+		/** Zombies break torches near them, and with a pickaxe or shovel other lights and beds. */
+		public boolean zombiesBreakLights = true;
+		/** Wither skeletons' weight in every Nether biome's monster list (0: fortresses only). */
+		public int netherWitherSkeletonWeight = 2;
 	}
 
 	public static final class FishingTweaks {
@@ -264,6 +273,12 @@ public final class EternalReturnConfig {
 		public double eatChance = 0.25;
 	}
 
+	/** Launch, Reeling, Spread of Ailments, Curse of Ascension (com.eternalreturn.logic.NewEnchantments). */
+	public static final class ExtraEnchantmentTweaks {
+		/** Items with Curse of Ascension drift up when dropped. */
+		public boolean ascensionCurseRises = true;
+	}
+
 	/** Redstone additions (com.eternalreturn.blocks.Redstone, ChainLinks). */
 	public static final class RedstoneTweaks {
 		/** Dispensers place block items that have no dispenser behaviour of their own. */
@@ -322,6 +337,8 @@ public final class EternalReturnConfig {
 		public boolean pigLitters = true;
 		/** A baby animal fed a poisonous potato is poisoned, and stays a baby for good, this often. */
 		public double poisonousPotatoStuntChance = 0.5;
+		/** Mobs see a glowing creature through blocks. */
+		public boolean glowingSeenThroughWalls = true;
 	}
 
 	private static Map<String, Double> defaultArmorWeight() {

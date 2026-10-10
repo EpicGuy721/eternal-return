@@ -50,6 +50,22 @@ public abstract class LivingEntitySurvivalMixin {
 		return value;
 	}
 
+	/** A beehive or TNT on a zombie's or skeleton's head (HeadGear). */
+	@Inject(method = "onDeath", at = @At("HEAD"))
+	private void eternalreturn$headGear(DamageSource source, CallbackInfo ci) {
+		com.eternalreturn.mobs.HeadGear.died((LivingEntity) (Object) this, source);
+	}
+
+	/** A glowing creature can be seen through blocks (survival.glowingSeenThroughWalls), within 128 blocks. */
+	@Inject(method = "canSee", at = @At("HEAD"), cancellable = true)
+	private void eternalreturn$glowingSeen(net.minecraft.entity.Entity entity, CallbackInfoReturnable<Boolean> cir) {
+		if (com.eternalreturn.config.EternalReturnConfig.get().survival.glowingSeenThroughWalls && entity instanceof LivingEntity living
+				&& living.hasStatusEffect(StatusEffects.GLOWING) && living.getWorld() == ((LivingEntity) (Object) this).getWorld()
+				&& living.squaredDistanceTo((LivingEntity) (Object) this) < 128.0 * 128.0) {
+			cir.setReturnValue(true);
+		}
+	}
+
 	@Inject(method = "dropLoot", at = @At("HEAD"), cancellable = true)
 	private void eternalreturn$noSpawnerLoot(DamageSource damageSource, boolean causedByPlayer, CallbackInfo ci) {
 		if (SpawnerMobs.dropsNothing((LivingEntity) (Object) this)) {
