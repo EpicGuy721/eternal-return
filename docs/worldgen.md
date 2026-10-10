@@ -155,6 +155,16 @@ For a little more drama, the "even more" numbers (`depth_weight` 1.3, `depth_off
 
 (First-pass overhang numbers came from 144 sampled chunks and are noisier than the 576-chunk numbers used now.)
 
+### Overhang undersides
+
+Moderner Beta works out the terrain's density only every 8 blocks of height (and every 4 across) and blends in straight lines between, as Beta and Release 1.6.4 did. Tops of hills hide that, but where rock hangs over open air the underside lands between two of those 8-block steps and comes out as a near-flat plane, often 10 to 20 blocks across: on the test seed, over squares of 8 x 8 chunks in seven biomes, 36 percent of the overhang undersides you can see from outside lay in flat patches of 12 columns or more at one height, the biggest 94 columns (a jungle overhang near 965, 100, 295). A finer step isn't an option: Moderner Beta's 1.6.4 terrain counts height in those steps, so halving them would double the height of every hill.
+
+So `OverhangRounder` (`com.eternalreturn.worldgen.terrain`) reshapes them. In Eternal Return worlds, the first time the cave carver sees a chunk, before any cave is carved, it finds every place above sea level where rock sits on open air with ground (or water) below, and moves that underside following smooth 3D noise from the world seed: it arches up into the rock by 0 to 6 blocks, and where there are at least 6 blocks of air below, rock hangs lower in places (up to 3 blocks), copying the underside's own block (or, when that is grass or sand, the first block above it that isn't). It never cuts closer than 3 blocks to the top of the overhang, never leaves less than 3 blocks of air under it, never leaves sand or gravel hanging, and only touches plain open air (not water or caves). Each column is handled from its own blocks and the noise, so overhangs line up across chunk borders. Thin floating slabs (3 or 4 blocks thick) can't arch, so their undersides still follow their tops.
+
+After it, 11 percent of the visible undersides lie in flat patches of 12 or more, the biggest 25 columns. The rest of the flat patches the survey finds are roofs of cave tunnels running just under the surface, which are as flat as any cave tunnel's roof.
+
+The setting `worldgen.roundOverhangs` (on by default) turns it off. Other worlds never change. Tests: `OverhangTests` (Eternal Return run) repeats the survey and fails if more than a fifth of the visible terrain undersides lie in flat patches of 12 or more columns, or any patch passes 48; with the setting off it fails (417 of 1,165, biggest 94). The old-caves control run turns the setting off, so it still matches the world as it was before the cave engine.
+
 ### Map tool
 
 `./gradlew generateWorldMaps` renders all three presets (about 15 minutes; add `-PworldmapHalf=1024` for a 2048-block area in a few minutes). `./gradlew runWorldmapEternalReturn` (or `runWorldmapBeta`, `runWorldmapRelease164`) renders one. Each run generates a world headlessly at seed 173164 and writes to `docs/worldgen-maps/<preset>/`:

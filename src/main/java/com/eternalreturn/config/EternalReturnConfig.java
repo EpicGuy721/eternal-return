@@ -174,6 +174,12 @@ public final class EternalReturnConfig {
 		 * is in docs/worldgen.md). Off: plain stone everywhere. Other worlds never change.
 		 */
 		public boolean biomeStone = true;
+		/**
+		 * Rounded overhangs: in Eternal Return worlds, the undersides of overhanging rock rise and fall by a
+		 * few blocks instead of lying almost flat (see docs/worldgen.md). Off: the terrain as Moderner Beta
+		 * makes it. Other worlds never change.
+		 */
+		public boolean roundOverhangs = true;
 		/** The cave engine (com.eternalreturn.worldgen.caves). Only Eternal Return worlds are affected. */
 		public CaveTweaks caves = new CaveTweaks();
 	}

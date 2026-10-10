@@ -39,6 +39,10 @@ public abstract class TestServerMixin {
 		if (biomeStone != null) {
 			EternalReturnConfig.get().worldgen.biomeStone = Boolean.parseBoolean(biomeStone);
 		}
+		String overhangs = System.getProperty("eternalreturn.gametest.roundOverhangs");
+		if (overhangs != null) {
+			EternalReturnConfig.get().worldgen.roundOverhangs = Boolean.parseBoolean(overhangs);
+		}
 		EternalReturnConfig.CaveTweaks caves = EternalReturnConfig.get().worldgen.caves;
 		String enabled = System.getProperty("eternalreturn.gametest.caves.enabled");
 		if (enabled != null) {

@@ -2,6 +2,7 @@ package com.eternalreturn.worldgen.caves;
 
 import com.eternalreturn.config.EternalReturnConfig;
 import com.eternalreturn.config.EternalReturnConfig.CaveTypeSettings;
+import com.eternalreturn.worldgen.terrain.OverhangRounder;
 import com.mojang.serialization.Codec;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.math.BlockPos;
@@ -28,6 +29,7 @@ import java.util.function.Function;
  * the source chunk, and simulates them in full; only the parts inside the chunk being carved are written.
  * Carving works only from the seed, the source position and the chunk's own blocks, so it matches
  * across chunk borders and doesn't depend on which chunks generated first.
+ * Before any cave is carved in a chunk, it also rounds the chunk's overhangs (OverhangRounder).
  * Outside Eternal Return worlds it does nothing.
  */
 public class CaveSystemCarver extends Carver<CarverConfig> {
@@ -47,7 +49,12 @@ public class CaveSystemCarver extends Carver<CarverConfig> {
 	public boolean carve(CarverContext context, CarverConfig config, Chunk chunk, Function<BlockPos, RegistryEntry<Biome>> posToBiome,
 			Random random, AquiferSampler aquiferSampler, ChunkPos source, CarvingMask mask) {
 		EternalReturnConfig.CaveTweaks caves = EternalReturnConfig.get().worldgen.caves;
-		if (!caves.enabled || !CaveWorlds.isEternalReturn(context)) {
+		if (!CaveWorlds.isEternalReturn(context)) {
+			return false;
+		}
+		// The first call for a chunk rounds its overhangs, before any cave is carved.
+		ChunkCarver target = this.target(context, config, chunk, mask);
+		if (!caves.enabled) {
 			return false;
 		}
 		long started = System.nanoTime();
@@ -58,7 +65,6 @@ public class CaveSystemCarver extends Carver<CarverConfig> {
 			return false;
 		}
 
-		ChunkCarver target = this.target(context, config, chunk, mask);
 		long before = target.carvedBlocks();
 		CaveBuilder builder = new CaveBuilder(target, source);
 		long sourceSeed = random.nextLong();
@@ -110,6 +116,9 @@ public class CaveSystemCarver extends Carver<CarverConfig> {
 		int seaLevel = generator != null ? generator.getSeaLevel() : 63;
 		ChunkCarver.NeighbourWater water = generator == null ? null
 				: (x, z) -> generator.getHeight(x, z, Heightmap.Type.OCEAN_FLOOR_WG, chunk, context.getNoiseConfig());
+		if (EternalReturnConfig.get().worldgen.roundOverhangs) {
+			OverhangRounder.round(chunk, context.getNoiseConfig(), seaLevel);
+		}
 		current = new ChunkCarver(chunk, mask, state -> state.isIn(config.replaceable), minY, maxY, config.lavaLevel.getY(context), seaLevel, water);
 		CURRENT.set(current);
 		return current;

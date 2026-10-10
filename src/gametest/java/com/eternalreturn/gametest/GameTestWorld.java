@@ -15,7 +15,7 @@ public final class GameTestWorld {
 	public static final String WORLDMAP_BATCH = "worldmap";
 	/** Batches that need a generated world, so they never run in the flat-world runs. */
 	private static final Set<String> GENERATED_WORLD_BATCHES = Set.of(WORLDGEN_BATCH, ETERNAL_RETURN_BATCH, WORLDMAP_BATCH,
-			ControlFingerprintTests.FINGERPRINT_BATCH, OreCensusTests.ORE_BATCH, BiomeStoneTests.BIOME_STONE_BATCH, StoneMapTests.STONEMAP_BATCH, CoastTests.COAST_BATCH);
+			ControlFingerprintTests.FINGERPRINT_BATCH, OreCensusTests.ORE_BATCH, BiomeStoneTests.BIOME_STONE_BATCH, StoneMapTests.STONEMAP_BATCH, CoastTests.COAST_BATCH, OverhangTests.OVERHANG_BATCH);
 
 	public static final String ETERNAL_RETURN_PRESET = "eternalreturn:eternal_return";
 

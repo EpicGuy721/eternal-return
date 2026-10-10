@@ -63,12 +63,13 @@ gameTestRun("gametestVanilla", "Game Test (vanilla generator, debug tunnel on)",
 		["gametest.preset": "minecraft:normal", "gametest.batches": "worldgen,fingerprint", "gametest.debugTunnel": "true",
 		 "gametest.fingerprint": "vanilla_tunnel"])
 gameTestRun("gametestEternalReturn", "Game Test (Eternal Return preset)", "eternal_return",
-		["gametest.preset": "eternalreturn:eternal_return", "gametest.seed": worldmapSeed, "gametest.batches": "worldgen,worldgen_er,ores,coast", "gametest.debugTunnel": "true",
+		["gametest.preset": "eternalreturn:eternal_return", "gametest.seed": worldmapSeed, "gametest.batches": "worldgen,worldgen_er,ores,coast,overhang", "gametest.debugTunnel": "true",
 		 "gametest.fingerprint": "ore_census"])
-// Eternal Return with the new caves off, the old ones back and biome stone off must match the world as it was before the cave engine.
+// Eternal Return with the new caves off, the old ones back, biome stone off and overhangs left flat must match the world as it was before the cave engine.
 gameTestRun("gametestEternalReturnOldCaves", "Game Test (Eternal Return, old caves only, control)", "eternal_return_old_caves",
 		["gametest.preset": "eternalreturn:eternal_return", "gametest.seed": worldmapSeed, "gametest.batches": "fingerprint,cavestats", "gametest.debugTunnel": "true",
-		 "gametest.caves.enabled": "false", "gametest.caves.oldCaves": "true", "gametest.biomeStone": "false", "gametest.fingerprint": "eternal_return_old_caves"])
+		 "gametest.caves.enabled": "false", "gametest.caves.oldCaves": "true", "gametest.biomeStone": "false", "gametest.roundOverhangs": "false",
+		 "gametest.fingerprint": "eternal_return_old_caves"])
 // The cave engine: every type forced in turn, seams, chunk order, the carvable tag, density and timing.
 // Biome stone: the same squares with it on here and off in the twin (BiomeStoneTests).
 // The world has a twin dimension with the same generator, for the generated-first-or-last check.
