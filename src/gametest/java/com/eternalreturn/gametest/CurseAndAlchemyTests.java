@@ -382,7 +382,7 @@ public class CurseAndAlchemyTests implements FabricGameTest {
 
 	// ---------- the philosopher's stone ----------
 
-	/** Crafted from a diamond, 4 lapis and 4 amethyst; 777 uses; turns glass to sand and back, keeps a log's axis, and wears down. */
+	/** Crafted from a diamond, 4 lapis and 4 amethyst; 777 uses; turns glass to sand and back, keeps a log's axis, concrete to powder and back, and wears down. */
 	@GameTest(templateName = EMPTY_STRUCTURE)
 	public void philosophersStoneOnBlocks(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
@@ -411,7 +411,24 @@ public class CurseAndAlchemyTests implements FabricGameTest {
 			ctx.setBlockState(stone, Blocks.DIAMOND_BLOCK);
 			use(ctx, player, stone);
 			ctx.expectBlock(Blocks.DIAMOND_BLOCK, stone);
-			ctx.assertTrue(player.getMainHandStack().getDamage() == 3, "3 uses, 3 damage: " + player.getMainHandStack().getDamage());
+			BlockPos concrete = new BlockPos(1, 1, 1);
+			ctx.setBlockState(concrete, Blocks.RED_CONCRETE);
+			use(ctx, player, concrete);
+			ctx.expectBlock(Blocks.RED_CONCRETE_POWDER, concrete);
+			use(ctx, player, concrete);
+			ctx.expectBlock(Blocks.RED_CONCRETE, concrete);
+			// Powder made beside water sets again at once: nothing happens, and the stone isn't worn.
+			ctx.setBlockState(new BlockPos(0, 1, 1), Blocks.WATER);
+			use(ctx, player, concrete);
+			ctx.expectBlock(Blocks.RED_CONCRETE, concrete);
+			BlockPos cherry = new BlockPos(3, 1, 3);
+			ctx.setBlockState(cherry, Blocks.CHERRY_LOG);
+			use(ctx, player, cherry);
+			ctx.expectBlock(Blocks.OAK_LOG, cherry);
+			ctx.assertTrue(PhilosophersStone.transmute(Blocks.DARK_OAK_PLANKS) == Blocks.CHERRY_PLANKS && PhilosophersStone.transmute(Blocks.CHERRY_PLANKS) == Blocks.OAK_PLANKS
+					&& PhilosophersStone.transmute(Blocks.MANGROVE_LOG) == null && PhilosophersStone.transmute(Blocks.NETHER_BRICKS) == null,
+					"no mangrove or bamboo wood, no red nether bricks");
+			ctx.assertTrue(player.getMainHandStack().getDamage() == 6, "6 uses, 6 damage: " + player.getMainHandStack().getDamage());
 		} finally {
 			FishingTests.disconnect(player);
 		}
@@ -455,7 +472,16 @@ public class CurseAndAlchemyTests implements FabricGameTest {
 			ctx.assertTrue(villager.isRemoved() && world.getEntitiesByClass(net.minecraft.entity.mob.WitchEntity.class, box, e -> e.isAlive()).size() == 1,
 					"right-clicking a villager made a witch");
 			ctx.assertTrue(!PhilosophersStone.canTransmute(still(ctx, EntityType.CHICKEN, new BlockPos(0, 1, 4))), "chickens are left alone");
-			ctx.assertTrue(stone.getDamage() == 5, "5 uses, 5 damage: " + stone.getDamage());
+
+			// A horse: a real right-click changes its coat or its markings (not both), instead of mounting it.
+			net.minecraft.entity.passive.HorseEntity horse = still(ctx, EntityType.HORSE, new BlockPos(3, 1, 0));
+			var color = horse.getVariant();
+			var marking = horse.getMarking();
+			player.interact(horse, Hand.MAIN_HAND);
+			boolean newColor = horse.getVariant() != color, newMarking = horse.getMarking() != marking;
+			ctx.assertTrue(newColor != newMarking, "coat " + color + " -> " + horse.getVariant() + ", markings " + marking + " -> " + horse.getMarking());
+			ctx.assertTrue(!player.hasVehicle(), "not mounted");
+			ctx.assertTrue(stone.getDamage() == 6, "6 uses, 6 damage: " + stone.getDamage());
 		} finally {
 			FishingTests.disconnect(player);
 			ctx.killAllEntities();

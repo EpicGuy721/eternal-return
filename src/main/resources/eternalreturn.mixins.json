@@ -18,6 +18,7 @@
 		"SheepEntityMixin",
 		"SmithingTransformRecipeMixin",
 		"combat.ArrowHitMixin",
+		"combat.HorseEntityInvoker",
 		"combat.ItemEntityAscensionMixin",
 		"combat.MobArrowMixin",
 		"combat.MobAttackMixin",

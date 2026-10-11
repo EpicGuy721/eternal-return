@@ -106,7 +106,7 @@ public class SurvivalTests implements FabricGameTest {
 		ctx.assertTrue(!sleep.canSkipNight(100), "everyone asleep should not skip the night");
 
 		floor(ctx, 12, Blocks.STONE);
-		BlockPos[] beds = {bed(ctx, new BlockPos(1, 1, 3)), bed(ctx, new BlockPos(4, 1, 3)), bed(ctx, new BlockPos(7, 1, 3)), bed(ctx, new BlockPos(10, 1, 3))};
+		BlockPos[] beds = {bed(ctx, new BlockPos(0, 1, 3)), bed(ctx, new BlockPos(2, 1, 3)), bed(ctx, new BlockPos(4, 1, 3)), bed(ctx, new BlockPos(6, 1, 3))};
 		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(1, 1, 4));
 		try {
 			for (BlockPos head : beds) {

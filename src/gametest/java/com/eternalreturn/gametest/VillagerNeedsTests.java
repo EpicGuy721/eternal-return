@@ -146,9 +146,10 @@ public class VillagerNeedsTests implements FabricGameTest {
 		floor(ctx, 12);
 		VillagerEntity walker = villager(ctx, new BlockPos(0, 1, 2));
 		VillagerEntity pacer = villager(ctx, new BlockPos(0, 1, 6));
-		VillagerEntity roofed = villager(ctx, new BlockPos(10, 1, 10));
-		for (int x = 9; x <= 11; x++) {
-			for (int z = 9; z <= 11; z++) {
+		// Inside the test's own 8 x 8 area: a roof beyond it can be cleared when a neighbouring test sets up.
+		VillagerEntity roofed = villager(ctx, new BlockPos(6, 1, 6));
+		for (int x = 5; x <= 7; x++) {
+			for (int z = 5; z <= 7; z++) {
 				ctx.setBlockState(x, 4, z, Blocks.STONE);
 			}
 		}

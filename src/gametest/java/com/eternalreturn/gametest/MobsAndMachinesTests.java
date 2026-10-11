@@ -42,6 +42,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.test.GameTest;
 import net.minecraft.test.TestContext;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
@@ -411,6 +412,87 @@ public class MobsAndMachinesTests implements FabricGameTest {
 			ctx.expectBlock(Blocks.PINK_PETALS, new BlockPos(1, 2, 2));
 			ctx.expectBlock(Blocks.PINK_PETALS, new BlockPos(2, 2, 2));
 			ctx.complete();
+		});
+	}
+
+	/**
+	 * A player on the bank right-clicks a pond with pink petals, as the client does it: the crosshair is on the pond
+	 * floor, so first the click on that block (which must pass), then the item's own use, which puts the petals on
+	 * the water. A second click on them adds a petal.
+	 */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "petal_clicks")
+	public void petalsPlacedOnWaterByClicking(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		for (int x = -1; x <= 7; x++) {
+			for (int z = -1; z <= 5; z++) {
+				ctx.setBlockState(x, 0, z, Blocks.STONE);
+				boolean pond = x >= 1 && x <= 6 && z >= 0 && z <= 4;
+				ctx.setBlockState(x, 1, z, pond ? Blocks.WATER : Blocks.STONE);
+			}
+		}
+		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(0, 2, 2));
+		try {
+			player.setStackInHand(Hand.MAIN_HAND, new ItemStack(Items.PINK_PETALS, 8));
+			// Look at the middle of the water's surface 2 blocks out, with the pond floor behind it within reach.
+			Vec3d aim = Vec3d.ofCenter(ctx.getAbsolutePos(new BlockPos(2, 1, 2))).add(0.0, 0.35, 0.0);
+			Vec3d look = aim.subtract(player.getEyePos());
+			// Body and head turned together, as a real player's are.
+			player.setYaw((float) Math.toDegrees(Math.atan2(-look.x, look.z)));
+			player.setHeadYaw(player.getYaw());
+			player.setPitch((float) -Math.toDegrees(Math.atan2(look.y, look.horizontalLength())));
+			Vec3d reach = player.getEyePos().add(player.getRotationVec(1.0F).multiply(player.getBlockInteractionRange()));
+			BlockHitResult crosshair = world.raycast(new net.minecraft.world.RaycastContext(player.getEyePos(), reach,
+					net.minecraft.world.RaycastContext.ShapeType.OUTLINE, net.minecraft.world.RaycastContext.FluidHandling.NONE, player));
+			ctx.assertTrue(crosshair.getType() == net.minecraft.util.hit.HitResult.Type.BLOCK && world.getBlockState(crosshair.getBlockPos()).isOf(Blocks.STONE),
+					"the crosshair is on the pond floor: " + world.getBlockState(crosshair.getBlockPos()));
+			ActionResult onFloor = player.interactionManager.interactBlock(player, world, player.getMainHandStack(), Hand.MAIN_HAND, crosshair);
+			ctx.assertTrue(!onFloor.isAccepted(), "the click on the floor passes: " + onFloor);
+			player.interactionManager.interactItem(player, world, player.getMainHandStack(), Hand.MAIN_HAND);
+			BlockPos petals = new BlockPos(2, 2, 2);
+			ctx.expectBlock(Blocks.PINK_PETALS, petals);
+			ctx.assertTrue(player.getMainHandStack().getCount() == 7, "one petal used");
+			BlockHitResult onPetals = new BlockHitResult(Vec3d.ofBottomCenter(ctx.getAbsolutePos(petals)), Direction.UP, ctx.getAbsolutePos(petals), false);
+			player.interactionManager.interactBlock(player, world, player.getMainHandStack(), Hand.MAIN_HAND, onPetals);
+			ctx.expectBlockProperty(petals, net.minecraft.block.FlowerbedBlock.FLOWER_AMOUNT, 2);
+		} finally {
+			FishingTests.disconnect(player);
+		}
+		ctx.runAtTick(ctx.getTick() + 10, () -> {
+			ctx.expectBlockProperty(new BlockPos(2, 2, 2), net.minecraft.block.FlowerbedBlock.FLOWER_AMOUNT, 2);
+			ctx.complete();
+		});
+	}
+
+	/** An adult zombie leaves alone a cow a baby zombie is riding, and hunts a pig nobody rides. */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "jockey_mounts", tickLimit = 400)
+	public void zombiesSpareJockeyMounts(TestContext ctx) {
+		floor(ctx, 7);
+		CowEntity cow = ctx.spawnEntity(EntityType.COW, new BlockPos(2, 1, 2));
+		cow.setAiDisabled(true);
+		ZombieEntity baby = ctx.spawnEntity(EntityType.ZOMBIE, new BlockPos(2, 1, 2));
+		baby.setBaby(true);
+		baby.setAiDisabled(true);
+		baby.equipStack(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));
+		baby.startRiding(cow, true);
+		ZombieEntity adult = ctx.spawnEntity(EntityType.ZOMBIE, new BlockPos(0, 1, 0));
+		adult.setBaby(false);
+		adult.equipStack(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));
+		PigEntity pig = ctx.spawnEntity(EntityType.PIG, new BlockPos(7, 1, 7));
+		pig.setAiDisabled(true);
+		boolean[] done = {false};
+		ctx.runAtEveryTick(() -> {
+			if (done[0]) {
+				return;
+			}
+			if (adult.getTarget() == cow) {
+				done[0] = true;
+				ctx.killAllEntities();
+				ctx.throwPositionedException("the zombie went for the ridden cow", cow);
+			} else if (adult.getTarget() == pig) {
+				done[0] = true;
+				ctx.killAllEntities();
+				ctx.complete();
+			}
 		});
 	}
 

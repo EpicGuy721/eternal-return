@@ -25,10 +25,13 @@ public abstract class PinkPetalsBlockItemMixin {
 		}
 		var player = context.getPlayer();
 		BlockHitResult water = context.getWorld().raycast(new RaycastContext(player.getEyePos(),
-				player.getEyePos().add(player.getRotationVec(1.0F).multiply(player.getBlockInteractionRange())),
+				// Looking the same way the item's use looks (Item.raycast), so both agree on where the water is.
+				player.getEyePos().add(player.getRotationVector(player.getPitch(), player.getYaw()).multiply(player.getBlockInteractionRange())),
 				RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.SOURCE_ONLY, player));
+		// Not when the click is already on the water's surface: that is the item's use placing them (it used to stop
+		// itself here, so petals almost never went on water).
 		if (water.getType() == HitResult.Type.BLOCK && !context.getWorld().getFluidState(water.getBlockPos()).isEmpty()
-				&& !water.getBlockPos().equals(context.getBlockPos())) {
+				&& !water.getBlockPos().equals(context.getBlockPos()) && !water.getBlockPos().up().equals(context.getBlockPos())) {
 			cir.setReturnValue(ActionResult.PASS);
 		}
 	}
