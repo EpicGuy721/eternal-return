@@ -122,11 +122,11 @@ public class FishingFixTests implements FabricGameTest {
 		ItemStack rod = new ItemStack(Items.FISHING_ROD);
 		rod.addEnchantment(thrift, 5);
 		PlayerEntity player = ctx.createMockPlayer(GameMode.SURVIVAL);
-		player.getInventory().main.set(0, new ItemStack(FishingItems.WORM, 64));
-		player.getInventory().main.set(1, new ItemStack(FishingItems.WORM, 64));
+		player.getInventory().main.set(0, new ItemStack(FishingItems.CHUM, 64));
+		player.getInventory().main.set(1, new ItemStack(FishingItems.CHUM, 64));
 		int used = 0;
 		for (int i = 0; i < 100; i++) {
-			if (Bait.consumeAfterCatch(player, new ItemStack(FishingItems.WORM), rod, random)) {
+			if (Bait.consumeAfterCatch(player, new ItemStack(FishingItems.CHUM), rod, random)) {
 				used++;
 			}
 		}
@@ -136,7 +136,7 @@ public class FishingFixTests implements FabricGameTest {
 		ItemStack plain = new ItemStack(Items.FISHING_ROD);
 		int plainUsed = 0;
 		for (int i = 0; i < 20; i++) {
-			if (Bait.consumeAfterCatch(player, new ItemStack(FishingItems.WORM), plain, random)) {
+			if (Bait.consumeAfterCatch(player, new ItemStack(FishingItems.CHUM), plain, random)) {
 				plainUsed++;
 			}
 		}
@@ -185,8 +185,9 @@ public class FishingFixTests implements FabricGameTest {
 		}
 		System.out.println("[gametest] fisherman buys: " + emeralds);
 		ctx.assertTrue(emeralds.getOrDefault("15xminecraft:cod", 0) == 2, "15 cod should pay 2 (vanilla 1): " + emeralds);
-		ctx.assertTrue(emeralds.getOrDefault("15xeternalreturn:perch", 0) == 2, "15 perch should pay 2: " + emeralds);
-		ctx.assertTrue(emeralds.getOrDefault("1xeternalreturn:koi", 0) == 10, "koi should pay 10: " + emeralds);
+		// The mod's fish pay the fish table's price, not doubled.
+		ctx.assertTrue(emeralds.getOrDefault("6xeternalreturn:bluegill", 0) == 1, "6 bluegill should pay 1: " + emeralds);
+		ctx.assertTrue(emeralds.getOrDefault("1xeternalreturn:oarfish", 0) == 12, "an oarfish should pay 12: " + emeralds);
 		ctx.complete();
 	}
 }

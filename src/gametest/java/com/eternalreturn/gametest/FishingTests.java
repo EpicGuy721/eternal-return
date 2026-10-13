@@ -53,7 +53,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-/** Fishing and villager trades: loot odds, bait, full catch cycles in water and lava, worms, recipes, trades. */
+/** Fishing and villager trades: bait, full catch cycles in water and lava, recipes, items, trades (each fish: FishTableTests). */
 public class FishingTests implements FabricGameTest {
 	// ---------- helpers ----------
 
@@ -157,90 +157,17 @@ public class FishingTests implements FabricGameTest {
 
 	// ---------- loot tables ----------
 
+	/** Without bait, nothing but junk and treasure bites, in water or lava (each fish's own odds: FishTableTests). */
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "fishing_loot", tickLimit = 200)
-	public void waterFishOdds(TestContext ctx) {
-		RegistryKey<LootTable> water = LootTables.FISHING_GAMEPLAY;
-		fillBiome(ctx, "minecraft:plains");
-		Map<Item, Integer> none = sample(ctx, water, null, 3000);
-		check(ctx, fishCount(none) == 0, "no bait must catch no fish: " + none);
-		check(ctx, n(none, Items.LILY_PAD) + n(none, Items.BONE) + n(none, Items.STICK) > 0, "no bait still catches junk: " + none);
-		// Prismarine: weight 2 next to junk 10 and treasure 5 (about 12% without bait, 2% with), shards a little more often than crystals.
-		int shards = n(none, Items.PRISMARINE_SHARD);
-		int crystals = n(none, Items.PRISMARINE_CRYSTALS);
-		check(ctx, shards > 120 && crystals > 80 && shards + crystals < 550, "prismarine without bait: " + shards + " shards, " + crystals + " crystals in 3000");
-		int blocks = n(none, Items.PRISMARINE) + n(none, Items.DARK_PRISMARINE) + n(none, Items.SEA_LANTERN);
-		check(ctx, blocks > 60 && blocks < 300 && n(none, Items.SEA_LANTERN) > 0, "prismarine blocks and sea lanterns, rarely: " + blocks + " in 3000");
-
-		Map<Item, Integer> worm = sample(ctx, water, FishingItems.WORM, 3000);
-		check(ctx, n(worm, Items.PRISMARINE_SHARD) + n(worm, Items.PRISMARINE_CRYSTALS) > 20, "prismarine with bait too: " + worm);
-		double ratio = (double) n(worm, FishingItems.PERCH) / Math.max(1, n(worm, Items.COD));
-		check(ctx, ratio > 0.75 && ratio < 1.33, "perch should be as common as cod, perch/cod = " + ratio + " " + worm);
-		check(ctx, n(worm, FishingItems.PIKE) > 0, "pike anywhere");
-		for (Item absent : List.of(FishingItems.KOI, FishingItems.ANGLERFISH, FishingItems.TUNA, FishingItems.CATFISH,
-				FishingItems.ICEFISH, FishingItems.ELECTRIC_EEL, FishingItems.MAGMA_EEL)) {
-			check(ctx, n(worm, absent) == 0, absent + " should not bite on worms in plains: " + worm);
-		}
-
-		Map<Item, Integer> melon = sample(ctx, water, Items.GLISTERING_MELON_SLICE, 3000);
-		check(ctx, n(melon, FishingItems.KOI) > 0, "koi with glistering melon: " + melon);
-		double pikeBoost = (double) n(melon, FishingItems.PIKE) / Math.max(1, n(worm, FishingItems.PIKE));
-		check(ctx, pikeBoost > 1.35, "glistering melon should boost uncommon fish, pike x" + pikeBoost);
-
-		fillBiome(ctx, "minecraft:deep_ocean");
-		Map<Item, Integer> glowDeep = sample(ctx, water, FishingItems.GLOW_BAIT, 4000);
-		check(ctx, n(glowDeep, FishingItems.TUNA) > 0 && n(glowDeep, FishingItems.ELECTRIC_EEL) > 0, "ocean fish: " + glowDeep);
-		check(ctx, n(glowDeep, FishingItems.ANGLERFISH) == 0, "no anglerfish without deep water under the hook: " + glowDeep);
-
-		fillBiome(ctx, "minecraft:swamp");
-		check(ctx, n(sample(ctx, water, FishingItems.WORM, 2000), FishingItems.CATFISH) > 0, "catfish in swamps");
-		fillBiome(ctx, "minecraft:snowy_plains");
-		check(ctx, n(sample(ctx, water, FishingItems.WORM, 2000), FishingItems.ICEFISH) > 0, "icefish in the cold");
-		ctx.complete();
-	}
-
-	/**
-	 * Anglerfish: any ocean biome, glow bait, and at least fishing.anglerfishMinWaterDepth (10) blocks of
-	 * water under the hook. deep_pool is a 5x14x5 column of water.
-	 */
-	@GameTest(templateName = "eternalreturn_test:deep_pool", batchId = "fishing_loot_deep", tickLimit = 200)
-	public void anglerfishNeedDeepWater(TestContext ctx) {
-		RegistryKey<LootTable> water = LootTables.FISHING_GAMEPLAY;
-		BlockPos deep = new BlockPos(2, 14, 2);
-		BlockPos shallow = new BlockPos(2, 5, 2);
-		check(ctx, DeepWaterLootCondition.waterDepth(ctx.getWorld(), ctx.getAbsolutePos(deep)) == 14, "deep spot depth "
-				+ DeepWaterLootCondition.waterDepth(ctx.getWorld(), ctx.getAbsolutePos(deep)));
-		check(ctx, DeepWaterLootCondition.waterDepth(ctx.getWorld(), ctx.getAbsolutePos(shallow)) == 5, "shallow spot depth");
-
-		fillBiome(ctx, "minecraft:ocean");
-		check(ctx, n(sample(ctx, water, FishingItems.GLOW_BAIT, 4000, deep), FishingItems.ANGLERFISH) > 0, "anglerfish over 14 deep ocean water");
-		check(ctx, n(sample(ctx, water, FishingItems.GLOW_BAIT, 4000, shallow), FishingItems.ANGLERFISH) == 0, "no anglerfish over 5 deep water");
-		check(ctx, n(sample(ctx, water, FishingItems.WORM, 4000, deep), FishingItems.ANGLERFISH) == 0, "anglerfish need glow bait");
-		EternalReturnConfig.FishingTweaks cfg = EternalReturnConfig.get().fishing;
-		int saved = cfg.anglerfishMinWaterDepth;
-		cfg.anglerfishMinWaterDepth = 15;
-		try {
-			check(ctx, n(sample(ctx, water, FishingItems.GLOW_BAIT, 4000, deep), FishingItems.ANGLERFISH) == 0, "config minimum 15 rules out 14 deep");
-		} finally {
-			cfg.anglerfishMinWaterDepth = saved;
-		}
-		fillBiome(ctx, "minecraft:plains");
-		check(ctx, n(sample(ctx, water, FishingItems.GLOW_BAIT, 4000, deep), FishingItems.ANGLERFISH) == 0, "no anglerfish outside ocean biomes");
-		ctx.complete();
-	}
-
-	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "fishing_loot_lava", tickLimit = 200)
-	public void lavaFishOdds(TestContext ctx) {
-		fillBiome(ctx, "minecraft:soul_sand_valley");
-		Map<Item, Integer> none = sample(ctx, FishingLoot.LAVA_FISHING, null, 2000);
-		check(ctx, n(none, FishingItems.MAGMA_EEL) + n(none, FishingItems.SOULFIN) == 0, "no bait, no nether fish: " + none);
-		check(ctx, n(none, Items.SOUL_SAND) + n(none, Items.BASALT) + n(none, Items.BONE) > 0, "nether junk: " + none);
-		check(ctx, n(none, Items.GOLD_NUGGET) > n(none, Items.BLAZE_ROD), "gold more common than blaze rods: " + none);
-		Map<Item, Integer> baited = sample(ctx, FishingLoot.LAVA_FISHING, FishingItems.INFERNAL_BAIT, 3000);
-		check(ctx, n(baited, FishingItems.MAGMA_EEL) > 0 && n(baited, FishingItems.SOULFIN) > 0, "soul sand valley fish: " + baited);
-		check(ctx, n(baited, FishingItems.ASHFIN) == 0, "ashfin only in basalt deltas: " + baited);
-		check(ctx, n(baited, Items.COD) + n(baited, FishingItems.PERCH) == 0, "no water fish from lava: " + baited);
-		fillBiome(ctx, "minecraft:basalt_deltas");
-		check(ctx, n(sample(ctx, FishingLoot.LAVA_FISHING, FishingItems.INFERNAL_BAIT, 2000), FishingItems.ASHFIN) > 0, "ashfin in basalt deltas");
+	public void noBaitNoFish(TestContext ctx) {
+		Map<Item, Integer> water = sample(ctx, LootTables.FISHING_GAMEPLAY, null, 2000);
+		check(ctx, fishCount(water) == 0, "no bait, no fish: " + water);
+		check(ctx, fishCount(sample(ctx, LootTables.FISHING_GAMEPLAY, FishingItems.CHUM, 2000)) > 1000, "chum brings fish");
+		fillBiome(ctx, "minecraft:nether_wastes");
+		Map<Item, Integer> lava = sample(ctx, FishingLoot.LAVA_FISHING, null, 2000);
+		check(ctx, fishCount(lava) == 0, "no magma cream, no Nether fish: " + lava);
+		Map<Item, Integer> baited = sample(ctx, FishingLoot.LAVA_FISHING, Items.MAGMA_CREAM, 2000);
+		check(ctx, fishCount(baited) > 1000 && n(baited, Items.COD) == 0, "Nether fish with magma cream, no water fish: " + baited);
 		ctx.complete();
 	}
 
@@ -249,33 +176,27 @@ public class FishingTests implements FabricGameTest {
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "bait", tickLimit = 40)
 	public void baitSelectionAndLure(TestContext ctx) {
 		PlayerEntity player = ctx.createMockPlayer(GameMode.SURVIVAL);
-		player.getInventory().main.set(5, new ItemStack(FishingItems.WORM, 3));
-		check(ctx, Bait.find(player, false).isOf(FishingItems.WORM), "finds worms in the inventory");
-		check(ctx, Bait.find(player, true).isEmpty(), "worms don't work in lava");
-		player.equipStack(net.minecraft.entity.EquipmentSlot.OFFHAND, new ItemStack(FishingItems.CHUM, 2));
-		check(ctx, Bait.find(player, false).isOf(FishingItems.CHUM), "off hand bait wins");
-		player.getInventory().main.set(20, new ItemStack(FishingItems.INFERNAL_BAIT, 1));
-		check(ctx, Bait.find(player, true).isOf(FishingItems.INFERNAL_BAIT), "infernal bait in lava");
-		Bait.consumeOne(player, new ItemStack(FishingItems.CHUM));
-		check(ctx, player.getOffHandStack().getCount() == 1, "one chum used");
+		player.getInventory().main.set(5, new ItemStack(FishingItems.CHUM, 3));
+		check(ctx, Bait.find(player, false).isOf(FishingItems.CHUM), "finds chum in the inventory");
+		check(ctx, Bait.find(player, true).isEmpty(), "chum doesn't work in lava");
+		player.equipStack(net.minecraft.entity.EquipmentSlot.OFFHAND, new ItemStack(Items.GLISTERING_MELON_SLICE, 2));
+		check(ctx, Bait.find(player, false).isOf(Items.GLISTERING_MELON_SLICE), "off hand bait wins");
+		player.getInventory().main.set(20, new ItemStack(Items.MAGMA_CREAM, 1));
+		check(ctx, Bait.find(player, true).isOf(Items.MAGMA_CREAM), "magma cream in lava");
+		check(ctx, !Bait.find(player, false).isOf(Items.MAGMA_CREAM), "magma cream isn't water bait");
+		Bait.consumeOne(player, new ItemStack(Items.GLISTERING_MELON_SLICE));
+		check(ctx, player.getOffHandStack().getCount() == 1, "one melon slice used");
 		check(ctx, Bait.lureTicks(new ItemStack(FishingItems.CHUM), ctx.getWorld()) == 200, "chum lure 10 s");
+		check(ctx, Bait.lureTicks(new ItemStack(Items.GLISTERING_MELON_SLICE), ctx.getWorld()) == 100, "glistering melon lure 5 s");
+		check(ctx, Bait.lureTicks(new ItemStack(Items.MAGMA_CREAM), ctx.getWorld()) == 100, "magma cream lure 5 s");
 		check(ctx, Bait.lureTicks(ItemStack.EMPTY, ctx.getWorld()) == 0, "no bait no lure");
 
 		PlayerEntity creative = ctx.createMockPlayer(GameMode.CREATIVE);
 		creative.getAbilities().creativeMode = true;
-		creative.equipStack(net.minecraft.entity.EquipmentSlot.OFFHAND, new ItemStack(FishingItems.WORM, 1));
-		Bait.consumeOne(creative, new ItemStack(FishingItems.WORM));
+		creative.equipStack(net.minecraft.entity.EquipmentSlot.OFFHAND, new ItemStack(FishingItems.CHUM, 1));
+		Bait.consumeOne(creative, new ItemStack(FishingItems.CHUM));
 		check(ctx, creative.getOffHandStack().getCount() == 1, "creative keeps bait");
-
-		ctx.getWorld().setTimeOfDay(6000);
-		ctx.runAtTick(5, () -> {
-			check(ctx, Bait.lureTicks(new ItemStack(FishingItems.GLOW_BAIT), ctx.getWorld()) == 100, "glow bait by day = worms");
-			ctx.getWorld().setTimeOfDay(18000);
-		});
-		ctx.runAtTick(10, () -> {
-			check(ctx, Bait.lureTicks(new ItemStack(FishingItems.GLOW_BAIT), ctx.getWorld()) == 300, "glow bait at night is the strongest");
-			ctx.complete();
-		});
+		ctx.complete();
 	}
 
 	// ---------- full catch cycles ----------
@@ -355,26 +276,26 @@ public class FishingTests implements FabricGameTest {
 	}
 
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "catch_lava", tickLimit = 600)
-	public void lavaCatchWithInfernalBait(TestContext ctx) {
+	public void lavaCatchWithMagmaCream(TestContext ctx) {
 		EternalReturnConfig.FishingTweaks saved = EternalReturnConfig.get().fishing;
 		EternalReturnConfig.FishingTweaks lavaAnywhere = new EternalReturnConfig.FishingTweaks();
 		lavaAnywhere.lavaFishingOutsideNether = true;
 		EternalReturnConfig.get().fishing = lavaAnywhere;
-		catchCycle(ctx, Blocks.LAVA, FishingItems.INFERNAL_BAIT, r -> {
+		catchCycle(ctx, Blocks.LAVA, Items.MAGMA_CREAM, r -> {
 			EternalReturnConfig.get().fishing = saved;
 			check(ctx, r.hookY() > r.surfaceY() + 0.2, "hook should float in the lava, not rest on the floor, y " + r.hookY() + " vs block " + r.surfaceY());
 			check(ctx, !r.caught().isEmpty(), "something should come out of the lava");
 			check(ctx, r.caught().stream().allMatch(ItemEntity::isInvulnerable), "lava catches are protected from burning: " + r.caught().stream().map(e -> e.getStack() + " inv " + e.isInvulnerable() + " at " + e.getBlockPos()).toList());
 			check(ctx, r.survivedOrCollected(), "the catch burned up: " + r.caught());
-			check(ctx, r.baitLeft() == 2, "one infernal bait used, left " + r.baitLeft());
+			check(ctx, r.baitLeft() == 2, "one magma cream used, left " + r.baitLeft());
 		});
 	}
 
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "catch_water", tickLimit = 600)
-	public void waterCatchUsesWorm(TestContext ctx) {
-		catchCycle(ctx, Blocks.WATER, FishingItems.WORM, r -> {
+	public void waterCatchUsesChum(TestContext ctx) {
+		catchCycle(ctx, Blocks.WATER, FishingItems.CHUM, r -> {
 			check(ctx, !r.caught().isEmpty(), "something should be caught");
-			check(ctx, r.baitLeft() == 2, "one worm used, left " + r.baitLeft());
+			check(ctx, r.baitLeft() == 2, "one chum used, left " + r.baitLeft());
 		});
 	}
 
@@ -386,51 +307,33 @@ public class FishingTests implements FabricGameTest {
 		});
 	}
 
-	// ---------- worms, recipes, items ----------
+	// ---------- recipes, items ----------
 
-	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "worms", tickLimit = 40)
-	public void wormsFromDirt(TestContext ctx) {
-		ServerPlayerEntity player = survivalPlayer(ctx, new BlockPos(0, 1, 0));
-		withFishing(f -> f.wormDropChance = 1.0, () -> {
-			for (int i = 0; i < 4; i++) {
-				Block block = List.of(Blocks.DIRT, Blocks.GRASS_BLOCK, Blocks.MUD, Blocks.STONE).get(i);
-				BlockPos rel = new BlockPos(1 + 2 * i, 1, 4);
-				ctx.setBlockState(rel, block);
-				player.interactionManager.tryBreakBlock(ctx.getAbsolutePos(rel));
-			}
-		});
-		ctx.runAtTick(2, () -> {
-			for (int i = 0; i < 4; i++) {
-				BlockPos abs = ctx.getAbsolutePos(new BlockPos(1 + 2 * i, 1, 4));
-				boolean worm = !ctx.getWorld().getEntitiesByType(EntityType.ITEM, new Box(abs).expand(0.6), e -> e.getStack().isOf(FishingItems.WORM)).isEmpty();
-				check(ctx, worm == (i < 3), "worm drop at block " + i + ": " + worm);
-			}
-			disconnect(player);
-			ctx.complete();
-		});
-	}
-
+	/** Chum from any raw fish; every fish fills like raw salmon, can't be cooked, and Nether fish don't burn. */
 	@GameTest(templateName = EMPTY_STRUCTURE)
 	public void recipesAndItems(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
-		Object[][] recipes = {
-				{Items.COD, Items.BONE_MEAL, FishingItems.CHUM},
-				{FishingItems.KOI, Items.BONE_MEAL, FishingItems.CHUM},
-				{Items.SLIME_BALL, Items.GLOWSTONE_DUST, FishingItems.GLOW_BAIT},
-				{Items.ROTTEN_FLESH, Items.MAGMA_CREAM, FishingItems.INFERNAL_BAIT},
-		};
-		for (Object[] r : recipes) {
-			CraftingRecipeInput input = CraftingRecipeInput.create(2, 1, List.of(new ItemStack((Item) r[0]), new ItemStack((Item) r[1])));
+		for (Item fish : List.of(Items.COD, FishingItems.FISH.get(0), FishingItems.FISH.get(FishingItems.FISH.size() - 1))) {
+			CraftingRecipeInput input = CraftingRecipeInput.create(2, 1, List.of(new ItemStack(fish), new ItemStack(Items.BONE_MEAL)));
 			ItemStack out = world.getRecipeManager().getFirstMatch(RecipeType.CRAFTING, input, world)
 					.map(e -> ((CraftingRecipe) e.value()).craft(input, world.getRegistryManager())).orElse(ItemStack.EMPTY);
-			check(ctx, out.isOf((Item) r[2]) && out.getCount() == 4, r[0] + " + " + r[1] + " -> " + out);
+			check(ctx, out.isOf(FishingItems.CHUM) && out.getCount() == 4, fish + " + bone meal -> " + out);
 		}
-		for (Item fish : List.of(FishingItems.PERCH, FishingItems.KOI, FishingItems.SOULFIN)) {
+		check(ctx, FishingItems.FISH.size() == com.eternalreturn.fishing.FishTable.fish().size() && FishingItems.FISH.size() == 53, "53 fish: " + FishingItems.FISH.size());
+		for (Item fish : FishingItems.FISH) {
 			ItemStack stack = new ItemStack(fish);
-			check(ctx, stack.get(DataComponentTypes.FOOD) != null && stack.get(DataComponentTypes.FOOD).nutrition() == 2, fish + " food");
+			var food = stack.get(DataComponentTypes.FOOD);
+			check(ctx, food != null && food.nutrition() == 2 && food.saturation() == new ItemStack(Items.SALMON).get(DataComponentTypes.FOOD).saturation(), fish + " fills like raw salmon");
 			check(ctx, stack.isIn(ItemTags.FISHES) && stack.isIn(FishingItems.RAW_FISH), fish + " tags");
+			net.minecraft.recipe.input.SingleStackRecipeInput single = new net.minecraft.recipe.input.SingleStackRecipeInput(stack);
+			for (RecipeType<?> type : List.of(RecipeType.SMELTING, RecipeType.SMOKING, RecipeType.CAMPFIRE_COOKING)) {
+				@SuppressWarnings("unchecked")
+				var cooking = (RecipeType<net.minecraft.recipe.AbstractCookingRecipe>) type;
+				check(ctx, world.getRecipeManager().getFirstMatch(cooking, single, world).isEmpty(), fish + " can't be cooked");
+			}
+			boolean nether = ((FishingItems.FishItem) fish).fish().nether();
+			check(ctx, stack.contains(DataComponentTypes.FIRE_RESISTANT) == nether, fish + (nether ? " is" : " isn't") + " fireproof");
 		}
-		check(ctx, new ItemStack(FishingItems.MAGMA_EEL).contains(DataComponentTypes.FIRE_RESISTANT), "nether fish are fireproof");
 		ctx.complete();
 	}
 
@@ -447,13 +350,11 @@ public class FishingTests implements FabricGameTest {
 			throw new RuntimeException(e);
 		}
 		Map<Item, Integer> fishBought = new HashMap<>();
-		int koiAtMaster = 0;
 		for (VillagerProfession profession : Registries.VILLAGER_PROFESSION) {
 			if (profession == VillagerProfession.NONE || profession == VillagerProfession.NITWIT) {
 				continue;
 			}
 			int offers = 0;
-			// Fishermen have many fish trades to pick from: enough of them that each fish turns up.
 			int samples = profession == VillagerProfession.FISHERMAN ? 40 : 15;
 			for (int sampleNo = 0; sampleNo < samples; sampleNo++) {
 				VillagerEntity villager = EntityType.VILLAGER.create(world);
@@ -474,16 +375,13 @@ public class FishingTests implements FabricGameTest {
 						check(ctx, profession == VillagerProfession.FISHERMAN && wanted.isIn(FishingItems.RAW_FISH),
 								profession.id() + " still buys " + wanted + " for emeralds");
 						fishBought.merge(wanted.getItem(), 1, Integer::sum);
-						if (wanted.isOf(FishingItems.KOI) && offer.getSellItem().getCount() == 10) {
-							koiAtMaster++;
-						}
 					}
 				}
 			}
 			check(ctx, offers > 0, profession.id() + " has no trades left at all");
 		}
-		check(ctx, koiAtMaster == 40, "every master fisherman buys koi for 10 emeralds, got " + koiAtMaster);
-		for (Item fish : List.of(Items.COD, Items.SALMON, FishingItems.PERCH, FishingItems.PIKE, FishingItems.TUNA, FishingItems.SOULFIN)) {
+		// Vanilla's own fish trades are still picked now and then; the mod's fish are always there (FishTableTests).
+		for (Item fish : List.of(Items.COD, Items.SALMON, FishingItems.FISH.get(0))) {
 			check(ctx, fishBought.containsKey(fish), "no fisherman ever bought " + fish + ": " + fishBought);
 		}
 		ctx.complete();

@@ -1,0 +1,68 @@
+{
+  "values": [
+    "minecraft:plains",
+    "minecraft:sunflower_plains",
+    "minecraft:forest",
+    "minecraft:flower_forest",
+    "minecraft:birch_forest",
+    "minecraft:old_growth_birch_forest",
+    "minecraft:dark_forest",
+    "minecraft:meadow",
+    {
+      "id": "moderner_beta:beta_forest",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:beta_oak_forest",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:beta_plains",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:beta_seasonal_forest",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:beta_shrubland",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:pe_forest",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:pe_plains",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:pe_seasonal_forest",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:pe_shrubland",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:late_beta_plains",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:alpha",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:indev_normal",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:indev_woods",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:indev_paradise",
+      "required": false
+    }
+  ]
+}

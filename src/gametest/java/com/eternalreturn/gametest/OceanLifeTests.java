@@ -247,7 +247,7 @@ public class OceanLifeTests implements FabricGameTest {
 			pool(ctx, "minecraft:plains", false);
 			ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(-1, 6, 3));
 			player.setStackInHand(Hand.MAIN_HAND, new ItemStack(Items.FISHING_ROD));
-			player.getInventory().main.set(9, new ItemStack(FishingItems.WORM, 3));
+			player.getInventory().main.set(9, new ItemStack(FishingItems.CHUM, 3));
 			Box around = new Box(ctx.getAbsolutePos(BlockPos.ORIGIN)).expand(12);
 
 			// Plains: only the drowned can bite here.

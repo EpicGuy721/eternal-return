@@ -1,0 +1,1062 @@
+{
+	"_doc": "Every fish: rarity, where and when it bites, and what the fisherman pays. Read by the game (items, fisherman trades) and by tools/fish/build_fish.py (textures, models, names, tooltips, habitat biome tags, catch tables, docs/fish.md): edit this, then rerun the script. The \"fishermen\" of a habitat are the villager regions whose fishermen buy fish from it; a fish is bought by the fishermen of all its habitats, and by every fisherman if one of its habitats has none (the sea, cherry groves, the Nether) or it has no habitat (underground).",
+	"rarities": {
+		"common": {
+			"weight": 30,
+			"level": 1,
+			"max_uses": 16,
+			"experience": 2
+		},
+		"uncommon": {
+			"weight": 12,
+			"level": 2,
+			"max_uses": 16,
+			"experience": 5
+		},
+		"rare": {
+			"weight": 5,
+			"level": 3,
+			"max_uses": 12,
+			"experience": 10
+		},
+		"epic": {
+			"weight": 2,
+			"level": 4,
+			"max_uses": 8,
+			"experience": 15
+		},
+		"legendary": {
+			"weight": 1,
+			"level": 5,
+			"max_uses": 4,
+			"experience": 25
+		}
+	},
+	"habitats": {
+		"rivers": {
+			"label": "rivers",
+			"biomes": [
+				"minecraft:river",
+				"minecraft:frozen_river"
+			],
+			"fishermen": [
+				"plains"
+			]
+		},
+		"lakes": {
+			"label": "plains and forests",
+			"biomes": [
+				"minecraft:plains",
+				"minecraft:sunflower_plains",
+				"minecraft:forest",
+				"minecraft:flower_forest",
+				"minecraft:birch_forest",
+				"minecraft:old_growth_birch_forest",
+				"minecraft:dark_forest",
+				"minecraft:meadow",
+				"?moderner_beta:beta_forest",
+				"?moderner_beta:beta_oak_forest",
+				"?moderner_beta:beta_plains",
+				"?moderner_beta:beta_seasonal_forest",
+				"?moderner_beta:beta_shrubland",
+				"?moderner_beta:pe_forest",
+				"?moderner_beta:pe_plains",
+				"?moderner_beta:pe_seasonal_forest",
+				"?moderner_beta:pe_shrubland",
+				"?moderner_beta:late_beta_plains",
+				"?moderner_beta:alpha",
+				"?moderner_beta:indev_normal",
+				"?moderner_beta:indev_woods",
+				"?moderner_beta:indev_paradise"
+			],
+			"fishermen": [
+				"plains"
+			]
+		},
+		"swamps": {
+			"label": "swamps",
+			"biomes": [
+				"minecraft:swamp",
+				"minecraft:mangrove_swamp",
+				"?moderner_beta:early_release_swampland",
+				"?moderner_beta:late_beta_swampland",
+				"?moderner_beta:beta_swampland",
+				"?moderner_beta:pe_swampland"
+			],
+			"fishermen": [
+				"swamp"
+			]
+		},
+		"jungles": {
+			"label": "jungles",
+			"biomes": [
+				"minecraft:jungle",
+				"minecraft:sparse_jungle",
+				"minecraft:bamboo_jungle",
+				"?moderner_beta:beta_rainforest",
+				"?moderner_beta:pe_rainforest"
+			],
+			"fishermen": [
+				"jungle"
+			]
+		},
+		"warm_dry": {
+			"label": "dry lands",
+			"biomes": [
+				"minecraft:desert",
+				"minecraft:badlands",
+				"minecraft:eroded_badlands",
+				"minecraft:wooded_badlands",
+				"minecraft:savanna",
+				"minecraft:savanna_plateau",
+				"minecraft:windswept_savanna",
+				"?moderner_beta:beta_desert",
+				"?moderner_beta:pe_desert",
+				"?moderner_beta:beta_savanna",
+				"?moderner_beta:pe_savanna"
+			],
+			"fishermen": [
+				"desert",
+				"savanna"
+			]
+		},
+		"cold": {
+			"label": "snowy lands",
+			"biomes": [
+				"minecraft:frozen_river",
+				"minecraft:snowy_plains",
+				"minecraft:ice_spikes",
+				"minecraft:snowy_taiga",
+				"minecraft:snowy_slopes",
+				"minecraft:grove",
+				"minecraft:frozen_peaks",
+				"minecraft:jagged_peaks",
+				"minecraft:snowy_beach",
+				"?moderner_beta:early_release_ice_plains",
+				"?moderner_beta:late_beta_ice_plains",
+				"?moderner_beta:beta_tundra",
+				"?moderner_beta:beta_ice_desert",
+				"?moderner_beta:pe_tundra",
+				"?moderner_beta:pe_ice_desert",
+				"?moderner_beta:alpha_winter"
+			],
+			"fishermen": [
+				"snow"
+			]
+		},
+		"taiga": {
+			"label": "taigas",
+			"biomes": [
+				"minecraft:taiga",
+				"minecraft:old_growth_pine_taiga",
+				"minecraft:old_growth_spruce_taiga",
+				"minecraft:snowy_taiga",
+				"?moderner_beta:early_release_taiga",
+				"?moderner_beta:late_beta_taiga",
+				"?moderner_beta:beta_taiga",
+				"?moderner_beta:beta_oak_taiga",
+				"?moderner_beta:pe_taiga"
+			],
+			"fishermen": [
+				"taiga"
+			]
+		},
+		"mountains": {
+			"label": "mountains",
+			"biomes": [
+				"minecraft:windswept_hills",
+				"minecraft:windswept_gravelly_hills",
+				"minecraft:windswept_forest",
+				"minecraft:stony_peaks",
+				"minecraft:meadow",
+				"?moderner_beta:early_release_extreme_hills",
+				"?moderner_beta:late_beta_extreme_hills"
+			],
+			"fishermen": [
+				"taiga"
+			]
+		},
+		"cherry": {
+			"label": "cherry groves",
+			"biomes": [
+				"minecraft:cherry_grove"
+			]
+		},
+		"beaches": {
+			"label": "beaches",
+			"biomes": [
+				"minecraft:beach",
+				"minecraft:snowy_beach",
+				"minecraft:stony_shore"
+			],
+			"fishermen": [
+				"plains"
+			]
+		},
+		"oceans": {
+			"label": "oceans",
+			"biomes": [
+				"#eternalreturn:ocean_waters"
+			]
+		},
+		"warm_oceans": {
+			"label": "warm oceans",
+			"biomes": [
+				"minecraft:warm_ocean",
+				"minecraft:lukewarm_ocean",
+				"minecraft:deep_lukewarm_ocean",
+				"?moderner_beta:beta_warm_ocean",
+				"?moderner_beta:beta_lukewarm_ocean",
+				"?moderner_beta:pe_warm_ocean",
+				"?moderner_beta:pe_lukewarm_ocean"
+			]
+		},
+		"temperate_oceans": {
+			"label": "temperate oceans",
+			"biomes": [
+				"minecraft:ocean",
+				"minecraft:deep_ocean",
+				"?moderner_beta:beta_ocean",
+				"?moderner_beta:pe_ocean"
+			]
+		},
+		"cold_oceans": {
+			"label": "cold oceans",
+			"biomes": [
+				"minecraft:cold_ocean",
+				"minecraft:deep_cold_ocean",
+				"minecraft:frozen_ocean",
+				"minecraft:deep_frozen_ocean",
+				"?moderner_beta:beta_cold_ocean",
+				"?moderner_beta:beta_frozen_ocean",
+				"?moderner_beta:pe_cold_ocean",
+				"?moderner_beta:pe_frozen_ocean"
+			]
+		},
+		"nether": {
+			"label": "the Nether",
+			"biomes": [
+				"#minecraft:is_nether"
+			]
+		},
+		"nether_wastes": {
+			"label": "nether wastes",
+			"biomes": [
+				"minecraft:nether_wastes"
+			]
+		},
+		"soul_sand_valley": {
+			"label": "soul sand valleys",
+			"biomes": [
+				"minecraft:soul_sand_valley"
+			]
+		},
+		"crimson_forest": {
+			"label": "crimson forests",
+			"biomes": [
+				"minecraft:crimson_forest"
+			]
+		},
+		"warped_forest": {
+			"label": "warped forests",
+			"biomes": [
+				"minecraft:warped_forest"
+			]
+		},
+		"basalt_deltas": {
+			"label": "basalt deltas",
+			"biomes": [
+				"minecraft:basalt_deltas"
+			]
+		}
+	},
+	"baits": {
+		"eternalreturn:chum": {
+			"emeralds": 1,
+			"count": 16
+		},
+		"minecraft:glistering_melon_slice": {
+			"emeralds": 1,
+			"count": 4
+		},
+		"minecraft:magma_cream": {
+			"emeralds": 1,
+			"count": 4
+		}
+	},
+	"fish": {
+		"bluegill": {
+			"name": "Bluegill",
+			"texture": "Bluegill.png",
+			"rarity": "common",
+			"nether": false,
+			"habitats": [
+				"lakes",
+				"rivers"
+			],
+			"time": "day",
+			"sell": {
+				"count": 6,
+				"emeralds": 1
+			}
+		},
+		"crappie": {
+			"name": "Crappie",
+			"texture": "Crappie.png",
+			"rarity": "common",
+			"nether": false,
+			"habitats": [
+				"lakes",
+				"rivers",
+				"swamps"
+			],
+			"time": "night",
+			"sell": {
+				"count": 6,
+				"emeralds": 1
+			}
+		},
+		"carp": {
+			"name": "Carp",
+			"texture": "Carp.png",
+			"rarity": "common",
+			"nether": false,
+			"habitats": [
+				"lakes",
+				"rivers",
+				"swamps"
+			],
+			"sell": {
+				"count": 8,
+				"emeralds": 1
+			}
+		},
+		"bass": {
+			"name": "Bass",
+			"texture": "Bass.png",
+			"rarity": "common",
+			"nether": false,
+			"habitats": [
+				"lakes",
+				"rivers"
+			],
+			"weather": "clear",
+			"sell": {
+				"count": 5,
+				"emeralds": 1
+			}
+		},
+		"striped_perch": {
+			"name": "Striped Perch",
+			"texture": "Striped_Perch.png",
+			"rarity": "common",
+			"nether": false,
+			"habitats": [
+				"rivers",
+				"taiga",
+				"lakes"
+			],
+			"time": "day",
+			"sell": {
+				"count": 6,
+				"emeralds": 1
+			}
+		},
+		"shad": {
+			"name": "Shad",
+			"texture": "Shad.png",
+			"rarity": "common",
+			"nether": false,
+			"habitats": [
+				"rivers",
+				"beaches"
+			],
+			"sell": {
+				"count": 8,
+				"emeralds": 1
+			}
+		},
+		"herring": {
+			"name": "Herring",
+			"texture": "Herring.png",
+			"rarity": "common",
+			"nether": false,
+			"habitats": [
+				"temperate_oceans",
+				"cold_oceans"
+			],
+			"sell": {
+				"count": 8,
+				"emeralds": 1
+			}
+		},
+		"anchovy": {
+			"name": "Anchovy",
+			"texture": "Anchovy.png",
+			"rarity": "common",
+			"nether": false,
+			"habitats": [
+				"warm_oceans",
+				"temperate_oceans"
+			],
+			"time": "day",
+			"sell": {
+				"count": 8,
+				"emeralds": 1
+			}
+		},
+		"guppy": {
+			"name": "Guppy",
+			"texture": "Guppy.png",
+			"rarity": "common",
+			"nether": false,
+			"habitats": [
+				"jungles",
+				"swamps",
+				"warm_dry"
+			],
+			"time": "day",
+			"sell": {
+				"count": 8,
+				"emeralds": 1
+			}
+		},
+		"mediterranean_killifish": {
+			"name": "Mediterranean Killifish",
+			"texture": "Mediterranean_Killifish.png",
+			"rarity": "uncommon",
+			"nether": false,
+			"habitats": [
+				"warm_dry",
+				"beaches"
+			],
+			"time": "day",
+			"sell": {
+				"count": 4,
+				"emeralds": 1
+			}
+		},
+		"tunisian_barb": {
+			"name": "Tunisian Barb",
+			"texture": "Tunisian_Barb.png",
+			"rarity": "uncommon",
+			"nether": false,
+			"habitats": [
+				"warm_dry"
+			],
+			"weather": "clear",
+			"sell": {
+				"count": 3,
+				"emeralds": 1
+			}
+		},
+		"walleye": {
+			"name": "Walleye",
+			"texture": "Walleye.png",
+			"rarity": "uncommon",
+			"nether": false,
+			"habitats": [
+				"rivers",
+				"taiga",
+				"lakes"
+			],
+			"time": "night",
+			"sell": {
+				"count": 3,
+				"emeralds": 1
+			}
+		},
+		"northern_pike": {
+			"name": "Northern Pike",
+			"texture": "Northern_Pike.png",
+			"rarity": "uncommon",
+			"nether": false,
+			"habitats": [
+				"rivers",
+				"taiga",
+				"cold",
+				"lakes"
+			],
+			"time": "day",
+			"sell": {
+				"count": 3,
+				"emeralds": 1
+			}
+		},
+		"catfish": {
+			"name": "Catfish",
+			"texture": "Catfish.png",
+			"rarity": "uncommon",
+			"nether": false,
+			"habitats": [
+				"swamps",
+				"rivers"
+			],
+			"time": "night",
+			"sell": {
+				"count": 2,
+				"emeralds": 1
+			}
+		},
+		"flounder": {
+			"name": "Flounder",
+			"texture": "Flounder.png",
+			"rarity": "uncommon",
+			"nether": false,
+			"habitats": [
+				"beaches",
+				"temperate_oceans",
+				"warm_oceans"
+			],
+			"sell": {
+				"count": 3,
+				"emeralds": 1
+			}
+		},
+		"gurnard": {
+			"name": "Gurnard",
+			"texture": "Gurnard.png",
+			"rarity": "uncommon",
+			"nether": false,
+			"habitats": [
+				"temperate_oceans",
+				"cold_oceans"
+			],
+			"time": "day",
+			"sell": {
+				"count": 3,
+				"emeralds": 1
+			}
+		},
+		"black_seabass": {
+			"name": "Black Seabass",
+			"texture": "Black_Seabass.png",
+			"rarity": "uncommon",
+			"nether": false,
+			"habitats": [
+				"temperate_oceans",
+				"warm_oceans"
+			],
+			"sell": {
+				"count": 3,
+				"emeralds": 1
+			}
+		},
+		"lamprey": {
+			"name": "Lamprey",
+			"texture": "Lamprey.png",
+			"rarity": "uncommon",
+			"nether": false,
+			"habitats": [
+				"rivers",
+				"cold_oceans"
+			],
+			"time": "night",
+			"sell": {
+				"count": 2,
+				"emeralds": 1
+			}
+		},
+		"freshwater_pufferfish": {
+			"name": "Freshwater Pufferfish",
+			"texture": "Freshwater_Pufferfish.png",
+			"rarity": "uncommon",
+			"nether": false,
+			"habitats": [
+				"jungles"
+			],
+			"time": "day",
+			"sell": {
+				"count": 2,
+				"emeralds": 1
+			}
+		},
+		"gar": {
+			"name": "Gar",
+			"texture": "Gar.png",
+			"rarity": "uncommon",
+			"nether": false,
+			"habitats": [
+				"swamps",
+				"jungles"
+			],
+			"sell": {
+				"count": 2,
+				"emeralds": 1
+			}
+		},
+		"armoured_catfish": {
+			"name": "Armoured Catfish",
+			"texture": "Armoured_Catfish.png",
+			"rarity": "uncommon",
+			"nether": false,
+			"habitats": [
+				"jungles"
+			],
+			"time": "night",
+			"sell": {
+				"count": 2,
+				"emeralds": 1
+			}
+		},
+		"alaska_blackfish": {
+			"name": "Alaska Blackfish",
+			"texture": "Alaska_Blackfish.png",
+			"rarity": "uncommon",
+			"nether": false,
+			"habitats": [
+				"cold"
+			],
+			"sell": {
+				"count": 2,
+				"emeralds": 1
+			}
+		},
+		"rainbow_wrasse": {
+			"name": "Rainbow Wrasse",
+			"texture": "Rainbow_Wrasse.png",
+			"rarity": "uncommon",
+			"nether": false,
+			"habitats": [
+				"warm_oceans"
+			],
+			"time": "day",
+			"weather": "clear",
+			"sell": {
+				"count": 2,
+				"emeralds": 1
+			}
+		},
+		"european_eel": {
+			"name": "European Eel",
+			"texture": "European_Eel.png",
+			"rarity": "rare",
+			"nether": false,
+			"habitats": [
+				"rivers",
+				"swamps"
+			],
+			"time": "night",
+			"weather": "rain",
+			"sell": {
+				"count": 1,
+				"emeralds": 2
+			}
+		},
+		"humpback_whitefish": {
+			"name": "Humpback Whitefish",
+			"texture": "Humpback_Whitefish.png",
+			"rarity": "rare",
+			"nether": false,
+			"habitats": [
+				"cold",
+				"taiga"
+			],
+			"sell": {
+				"count": 1,
+				"emeralds": 2
+			}
+		},
+		"spoonhead_sculpin": {
+			"name": "Spoonhead Sculpin",
+			"texture": "Spoonhead_Sculpin.png",
+			"rarity": "rare",
+			"nether": false,
+			"habitats": [
+				"mountains",
+				"taiga",
+				"cold"
+			],
+			"min_y": 90,
+			"sell": {
+				"count": 1,
+				"emeralds": 2
+			}
+		},
+		"muskellunge": {
+			"name": "Muskellunge",
+			"texture": "Muskellunge.png",
+			"rarity": "rare",
+			"nether": false,
+			"habitats": [
+				"lakes",
+				"rivers"
+			],
+			"weather": "rain",
+			"sell": {
+				"count": 1,
+				"emeralds": 2
+			}
+		},
+		"piranha": {
+			"name": "Piranha",
+			"texture": "Piranha.png",
+			"rarity": "rare",
+			"nether": false,
+			"habitats": [
+				"jungles"
+			],
+			"time": "day",
+			"sell": {
+				"count": 1,
+				"emeralds": 2
+			}
+		},
+		"bujurqui": {
+			"name": "Bujurqui",
+			"texture": "Bujurqui.png",
+			"rarity": "rare",
+			"nether": false,
+			"habitats": [
+				"jungles"
+			],
+			"time": "dawn_dusk",
+			"sell": {
+				"count": 1,
+				"emeralds": 2
+			}
+		},
+		"kohaku_koi": {
+			"name": "Kohaku Koi",
+			"texture": "kohaku_koi.png",
+			"rarity": "rare",
+			"nether": false,
+			"habitats": [
+				"cherry"
+			],
+			"time": "day",
+			"sell": {
+				"count": 1,
+				"emeralds": 3
+			}
+		},
+		"mahi_mahi": {
+			"name": "Mahi-Mahi",
+			"texture": "Mahi_Mahi.png",
+			"rarity": "rare",
+			"nether": false,
+			"habitats": [
+				"warm_oceans"
+			],
+			"time": "day",
+			"weather": "clear",
+			"sell": {
+				"count": 1,
+				"emeralds": 2
+			}
+		},
+		"flying_fish": {
+			"name": "Flying Fish",
+			"texture": "Flying_Fish.png",
+			"rarity": "rare",
+			"nether": false,
+			"habitats": [
+				"warm_oceans",
+				"temperate_oceans"
+			],
+			"time": "day",
+			"weather": "clear",
+			"sell": {
+				"count": 1,
+				"emeralds": 2
+			}
+		},
+		"painted_moray": {
+			"name": "Painted Moray",
+			"texture": "Painted_Moray.png",
+			"rarity": "rare",
+			"nether": false,
+			"habitats": [
+				"warm_oceans"
+			],
+			"time": "night",
+			"sell": {
+				"count": 1,
+				"emeralds": 2
+			}
+		},
+		"skate": {
+			"name": "Skate",
+			"texture": "Skate.png",
+			"rarity": "rare",
+			"nether": false,
+			"habitats": [
+				"oceans"
+			],
+			"min_depth": 8,
+			"sell": {
+				"count": 1,
+				"emeralds": 2
+			}
+		},
+		"wolffish": {
+			"name": "Wolffish",
+			"texture": "Wolffish.png",
+			"rarity": "rare",
+			"nether": false,
+			"habitats": [
+				"cold_oceans"
+			],
+			"min_depth": 8,
+			"time": "night",
+			"sell": {
+				"count": 1,
+				"emeralds": 3
+			}
+		},
+		"pale_fish": {
+			"name": "Pale Fish",
+			"texture": "Pale_Fish.png",
+			"rarity": "rare",
+			"nether": false,
+			"habitats": [],
+			"underground": true,
+			"max_y": 40,
+			"sell": {
+				"count": 1,
+				"emeralds": 3
+			}
+		},
+		"arapaima": {
+			"name": "Arapaima",
+			"texture": "Arapaima.png",
+			"rarity": "epic",
+			"nether": false,
+			"habitats": [
+				"jungles"
+			],
+			"weather": "rain",
+			"sell": {
+				"count": 1,
+				"emeralds": 5
+			}
+		},
+		"showa_koi": {
+			"name": "Showa Koi",
+			"texture": "showa_koi.png",
+			"rarity": "epic",
+			"nether": false,
+			"habitats": [
+				"cherry"
+			],
+			"time": "night",
+			"weather": "clear",
+			"sell": {
+				"count": 1,
+				"emeralds": 6
+			}
+		},
+		"sturgeon": {
+			"name": "Sturgeon",
+			"texture": "Sturgeon.png",
+			"rarity": "epic",
+			"nether": false,
+			"habitats": [
+				"rivers",
+				"beaches"
+			],
+			"time": "dawn_dusk",
+			"sell": {
+				"count": 1,
+				"emeralds": 5
+			}
+		},
+		"siberian_sturgeon": {
+			"name": "Siberian Sturgeon",
+			"texture": "Siberian_Sturgeon.png",
+			"rarity": "epic",
+			"nether": false,
+			"habitats": [
+				"cold"
+			],
+			"weather": "rain",
+			"sell": {
+				"count": 1,
+				"emeralds": 6
+			}
+		},
+		"monkfish": {
+			"name": "Monkfish",
+			"texture": "Monkfish.png",
+			"rarity": "epic",
+			"nether": false,
+			"habitats": [
+				"oceans"
+			],
+			"min_depth": 10,
+			"time": "night",
+			"sell": {
+				"count": 1,
+				"emeralds": 5
+			}
+		},
+		"swordfish": {
+			"name": "Swordfish",
+			"texture": "Swordfish.png",
+			"rarity": "epic",
+			"nether": false,
+			"habitats": [
+				"warm_oceans",
+				"temperate_oceans"
+			],
+			"min_depth": 10,
+			"time": "day",
+			"weather": "clear",
+			"sell": {
+				"count": 1,
+				"emeralds": 6
+			}
+		},
+		"opah": {
+			"name": "Opah",
+			"texture": "Opah.png",
+			"rarity": "epic",
+			"nether": false,
+			"habitats": [
+				"oceans"
+			],
+			"time": "night",
+			"moon": "full",
+			"sell": {
+				"count": 1,
+				"emeralds": 8
+			}
+		},
+		"oarfish": {
+			"name": "Oarfish",
+			"texture": "Oarfish.png",
+			"rarity": "legendary",
+			"nether": false,
+			"habitats": [
+				"oceans"
+			],
+			"min_depth": 12,
+			"weather": "thunder",
+			"sell": {
+				"count": 1,
+				"emeralds": 12
+			}
+		},
+		"echo_fish": {
+			"name": "Echo Fish",
+			"texture": "Echo_Fish.png",
+			"rarity": "legendary",
+			"nether": false,
+			"habitats": [],
+			"underground": true,
+			"max_y": 0,
+			"moon": "new",
+			"sell": {
+				"count": 1,
+				"emeralds": 12
+			}
+		},
+		"magma_fish": {
+			"name": "Magma Fish",
+			"texture": "magma_fish.png",
+			"rarity": "common",
+			"nether": true,
+			"habitats": [],
+			"sell": {
+				"count": 4,
+				"emeralds": 1
+			}
+		},
+		"searing_cod": {
+			"name": "Searing Cod",
+			"texture": "searing_cod.png",
+			"rarity": "common",
+			"nether": true,
+			"habitats": [
+				"nether_wastes",
+				"crimson_forest"
+			],
+			"sell": {
+				"count": 4,
+				"emeralds": 1
+			}
+		},
+		"bonefish": {
+			"name": "Bonefish",
+			"texture": "bonefish.png",
+			"rarity": "uncommon",
+			"nether": true,
+			"habitats": [
+				"soul_sand_valley",
+				"nether_wastes"
+			],
+			"sell": {
+				"count": 2,
+				"emeralds": 1
+			}
+		},
+		"obsidian_fish": {
+			"name": "Obsidian Fish",
+			"texture": "obsidianfish.png",
+			"rarity": "uncommon",
+			"nether": true,
+			"habitats": [
+				"basalt_deltas"
+			],
+			"sell": {
+				"count": 2,
+				"emeralds": 1
+			}
+		},
+		"glowdine": {
+			"name": "Glowdine",
+			"texture": "glowdine.png",
+			"rarity": "rare",
+			"nether": true,
+			"habitats": [
+				"warped_forest",
+				"crimson_forest"
+			],
+			"sell": {
+				"count": 1,
+				"emeralds": 2
+			}
+		},
+		"eyeball_fish": {
+			"name": "Eyeball Fish",
+			"texture": "eyeball_fish.png",
+			"rarity": "rare",
+			"nether": true,
+			"habitats": [
+				"crimson_forest",
+				"nether_wastes"
+			],
+			"sell": {
+				"count": 1,
+				"emeralds": 3
+			}
+		},
+		"soulsucker": {
+			"name": "Soulsucker",
+			"texture": "soulsucker.png",
+			"rarity": "epic",
+			"nether": true,
+			"habitats": [
+				"soul_sand_valley"
+			],
+			"sell": {
+				"count": 1,
+				"emeralds": 6
+			}
+		},
+		"wither_bonefish": {
+			"name": "Wither Bonefish",
+			"texture": "wither_bonefish.png",
+			"rarity": "legendary",
+			"nether": true,
+			"habitats": [
+				"soul_sand_valley",
+				"basalt_deltas"
+			],
+			"sell": {
+				"count": 1,
+				"emeralds": 12
+			}
+		}
+	}
+}

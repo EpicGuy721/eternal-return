@@ -1,7 +1,8 @@
 package com.eternalreturn.fishing;
 
-import com.eternalreturn.config.EternalReturnConfig;
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.loot.condition.LootCondition;
 import net.minecraft.loot.condition.LootConditionType;
 import net.minecraft.loot.context.LootContext;
@@ -15,11 +16,13 @@ import net.minecraft.world.World;
 import java.util.Set;
 
 /**
- * {"condition": "eternalreturn:deep_water"} passes when the water under the fishing hook (origin)
- * is at least fishing.anglerfishMinWaterDepth blocks deep.
+ * {"condition": "eternalreturn:deep_water", "min_depth": 10} passes when the water under the fishing hook
+ * (origin) is at least min_depth blocks deep.
  */
-public record DeepWaterLootCondition() implements LootCondition {
-	public static final MapCodec<DeepWaterLootCondition> CODEC = MapCodec.unit(new DeepWaterLootCondition());
+public record DeepWaterLootCondition(int minDepth) implements LootCondition {
+	public static final MapCodec<DeepWaterLootCondition> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+			Codec.INT.fieldOf("min_depth").forGetter(DeepWaterLootCondition::minDepth)
+	).apply(instance, DeepWaterLootCondition::new));
 	/** Deeper than this counts as deep enough for any sensible config, and keeps the scan short. */
 	private static final int MAX_SCAN = 128;
 
@@ -36,7 +39,7 @@ public record DeepWaterLootCondition() implements LootCondition {
 	@Override
 	public boolean test(LootContext context) {
 		Vec3d origin = context.get(LootContextParameters.ORIGIN);
-		return origin != null && waterDepth(context.getWorld(), BlockPos.ofFloored(origin)) >= EternalReturnConfig.get().fishing.anglerfishMinWaterDepth;
+		return origin != null && waterDepth(context.getWorld(), BlockPos.ofFloored(origin)) >= this.minDepth;
 	}
 
 	/** Water blocks in a straight line down from the hook. A bobbing hook can sit just above the surface, so that block is skipped. */

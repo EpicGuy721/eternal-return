@@ -128,6 +128,18 @@ public abstract class VillagerEntityMixin implements NeedyVillager {
 		}
 	}
 
+	/** The fisherman's fixed trades (FishermanTrades): added as he levels up. */
+	@Inject(method = "fillRecipes", at = @At("TAIL"))
+	private void eternalreturn$fishermanTrades(CallbackInfo ci) {
+		com.eternalreturn.villager.FishermanTrades.topUp((VillagerEntity) (Object) this);
+	}
+
+	/** And topped up when a player opens his trades, so fishermen from before them get them too. */
+	@Inject(method = "prepareOffersFor", at = @At("HEAD"))
+	private void eternalreturn$fishermanTradesTopUp(PlayerEntity player, CallbackInfo ci) {
+		com.eternalreturn.villager.FishermanTrades.topUp((VillagerEntity) (Object) this);
+	}
+
 	@Inject(method = "prepareOffersFor", at = @At("TAIL"))
 	private void eternalreturn$raisePrices(PlayerEntity player, CallbackInfo ci) {
 		VillagerNeeds.raisePrices((VillagerEntity) (Object) this);

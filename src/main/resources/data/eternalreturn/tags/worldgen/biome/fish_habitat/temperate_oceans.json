@@ -1,0 +1,14 @@
+{
+  "values": [
+    "minecraft:ocean",
+    "minecraft:deep_ocean",
+    {
+      "id": "moderner_beta:beta_ocean",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:pe_ocean",
+      "required": false
+    }
+  ]
+}

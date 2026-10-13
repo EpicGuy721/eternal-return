@@ -1,0 +1,23 @@
+{
+  "values": [
+    "minecraft:warm_ocean",
+    "minecraft:lukewarm_ocean",
+    "minecraft:deep_lukewarm_ocean",
+    {
+      "id": "moderner_beta:beta_warm_ocean",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:beta_lukewarm_ocean",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:pe_warm_ocean",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:pe_lukewarm_ocean",
+      "required": false
+    }
+  ]
+}

@@ -32,7 +32,8 @@
 			"com.eternalreturn.gametest.SurvivalTests",
 			"com.eternalreturn.gametest.WorldRulesTests",
 			"com.eternalreturn.gametest.MobsAndMachinesTests",
-			"com.eternalreturn.gametest.CurseAndAlchemyTests"
+			"com.eternalreturn.gametest.CurseAndAlchemyTests",
+			"com.eternalreturn.gametest.FishTableTests"
 		]
 	},
 	"mixins": [

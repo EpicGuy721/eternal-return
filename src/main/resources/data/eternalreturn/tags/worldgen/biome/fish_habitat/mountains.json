@@ -1,0 +1,17 @@
+{
+  "values": [
+    "minecraft:windswept_hills",
+    "minecraft:windswept_gravelly_hills",
+    "minecraft:windswept_forest",
+    "minecraft:stony_peaks",
+    "minecraft:meadow",
+    {
+      "id": "moderner_beta:early_release_extreme_hills",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:late_beta_extreme_hills",
+      "required": false
+    }
+  ]
+}

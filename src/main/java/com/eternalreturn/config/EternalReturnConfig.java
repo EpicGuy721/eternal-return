@@ -171,10 +171,11 @@ public final class EternalReturnConfig {
 		 * used; lava baits only count in lava and the rest only in water.
 		 */
 		public Map<String, BaitStats> baits = defaultBaits();
-		/** Chance for blocks in eternalreturn:drops_worms to drop a worm when a player mines them. */
-		public double wormDropChance = 0.04;
-		/** Anglerfish only bite where the water under the hook is at least this many blocks deep. */
-		public int anglerfishMinWaterDepth = 10;
+		/**
+		 * Which version of the bait list this file holds. When the default baits change (worms, glow bait
+		 * and infernal bait gave way to magma cream), the list is reset to the new defaults once. Don't edit.
+		 */
+		public int baitsVersion;
 		/** Lava fishing works in ultrawarm dimensions (the Nether). True allows it in any lava. */
 		public boolean lavaFishingOutsideNether = false;
 		/**
@@ -235,13 +236,11 @@ public final class EternalReturnConfig {
 	public static final class VillagerTweaks {
 		/** Villagers stop buying items for emeralds. Fishermen still buy raw fish (eternalreturn:raw_fish). */
 		public boolean onlyFishermenBuy = true;
-		/** Multiplies the emeralds fishermen pay for every fish, vanilla ones included. Rounded, at least 1. */
-		public double fishPriceMultiplier = 2.0;
 		/**
-		 * Extra fish the fisherman buys, on top of vanilla's cod, salmon, tropical fish and pufferfish.
-		 * "emeralds" is before fishPriceMultiplier. Needs a restart.
+		 * Multiplies the emeralds fishermen pay in vanilla's own fish trades (cod, salmon, tropical fish,
+		 * pufferfish). Rounded, at least 1. The mod's fish pay what the fish table says (fish.json).
 		 */
-		public Map<String, FishTrade> fishermanTrades = defaultFishTrades();
+		public double fishPriceMultiplier = 2.0;
 		/** Villagers' needs, their shop hours and healing with food (see VillagerNeeds). */
 		public VillagerNeedSettings needs = new VillagerNeedSettings();
 	}
@@ -478,26 +477,8 @@ public final class EternalReturnConfig {
 		}
 	}
 
-	public static final class FishTrade {
-		/** Villager level that can offer it, 1 (novice) to 5 (master). */
-		public int level;
-		/** Fish the player hands over. */
-		public int count;
-		public int emeralds;
-		public int maxUses;
-		public int experience;
-
-		public FishTrade() {
-		}
-
-		FishTrade(int level, int count, int emeralds, int maxUses, int experience) {
-			this.level = level;
-			this.count = count;
-			this.emeralds = emeralds;
-			this.maxUses = maxUses;
-			this.experience = experience;
-		}
-	}
+	/** See FishingTweaks.baitsVersion. */
+	static final int BAITS_VERSION = 1;
 
 	public static EternalReturnConfig get() {
 		return instance;
@@ -525,7 +506,15 @@ public final class EternalReturnConfig {
 
 		if (loaded == null) {
 			loaded = new EternalReturnConfig();
+			loaded.fishing.baitsVersion = BAITS_VERSION;
 			loaded.worldgen.caves.typesVersion = CaveTypes.SETTINGS_VERSION;
+		}
+		if (loaded.fishing == null) {
+			loaded.fishing = new FishingTweaks();
+		}
+		if (loaded.fishing.baits == null || loaded.fishing.baitsVersion < BAITS_VERSION) {
+			loaded.fishing.baits = defaultBaits();
+			loaded.fishing.baitsVersion = BAITS_VERSION;
 		}
 		if (loaded.worldgen == null) {
 			loaded.worldgen = new WorldgenTweaks();
@@ -616,11 +605,9 @@ public final class EternalReturnConfig {
 
 	private static Map<String, BaitStats> defaultBaits() {
 		Map<String, BaitStats> m = new LinkedHashMap<>();
-		m.put("eternalreturn:worm", new BaitStats(5, 0, false));
 		m.put("eternalreturn:chum", new BaitStats(10, 0, false));
-		m.put("eternalreturn:glow_bait", new BaitStats(5, 15, false));
 		m.put("minecraft:glistering_melon_slice", new BaitStats(5, 0, false));
-		m.put("eternalreturn:infernal_bait", new BaitStats(5, 0, true));
+		m.put("minecraft:magma_cream", new BaitStats(5, 0, true));
 		return m;
 	}
 
@@ -632,22 +619,6 @@ public final class EternalReturnConfig {
 		m.put("drowned_guardian_jockey", new HostileCatch(10, true));
 		m.put("elder_guardian", new HostileCatch(3, true));
 		m.put("drowned_elder_guardian_jockey", new HostileCatch(1, true));
-		return m;
-	}
-
-	private static Map<String, FishTrade> defaultFishTrades() {
-		Map<String, FishTrade> m = new LinkedHashMap<>();
-		m.put("eternalreturn:perch", new FishTrade(1, 15, 1, 16, 2));
-		m.put("eternalreturn:pike", new FishTrade(2, 6, 1, 16, 10));
-		m.put("eternalreturn:catfish", new FishTrade(2, 6, 1, 16, 10));
-		m.put("eternalreturn:magma_eel", new FishTrade(2, 10, 1, 16, 10));
-		m.put("eternalreturn:tuna", new FishTrade(3, 5, 1, 16, 20));
-		m.put("eternalreturn:icefish", new FishTrade(3, 6, 1, 16, 20));
-		m.put("eternalreturn:ashfin", new FishTrade(3, 4, 1, 16, 20));
-		m.put("eternalreturn:electric_eel", new FishTrade(4, 1, 2, 12, 30));
-		m.put("eternalreturn:anglerfish", new FishTrade(4, 1, 3, 12, 30));
-		m.put("eternalreturn:soulfin", new FishTrade(4, 1, 2, 12, 30));
-		m.put("eternalreturn:koi", new FishTrade(5, 1, 5, 12, 30));
 		return m;
 	}
 

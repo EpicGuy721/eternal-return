@@ -485,10 +485,7 @@ Sources: the mod's shipped data and its source (Codeberg, tag `5.0.0-alpha.2`). 
 
 Checked against a Moderner Beta Release 1.6.4 world in phase 1, fixed in phase 2.
 
-- Catfish (`catfish_waters`): now also bite in Moderner Beta's swamps (`early_release_swampland`, `late_beta_swampland`, `beta_swampland`, `pe_swampland`).
-- Icefish (`icefish_waters`): now also Moderner Beta's ice plains, cold taiga, tundra, ice desert, and frozen and cold oceans (every generation), alongside vanilla's snowy biomes. 1.6.4 has no snowy beaches, ice spikes or 1.18 peaks, so those entries only matter in other world types.
-- Anglerfish: no longer need a deep ocean biome. They bite in any ocean biome (`ocean_waters`: vanilla's oceans plus Moderner Beta's) when at least 10 blocks of water lie under the hook (`fishing.anglerfishMinWaterDepth`). On the test maps, half of all water is at least 13 blocks deep in Eternal Return (12 in 1.6.4, 2 in Beta).
-- Tuna and electric eels: now use `ocean_waters` too, so Moderner Beta's Beta-style oceans count.
-- Every Moderner Beta entry in these tags is optional, so the tags load without it.
+- Fish (the fish table, `eternalreturn/fish.json`; see [fish.md](fish.md)): each habitat's biome tag (`fish_habitat/<habitat>`) lists vanilla's biomes of that kind and Moderner Beta's (every generation: early release, late Beta, Beta, Pocket Edition, Alpha, Indev) as optional entries, so the tags load without it. Deep-water fish need enough water straight down from the hook rather than a deep ocean biome; on the test maps, half of all water is at least 13 blocks deep in Eternal Return (12 in 1.6.4, 2 in Beta).
+- Villager regions: vanilla only gives its own biomes a region (snow, taiga, swamp...), so villagers in Moderner Beta's biomes were all plains villagers. `VillagerRegions` maps Moderner Beta's ice plains, tundras, taigas, extreme hills, swamplands, deserts, savannas and rainforests to vanilla's region for that kind of biome. The region decides which fish a fisherman buys.
 - Spider jockey riders (weighted by the biome's monster spawn list): fine. Vanilla `desert` spawns husks, and Moderner Beta's ice plains spawn strays (weight 80), so strays on polar bears still happen there.
 - Cave-only creepers (sky light 0): creepers only spawn where no sky light reaches. Cave types open to the sky (ravines, vertical shafts, big caverns with openings) won't get creepers near their openings; deep enclosed rooms will.
