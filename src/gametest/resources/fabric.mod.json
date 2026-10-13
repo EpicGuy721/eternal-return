@@ -33,7 +33,9 @@
 			"com.eternalreturn.gametest.WorldRulesTests",
 			"com.eternalreturn.gametest.MobsAndMachinesTests",
 			"com.eternalreturn.gametest.CurseAndAlchemyTests",
-			"com.eternalreturn.gametest.FishTableTests"
+			"com.eternalreturn.gametest.FishTableTests",
+			"com.eternalreturn.gametest.CursesItemsAndMobsTests",
+			"com.eternalreturn.gametest.StrongholdAndNetherTests"
 		]
 	},
 	"mixins": [

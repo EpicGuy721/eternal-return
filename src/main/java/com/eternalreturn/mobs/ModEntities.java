@@ -31,6 +31,16 @@ public final class ModEntities {
 					.trackingTickInterval(10)
 					.build(EternalReturn.id("web").toString()));
 
+	/** A thrown stick of dynamite (Dynamite.Lit). */
+	public static final EntityType<com.eternalreturn.items.Dynamite.Lit> DYNAMITE = Registry.register(
+			Registries.ENTITY_TYPE,
+			EternalReturn.id("dynamite"),
+			EntityType.Builder.<com.eternalreturn.items.Dynamite.Lit>create(com.eternalreturn.items.Dynamite.Lit::new, SpawnGroup.MISC)
+					.dimensions(0.25F, 0.25F)
+					.maxTrackingRange(4)
+					.trackingTickInterval(10)
+					.build(EternalReturn.id("dynamite").toString()));
+
 	private ModEntities() {
 	}
 

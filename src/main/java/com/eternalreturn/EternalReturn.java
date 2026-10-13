@@ -53,6 +53,13 @@ public class EternalReturn implements ModInitializer {
 		Slimes.register();
 		Blazes.register();
 		VillagerRegions.register();
+		com.eternalreturn.mobs.SpawnTweaks.register();
+		com.eternalreturn.logic.Curses.register();
+		com.eternalreturn.blocks.CopperRail.register();
+		com.eternalreturn.items.Dynamite.register();
+		com.eternalreturn.items.AsylumPapers.register();
+		com.eternalreturn.items.Necronomicon.register();
+		com.eternalreturn.mobs.PillagerBoats.register();
 		WorldgenFeatures.register();
 		HardenedBlocks.register();
 		OreVariants.register();

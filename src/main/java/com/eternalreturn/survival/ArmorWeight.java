@@ -47,7 +47,9 @@ public final class ArmorWeight {
 		}
 		Map<String, Double> sets = EternalReturnConfig.get().survival.armorWeight;
 		String material = armor.getMaterial().getKey().map(key -> key.getValue().toString()).orElse("");
-		return sets.getOrDefault(material, 0.0) * share(armor.getSlotType());
+		// Curse of Heaviness (Curses) doubles a piece's weight.
+		double heavy = com.eternalreturn.logic.Curses.has(stack, com.eternalreturn.logic.Curses.HEAVINESS) ? 2.0 : 1.0;
+		return sets.getOrDefault(material, 0.0) * share(armor.getSlotType()) * heavy;
 	}
 
 	public static boolean isWeightless(ItemStack stack) {

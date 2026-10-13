@@ -74,6 +74,15 @@ public abstract class MobEntitySpawnMixin extends LivingEntity {
 		}
 	}
 
+	/** Large creepers (LargeMobs); zombies and skeletons roll in their own initialize, after their gear. */
+	@Inject(method = "initialize", at = @At("RETURN"))
+	private void eternalreturn$largeCreeper(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason,
+			EntityData entityData, CallbackInfoReturnable<EntityData> cir) {
+		if ((Object) this instanceof net.minecraft.entity.mob.CreeperEntity) {
+			com.eternalreturn.mobs.LargeMobs.roll((MobEntity) (Object) this, world.getRandom());
+		}
+	}
+
 	@Inject(method = "initEquipment", at = @At("TAIL"))
 	private void eternalreturn$moreArmor(Random random, LocalDifficulty localDifficulty, CallbackInfo ci) {
 		SpawnGear.rollExtraArmor((MobEntity) (Object) this, random, localDifficulty);
@@ -91,7 +100,7 @@ public abstract class MobEntitySpawnMixin extends LivingEntity {
 	@Inject(method = "tickNewAi", at = @At("TAIL"))
 	private void eternalreturn$breakOutOfBoat(CallbackInfo ci) {
 		if (!(this instanceof Monster) || !(this.getVehicle() instanceof BoatEntity boat)
-				|| !EternalReturnConfig.get().mobs.monstersBreakOutOfBoats) {
+				|| !EternalReturnConfig.get().mobs.monstersBreakOutOfBoats || com.eternalreturn.mobs.PillagerBoats.isPillagerBoat(boat)) {
 			this.eternalreturn$ticksInBoat = 0;
 			return;
 		}

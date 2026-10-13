@@ -89,6 +89,7 @@ public abstract class AbstractSkeletonEntityMixin extends HostileEntity {
 			Jockeys.tryPolarBearMount(this, world, difficulty, spawnReason);
 		}
 		com.eternalreturn.mobs.HeadGear.roll(this, world.getRandom());
+		com.eternalreturn.mobs.LargeMobs.roll(this, world.getRandom());
 	}
 
 	/**

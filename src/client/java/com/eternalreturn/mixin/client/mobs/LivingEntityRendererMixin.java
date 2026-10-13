@@ -11,14 +11,15 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Fish and squid models have no baby form, so a baby (BabyVariants) is drawn at half size, right after the
- * renderer's own scaling (some fish renderers replace scale() without calling the base one).
+ * Fish and squid models have no baby form, so a baby (BabyVariants) is drawn at half size. The halving goes
+ * where the game applies a mob's size (right after the scale attribute, before the renderer moves the model
+ * into place), so a squid, whose renderer turns the model around its middle, stays inside its hitbox.
  */
 @Mixin(LivingEntityRenderer.class)
 public abstract class LivingEntityRendererMixin {
 	@Inject(method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V",
-			at = @At(value = "INVOKE", shift = At.Shift.AFTER,
-					target = "Lnet/minecraft/client/render/entity/LivingEntityRenderer;scale(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/client/util/math/MatrixStack;F)V"))
+			at = @At(value = "INVOKE", shift = At.Shift.AFTER, ordinal = 0,
+					target = "Lnet/minecraft/client/util/math/MatrixStack;scale(FFF)V"))
 	private void eternalreturn$babyWaterCreature(LivingEntity entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertices, int light,
 			CallbackInfo ci) {
 		if (entity instanceof WaterCreatureEntity && entity.isBaby()) {

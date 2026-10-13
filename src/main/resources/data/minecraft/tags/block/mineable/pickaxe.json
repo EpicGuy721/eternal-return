@@ -4,6 +4,7 @@
     "#eternalreturn:hardened_stones",
     "#eternalreturn:ore_variants",
     "#eternalreturn:concrete_cut_blocks",
-    "eternalreturn:obsidian_pressure_plate"
+    "eternalreturn:obsidian_pressure_plate",
+    "eternalreturn:copper_rail"
   ]
 }

@@ -36,7 +36,8 @@ public class ZombieEatMeatGoal extends Goal {
 
 	@Override
 	public boolean canStart() {
-		if (this.zombie.isBaby() || this.zombie.getHealth() >= this.zombie.getMaxHealth() || --this.searchCooldown > 0) {
+		if (this.zombie.isBaby() || this.zombie.getHealth() >= this.zombie.getMaxHealth() || --this.searchCooldown > 0
+				|| com.eternalreturn.mobs.LargeMobs.isLarge(this.zombie)) {
 			return false;
 		}
 		this.searchCooldown = 20;

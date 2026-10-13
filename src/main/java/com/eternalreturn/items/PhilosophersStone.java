@@ -53,8 +53,7 @@ import java.util.Map;
  * <li>blocks, each into its partner and back (glass and sand, grass and dirt, cobblestone and stone, ice
  * and packed ice, clay and terracotta, melon and pumpkin, obsidian and crying obsidian...), or around a
  * ring (the woods' logs and planks, granite to diorite to andesite, the sixteen wools); concrete and its
- * powder, same colour. Only into blocks an Eternal Return world can give (no mangrove or bamboo wood, no red
- * nether bricks: no nether wart without fortresses);</li>
+ * powder, same colour. Only into blocks an Eternal Return world can give (no mangrove or bamboo wood, no moss);</li>
  * <li>creatures: a pig into a zombified piglin and back, a cow into a mooshroom and back, a villager into a
  * witch and back, zombie to husk to drowned, skeleton to stray to bogged, squid and glow squid, cod and
  * salmon, slime and magma cube, spider and cave spider, donkey and mule; a sheep gets random wool, a
@@ -83,11 +82,11 @@ public final class PhilosophersStone extends Item {
 		pair(Blocks.OBSIDIAN, Blocks.CRYING_OBSIDIAN);
 		pair(Blocks.SANDSTONE, Blocks.RED_SANDSTONE);
 		pair(Blocks.SOUL_SAND, Blocks.SOUL_SOIL);
+		pair(Blocks.NETHER_BRICKS, Blocks.RED_NETHER_BRICKS);
 		pair(Blocks.COARSE_DIRT, Blocks.PODZOL);
 		pair(Blocks.GRAVEL, Blocks.TUFF);
 		pair(Blocks.NETHERRACK, Blocks.BLACKSTONE);
 		pair(Blocks.MUD, Blocks.PACKED_MUD);
-		pair(Blocks.MOSS_BLOCK, Blocks.MYCELIUM);
 		pair(Blocks.SNOW_BLOCK, Blocks.POWDER_SNOW);
 		ring(Blocks.GRANITE, Blocks.DIORITE, Blocks.ANDESITE);
 		ring(Blocks.OAK_LOG, Blocks.SPRUCE_LOG, Blocks.BIRCH_LOG, Blocks.JUNGLE_LOG, Blocks.ACACIA_LOG, Blocks.DARK_OAK_LOG, Blocks.CHERRY_LOG);

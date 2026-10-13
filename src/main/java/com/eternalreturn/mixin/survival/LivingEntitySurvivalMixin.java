@@ -66,9 +66,17 @@ public abstract class LivingEntitySurvivalMixin {
 		}
 	}
 
+	/** Undead servants (Servants) leave no experience either. */
+	@Inject(method = "dropXp", at = @At("HEAD"), cancellable = true)
+	private void eternalreturn$noServantXp(net.minecraft.entity.Entity attacker, CallbackInfo ci) {
+		if (com.eternalreturn.mobs.Servants.isServant((LivingEntity) (Object) this)) {
+			ci.cancel();
+		}
+	}
+
 	@Inject(method = "dropLoot", at = @At("HEAD"), cancellable = true)
 	private void eternalreturn$noSpawnerLoot(DamageSource damageSource, boolean causedByPlayer, CallbackInfo ci) {
-		if (SpawnerMobs.dropsNothing((LivingEntity) (Object) this)) {
+		if (SpawnerMobs.dropsNothing((LivingEntity) (Object) this) || com.eternalreturn.mobs.Servants.isServant((LivingEntity) (Object) this)) {
 			ci.cancel();
 		}
 	}

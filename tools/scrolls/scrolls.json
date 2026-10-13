@@ -196,5 +196,25 @@
     "minecraft:phantom_membrane",
     "minecraft:feather",
     "minecraft:ender_pearl"
+  ],
+  "eternalreturn:visibility_curse": [
+    "minecraft:glow_ink_sac",
+    "minecraft:glowstone_dust"
+  ],
+  "eternalreturn:blindness_curse": [
+    "minecraft:ink_sac",
+    "minecraft:fermented_spider_eye"
+  ],
+  "eternalreturn:heaviness_curse": [
+    "minecraft:iron_block",
+    "minecraft:obsidian"
+  ],
+  "eternalreturn:slipperiness_curse": [
+    "minecraft:slime_ball",
+    "minecraft:ice"
+  ],
+  "eternalreturn:frailness_curse": [
+    "minecraft:bone",
+    "minecraft:gravel"
   ]
 }

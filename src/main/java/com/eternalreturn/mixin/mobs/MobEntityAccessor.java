@@ -1,5 +1,6 @@
 package com.eternalreturn.mixin.mobs;
 
+import net.minecraft.entity.ai.goal.GoalSelector;
 import net.minecraft.entity.mob.MobEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -9,4 +10,10 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 public interface MobEntityAccessor {
 	@Accessor("persistent")
 	void eternalreturn$setPersistent(boolean persistent);
+
+	@Accessor("goalSelector")
+	GoalSelector eternalreturn$goalSelector();
+
+	@Accessor("targetSelector")
+	GoalSelector eternalreturn$targetSelector();
 }

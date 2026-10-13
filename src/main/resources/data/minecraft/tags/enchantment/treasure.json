@@ -1,6 +1,11 @@
 {
   "values": [
     "eternalreturn:invisibility_curse",
-    "eternalreturn:ascension_curse"
+    "eternalreturn:ascension_curse",
+    "eternalreturn:visibility_curse",
+    "eternalreturn:blindness_curse",
+    "eternalreturn:heaviness_curse",
+    "eternalreturn:slipperiness_curse",
+    "eternalreturn:frailness_curse"
   ]
 }

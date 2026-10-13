@@ -11,10 +11,12 @@ public final class GameTestWorld {
 	public static final String WORLDGEN_BATCH = "worldgen";
 	/** Checks that only make sense in an Eternal Return preset world. */
 	public static final String ETERNAL_RETURN_BATCH = "worldgen_er";
+	/** Strongholds, Nether dungeons and wart, dungeon styles: Eternal Return worlds, a batch of their own. */
+	public static final String ETERNAL_RETURN_EXTRAS_BATCH = "er_extras";
 	/** The headless map tool; only runs in the worldmap runs. */
 	public static final String WORLDMAP_BATCH = "worldmap";
 	/** Batches that need a generated world, so they never run in the flat-world runs. */
-	private static final Set<String> GENERATED_WORLD_BATCHES = Set.of(WORLDGEN_BATCH, ETERNAL_RETURN_BATCH, WORLDMAP_BATCH,
+	private static final Set<String> GENERATED_WORLD_BATCHES = Set.of(WORLDGEN_BATCH, ETERNAL_RETURN_BATCH, ETERNAL_RETURN_EXTRAS_BATCH, WORLDMAP_BATCH,
 			ControlFingerprintTests.FINGERPRINT_BATCH, OreCensusTests.ORE_BATCH, BiomeStoneTests.BIOME_STONE_BATCH, StoneMapTests.STONEMAP_BATCH, CoastTests.COAST_BATCH, OverhangTests.OVERHANG_BATCH);
 
 	public static final String ETERNAL_RETURN_PRESET = "eternalreturn:eternal_return";

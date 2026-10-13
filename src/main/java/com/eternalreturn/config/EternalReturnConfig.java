@@ -161,6 +161,14 @@ public final class EternalReturnConfig {
 		public boolean zombiesBreakLights = true;
 		/** Wither skeletons' weight in every Nether biome's monster list (0: fortresses only). */
 		public int netherWitherSkeletonWeight = 2;
+		/** Share of zombie villagers among a biome's zombies and zombie villagers (vanilla 0.05). Read when the world loads. */
+		public double zombieVillagerShare = 0.15;
+		/** Witches' weight in every Nether biome's monster list (0: none). Read when the world loads. */
+		public int netherWitchWeight = 2;
+		/** Chance, checked once a minute for each player in an ocean biome, that a boat of two pillagers turns up. */
+		public double pillagerBoatChance = 0.15;
+		/** Chance a zombie, skeleton or creeper spawns large (twice the size). */
+		public double largeVariantChance = 0.005;
 	}
 
 	public static final class FishingTweaks {
@@ -241,6 +249,11 @@ public final class EternalReturnConfig {
 		 * pufferfish). Rounded, at least 1. The mod's fish pay what the fish table says (fish.json).
 		 */
 		public double fishPriceMultiplier = 2.0;
+		/** Wandering traders only come to a player with at least this many villagers within traderVillageRadius blocks. */
+		public int traderVillageVillagers = 3;
+		public double traderVillageRadius = 64.0;
+		/** Every wandering trader sells one asylum papers for this many emeralds (0: none). */
+		public int asylumPapersPrice = 16;
 		/** Villagers' needs, their shop hours and healing with food (see VillagerNeeds). */
 		public VillagerNeedSettings needs = new VillagerNeedSettings();
 	}
@@ -286,6 +299,8 @@ public final class EternalReturnConfig {
 		public boolean pistonsMoveBlockEntities = true;
 		/** Chains link the blocks at their ends when pistons move them; chains stick to slime and honey only where they visibly join. */
 		public boolean chainsLinkBlocks = true;
+		/** Multiplies a minecart's top speed (vanilla 8 blocks a second, 4 in water). */
+		public double minecartSpeedMultiplier = 3.0;
 	}
 
 	/** Beds, beacons, animals and a few mob rules (com.eternalreturn.survival). */
@@ -321,6 +336,8 @@ public final class EternalReturnConfig {
 		 * Materials not listed weigh nothing. Weightless on a piece makes it weigh nothing.
 		 */
 		public Map<String, Double> armorWeight = defaultArmorWeight();
+		/** Which defaults the armor weights were written with; gold was made lighter than iron in version 1. Don't edit. */
+		public int armorWeightVersion;
 		/** Snow layers and snow blocks fall like sand when nothing holds them up. */
 		public boolean snowFalls = true;
 		/**
@@ -347,7 +364,7 @@ public final class EternalReturnConfig {
 		m.put("minecraft:chainmail", 0.08);
 		m.put("minecraft:iron", 0.15);
 		m.put("minecraft:netherite", 0.15);
-		m.put("minecraft:gold", 0.20);
+		m.put("minecraft:gold", 0.10);
 		m.put("minecraft:diamond", 0.30);
 		return m;
 	}
@@ -377,6 +394,16 @@ public final class EternalReturnConfig {
 		 * sand valleys and basalt deltas there instead of fortresses. Other worlds never change.
 		 */
 		public boolean onlyEssentialStructures = true;
+		/** Eternal Return worlds: twice as many overworld dungeons, in cobblestone, stone brick and brick (Dungeons). */
+		public boolean moreDungeons = true;
+		/** Eternal Return worlds: dungeon tries per Nether chunk (0: no Nether dungeons). */
+		public int netherDungeonAttempts = 6;
+		/** Eternal Return worlds: share of Nether chunks with a patch of wild nether wart on soul sand. */
+		public double netherWartPatchChance = 0.3;
+		/** Eternal Return worlds: share of strongholds built at ground level (above sea level ground only). */
+		public double surfaceStrongholdChance = 1.0 / 3.0;
+		/** Eternal Return worlds: illagers in strongholds, an illusioner in every portal room. */
+		public boolean strongholdIllagers = true;
 		/** The cave engine (com.eternalreturn.worldgen.caves). Only Eternal Return worlds are affected. */
 		public CaveTweaks caves = new CaveTweaks();
 	}
@@ -515,6 +542,13 @@ public final class EternalReturnConfig {
 		if (loaded.fishing.baits == null || loaded.fishing.baitsVersion < BAITS_VERSION) {
 			loaded.fishing.baits = defaultBaits();
 			loaded.fishing.baitsVersion = BAITS_VERSION;
+		}
+		if (loaded.survival != null && loaded.survival.armorWeightVersion < 1) {
+			// Gold armor used to weigh more than iron; it is lighter now (unless the file set its own number).
+			if (loaded.survival.armorWeight != null && Double.valueOf(0.20).equals(loaded.survival.armorWeight.get("minecraft:gold"))) {
+				loaded.survival.armorWeight.put("minecraft:gold", 0.10);
+			}
+			loaded.survival.armorWeightVersion = 1;
 		}
 		if (loaded.worldgen == null) {
 			loaded.worldgen = new WorldgenTweaks();

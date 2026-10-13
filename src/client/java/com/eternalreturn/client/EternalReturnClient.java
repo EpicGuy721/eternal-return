@@ -23,9 +23,12 @@ public class EternalReturnClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		EntityRendererRegistry.register(ModEntities.ZOMBIE_HOOK, ZombieHookEntityRenderer::new);
 		EntityRendererRegistry.register(ModEntities.WEB, net.minecraft.client.render.entity.FlyingItemEntityRenderer::new);
+		EntityRendererRegistry.register(ModEntities.DYNAMITE, net.minecraft.client.render.entity.FlyingItemEntityRenderer::new);
 		HardenedBlockModels.register();
 		OreVariantRendering.register();
 		FrameModels.register();
+		net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap.INSTANCE.putBlock(com.eternalreturn.blocks.CopperRail.BLOCK,
+				net.minecraft.client.render.RenderLayer.getCutout());
 
 		ItemTooltipCallback.EVENT.register((stack, context, type, lines) -> {
 			if (lines.isEmpty() || EnchantLevels.isConcealed(stack)) {

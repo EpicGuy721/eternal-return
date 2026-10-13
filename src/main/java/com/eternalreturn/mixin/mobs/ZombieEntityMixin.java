@@ -45,6 +45,7 @@ public abstract class ZombieEntityMixin extends HostileEntity {
 		// Adults hunt farm animals, after players and villagers (ZombieHabits), but not one a mob is riding (a baby zombie's cow, a chicken jockey's chicken).
 		this.targetSelector.add(5, new ActiveTargetGoal<>(this, AnimalEntity.class, 10, true, false,
 				animal -> !self.isBaby() && animal.getType().isIn(ZombieHabits.ZOMBIE_PREY) && EternalReturnConfig.get().mobs.zombiesHuntAnimals
+						&& !com.eternalreturn.mobs.LargeMobs.isLarge(self)
 						&& animal.getPassengerList().stream().noneMatch(rider -> rider instanceof net.minecraft.entity.mob.MobEntity)));
 	}
 
@@ -53,6 +54,7 @@ public abstract class ZombieEntityMixin extends HostileEntity {
 			CallbackInfoReturnable<EntityData> cir) {
 		ZombieHabits.tryAnimalJockey((ZombieEntity) (Object) this, world, difficulty, reason);
 		com.eternalreturn.mobs.HeadGear.roll((ZombieEntity) (Object) this, world.getRandom());
+		com.eternalreturn.mobs.LargeMobs.roll((ZombieEntity) (Object) this, world.getRandom());
 	}
 
 	@Inject(method = "initEquipment", at = @At("TAIL"))

@@ -426,8 +426,9 @@ public class CurseAndAlchemyTests implements FabricGameTest {
 			use(ctx, player, cherry);
 			ctx.expectBlock(Blocks.OAK_LOG, cherry);
 			ctx.assertTrue(PhilosophersStone.transmute(Blocks.DARK_OAK_PLANKS) == Blocks.CHERRY_PLANKS && PhilosophersStone.transmute(Blocks.CHERRY_PLANKS) == Blocks.OAK_PLANKS
-					&& PhilosophersStone.transmute(Blocks.MANGROVE_LOG) == null && PhilosophersStone.transmute(Blocks.NETHER_BRICKS) == null,
-					"no mangrove or bamboo wood, no red nether bricks");
+					&& PhilosophersStone.transmute(Blocks.MANGROVE_LOG) == null && PhilosophersStone.transmute(Blocks.MYCELIUM) == null
+					&& PhilosophersStone.transmute(Blocks.NETHER_BRICKS) == Blocks.RED_NETHER_BRICKS,
+					"no mangrove or bamboo wood, no moss; red nether bricks (wild nether wart)");
 			ctx.assertTrue(player.getMainHandStack().getDamage() == 6, "6 uses, 6 damage: " + player.getMainHandStack().getDamage());
 		} finally {
 			FishingTests.disconnect(player);

@@ -210,5 +210,16 @@
 	"fish.eternalreturn.soulsucker.buyers": "Bought by every fisherman",
 	"item.eternalreturn.wither_bonefish": "Wither Bonefish",
 	"fish.eternalreturn.wither_bonefish.habitat": "Lava in soul sand valleys or basalt deltas",
-	"fish.eternalreturn.wither_bonefish.buyers": "Bought by every fisherman"
+	"fish.eternalreturn.wither_bonefish.buyers": "Bought by every fisherman",
+	"enchantment.eternalreturn.visibility_curse": "Curse of Visibility",
+	"enchantment.eternalreturn.blindness_curse": "Curse of Blindness",
+	"enchantment.eternalreturn.heaviness_curse": "Curse of Heaviness",
+	"enchantment.eternalreturn.slipperiness_curse": "Curse of Slipperiness",
+	"enchantment.eternalreturn.frailness_curse": "Curse of Frailness",
+	"block.eternalreturn.copper_rail": "Copper Rail",
+	"item.eternalreturn.dynamite": "Dynamite",
+	"entity.eternalreturn.dynamite": "Dynamite",
+	"item.eternalreturn.asylum_papers": "Asylum Papers",
+	"item.eternalreturn.necronomicon": "Necronomicon",
+	"item.eternalreturn.necronomicon.full": "You already have %s servants"
 }
