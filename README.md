@@ -25,7 +25,7 @@ In-game tests live in `src/gametest`, a separate test mod that is never packed i
 
 | Task | World | What runs |
 |---|---|---|
-| `runGametest` | flat | the mob, fishing and trade suites (with guardian spawn lists and limits, prismarine, monsters on the hook and overfishing), villager needs (how each is met, price rises on emerald trades only, refusals, shop hours, sleep privacy, healing, saving), survival (no night skip, remembered beds and respawning at the one before, beacon areas through the real spawn rules, grazing and starving, feeding by hand, herd panic, blind follow range, a real spawner's mobs dropping nothing, Growth and Slayer, every stairs and slab with its tags and recipes, stacking and dropping carpets), armor weight and Weightless, drowned prismarine, baby fish and squids, bigger and rain slimes, blazes, falling snow, crop biomes, scrolls and book recipes, spider webs, eating times and raw food, mining and hungry zombies, the newer jockeys, Soulbound, dispensers, the obsidian plate, pistons moving chests and chains, cut vines, floating petals, pig litters, stunted babies, glass and dyed frames, beehive and TNT heads, zombies breaking lights, glowing seen through walls, Nether wither skeletons and their skulls, Launch, Reeling, Spread of Ailments, Curse of Ascension, what endermen carry, the philosopher's stone, a check that the Eternal Return world type loaded, the hardened blocks, and every ore variant against its vanilla ore (drops, Fortune, Silk Touch, experience, tool tier, smelting, tags, creative tab, redstone light, overlay textures) |
+| `runGametest` | flat | the mob, fishing and trade suites (with guardian spawn lists and limits, prismarine, monsters on the hook and overfishing), villager needs (how each is met, price rises on emerald trades only, refusals, shop hours, sleep privacy, healing, saving), survival (no night skip, remembered beds and respawning at the one before, beacon areas through the real spawn rules, grazing and starving, feeding by hand, herd panic, blind follow range, a real spawner's mobs dropping nothing, Growth and Slayer, every stairs and slab with its tags and recipes, stacking and dropping carpets), armor weight and Weightless, drowned prismarine, baby fish and squids, bigger and rain slimes, blazes, falling snow, crop biomes, scrolls and book recipes, spider webs, eating times and raw food, mining and hungry zombies, the newer jockeys, Soulbound, dispensers, the obsidian plate, pistons moving chests and chains, cut vines, floating petals, pig litters, stunted babies, glass and dyed frames, beehive and TNT heads, zombies breaking lights, glowing seen through walls, Nether wither skeletons and their skulls, Launch, Reeling, Spread of Ailments, Curse of Ascension, what endermen carry, the philosopher's stone, the older tool damage, sweeping, thrown knockback and rockets, potion stacks, Haste and mixing, the illusioner's potions, Cubism and Autoload, invisible signs and dyed shulkers, bone meal, rain, Feather Falling on farmland and saplings, zombies by trade and on horseback, pillagers backing off, End phantoms, sheep and wolves, the wither and bedrock, villagers' chores, no summoned golems or cure discounts, beacons paid by the ingot, fast minecarts on curves and chained minecarts, a check that the Eternal Return world type loaded, the hardened blocks, and every ore variant against its vanilla ore (drops, Fortune, Silk Touch, experience, tool tier, smelting, tags, creative tab, redstone light, overlay textures) |
 | `runGametestNoModernerBeta` | flat, Moderner Beta removed | the same suites, and a check that the world type is skipped cleanly |
 | `runGametestModernerBeta` | Moderner Beta, Release 1.6.4 amplified | worldgen checks (debug tunnel on, trial chambers present), carving unchanged |
 | `runGametestModernerBetaTunnelOff` | same | the same with the debug tunnel off |
@@ -62,6 +62,7 @@ The map tool runs the same way: `runWorldmapEternalReturn`, `runWorldmapBeta` an
 | Weightless (armor weighs nothing) | `weightless.json`, read by `ArmorWeight` |
 | Launch, Reeling, Spread of Ailments, Curse of Ascension | `launch.json`, `reeling.json`, `spread_of_ailments.json`, `ascension_curse.json`; `NewEnchantments`; `mixin/combat`; item tag `eternalreturn:enchantable/ranged` |
 | Curses of Visibility, Blindness, Heaviness, Slipperiness and Frailness | `visibility_curse.json` and the rest; `Curses`; `LivingEntityCurseMixin`, `ItemStackFrailMixin`, `ArmorWeight`; item tag `eternalreturn:enchantable/tools` |
+| Cubism (swords: damage to slimes, magma cubes and shulkers); Autoload (crossbows load themselves) | `cubism.json`, `autoload.json`; entity tag `sensitive_to_cubism`; `Autoload`, `CrossbowItemInvoker`, ticked from `PlayerEntityMealsMixin` |
 | Librarians sell scrolls; scrolls in stronghold and end city chests; scrolls teach enchanted book recipes | `com.eternalreturn.scrolls` (`Scrolls`, `ScrollItem`, `ScrollLoot`); `EnchantBookFactoryMixin`, `ServerPlayNetworkHandlerMixin` (left click), `CraftingScreenHandlerMixin` and `CrafterBlockMixin` (locked recipes); recipes generated by `tools/scrolls/build_scrolls.py` from `tools/scrolls/scrolls.json` |
 
 ### Mobs
@@ -92,6 +93,14 @@ The map tool runs the same way: `runWorldmapEternalReturn`, `runWorldmapBeta` an
 | Bigger slimes; slimes in the rain at night | `Slimes`, `SlimeEntityMixin`, `SpawnRestrictionMixin` |
 | Blazes outside fortresses (Eternal Return worlds) | `Blazes`, `SpawnRestrictionMixin` |
 | Drowned drop prismarine | loot table `eternalreturn:entities/drowned_prismarine`, added to the drowned's by `FishingLoot` |
+| Zombie fletchers shoot crossbows, zombie clerics throw potions, zombie fishermen reel you in; zombies on zombie horses | `ZombieVillagerJobs`, `ZombieCrossbowGoal`, `ZombiePotionGoal`, `ReelInTargetGoal`, `ZombieEntityMixin` |
+| Pillagers back away from a close target | `PillagerStrafeMixin` |
+| Illusioners drop a potion of Blindness, Luck or Bad Luck | loot table `minecraft:entities/illusioner` (replaced); potions in `Potions2` |
+| Shulkers take dye | `MobInteractMixin` |
+| Phantoms of every size in the End | `SpawnTweaks`, `MobEntitySpawnMixin` |
+| Sheep run from wolves | `SheepFleeMixin` |
+| Humanoid monsters jump gaps | `LeapGapGoal`, `MobParkourMixin`; entity tag `parkour_mobs` |
+| No wither within 8 blocks of bedrock | `WitherSummonMixin` |
 | Guardians and elder guardians in every ocean | `OceanSpawns` (biome tag `ocean_waters`); `SpawnRestrictionMixin` (elder guardian limits), `MobEntitySpawnMixin` and `MobEntityAccessor` (they despawn) |
 
 ### Worldgen
@@ -139,6 +148,8 @@ The plan, status, terrain settings and maps are in [docs/worldgen.md](docs/world
 | Fishermen buy every fish of their region from the level of its rarity, and sell bait | `FishermanTrades`, `VillagerEntityMixin` |
 | Wandering traders: only near villages, nothing the world can't give, always asylum papers | `WanderingTraders`, `WanderingTraderEntityMixin`, `WanderingTraderManagerMixin`; item tag `not_from_wandering_traders`; `AsylumPapers` |
 | Villagers in Moderner Beta's biomes get the right region (snow, taiga, swamp...) | `VillagerRegions` |
+| Villagers' chores: smiths repair golems, clerics heal, farmers feed babies, shepherds shear, fishermen fish | `VillagerChores`, `VillagerEntityMixin` |
+| No golems summoned by villagers; no discount for curing | `VillagerEntityMixin` |
 | Villager needs, shop hours, healing with food | `VillagerNeeds`; `VillagerEntityMixin` (ticking, saving, gossip, trading, prices), `SleepTaskMixin` (privacy); messages in `lang/en_us.json` |
 
 ### Survival and blocks
@@ -146,6 +157,7 @@ The plan, status, terrain settings and maps are in [docs/worldgen.md](docs/world
 | Feature | Implementation |
 |---|---|
 | Beds don't skip the night; the last 3 beds are remembered for respawning | `BedMemory`; `SleepManagerMixin`, `ServerWorldSleepMixin`, `survival/ServerPlayerEntityMixin` |
+| Beacons need no pyramid, give one effect, and reach as far as their payment says | `BeaconPower`; `BeaconBlockEntityMixin`, `BeaconEffectsMixin`, `BeaconScreenHandlerMixin`; client `BeaconScreenMixin`, `BeaconLevelTwoButtonMixin` |
 | Beacons keep monsters out and let animals spawn; animals spawn nowhere else | `BeaconZones`; `BeaconBlockEntityMixin`, `SpawnRestrictionMixin`, `PhantomSpawnerMixin`, `PatrolSpawnerMixin` |
 | Animals get hungry, graze, take food by hand, starve | `AnimalHunger`; `AnimalEntityMixin`, `SheepGrazingMixin`, `HorseFoodMixin`, `MobEntitySurvivalMixin`; tags `grazers` (entity), `grazing_plants` (block) |
 | Herds panic together | `HerdPanic`, `LivingEntitySurvivalMixin`; entity tag `herd_animals` |
@@ -163,7 +175,11 @@ The plan, status, terrain settings and maps are in [docs/worldgen.md](docs/world
 | Philosopher's stone | `com.eternalreturn.items.PhilosophersStone`, `CreeperEntityAccessor`; recipe `philosophers_stone.json` |
 | Necronomicon | `com.eternalreturn.items.Necronomicon`; recipe `necronomicon.json` |
 | Dynamite | `com.eternalreturn.items.Dynamite` (entity `eternalreturn:dynamite`), recipe `dynamite.json` |
-| Faster minecarts; copper rails | `MinecartSpeedMixin`; `com.eternalreturn.blocks.CopperRail` |
+| Faster minecarts that keep to curves; chained minecarts; copper rails | `com.eternalreturn.blocks.Minecarts`; `MinecartMixin`, `MinecartTrackingMixin`; client `MinecartEntityRendererMixin`; `com.eternalreturn.blocks.CopperRail` |
+| Older combat: tool damage, sweeping only with Sweeping Edge, snowballs and eggs knock back, no rocket boosts | `OldCombat`; `PlayerEntitySweepMixin`, `ThrownKnockbackMixin`, `FireworkElytraMixin` |
+| Potions stack to 16; Haste potions; potions mixed in a crafting grid | `Potions2`, `PotionMixingRecipe` (recipe `potion_mixing.json`) |
+| Rain speeds growth; bone meal on sugar cane, cactus and nether wart; Feather Falling spares farmland; saplings plant themselves | `Growing`; `RainGrowthMixin`, `SugarCaneBlockFertilizableMixin`, `CactusBlockFertilizableMixin`, `NetherWartFertilizableMixin`, `FarmlandBlockMixin`, `ItemEntitySaplingMixin` |
+| Invisible signs | `InvisibleSigns`; `SignBlockEntityMixin`, `SignInvisibilityMixin`; client `SignRendererMixin` |
 | Netherite gear crafted from ingots, not upgraded | recipes `data/eternalreturn/recipe/netherite_*.json`; vanilla's smithing upgrades switched off (`data/minecraft/recipe/netherite_*_smithing.json`) |
 | Wool and concrete stairs and slabs | `com.eternalreturn.blocks.CutBlocks`; resources generated by `tools/blocks/build_blocks.py` |
 | Carpets stack up to 16 layers | `CarpetLayers`, `CarpetBlockMixin`; vanilla carpet blockstates and loot tables replaced by `tools/blocks/build_blocks.py` |
@@ -250,6 +266,12 @@ All four have scrolls and book recipes like the other enchantments.
 - Curse of Slipperiness (tools and weapons): each time you use it (a hit, starting to dig, using it on a block or in the air) there's a 0.5% chance it slips out of your hand onto the ground.
 - Curse of Frailness (anything with durability): whenever it takes damage, half the time it takes twice as much. It can't share an item with Unbreaking.
 
+**Cubism.** A new sword enchantment, I to V: 2.5 extra damage per level against slimes, magma cubes and shulkers (entity tag `eternalreturn:sensitive_to_cubism`), as Smite is against the undead; it can't share a sword with Sharpness, Smite or Bane of Arthropods.
+
+**Autoload.** A new crossbow enchantment, one level: a crossbow with it that is anywhere in your inventory except your hand loads itself, one every 1.25 seconds (a crossbow's loading time), from your arrows, as if you had drawn it.
+
+Both have scrolls and book recipes like the other enchantments.
+
 **Growth.** A new armor enchantment, levels I to V: each level adds half a heart (1 point) of max health, on each piece that has it, so Growth V on all four pieces is ten extra hearts. Enchanting tables, loot and librarians offer it like other armor enchantments, and its levels count toward the piece's capacity.
 
 ### Mobs
@@ -322,13 +344,39 @@ Villagers that existed before this update, and babies until they grow up, start 
 
 **Shop hours.** Villagers don't trade at night (from dusk, 13000 on the day clock, to dawn, 23000): "Sorry, we're closed for the night."
 
+**Chores.** By day, when they aren't trading, sleeping or running from something, villagers help out:
+
+- armorers, weaponsmiths and toolsmiths walk over to a hurt iron golem within 16 blocks and repair it (25 health, as an iron ingot does), at most every 30 seconds;
+- clerics throw a splash potion of Healing at a hurt villager within 12 blocks (one being attacked first), at most every 8 seconds;
+- farmers feed a baby animal within 12 blocks its food from their pockets (wheat, carrots and the like), which helps it grow up as your feeding does;
+- shepherds shear a woolly sheep within 12 blocks every 2 to 4 minutes;
+- fishermen go fishing once a day, in the morning: they walk to the water's edge within 24 blocks, fish for half a minute or so with a rod in hand, and pocket what they catch (cod, salmon, now and then a tropical fish).
+
+A chore they can't reach in 30 seconds is given up.
+
+**Golems.** Villagers no longer summon iron golems, so golems don't spawn by themselves; build them.
+
+**Cures.** Curing a zombie villager no longer makes it, or its neighbours, sell to you at a discount.
+
 **Healing.** A hurt villager with food in its inventory (bread, carrots, potatoes or beetroot, which farmers gather and share) now and then eats one, about one chance in four every 2 seconds, healing by the food's value (bread 5, a carrot 3, a potato or beetroot 1).
 
 ### Survival
 
 **Beds.** Sleeping never skips the night, however many players sleep: a bed only sets your respawn point (by day too, as in vanilla), and you get up when you like (morning wakes you as usual). Lying down still resets the phantom timer. Each player remembers the last 3 beds that set their spawn point. If you die and your bed is gone (or blocked), you respawn at the bed before it, then the one before that; only if none of the three works do you go to world spawn. Respawn anchors and spawn points set by command are left alone.
 
-**Beacons.** A working beacon (a pyramid and a clear beam) covers the same area its effects reach: 20, 30, 40 or 50 blocks each way for a 1 to 4 tier pyramid, from that far below the beacon up to the sky. No monster spawns naturally inside it, and no phantoms or pillager patrols come there. Spawners still work.
+**Beacons.** A beacon needs no pyramid, only a clear beam to the sky, and every effect can be picked from the start (Regeneration is a first choice now). It gives one effect, not two. What you pay it with decides how far it reaches and how much effect it can store up on you:
+
+| Payment | Range (each way) | Effect stored up to |
+|---|---|---|
+| Iron ingot | 32 blocks | 30 s |
+| Gold ingot | 64 blocks | 1 min |
+| Emerald | 128 blocks | 1.5 min |
+| Diamond | 256 blocks | 2 min |
+| Netherite ingot | 512 blocks | 4 min |
+
+Each second you spend in range adds a second of the effect, up to that limit, and it keeps running after you leave. The beacon screen shows the range and time of whatever is in the payment slot. A beacon set up before this counts as paid with iron until it is paid again.
+
+**Beacon areas.** A working beacon covers the same area its effect reaches, from that far below the beacon up to the sky. No monster spawns naturally inside it, and no phantoms or pillager patrols come there. Spawners still work.
 
 **Animals.** Animals (cows, pigs, sheep, chickens, horses, rabbits, wolves, foxes and the rest of the creature spawn group) no longer spawn naturally once the land has been generated, except inside a beacon's area. New land still comes with its animals, and breeding works everywhere: once a herd is gone, it's gone.
 
@@ -357,6 +405,24 @@ Villagers that existed before this update, and babies until they grow up, start 
 **Zombie villagers** are 15% of zombies (vanilla 5%), so curing them is a real way to get villagers in Eternal Return worlds, which have no villages. **Witches** spawn now and then in the Nether.
 
 **Pillagers at sea.** Out in an ocean, now and then (about once every 7 minutes on average) a dark oak boat with two pillagers turns up on the water 24 to 40 blocks away. The front one steers toward you (or whoever they're after) and stops about 6 blocks off so both can shoot. They don't break out of their boat like other monsters; an empty boat sinks away after 5 seconds. Never on Peaceful or inside a beacon's area.
+
+**Zombies by trade.** A zombie villager fights the way its trade suggests. A zombie fletcher comes with a crossbow and shoots it from 3 to 16 blocks. A zombie cleric throws splash potions of Harming at you from up to 10 blocks, and at hurt undead nearby, whom Harming heals. A zombie fisherman comes with a fishing rod and reels you in, as fishing-rod zombies do.
+
+**Zombie horsemen.** 2% of adult zombies that spawn naturally ride a zombie horse. The horse goes where its rider goes and despawns with it.
+
+**Pillagers** back away from a target closer than 5 blocks, shooting as they go, instead of standing their ground.
+
+**Illusioners** drop a potion: Blindness, Luck or Bad Luck, one of the three at random.
+
+**Shulkers** can be dyed, as in Bedrock Edition: right-click one with a dye.
+
+**Phantoms in the End.** Phantoms now and then spawn in the End, at any size from a vanilla phantom's up to one six times as big.
+
+**Sheep** run from wolves within 16 blocks. A tamed wolf doesn't scare them.
+
+**Parkour.** Zombies, skeletons, piglins, illagers, witches and the other humanoid monsters (entity tag `eternalreturn:parkour_mobs`) jump a gap that stands between them and their target: from an edge with a drop of 2 blocks or more ahead, to solid ground 2 to 4 blocks across (level, a block up or a block down).
+
+**The Wither** can't be built within 8 blocks of bedrock, so it can't be trapped under the Nether roof or against the bedrock floor. Players nearby are told why, and the blocks stay where they are.
 
 **Spiders** fling a ball of web at you from 4 to 16 blocks away every 6 seconds or so; if it hits, you're stuck in a cobweb where you stand (it stays until broken). Cave spiders too.
 
@@ -421,6 +487,18 @@ Villagers that existed before this update, and babies until they grow up, start 
 
 Stacks bigger than a food's new stack size (from before this change) stay as they are until split.
 
+**Combat.** Pickaxes, axes and shovels hit as hard as they did before 1.9: a pickaxe 2, an axe 3 and a shovel 1 more than your fist, plus the material's bonus (wood and gold 0, stone 1, iron 2, diamond 3, netherite 4), so a diamond axe hits for 7, not 9. They swing as fast as before. A sword only sweeps with Sweeping Edge on it. Snowballs and eggs knock back what they hit. A firework rocket no longer boosts you while you glide with an elytra.
+
+**Potions** stack to 16 (drinking, splash and lingering). An awkward potion and a diamond brew a Potion of Haste (redstone makes it last 8 minutes, glowstone makes it Haste II). Potions of the same kind (all drinking, all splash or all lingering) mix in a crafting grid: two to nine of them make one potion with all their effects, keeping the stronger (then the longer) of any effect they share, up to 8 effects; the other bottles come back empty.
+
+**Rain** makes crops, sugar cane, bamboo, cocoa beans and sweet berry bushes grow twice as fast while it falls on them (cocoa, under its tree's leaves, only needs it to be raining in its biome).
+
+**Bone meal** works on sugar cane and cactus (a block taller, up to 3) and on nether wart (a stage older).
+
+**Farmland** isn't trampled by anyone wearing Feather Falling boots.
+
+**Saplings** dropped on the ground plant themselves where they lie, if they can grow there, some time between their first minute and when they would despawn.
+
 **Farming.** Right-click a vine with shears and it stops growing. Pink petals can be placed on still water, like lily pads: right-click the water, from any angle. Pigs have litters of 2 or 3 piglets, or 2 to 5 if a parent was fed a golden carrot (golden carrots are pig food now). A baby animal fed a poisonous potato is poisoned half the time, and one poisoned that way never grows up.
 
 **Snow** falls like sand when nothing holds it up: a snow block placed in the air, or a snow layer whose block is mined away, drops to the ground (a layer keeps its layers) instead of vanishing. Snow that lands on a snow layer adds to the pile: the layers add up (a snow block counts as 8) to a full layer, and any left over pile on top.
@@ -462,11 +540,17 @@ Creatures keep their gear and name. The stone works before a creature's own righ
 
 **Netherite** gear is crafted like diamond gear, from netherite ingots (8 for a chestplate, 2 and a stick for a sword); diamond gear can no longer be upgraded at a smithing table.
 
-**Minecarts** can go up to three times as fast (24 blocks a second at top speed, on any rail). **Copper rails**: 6 copper ingots and a stick make 16. They work and curve like ordinary rails.
+**Minecarts** run up to three times as fast (24 blocks a second at top speed, on any rail). Each tick a cart takes three of vanilla's steps instead of one long jump, so it keeps to curves and slopes and still trips detector and activator rails at full speed; off the rails it moves as in vanilla. Players are sent a cart's position every tick, so riding a fast cart is smooth.
+
+**Chained minecarts.** Right-click a minecart with a chain, then another minecart within 4 blocks: the second is chained behind the first (one chain is used). The chain holds them at most 1.6 blocks apart and pulls both ways, like a rope, so a train moves together. A cart pulls at most one other, so build trains in a line. Shears cut a cart's chains, and a broken cart drops its chains. A chain pulled more than 8 blocks long breaks and drops.
+
+**Copper rails**: 6 copper ingots and a stick make 16. They work and curve like ordinary rails.
 
 ### Blocks
 
 **Stairs and slabs.** Every color of wool and concrete has stairs and a slab (`eternalreturn:white_wool_stairs`, `eternalreturn:red_concrete_slab` and so on), after the full block in the Colored Blocks tab. Crafted like any stairs (6 blocks make 4) and slab (3 make 6); concrete ones also come from the stonecutter (1 block makes 1 stairs or 2 slabs). They behave like their block: wool ones burn, are quick to cut with shears and muffle sculk; concrete ones need a pickaxe.
+
+**Invisible signs.** Right-click a sign with a phantom membrane: the board and post vanish and only the writing shows, floating where the sign is.
 
 **Carpets.** Placing a carpet on top of the same carpet adds a layer, like snow: up to 16 layers, a full block. Each layer is 1/16 of a block high and breaking it gives back one carpet per layer. A different color doesn't stack. Moss carpet stacks too.
 
@@ -481,17 +565,17 @@ Creatures keep their gear and name. The stone works before a creature's own righ
 - `bookshelfBias`: the multipliers above, plus `booksCanUnlockNonTableEnchantments` (off by default) to let shelved books make the table offer treasure enchantments like Frost Walker.
 - `fortune`: toggles for hoes and shears.
 - `fishing`: `fishRequireBait`; `baits` (item to `lureSeconds`, `nightLureSeconds`, `lava`; config files with the old worms, glow bait and infernal bait are reset to the new list once); `lavaFishingOutsideNether`; `hostileCatchChance` (default 0.03) and `hostileCatches` (mob to `weight` and `oceanOnly`; the ids are mob ids, or `drowned_guardian_jockey` / `drowned_elder_guardian_jockey`); `overfishing` (`enabled`, `radius` 6, `freeCatches` 3, `slowdownPerCatch` 0.5, `maxSlowdown` 4, `recoveryMinutes` 5).
-- `survival`: `bedsSkipNight` (off), `rememberedBeds` (3), `beaconsBlockMonsters`, `animalsOnlySpawnNearBeacons`, `animalsGetHungry`, `hungryAfterDays` (0.5), `grazeChance` (per second, 0.125), `daysBeforeStarving` (3), `starveDamageSeconds` (30), `herdPanic` and `herdPanicRadius` (16), `blindFollowRange` (2), `spawnerMobsDropNothing`; `armorWeight` (material to a full set's slowdown; gold is lighter than iron now, and config files with the old gold weight are moved to the new one once), `snowFalls`, `cropGrowthOutsideIdealBiome` (0.25); `removeHunger` (on: no hunger, food heals), `hitsInterruptEating`, `rawFoodPoisonChance` (0.7), `pigLitters`, `poisonousPotatoStuntChance` (0.5); `glowingSeenThroughWalls`.
+- `survival`: `bedsSkipNight` (off), `rememberedBeds` (3), `beaconsBlockMonsters`, `animalsOnlySpawnNearBeacons`, `animalsGetHungry`, `hungryAfterDays` (0.5), `grazeChance` (per second, 0.125), `daysBeforeStarving` (3), `starveDamageSeconds` (30), `herdPanic` and `herdPanicRadius` (16), `blindFollowRange` (2), `spawnerMobsDropNothing`; `armorWeight` (material to a full set's slowdown; gold is lighter than iron now, and config files with the old gold weight are moved to the new one once), `snowFalls`, `cropGrowthOutsideIdealBiome` (0.25); `removeHunger` (on: no hunger, food heals), `hitsInterruptEating`, `rawFoodPoisonChance` (0.7), `pigLitters`, `poisonousPotatoStuntChance` (0.5); `glowingSeenThroughWalls`; `beaconRework` (no pyramids, one effect, range by payment); `rainGrowthMultiplier` (2), `saplingsPlantThemselves`; `sweepingNeedsEnchantment`, `snowballsKnockBack`, `elytraRocketBoost` (off), `potionStackSize` (16).
 - `enchantmentsExtra`: `ascensionCurseRises`.
-- `redstone`: `dispensersPlaceBlocks`, `pistonsMoveBlockEntities`, `chainsLinkBlocks`, `minecartSpeedMultiplier` (3).
-- `villagers`: `onlyFishermenBuy`; `fishPriceMultiplier` (default 2, applied to vanilla's own fish trades; the mod's fish pay what `eternalreturn/fish.json` says); `traderVillageVillagers` (3) and `traderVillageRadius` (64), `asylumPapersPrice` (16, 0 for none); `needs`: `enabled`, `daysBeforePriceRise` (2), `emeraldsPerMissingNeed` (5), `daysBeforeRefusal` (7), `maxOtherAdultsInSight` (1), `exerciseBlocks` (8), `minWorkstationDistance` (8), `closedAtNight`, `nightStart` (13000) and `nightEnd` (23000), `healWithFood` and `eatChance` (0.25).
+- `redstone`: `dispensersPlaceBlocks`, `pistonsMoveBlockEntities`, `chainsLinkBlocks`, `minecartSpeedMultiplier` (3, a whole number: vanilla steps a tick), `minecartChains`.
+- `villagers`: `onlyFishermenBuy`; `fishPriceMultiplier` (default 2, applied to vanilla's own fish trades; the mod's fish pay what `eternalreturn/fish.json` says); `traderVillageVillagers` (3) and `traderVillageRadius` (64), `asylumPapersPrice` (16, 0 for none); `needs`: `enabled`, `daysBeforePriceRise` (2), `emeraldsPerMissingNeed` (5), `daysBeforeRefusal` (7), `maxOtherAdultsInSight` (1), `exerciseBlocks` (8), `minWorkstationDistance` (8), `closedAtNight`, `nightStart` (13000) and `nightEnd` (23000), `healWithFood` and `eatChance` (0.25); `chores`, `villagersSummonGolems` (off), `cureDiscount` (off).
 - `worldgen`: `debugTunnel` (off by default). Carves one straight 3x3 tunnel at y=20 along z=8 through every chunk on that row, to check that this mod's carvers run under the current world generator. Needs a restart, and only affects newly generated chunks.
 - `worldgen.biomeStone` (on by default; Eternal Return worlds only, newly generated chunks only): each biome's stone under the topsoil. Off: plain stone everywhere.
 - `worldgen.moreDungeons`, `netherDungeonAttempts` (6 per chunk), `netherWartPatchChance` (0.3), `surfaceStrongholdChance` (a third), `strongholdIllagers` (Eternal Return worlds only, newly generated chunks only).
 - `worldgen.onlyEssentialStructures` (on by default; Eternal Return worlds only): only strongholds, mineshafts, nether fossils and end cities, in all three dimensions, and blazes outside fortresses.
 - `worldgen.roundOverhangs` (on by default; Eternal Return worlds only, newly generated chunks only): overhang undersides arch and bulge instead of lying almost flat. Off: the terrain as Moderner Beta makes it.
 - `worldgen.caves` (Eternal Return worlds only; newly generated chunks only): `enabled` (the new caves); `oldCaves` (off: vanilla's, Moderner Beta's and other mods' cave carvers don't run there); `density` (multiplies every weight); per type under `types` (`spaghetti`, `ravine`, `large`, `vertical`, `zigzag`, `ribbed`, `spiral`, `toroidal`): `enabled`, `weight` (caves starting per 100 chunks), `minY` and `maxY` (where a cave starts), `minRadius` and `maxRadius`, and for `large` a `typicalRadius` (the most common size; a few caverns reach toward `maxRadius`); `spiral` and `toroidal` also have `minSize` and `maxSize` (the spiral's coil radius, the room's ring radius). Config files from before the first cave tuning are reset to the new type defaults once (`typesVersion`). Debug: `debugForceCaveType` (a type id: only that type, at a high rate) and `debugLogCaveStarts` (writes `type,x,y,z` of every cave start to `eternalreturn-cave-starts.csv` in the game folder).
-- `mobs`: baby chance, baby speed, and baby creeper fuse and blast multipliers; armor and armor-enchant chances, each written as `base + perDifficulty x clamped local difficulty`; the underground-creeper toggle and its sky-light limit; jockey, fishing rod, ender pearl and sword chances; fishing rod pull strength; the boat-breaking toggle; `guardianSpawnWeight` (4) and `elderGuardianSpawnWeight` (1) in ocean biomes (0 turns them off; read when the world loads), `elderGuardianSpawnChance` (0.25) and `elderGuardianSpacing` (96 blocks); `slimeSize8Chance` (0.08), `slimeSize16Chance` (0.02), `slimesInNightRain`; `waterBabyChance` (0.15); `spiderWebCooldownSeconds` (6), `miningZombieChance` (0.15), `spawnerZombiesDig`, `zombiesHuntAnimals`, `babyZombieAnimalJockeyChance` (0.05), `phantomSkeletonChance` (0.1), `slimeSkeletonChance` (0.05); `beehiveHeadChance` (0.1), `tntHeadChance` (0.001), `zombiesBreakLights`, `netherWitherSkeletonWeight` (2; 0 for fortresses only, read when the world loads); `zombieVillagerShare` (0.15), `netherWitchWeight` (2), `largeVariantChance` (0.005), `pillagerBoatChance` (0.15 a minute at sea).
+- `mobs`: baby chance, baby speed, and baby creeper fuse and blast multipliers; armor and armor-enchant chances, each written as `base + perDifficulty x clamped local difficulty`; the underground-creeper toggle and its sky-light limit; jockey, fishing rod, ender pearl and sword chances; fishing rod pull strength; the boat-breaking toggle; `guardianSpawnWeight` (4) and `elderGuardianSpawnWeight` (1) in ocean biomes (0 turns them off; read when the world loads), `elderGuardianSpawnChance` (0.25) and `elderGuardianSpacing` (96 blocks); `slimeSize8Chance` (0.08), `slimeSize16Chance` (0.02), `slimesInNightRain`; `waterBabyChance` (0.15); `spiderWebCooldownSeconds` (6), `miningZombieChance` (0.15), `spawnerZombiesDig`, `zombiesHuntAnimals`, `babyZombieAnimalJockeyChance` (0.05), `phantomSkeletonChance` (0.1), `slimeSkeletonChance` (0.05); `beehiveHeadChance` (0.1), `tntHeadChance` (0.001), `zombiesBreakLights`, `netherWitherSkeletonWeight` (2; 0 for fortresses only, read when the world loads); `zombieVillagerShare` (0.15), `netherWitchWeight` (2), `largeVariantChance` (0.005), `pillagerBoatChance` (0.15 a minute at sea); `zombieHorsemanChance` (0.02), `pillagersBackOff`, `endPhantomWeight` (2; read when the world loads), `sheepFleeWolves`, `mobParkour`, `witherBedrockDistance` (8; 0 for none).
 
 Which items belong to each tier is controlled by tags in `data/eternalreturn/tags/item/`, so modded gear can be added with a datapack and no code changes. The same goes for mobs: `data/eternalreturn/tags/entity_type/` decides which mobs can be babies (`baby_variants`, which only works for skeleton-type mobs and creepers), which get the boosted armor (`armored_spawns`), and which can ride spiders (`jockey_riders`).
 
@@ -527,7 +611,12 @@ Fishing data lives in the same place. The item tag `raw_fish` is what chum accep
 - Endermen: the vanilla block tag `minecraft:enderman_holdable` is replaced, so blocks other mods add to it are dropped too.
 - Netherite: vanilla's nine netherite smithing upgrade recipes are switched off (replaced with recipes that never load) and crafting recipes added. A datapack or mod that brings the smithing upgrades back would make both work.
 - Wandering traders: their trade pools are filtered as they pick (the item tag `eternalreturn:not_from_wandering_traders`), so trades other mods add still turn up unless their item is in the tag.
-- Minecarts: the speed multiplier applies to every minecart that uses vanilla's top speed (not the furnace minecart, which has its own).
+- Minecarts: every minecart takes the extra steps on rails, the furnace minecart included. A chained cart saves the cart ahead under the key `eternalreturn_leader`; without this mod the chain is simply gone.
+- Beacons: pyramids no longer matter and the second effect is gone, for every beacon in every world; the payment is saved with the beacon as `eternalreturn_tier`. Mods that read a beacon's level see 4 for any beacon with a clear beam.
+- Tools: every pickaxe, axe and shovel (modded ones too, if they use vanilla's tool classes) gets the older damage: 2, 3 or 1 plus its material's bonus.
+- The illusioner's loot table `minecraft:entities/illusioner` is replaced; a datapack replacing it wins.
+- Potions: the stack size is set on the three potion items' default components, so other mods that read the stack size see 16.
+- Golems: villagers never summon them, whatever another mod adds to that; golems from pumpkins and iron blocks still work.
 - Wither skeletons: the vanilla loot table `minecraft:entities/wither_skeleton` is replaced (the skull no longer needs a player kill or luck). A datapack replacing it wins.
 - Beds: with night skipping off, the "players sleeping" counter isn't shown on servers.
 
@@ -628,7 +717,7 @@ Ore variants (same world, made after this update; `/gamemode spectator` and `/ef
 Survival and blocks (any world, survival mode):
 
 71. Beds: sleep in a bed at night: the night goes on (get up whenever). Right-click three more beds by day ("You can sleep only at night", but each sets your spawn). Break the newest bed, then `/kill @s`: you wake at the bed before it. Break that one too and die again: the one before.
-72. Beacons: build a working beacon (a 3 x 3 iron pyramid is enough). At night around it nothing hostile spawns within 20 blocks; outside, monsters do. Phantoms leave you alone inside it.
+72. Beacons: place a beacon on the ground (no pyramid), pay it an iron ingot and pick Speed: Speed builds up while you stand nearby, to 30 seconds. At night nothing hostile spawns within 32 blocks of it; further out, monsters do. Phantoms leave you alone inside it. Pay another with a netherite ingot (the screen says "Range 512 blocks", "Up to 4 min"): there's only one column of effects, Regeneration among them.
 73. Animals: kill every cow around: none come back (breeding still works). Inside a beacon's area on grass, animals turn up again now and then.
 74. Hunger: pen a cow on stone and `/time add 80000`: it loses health every 30 seconds until you feed it wheat (it eats even right after breeding). A cow penned on grass grazes the grass to dirt and stays healthy while there's grass left.
 75. Herd panic: hit a sheep in a flock: the whole flock bolts. Hit a pig next to them: only pigs run.
@@ -670,7 +759,7 @@ Survival and blocks (any world, survival mode):
 111. Philosopher's stone: craft one, right-click glass (sand), again (glass), a pig (zombified piglin), a sheep (new colour), a creeper (charged).
 112. Curses: `/enchant @s eternalreturn:visibility_curse` on a chestplate and put it on: you glow. `blindness_curse` on a helmet: blind. `heaviness_curse` on a chestplate: its tooltip weight doubles. `slipperiness_curse` on a pickaxe: dig for a while and it eventually drops out of your hand. `frailness_curse` on a sword: it wears out about half again as fast.
 113. Netherite: 8 netherite ingots make a chestplate; a smithing table no longer upgrades diamond gear.
-114. Minecarts: a long straight track with powered rails: a cart gets much faster than before. Craft copper rails (6 copper ingots and a stick) and lay a curve: carts take it.
+114. Minecarts: a long track with powered rails, curves and a slope: a cart gets much faster than before and takes the curves and the slope without flying off; riding it is smooth. Right-click one cart with a chain, then another: they ride together, with a chain drawn between them; shears cut it. Craft copper rails (6 copper ingots and a stick) and lay a curve: carts take it.
 115. Dynamite: craft it (2 gunpowder, paper, string), throw it at some dirt: it lands, fizzes, and blows up 2 seconds after the throw.
 116. Wandering traders: none come out in the wild. Gather 3 villagers (cure zombie villagers, or `/summon villager` three times) and wait near them: a trader comes, selling asylum papers for 16 emeralds and no moss, dripstone, dripleaf, rooted dirt, allium or mangrove propagules. Right-click the papers on the ground: a villager arrives.
 117. Necronomicon: craft it (philosopher's stone, a book, 7 wither skeleton skulls). Right-click the ground three times: three undead servants follow you. Hit a cow: they go for it. A fourth click: "You already have 3 servants".
@@ -680,3 +769,17 @@ Survival and blocks (any world, survival mode):
 121. Strongholds (Eternal Return world): `/locate structure minecraft:stronghold` a few times from different places: about a third stand at ground level. Inside: illagers in the rooms, and an illusioner in the portal room.
 122. Baby squid: `/summon squid ~ ~ ~ {IsBaby:1b}` in water: the small squid is drawn right where it is (it used to float off to one side).
 123. No hunger: in survival there's no food bar; sprint as long as you like. Take some fall damage: your health stays down. Eat a melon slice (much quicker than bread): 1 ❤ back at once. Eat a steak: 6 ❤ come back over 10 seconds, and you get Strength for 20 s. At full health, bread won't be eaten but a cooked chicken will (it gives Speed). Hover any food to see what it heals.
+124. Combat: hit a zombie with a diamond axe: noticeably weaker than before (7, not 9). Swing a plain sword into a group of mobs: only one is hit; with Sweeping Edge, the ones beside it too. Throw a snowball at a pig: it's knocked back. Glide with an elytra and use a firework rocket: nothing.
+125. Potions: stack potions in one slot (16). Brew an awkward potion with a diamond: Haste. Put a Potion of Swiftness and a Potion of Strength in a crafting grid: a mixed potion with both, and an empty bottle back.
+126. Cubism and Autoload: `/enchant @s eternalreturn:cubism 5` on a sword, hit a slime: much harder than a zombie. `/enchant @s eternalreturn:autoload` on a crossbow, fire it, then switch to another slot with arrows in your inventory: a moment later it's loaded again.
+127. Signs: write on a sign, right-click it with a phantom membrane: only the writing is left.
+128. Shulkers: right-click a shulker with blue dye: it turns blue.
+129. Zombies by trade: `/summon zombie_villager ~ ~ ~ {VillagerData:{profession:"minecraft:fletcher"}}` at night from 10 blocks off: it carries a crossbow and shoots it at you. A cleric throws Harming at you. Set `zombieHorsemanChance` to 1: zombies ride zombie horses.
+130. Pillagers: walk up close to a pillager: it backs off while it shoots. Kill an illusioner: a potion drops.
+131. The End: phantoms of all sizes fly about the outer islands.
+132. Sheep: bring a wild wolf near a flock (`/summon wolf`): the sheep run from it.
+133. Parkour: dig a 2-block-wide trench between you and a zombie: it jumps across.
+134. The Wither: build it next to bedrock (at the bottom of the world): "The wither will not rise this close to bedrock", and nothing happens. Build it 10 blocks up: it spawns.
+135. Villager chores (a village by day): hurt an iron golem near an armorer: the armorer walks over and repairs it. Hit a villager near a cleric: the cleric throws a healing potion. A farmer with wheat walks over to a calf and feeds it. A shepherd shears a sheep now and then. A fisherman walks to a pond in the morning and fishes with a rod.
+136. Golems and cures: villagers sleeping and gossiping in a village never summon a golem. Cure a zombie villager: its prices stay as they were.
+137. Farming: `/weather rain` over a wheat field: it grows twice as fast. Bone meal on sugar cane, a cactus or nether wart: it grows. Jump on farmland in Feather Falling boots: it stays farmland. Drop a sapling on grass and wait a minute or two: it plants itself.

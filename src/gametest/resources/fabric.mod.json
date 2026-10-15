@@ -36,7 +36,9 @@
 			"com.eternalreturn.gametest.FishTableTests",
 			"com.eternalreturn.gametest.CursesItemsAndMobsTests",
 			"com.eternalreturn.gametest.StrongholdAndNetherTests",
-			"com.eternalreturn.gametest.FoodTests"
+			"com.eternalreturn.gametest.FoodTests",
+			"com.eternalreturn.gametest.CombatPotionFarmTests",
+			"com.eternalreturn.gametest.MobVillagerCartTests"
 		]
 	},
 	"mixins": [

@@ -144,7 +144,7 @@ public class SurvivalTests implements FabricGameTest {
 	// ---------- beacons ----------
 
 	/**
-	 * A tier-1 beacon on its iron pyramid covers 20 blocks each way: no natural zombie spawns there, and
+	 * A beacon paid with iron (no pyramid needed) covers 32 blocks each way: no natural zombie spawns there, and
 	 * cows may spawn there but nowhere else. Removing the beacon removes its area.
 	 */
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "beacons", tickLimit = 300)
@@ -153,29 +153,25 @@ public class SurvivalTests implements FabricGameTest {
 		world.setTimeOfDay(6000);
 		BeaconZones.clear(world);
 		floor(ctx, 4, Blocks.STONE);
-		for (int x = 1; x <= 3; x++) {
-			for (int z = 1; z <= 3; z++) {
-				ctx.setBlockState(x, 1, z, Blocks.IRON_BLOCK);
-			}
-		}
 		ctx.setBlockState(2, 2, 2, Blocks.BEACON);
 		BlockPos beacon = ctx.getAbsolutePos(new BlockPos(2, 2, 2));
+		((com.eternalreturn.survival.BeaconPower.Holder) world.getBlockEntity(beacon)).eternalreturn$setTier(1);
 		ctx.runAtTick(ctx.getTick() + 100, () -> {
-			int level = BeaconZones.level(world, beacon);
-			ctx.assertTrue(level == 1, "the beacon registered itself at level 1, got " + level);
+			int level = BeaconZones.range(world, beacon);
+			ctx.assertTrue(level == 32, "the iron-paid beacon registered itself with range 32, got " + level);
 			// The test framework marks every finished test with a beacon of its own: forget those for the checks
 			// below (they register again on their next tick; these checks all run within this one).
 			BeaconZones.clear(world);
 			BeaconZones.update(world, beacon, level, true);
-			ctx.assertTrue(BeaconZones.covers(world, beacon.add(15, 0, 15)), "15 blocks from a tier-1 beacon is covered");
-			ctx.assertTrue(!BeaconZones.covers(world, beacon.add(25, 0, 0)), "25 blocks away is not");
+			ctx.assertTrue(BeaconZones.covers(world, beacon.add(30, 0, 30)), "30 blocks from an iron beacon is covered");
+			ctx.assertTrue(!BeaconZones.covers(world, beacon.add(40, 0, 0)), "40 blocks away is not");
 			ctx.assertTrue(!BeaconZones.allowsNaturalSpawn(world, EntityType.ZOMBIE, beacon.add(5, 0, 5)), "no zombies near a beacon");
-			ctx.assertTrue(BeaconZones.allowsNaturalSpawn(world, EntityType.ZOMBIE, beacon.add(40, 0, 0)), "zombies away from it");
+			ctx.assertTrue(BeaconZones.allowsNaturalSpawn(world, EntityType.ZOMBIE, beacon.add(50, 0, 0)), "zombies away from it");
 			ctx.assertTrue(BeaconZones.allowsNaturalSpawn(world, EntityType.COW, beacon.add(5, 0, 5)), "cows may spawn near a beacon");
-			ctx.assertTrue(!BeaconZones.allowsNaturalSpawn(world, EntityType.COW, beacon.add(40, 0, 0)), "but not away from one");
+			ctx.assertTrue(!BeaconZones.allowsNaturalSpawn(world, EntityType.COW, beacon.add(50, 0, 0)), "but not away from one");
 			// Through the real spawn rules: a cow on grass in daylight, inside and outside.
 			BlockPos inside = beacon.add(6, -1, 0);
-			BlockPos outside = beacon.add(30, -1, 0);
+			BlockPos outside = beacon.add(45, -1, 0);
 			for (BlockPos spot : List.of(inside, outside)) {
 				world.setBlockState(spot.down(), Blocks.GRASS_BLOCK.getDefaultState());
 				world.setBlockState(spot, Blocks.AIR.getDefaultState());
@@ -187,7 +183,7 @@ public class SurvivalTests implements FabricGameTest {
 			ctx.assertTrue(SpawnRestriction.canSpawn(EntityType.COW, world, SpawnReason.CHUNK_GENERATION, outside, random), "new land still gets its animals");
 			world.setBlockState(outside.down(), Blocks.AIR.getDefaultState());
 			ctx.setBlockState(2, 2, 2, Blocks.AIR);
-			ctx.assertTrue(BeaconZones.level(world, beacon) == 0, "a removed beacon covers nothing");
+			ctx.assertTrue(BeaconZones.range(world, beacon) == 0, "a removed beacon covers nothing");
 			ctx.complete();
 		});
 	}

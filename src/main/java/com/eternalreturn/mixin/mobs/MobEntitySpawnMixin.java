@@ -81,6 +81,12 @@ public abstract class MobEntitySpawnMixin extends LivingEntity {
 		if ((Object) this instanceof net.minecraft.entity.mob.CreeperEntity) {
 			com.eternalreturn.mobs.LargeMobs.roll((MobEntity) (Object) this, world.getRandom());
 		}
+		// Phantoms born in the End come in all sizes (SpawnTweaks).
+		if ((Object) this instanceof net.minecraft.entity.mob.PhantomEntity phantom && spawnReason == SpawnReason.NATURAL
+				&& world.toServerWorld().getRegistryKey() == net.minecraft.world.World.END) {
+			var random = world.getRandom();
+			phantom.setPhantomSize(Math.min(random.nextInt(4) + random.nextInt(4), 6));
+		}
 	}
 
 	@Inject(method = "initEquipment", at = @At("TAIL"))

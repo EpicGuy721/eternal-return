@@ -54,9 +54,12 @@ public class EternalReturn implements ModInitializer {
 		Blazes.register();
 		VillagerRegions.register();
 		com.eternalreturn.survival.Meals.register();
+		com.eternalreturn.logic.OldCombat.register();
+		com.eternalreturn.items.Potions2.register();
 		com.eternalreturn.mobs.SpawnTweaks.register();
 		com.eternalreturn.logic.Curses.register();
 		com.eternalreturn.blocks.CopperRail.register();
+		com.eternalreturn.blocks.Minecarts.register();
 		com.eternalreturn.items.Dynamite.register();
 		com.eternalreturn.items.AsylumPapers.register();
 		com.eternalreturn.items.Necronomicon.register();

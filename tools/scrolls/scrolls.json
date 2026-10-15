@@ -216,5 +216,13 @@
   "eternalreturn:frailness_curse": [
     "minecraft:bone",
     "minecraft:gravel"
+  ],
+  "eternalreturn:cubism": [
+    "minecraft:slime_block",
+    "minecraft:magma_cream"
+  ],
+  "eternalreturn:autoload": [
+    "minecraft:crossbow",
+    "minecraft:hopper"
   ]
 }

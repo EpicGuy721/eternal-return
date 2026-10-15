@@ -4,10 +4,14 @@
 	"compatibilityLevel": "JAVA_21",
 	"client": [
 		"AnvilScreenMixin",
+		"BeaconLevelTwoButtonMixin",
+		"BeaconScreenMixin",
 		"EnchantmentScreenMixin",
 		"HungerBarMixin",
 		"ItemFrameEntityRendererMixin",
+		"MinecartEntityRendererMixin",
 		"PistonBlockEntityRendererMixin",
+		"SignRendererMixin",
 		"mobs.CreeperEntityRendererMixin",
 		"mobs.LivingEntityRendererMixin"
 	],

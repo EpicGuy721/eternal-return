@@ -11,24 +11,24 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 /**
- * Working beacons (a pyramid and a clear beam) and the area they cover: the same area their effects
- * reach, 20, 30, 40 or 50 blocks across each way for a 1 to 4 tier pyramid, from that far below the
- * beacon up to the sky. Inside it no monster spawns naturally (nor phantoms or patrols), and animals
+ * Working beacons (a clear beam, and paid for: BeaconPower) and the area they cover: the same area their
+ * effects reach, from 32 blocks each way for one paid with iron to 512 for netherite (with the beacon rework
+ * off, 20 to 50 for a 1 to 4 tier pyramid), from that far below the beacon up to the sky. Inside it no monster spawns naturally (nor phantoms or patrols), and animals
  * can still spawn; outside, animals no longer spawn once the land has been generated
  * (survival.beaconsBlockMonsters, survival.animalsOnlySpawnNearBeacons). Beacons register themselves as
  * they tick and leave when they are removed or unloaded.
  */
 public final class BeaconZones {
-	/** Per world: beacon position -> its pyramid level (only working beacons). */
+	/** Per world: beacon position -> the range it covers (only working beacons). */
 	private static final Map<World, Map<BlockPos, Integer>> BEACONS = new WeakHashMap<>();
 
 	private BeaconZones() {
 	}
 
-	/** From a beacon's tick: level 0 or a blocked beam means it covers nothing. */
-	public static synchronized void update(World world, BlockPos pos, int level, boolean beam) {
-		if (level > 0 && beam) {
-			BEACONS.computeIfAbsent(world, w -> new HashMap<>()).put(pos.toImmutable(), level);
+	/** From a beacon's tick: range 0 or a blocked beam means it covers nothing. */
+	public static synchronized void update(World world, BlockPos pos, int range, boolean beam) {
+		if (range > 0 && beam) {
+			BEACONS.computeIfAbsent(world, w -> new HashMap<>()).put(pos.toImmutable(), range);
 		} else {
 			remove(world, pos);
 		}
@@ -48,7 +48,7 @@ public final class BeaconZones {
 			return false;
 		}
 		for (Map.Entry<BlockPos, Integer> beacon : beacons.entrySet()) {
-			int range = beacon.getValue() * 10 + 10;
+			int range = beacon.getValue();
 			BlockPos at = beacon.getKey();
 			if (Math.abs(pos.getX() - at.getX()) <= range && Math.abs(pos.getZ() - at.getZ()) <= range && pos.getY() >= at.getY() - range) {
 				return true;
@@ -78,8 +78,8 @@ public final class BeaconZones {
 		return EternalReturnConfig.get().survival.beaconsBlockMonsters && covers(world, pos);
 	}
 
-	/** The level a working beacon at pos registered, or 0. */
-	public static synchronized int level(World world, BlockPos pos) {
+	/** The range a working beacon at pos registered, or 0. */
+	public static synchronized int range(World world, BlockPos pos) {
 		Map<BlockPos, Integer> beacons = BEACONS.get(world);
 		return beacons == null ? 0 : beacons.getOrDefault(pos, 0);
 	}

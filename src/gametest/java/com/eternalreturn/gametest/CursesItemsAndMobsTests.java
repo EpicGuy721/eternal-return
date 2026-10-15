@@ -59,7 +59,6 @@ import net.minecraft.village.TradeOffer;
 import net.minecraft.village.VillagerProfession;
 import net.minecraft.world.biome.BiomeKeys;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -195,9 +194,9 @@ public class CursesItemsAndMobsTests implements FabricGameTest {
 		ctx.complete();
 	}
 
-	/** Minecarts top out at 3 times vanilla's speed; copper rails are crafted from copper and carry a cart like any rail. */
+	/** Minecarts take 3 of vanilla's steps a tick; copper rails are crafted from copper and carry a cart like any rail. */
 	@GameTest(templateName = EMPTY_STRUCTURE, tickLimit = 100)
-	public void fasterMinecartsAndCopperRails(TestContext ctx) throws ReflectiveOperationException {
+	public void fasterMinecartsAndCopperRails(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
 		ItemStack c = new ItemStack(Items.COPPER_INGOT);
 		ItemStack rails = craft(world, 3, 3, List.of(c, ItemStack.EMPTY, c, c, new ItemStack(Items.STICK), c, c, ItemStack.EMPTY, c));
@@ -209,10 +208,7 @@ public class CursesItemsAndMobsTests implements FabricGameTest {
 					.with(net.minecraft.block.RailBlock.SHAPE, net.minecraft.block.enums.RailShape.EAST_WEST));
 		}
 		AbstractMinecartEntity cart = ctx.spawnEntity(EntityType.MINECART, new BlockPos(0, 1, 3));
-		Method max = AbstractMinecartEntity.class.getDeclaredMethod("getMaxSpeed");
-		max.setAccessible(true);
-		double top = (double) max.invoke(cart);
-		ctx.assertTrue(Math.abs(top - 1.2) < 1e-9, "top speed " + top + " blocks a tick (vanilla 0.4)");
+		ctx.assertTrue(com.eternalreturn.blocks.Minecarts.steps() == 3, "3 steps a tick, each up to vanilla's 0.4 blocks");
 		Vec3d east = ctx.getAbsolutePos(new BlockPos(1, 0, 0)).subtract(ctx.getAbsolutePos(BlockPos.ORIGIN)).toCenterPos().subtract(0.5, 0.5, 0.5);
 		cart.setVelocity(east.multiply(0.6));
 		double start = cart.getPos().dotProduct(east);

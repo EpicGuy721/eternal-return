@@ -23,7 +23,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.Arrays;
 
 @Mixin(VillagerEntity.class)
-public abstract class VillagerEntityMixin implements NeedyVillager {
+public abstract class VillagerEntityMixin implements NeedyVillager, com.eternalreturn.villager.VillagerChores.Holder {
 	@Unique
 	private static final String NEEDS_KEY = "EternalReturnNeeds";
 
@@ -35,6 +35,13 @@ public abstract class VillagerEntityMixin implements NeedyVillager {
 	private Vec3d eternalreturn$walkStart;
 	@Unique
 	private int eternalreturn$stillTicks;
+	@Unique
+	private final com.eternalreturn.villager.VillagerChores.State eternalreturn$chores = new com.eternalreturn.villager.VillagerChores.State();
+
+	@Override
+	public com.eternalreturn.villager.VillagerChores.State eternalreturn$chores() {
+		return this.eternalreturn$chores;
+	}
 
 	@Unique
 	private static long[] eternalreturn$unset() {
@@ -90,6 +97,23 @@ public abstract class VillagerEntityMixin implements NeedyVillager {
 	@Inject(method = "mobTick", at = @At("HEAD"))
 	private void eternalreturn$tickNeeds(CallbackInfo ci) {
 		VillagerNeeds.tick((VillagerEntity) (Object) this);
+		com.eternalreturn.villager.VillagerChores.tick((VillagerEntity) (Object) this);
+	}
+
+	/** Iron golems don't come by themselves: villagers never summon one (villagers.villagersSummonGolems). */
+	@Inject(method = "summonGolem", at = @At("HEAD"), cancellable = true)
+	private void eternalreturn$noGolems(ServerWorld world, long time, int requiredCount, CallbackInfo ci) {
+		if (!com.eternalreturn.config.EternalReturnConfig.get().villagers.villagersSummonGolems) {
+			ci.cancel();
+		}
+	}
+
+	/** Curing a zombie villager earns no discount (villagers.cureDiscount). */
+	@Inject(method = "onInteractionWith", at = @At("HEAD"), cancellable = true)
+	private void eternalreturn$noCureDiscount(net.minecraft.entity.EntityInteraction interaction, net.minecraft.entity.Entity entity, CallbackInfo ci) {
+		if (interaction == net.minecraft.entity.EntityInteraction.ZOMBIE_VILLAGER_CURED && !com.eternalreturn.config.EternalReturnConfig.get().villagers.cureDiscount) {
+			ci.cancel();
+		}
 	}
 
 	@Inject(method = "writeCustomDataToNbt", at = @At("TAIL"))

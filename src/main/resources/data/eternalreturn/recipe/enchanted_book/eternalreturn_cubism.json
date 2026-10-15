@@ -1,0 +1,38 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "eternalreturn_enchanted_book",
+  "key": {
+    "B": {
+      "item": "minecraft:book"
+    },
+    "D": {
+      "item": "minecraft:diamond"
+    },
+    "A": {
+      "item": "minecraft:amethyst_shard"
+    },
+    "X": {
+      "item": "minecraft:slime_block"
+    },
+    "Y": {
+      "item": "minecraft:magma_cream"
+    }
+  },
+  "pattern": [
+    "DXD",
+    "ABA",
+    "DYD"
+  ],
+  "result": {
+    "count": 1,
+    "id": "minecraft:enchanted_book",
+    "components": {
+      "minecraft:stored_enchantments": {
+        "levels": {
+          "eternalreturn:cubism": 1
+        }
+      }
+    }
+  }
+}

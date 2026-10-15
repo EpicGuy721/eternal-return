@@ -14,7 +14,9 @@ import net.minecraft.world.biome.SpawnSettings;
  * <ul>
  * <li>zombie villagers make up mobs.zombieVillagerShare (15%) of a biome's zombies and zombie villagers
  * (vanilla 5%): wherever a biome spawns zombie villagers, their weight is set from its zombies' weight;</li>
- * <li>witches spawn now and then in every Nether biome (weight mobs.netherWitchWeight).</li>
+ * <li>witches spawn now and then in every Nether biome (weight mobs.netherWitchWeight);</li>
+ * <li>phantoms spawn in the End (weight mobs.endPhantomWeight), at sizes from a vanilla phantom's up to six times
+ * that (MobEntitySpawnMixin).</li>
  * </ul>
  */
 public final class SpawnTweaks {
@@ -37,6 +39,12 @@ public final class SpawnTweaks {
 					context.getSpawnSettings().removeSpawnsOfEntityType(EntityType.ZOMBIE_VILLAGER);
 					context.getSpawnSettings().addSpawn(SpawnGroup.MONSTER, new SpawnSettings.SpawnEntry(EntityType.ZOMBIE_VILLAGER, weight, old.minGroupSize, old.maxGroupSize));
 				});
+		BiomeModifications.create(EternalReturn.id("end_phantoms")).add(ModificationPhase.ADDITIONS, BiomeSelectors.foundInTheEnd(), context -> {
+			int weight = EternalReturnConfig.get().mobs.endPhantomWeight;
+			if (weight > 0) {
+				context.getSpawnSettings().addSpawn(SpawnGroup.MONSTER, new SpawnSettings.SpawnEntry(EntityType.PHANTOM, weight, 1, 2));
+			}
+		});
 		BiomeModifications.create(EternalReturn.id("nether_witches")).add(ModificationPhase.ADDITIONS, BiomeSelectors.foundInTheNether(), context -> {
 			int weight = EternalReturnConfig.get().mobs.netherWitchWeight;
 			if (weight > 0) {

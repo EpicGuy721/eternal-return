@@ -37,6 +37,7 @@ public abstract class PlayerEntityMealsMixin implements Meals.Holder {
 		PlayerEntity self = (PlayerEntity) (Object) this;
 		if (!self.getWorld().isClient) {
 			Meals.tick(self);
+			com.eternalreturn.logic.Autoload.tick(self);
 		}
 	}
 

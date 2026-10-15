@@ -167,6 +167,18 @@ public final class EternalReturnConfig {
 		public int netherWitchWeight = 2;
 		/** Chance, checked once a minute for each player in an ocean biome, that a boat of two pillagers turns up. */
 		public double pillagerBoatChance = 0.15;
+		/** Chance an adult zombie spawning naturally rides a zombie horse. */
+		public double zombieHorsemanChance = 0.02;
+		/** Pillagers back away from a target within 5 blocks. */
+		public boolean pillagersBackOff = true;
+		/** Phantoms' weight in the End's monster lists (0: none). Read when the world loads. */
+		public int endPhantomWeight = 2;
+		/** Sheep run from wild wolves within 16 blocks. */
+		public boolean sheepFleeWolves = true;
+		/** Humanoid monsters jump gaps to reach their target. */
+		public boolean mobParkour = true;
+		/** No wither can be summoned within this many blocks of bedrock (0: anywhere). */
+		public int witherBedrockDistance = 8;
 		/** Chance a zombie, skeleton or creeper spawns large (twice the size). */
 		public double largeVariantChance = 0.005;
 	}
@@ -252,6 +264,12 @@ public final class EternalReturnConfig {
 		/** Wandering traders only come to a player with at least this many villagers within traderVillageRadius blocks. */
 		public int traderVillageVillagers = 3;
 		public double traderVillageRadius = 64.0;
+		/** Villagers do chores by day: blacksmiths repair golems, clerics heal, farmers feed babies, shepherds shear, fishermen fish (VillagerChores). */
+		public boolean chores = true;
+		/** Villagers summon iron golems (vanilla); off: golems only come from players. */
+		public boolean villagersSummonGolems = false;
+		/** Curing a zombie villager gives a discount (vanilla); off: it doesn't. */
+		public boolean cureDiscount = false;
 		/** Every wandering trader sells one asylum papers for this many emeralds (0: none). */
 		public int asylumPapersPrice = 16;
 		/** Villagers' needs, their shop hours and healing with food (see VillagerNeeds). */
@@ -291,7 +309,7 @@ public final class EternalReturnConfig {
 		public boolean ascensionCurseRises = true;
 	}
 
-	/** Redstone additions (com.eternalreturn.blocks.Redstone, ChainLinks). */
+	/** Redstone additions (com.eternalreturn.blocks.Redstone, ChainLinks, Minecarts). */
 	public static final class RedstoneTweaks {
 		/** Dispensers place block items that have no dispenser behaviour of their own. */
 		public boolean dispensersPlaceBlocks = true;
@@ -299,8 +317,13 @@ public final class EternalReturnConfig {
 		public boolean pistonsMoveBlockEntities = true;
 		/** Chains link the blocks at their ends when pistons move them; chains stick to slime and honey only where they visibly join. */
 		public boolean chainsLinkBlocks = true;
-		/** Multiplies a minecart's top speed (vanilla 8 blocks a second, 4 in water). */
+		/**
+		 * How many times as fast minecarts run on rails (a whole number): each tick a cart takes this many of vanilla's
+		 * steps, so it keeps to curves and slopes (vanilla tops out at 8 blocks a second, 4 in water) (Minecarts).
+		 */
 		public double minecartSpeedMultiplier = 3.0;
+		/** Right-click a minecart with a chain, then another, to chain the second behind the first (Minecarts). */
+		public boolean minecartChains = true;
 	}
 
 	/** Beds, beacons, animals and a few mob rules (com.eternalreturn.survival). */
@@ -310,6 +333,23 @@ public final class EternalReturnConfig {
 		 * food heals instead, each kind its own way (Meals; the table is eternalreturn/foods.json).
 		 */
 		public boolean removeHunger = true;
+		/**
+		 * Beacons need no pyramid and give one effect; the payment sets their range (iron 32 to netherite 512 blocks)
+		 * and how much effect time builds up (30 seconds to 4 minutes) (BeaconPower).
+		 */
+		public boolean beaconRework = true;
+		/** How many times as fast crops, sugar cane, bamboo, cocoa and sweet berries grow in the rain (1: no faster). */
+		public double rainGrowthMultiplier = 2.0;
+		/** Saplings lying on the ground plant themselves before they despawn. */
+		public boolean saplingsPlantThemselves = true;
+		/** A sword only sweeps with Sweeping Edge on it. */
+		public boolean sweepingNeedsEnchantment = true;
+		/** Snowballs and eggs knock back what they hit. */
+		public boolean snowballsKnockBack = true;
+		/** Firework rockets boost a gliding elytra (off: they don't). */
+		public boolean elytraRocketBoost = false;
+		/** How many drinkable, splash or lingering potions fit in a stack. Needs a restart. */
+		public int potionStackSize = 16;
 		/** False: however many players sleep, the night never skips; beds only set the respawn point. */
 		public boolean bedsSkipNight = false;
 		/** How many beds each player remembers; when the newest is gone, respawning uses the next one that works. */
