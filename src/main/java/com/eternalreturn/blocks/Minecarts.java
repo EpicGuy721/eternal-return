@@ -43,17 +43,18 @@ import java.util.UUID;
  * rails, at 3 times the speed (MinecartMixin). Off the rails it moves as in vanilla. Players get a cart's position
  * every tick, smoothed over less time, so a fast cart doesn't stutter.</li>
  * <li>Chains (redstone.minecartChains): right-click a minecart with a chain, then another within 4 blocks: the second
- * is chained behind the first, kept at most 1.6 blocks from it (a chain is used up). A cart pulls at most one other,
- * and the chain pulls both ways, like a rope. Shears cut a cart's chains, breaking a cart drops its chains, and a
- * chain pulled more than 8 blocks long breaks.</li>
+ * is chained behind the first (a chain is used up). The chain is rigid, a coupling rather than a rope: it holds the
+ * two 1.6 blocks apart, centre to centre, pulling or pushing either one, so they move as one. A cart pulls at most
+ * one other. Shears cut a cart's chains, breaking a cart drops its chains, and a chain forced more than 8 blocks
+ * long breaks.</li>
  * </ul>
  */
 public final class Minecarts {
 	public static final double SPACING = 1.6;
 	public static final double BREAK = 8.0;
 	public static final double REACH = 4.0;
-	/** How hard a taut chain pulls back, per block it is stretched, each step. */
-	private static final double SPRING = 0.2;
+	/** How much of a gap that is off the chain's length is made up over one tick's steps (1: all of it). */
+	private static final double HOLD = 0.75;
 	/** Per player: the cart they clicked first with a chain. */
 	private static final Map<UUID, UUID> FIRST = new HashMap<>();
 	private static Set<EntityType<?>> types;
@@ -212,7 +213,10 @@ public final class Minecarts {
 		}
 	}
 
-	/** Each tick, from a chained cart: the chain pulls it and the cart ahead together once it is taut. */
+	/**
+	 * Each tick, from a chained cart: the two carts get the same speed along the chain, plus what makes up over about
+	 * a tick for the gap being longer or shorter than the chain, shared so that what one gains the other loses.
+	 */
 	public static void follow(AbstractMinecartEntity cart) {
 		Linked linked = (Linked) cart;
 		UUID id = linked.eternalreturn$leader();
@@ -234,14 +238,19 @@ public final class Minecarts {
 			world.playSound(null, cart.getBlockPos(), SoundEvents.BLOCK_CHAIN_BREAK, SoundCategory.NEUTRAL, 1.0F, 1.0F);
 			return;
 		}
-		if (length <= SPACING || gap.horizontalLengthSquared() < 1.0E-6) {
+		if (gap.horizontalLengthSquared() < 1.0E-6) {
 			return;
 		}
 		Vec3d dir = new Vec3d(gap.x, 0.0, gap.z).normalize();
 		double separating = leader.getVelocity().dotProduct(dir) - cart.getVelocity().dotProduct(dir);
-		double pull = Math.max(0.0, separating) + (length - SPACING) * SPRING;
-		push(cart, dir, pull / 2.0);
-		push(leader, dir, -pull / 2.0);
+		// Velocities are per step, and a cart takes steps() of them a tick.
+		double wanted = -(length - SPACING) * HOLD / steps();
+		double change = separating - wanted;
+		if (Math.abs(change) < 1.0E-4) {
+			return;
+		}
+		push(cart, dir, change / 2.0);
+		push(leader, dir, -change / 2.0);
 	}
 
 	/** Adds a pull to a cart's speed, only along its rail if it is on one (a sideways pull would just speed it up). */

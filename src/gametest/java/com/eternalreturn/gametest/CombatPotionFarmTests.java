@@ -129,15 +129,21 @@ public class CombatPotionFarmTests implements FabricGameTest {
 
 	// ---------- combat ----------
 
-	/** Pickaxes, axes and shovels hit as before 1.9 (2, 3 and 1, plus the material's bonus); swords are untouched. */
+	/**
+	 * Pickaxes, axes and shovels sit below swords as before 1.9: an axe 1 under a sword of its material, a pickaxe 2,
+	 * a shovel 3 (1, 2 and 0 plus the material's bonus); swords are untouched.
+	 */
 	@GameTest(templateName = EMPTY_STRUCTURE)
 	public void toolsHitAsTheyUsedTo(TestContext ctx) {
-		ctx.assertTrue(toolDamage(Items.DIAMOND_PICKAXE) == 5.0, "diamond pickaxe +5, got " + toolDamage(Items.DIAMOND_PICKAXE));
-		ctx.assertTrue(toolDamage(Items.IRON_AXE) == 5.0, "iron axe +5 (vanilla +8), got " + toolDamage(Items.IRON_AXE));
-		ctx.assertTrue(toolDamage(Items.NETHERITE_AXE) == 7.0, "netherite axe +7, got " + toolDamage(Items.NETHERITE_AXE));
-		ctx.assertTrue(toolDamage(Items.WOODEN_SHOVEL) == 1.0, "wooden shovel +1, got " + toolDamage(Items.WOODEN_SHOVEL));
-		ctx.assertTrue(toolDamage(Items.STONE_PICKAXE) == 3.0, "stone pickaxe +3, got " + toolDamage(Items.STONE_PICKAXE));
 		ctx.assertTrue(toolDamage(Items.DIAMOND_SWORD) == 6.0, "the diamond sword keeps +6, got " + toolDamage(Items.DIAMOND_SWORD));
+		ctx.assertTrue(toolDamage(Items.DIAMOND_AXE) == 5.0, "diamond axe +5, one under the sword (vanilla +8), got " + toolDamage(Items.DIAMOND_AXE));
+		ctx.assertTrue(toolDamage(Items.DIAMOND_PICKAXE) == 4.0, "diamond pickaxe +4, got " + toolDamage(Items.DIAMOND_PICKAXE));
+		ctx.assertTrue(toolDamage(Items.DIAMOND_SHOVEL) == 3.0, "diamond shovel +3, got " + toolDamage(Items.DIAMOND_SHOVEL));
+		ctx.assertTrue(toolDamage(Items.IRON_AXE) == 4.0 && toolDamage(Items.IRON_SWORD) == 5.0, "iron axe +4 under the iron sword's +5, got "
+				+ toolDamage(Items.IRON_AXE));
+		ctx.assertTrue(toolDamage(Items.NETHERITE_AXE) == 6.0 && toolDamage(Items.NETHERITE_SWORD) == 7.0, "netherite axe +6, got " + toolDamage(Items.NETHERITE_AXE));
+		ctx.assertTrue(toolDamage(Items.WOODEN_SHOVEL) == 0.0, "wooden shovel +0, got " + toolDamage(Items.WOODEN_SHOVEL));
+		ctx.assertTrue(toolDamage(Items.STONE_PICKAXE) == 2.0, "stone pickaxe +2, got " + toolDamage(Items.STONE_PICKAXE));
 		ctx.complete();
 	}
 
@@ -176,7 +182,7 @@ public class CombatPotionFarmTests implements FabricGameTest {
 		return swept;
 	}
 
-	/** Snowballs and eggs push what they hit, and a gliding player's firework rocket does nothing. */
+	/** Snowballs and eggs push mobs and players they hit half as hard as a punch; a gliding player's firework rocket does nothing. */
 	@GameTest(templateName = EMPTY_STRUCTURE)
 	public void thrownKnockbackAndNoRocketBoost(TestContext ctx) throws ReflectiveOperationException {
 		ServerWorld world = ctx.getWorld();
@@ -189,11 +195,18 @@ public class CombatPotionFarmTests implements FabricGameTest {
 					: new EggEntity(world, zombie.getX() - 2.0, zombie.getY() + 1.0, zombie.getZ());
 			thrown.setVelocity(1.5, 0.0, 0.0);
 			collide.invoke(thrown, new EntityHitResult(zombie));
-			ctx.assertTrue(zombie.getVelocity().x > 0.3, type.getUntranslatedName() + " pushed the zombie away: " + zombie.getVelocity());
+			double push = zombie.getVelocity().x;
+			ctx.assertTrue(push > 0.15 && push < 0.25, type.getUntranslatedName() + " pushed the zombie 0.2 (a punch is 0.4): " + zombie.getVelocity());
 			zombie.discard();
 		}
 		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(2, 1, 2));
 		try {
+			SnowballEntity snowball = new SnowballEntity(world, player.getX() - 2.0, player.getY() + 1.0, player.getZ());
+			snowball.setVelocity(1.5, 0.0, 0.0);
+			collide.invoke(snowball, new EntityHitResult(player));
+			double push = player.getVelocity().x;
+			ctx.assertTrue(push > 0.15 && push < 0.25, "a snowball pushed the player 0.2 too: " + player.getVelocity());
+			player.setVelocity(Vec3d.ZERO);
 			player.startFallFlying();
 			ItemStack rockets = new ItemStack(Items.FIREWORK_ROCKET, 3);
 			player.setStackInHand(Hand.MAIN_HAND, rockets);

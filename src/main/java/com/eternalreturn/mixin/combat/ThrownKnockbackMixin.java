@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Snowballs and eggs knock back what they hit (OldCombat). */
+/** Snowballs and eggs knock back players they hit, as they do mobs (OldCombat). */
 @Mixin({SnowballEntity.class, EggEntity.class})
 public abstract class ThrownKnockbackMixin {
 	@Inject(method = "onEntityHit", at = @At("TAIL"))

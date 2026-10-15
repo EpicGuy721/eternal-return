@@ -344,8 +344,10 @@ public final class EternalReturnConfig {
 		public boolean saplingsPlantThemselves = true;
 		/** A sword only sweeps with Sweeping Edge on it. */
 		public boolean sweepingNeedsEnchantment = true;
-		/** Snowballs and eggs knock back what they hit. */
+		/** Snowballs and eggs knock back players they hit, as they do mobs, at thrownKnockback strength. */
 		public boolean snowballsKnockBack = true;
+		/** How hard a snowball or egg pushes what it hits (vanilla's punch, and vanilla's snowball on a mob: 0.4). */
+		public double thrownKnockback = 0.2;
 		/** Firework rockets boost a gliding elytra (off: they don't). */
 		public boolean elytraRocketBoost = false;
 		/** How many drinkable, splash or lingering potions fit in a stack. Needs a restart. */

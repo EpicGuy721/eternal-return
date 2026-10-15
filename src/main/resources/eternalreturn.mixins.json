@@ -30,6 +30,7 @@
 		"combat.PlayerAttackMixin",
 		"combat.PlayerEntitySweepMixin",
 		"combat.RangedWeaponMixin",
+		"combat.ThrownHitKnockbackMixin",
 		"combat.ThrownKnockbackMixin",
 		"fishing.FishingBobberEntityMixin",
 		"frames.DecorationItemMixin",

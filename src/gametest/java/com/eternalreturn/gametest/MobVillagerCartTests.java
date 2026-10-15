@@ -471,9 +471,10 @@ public class MobVillagerCartTests implements FabricGameTest {
 	}
 
 	/**
-	 * A chain clicked on one minecart and then another chains the second behind the first (not back the other way);
-	 * pulled, the second follows within the chain's length; shears cut it, dropping the chain; a broken cart drops
-	 * its chain too.
+	 * A chain clicked on one minecart and then another chains the second behind the first (not back the other way).
+	 * The chain is rigid: the front cart pulled, the back one comes along at 1.6 blocks; the back one pushed, the
+	 * front one goes ahead of it at 1.6 blocks, not squeezed together. Shears cut it, dropping the chain; a broken
+	 * cart drops its chain too.
 	 */
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "minecarts", tickLimit = 100)
 	public void chainedMinecartsFollow(TestContext ctx) {
@@ -500,12 +501,20 @@ public class MobVillagerCartTests implements FabricGameTest {
 		ctx.assertTrue(((Minecarts.Linked) leader).eternalreturn$leader() == null && chains.getCount() == 2, "no chaining back the other way");
 		Vec3d east = Vec3d.of(ctx.getAbsolutePos(new BlockPos(1, 0, 0)).subtract(ctx.getAbsolutePos(BlockPos.ORIGIN)));
 		double followerStart = follower.getPos().dotProduct(east);
-		leader.setVelocity(east.multiply(0.3));
+		leader.setVelocity(east.multiply(0.1));
+		double[] leaderStart = new double[1];
 		ctx.runAtTick(ctx.getTick() + 10, () -> {
+			double moved = follower.getPos().dotProduct(east) - followerStart;
+			ctx.assertTrue(moved > 0.5, "the chained cart was pulled along " + moved + " blocks");
+			ctx.assertTrue(Math.abs(follower.distanceTo(leader) - Minecarts.SPACING) < 0.15, "at the chain's length: " + follower.distanceTo(leader));
+			leaderStart[0] = leader.getPos().dotProduct(east);
+			follower.setVelocity(follower.getVelocity().add(east.multiply(0.1)));
+		});
+		ctx.runAtTick(ctx.getTick() + 16, () -> {
 			try {
-				double moved = follower.getPos().dotProduct(east) - followerStart;
-				ctx.assertTrue(moved > 0.5, "the chained cart was pulled along " + moved + " blocks");
-				ctx.assertTrue(follower.distanceTo(leader) < 2.2, "and kept close: " + follower.distanceTo(leader));
+				double pushed = leader.getPos().dotProduct(east) - leaderStart[0];
+				ctx.assertTrue(pushed > 0.3, "pushing the back cart moved the front one " + pushed + " blocks");
+				ctx.assertTrue(Math.abs(follower.distanceTo(leader) - Minecarts.SPACING) < 0.15, "still at the chain's length: " + follower.distanceTo(leader));
 				player.setStackInHand(Hand.MAIN_HAND, new ItemStack(Items.SHEARS));
 				Minecarts.use(player, world, Hand.MAIN_HAND, follower, null);
 				ctx.assertTrue(linked.eternalreturn$leader() == null, "shears cut the chain");

@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** A chained minecart (Minecarts) draws its chain to the cart ahead: grey links, drawn the way leads are. */
+/** A chained minecart (Minecarts) draws its chain to the cart ahead: grey links, drawn the way leads are, nearly taut. */
 @Mixin(MinecartEntityRenderer.class)
 public abstract class MinecartEntityRendererMixin {
 	@Unique
@@ -65,7 +65,7 @@ public abstract class MinecartEntityRendererMixin {
 		float gr = 0.34F * shade;
 		float b = 0.4F * shade;
 		float x = dx * t;
-		float y = dy * t - 0.08F * MathHelper.sin(t * MathHelper.PI);
+		float y = dy * t - 0.02F * MathHelper.sin(t * MathHelper.PI);
 		float z = dz * t;
 		buffer.vertex(matrix, x - ox, y + g, z + oz).color(r, gr, b, 1.0F).light(light);
 		buffer.vertex(matrix, x + ox, y + f - g, z - oz).color(r, gr, b, 1.0F).light(light);
