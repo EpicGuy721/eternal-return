@@ -389,8 +389,9 @@ public final class EternalReturnConfig {
 		public boolean biomeStone = true;
 		/**
 		 * Rounded overhangs: in Eternal Return worlds, the undersides of overhanging rock rise and fall by a
-		 * few blocks instead of lying almost flat (see docs/worldgen.md). Off: the terrain as Moderner Beta
-		 * makes it. Other worlds never change.
+		 * few blocks instead of lying almost flat, and floating sheets of rock too thin to round (3 blocks or
+		 * less) are removed (see docs/worldgen.md). Off: the terrain as Moderner Beta makes it. Other worlds
+		 * never change.
 		 */
 		public boolean roundOverhangs = true;
 		/**

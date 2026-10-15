@@ -52,7 +52,7 @@ The preset is all data. Without Moderner Beta installed, the world type and its 
 ## Status
 
 - Phase 1 (investigation): done. Findings below.
-- Phase 2 (preset, fish tags, terrain): done. Biome list, no cave biomes, no deepslate, full -64 to 320 height, terrain tuned in two passes (the second after playtesting).
+- Phase 2 (preset, fish tags, terrain): done. Biome list, no cave biomes, no deepslate, full -64 to 320 height, terrain tuned in three passes (the second and third after playtesting).
 - Phase 3, part 1 (cave engine): done. The shared engine, debug tools and six tunnel types; the old caves are off in Eternal Return worlds; trial chambers removed there. Ores are still vanilla's.
 - Phase 3, part 2: done. Spiral and toroidal-room caves; maze, combination and circular-room caves dropped.
 - Phase 4, part 1 (biome stone): done. Each biome's stone from under the topsoil to bedrock, and two hardened blocks.
@@ -86,42 +86,84 @@ The later biomes work cleanly next to Moderner Beta's own: Moderner Beta ships h
 
 **No deepslate.** Moderner Beta's deepslate layer is off, so below y=0 the stone carries on unchanged (plain stone, or the biome's stone; see Biome stone). Vanilla still scatters tuff blobs below y=0, and an ore that lands in tuff would take its deepslate variant. Tuff is added to `stone_ore_replaceables` and taken out of `deepslate_ore_replaceables` (that file replaces vanilla's, leaving only deepslate), so those ores are always the stone kind; the second change matters once caves expose tuff to air, because vanilla's ore placer then falls back to the deepslate target. Both tag changes apply to every world: in a vanilla world, ores inside tuff blobs use the stone variant too. Trial chambers, which have a little cobbled-deepslate rubble, no longer generate in Eternal Return worlds. Moderner Beta's optional "Deepslate Blobs" datapack would still add deepslate if someone turned it on.
 
-**World height.** -64 to 320, all of it used. Bedrock at -64, solid stone with caves and ores from there to the surface, sea level 63, most land between 65 and 90, hills to about 115 and the tallest mountains around 180. Moderner Beta's own 1.6.4 presets stop terrain at y=128; this preset lets it go higher, with room to spare up to 320. Don't turn on Moderner Beta's "Reduced Height" datapack with this preset: it moves the floor to y=0 for every world.
+**World height.** -64 to 320, all of it used. Bedrock at -64, solid stone with caves and ores from there to the surface, sea level 63, most land between 65 and 85, hills to about 105 and the tallest mountains around 170. Moderner Beta's own 1.6.4 presets stop terrain at y=128; this preset lets it go higher, with room to spare up to 320. Don't turn on Moderner Beta's "Reduced Height" datapack with this preset: it moves the floor to y=0 for every world.
 
 ## Terrain tuning
 
 Goal: Beta 1.7.3's weird, dramatic land at Release 1.6.4's continent and ocean scale. All maps are seed 173164, 4096 x 4096 blocks centred on 0,0, in `docs/worldgen-maps/`.
 
-| | Beta 1.7.3 | Release 1.6.4 | Eternal Return |
-|---|---|---|---|
-| Water (share of the map) | 42.1% | 64.7% | 61.1% |
-| Ocean biomes | 0% (Beta has none) | 44.5% | 44.6% |
-| Landmasses bigger than a chunk | 337 | 200 | 135 |
-| Land height: median / 90th / 99th percentile / max | 71 / 84 / 105 / 122 | 68 / 78 / 104 / 124 | 71 / 91 / 113 / 177 |
-| Land roughness (average height change between points 4 blocks apart) | 1.4 | 1.3 | 2.2 |
-| Land mix: flat / rolling / hilly / mountains / extreme | 29 / 51 / 18 / 2 / 0% | 47 / 34 / 16 / 4 / 0% | 17 / 40 / 37 / 7 / 0.1% |
-| Land with an overhang (576 sampled chunks) | 0.5% | 0.6% | 0.8% |
+| | Beta 1.7.3 | Release 1.6.4 | Eternal Return, second pass | Eternal Return |
+|---|---|---|---|---|
+| Water (share of the map) | 42.1% | 64.7% | 58.7% | 57.1% |
+| Ocean biomes | 0% (Beta has none) | 44.5% | 44.8% | 44.8% |
+| Landmasses bigger than a chunk | 337 | 200 | 82 | 55 |
+| Land height: median / 90th / 99th percentile / max | 71 / 84 / 105 / 122 | 68 / 78 / 104 / 124 | 72 / 93 / 115 / 177 | 71 / 85 / 106 / 170 |
+| Land roughness (average height change between points 4 blocks apart) | 1.42 | 1.31 | 2.24 | 1.56 |
+| Steps between neighbouring land columns of 2+ / 4+ / 8+ blocks | 3.7 / 0.9 / 0.3% | 4.1 / 0.6 / 0.1% | 8.7 / 1.8 / 0.5% | 4.8 / 0.6 / 0.2% |
+| Land mix: flat / rolling / hilly / mountains / extreme | 29 / 51 / 18 / 2.4 / 0% | 47 / 34 / 16 / 3.6 / 0% | 16 / 39 / 38 / 7.5 / 0.2% | 27 / 48 / 22 / 2.6 / 0.1% |
+| Land with an overhang (576 sampled chunks) | 0.5% | 0.6% | 1.5% | 0.4% |
+| Air under the ground, per land column (overhangs, arches, floating rock) | 0.07 | 0.15 | 0.28 | 0.09 |
 
-The land mix sorts every mostly-land 32 x 32 block square by its relief (highest minus lowest ground): flat under 8 blocks, rolling 8-19, hilly 20-39, mountains 40-79, extreme 80 or more.
+The land mix sorts every mostly-land 32 x 32 block square by its relief (highest minus lowest ground): flat under 8 blocks, rolling 8-19, hilly 20-39, mountains 40-79, extreme 80 or more. Steps, overhangs and air under the ground are counted block by block in 576 chunks spread over the map (see Map tool).
 
-Beta's world is a maze of lakes, inlets and islands with no real oceans, and most of its land rolls. 1.6.4 has real oceans and continents, but half its land is flat. Eternal Return keeps 1.6.4's oceans and coastlines (same ocean-biome share) and makes the land roll and climb almost everywhere: mostly rolling and hilly ground, mountains up to about y 180, Beta-like cliffs and the odd overhang.
+Beta's world is a maze of lakes, inlets and islands with no real oceans, and most of its land rolls. 1.6.4 has real oceans and continents, but half its land is flat. Eternal Return keeps 1.6.4's oceans and coastlines (same ocean-biome share) and makes the land roll like Beta's: mostly rolling ground with gentle hills, steps and cliffs about as often as in Beta, mountains (mostly extreme hills) up to about y 170, and the odd overhang.
 
-**Second pass (after playtesting the first).** The first pass (below) gave mountains up to y 307, 200-block spires and many floating islands, and the change from plain to spire was sudden. That came from multiplying each biome's own height range by 2.5: extreme hills, hills variants and mushroom islands became far more rugged than deserts (median relief 64 blocks against 12 on the land-rich test area). The second pass cuts that multiplier to 0.45 and adds a fixed 0.85 to every land biome instead, so every biome gets a similar Beta-style roll and the hilly biomes are only somewhat hillier (median relief 10 to 27 blocks by biome; Beta 9 to 15). The land lift is roughly halved too.
+**Third pass (smoother, closer to Beta 1.7.3).** Playtesting the second pass found the land rough rather than fantastical: steep steps of two to four blocks almost everywhere, sheer cliffs, flat-topped blocks rising from the forest, and the odd spike or floating bit. The map tool now measures that directly (steps between neighbouring land columns, see Map tool). On the land-rich test area the second pass had 2.7 times Beta 1.7.3's share of 2-block steps and 2.7 times its 4-block steps, and more than twice its hilly ground. Five causes:
+
+- **Base ruggedness everywhere.** The second pass gave every land biome a ruggedness of 0.85 on top of its own, so the noise threw up bumps and ledges in every forest and plain. Now 0.5, with the biome contrast raised from 0.45 to 0.7 so extreme hills and the hills variants still stand out: plains, forests and deserts roll gently (median relief 10 to 14 blocks by biome, Beta 9 to 15), extreme hills keep their mountains (median relief 22, highest ground y 170).
+- **Plateau hills.** Jungle hills keep Release 1.6.4's odd height (depth 1.8, scale 0.5), and Moderner Beta's height tags give savanna and badlands hills a plateau (1.8, 0.2). With the land lift they became flat-topped blocks 30 to 40 blocks above the land around them, with sheer sides (the savanna "peak" at y 161 in the old checklist was one). They are now raised, rolling hills, as the cherry groves were before: jungle and savanna hills `0.6;0.8`, badlands hills `0.8;0.5` (`height_overrides` in the knobs).
+- **The noise's sudden switches.** Moderner Beta's terrain, like Beta's and 1.6.4's, mixes two 3D noises, and a third decides which one counts where. The switch from one to the other is narrow (`limitBlending` 10), so where the two disagree the ground jumps: in the second pass a 28-block wall stood inside one jungle at x -24, z -1328, with the same biome height on both sides. Blending over a four times wider band (`limitBlending` 40) leaves far fewer and lower walls, fewer overhangs and almost no floating rock: that jungle wall is now an 11-block step and a slope, and the biggest single steps along the side view in the picture below went from 23, 17 and 15 blocks to 11, 7 and 4.
+- **River banks.** 1.6.4's rivers cut 8 blocks below the sea through land that sits a little higher here, so river banks stay steep (about a tenth of the steps on river banks are 4 blocks or more). Shallower rivers (`-0.35;0.0`) halved that, but rivers then ran dry in places and stopped splitting the land (landmasses on the test area 26 to 20), so rivers stay as they are.
+- **Floating sheets.** Beside plateau tops the noise leaves thin sheets of grass and dirt hanging in the air, 1 to 3 blocks thick, sometimes with a tree on them. They are too thin for the overhang rounder to arch, so it now removes them (see Overhang undersides); over the overhang survey's squares that took the flat-bottomed undersides from 27 to 9 percent.
+
+Over the whole map (terrain as the noise makes it, before the overhang rounder): roughness 2.24 to 1.56 (Beta 1.42), steps of 4 or more blocks 1.8 to 0.6 percent of neighbouring land columns (Beta 0.9), hilly ground 38 to 22 percent (Beta 18), mountains 7.5 to 2.6 percent (Beta 2.4), land with an overhang 1.5 to 0.4 percent (Beta 0.5). Oceans, coastlines and biomes keep their layout (same ocean-biome share); the land is a little lower (99th percentile 115 to 106), there are fewer islets off the coasts (55 landmasses bigger than a chunk instead of 82) and slightly less water (57.1 percent instead of 58.7).
+
+![Before and after, same ground](worldgen-maps/terrain_third_pass/before_after.png)
+
+![The whole test map, before and after](worldgen-maps/terrain_third_pass/height_before_after.png)
+
+Third-pass variants, on the land-rich 2048 x 2048 area centred on 0,-1024 (`MAP_CENTRE=0,-1024 MAP_CLOSEUP=942,-420 MAP_SLICE_Z=-1328`, the first picture above). Knobs are contrast (`scaleWeight`), base (`scaleOffset`), blending (`limitBlending`) and the plateau hills (kept or tamed); steps are the share of neighbouring land columns whose ground differs by 2, 4 or 8 blocks or more:
+
+| Variant | Contrast, base, blending, plateaus | Roughness | Steps 2+ / 4+ / 8+ | Flat / rolling / hilly / mountains / extreme | Land: median / 99th pct / max | Overhangs | Landmasses |
+|---|---|---|---|---|---|---|---|
+| Beta 1.7.3 | (no biome heights) | 1.41 | 3.4 / 0.7 / 0.2% | 28 / 54 / 16 / 1.6 / 0% | 71 / 101 / 122 | 0.4% | 86 |
+| Release 1.6.4 | 1, 0, 10, plateaus | 1.27 | 4.1 / 0.8 / 0.2% | 46 / 36 / 14 / 3.3 / 0% | 68 / 102 / 119 | 0.2% | 75 |
+| Second pass | 0.45, 0.85, 10, plateaus | 2.31 | 9.1 / 1.9 / 0.4% | 14 / 40 / 39 / 7.5 / 0.2% | 72 / 114 / 163 | 0.6% | 31 |
+| Lower base | 0.45, 0.45, 10, plateaus | 1.59 | 5.1 / 0.7 / 0.1% | 24 / 54 / 20 / 1.9 / 0% | 72 / 101 / 132 | 0.2% | 23 |
+| Lower base, more contrast | 0.75, 0.4, 10, plateaus | 1.78 | 6.2 / 1.0 / 0.2% | 21 / 50 / 25 / 3.9 / 0.2% | 72 / 107 / 163 | 0.3% | 24 |
+| Plateaus tamed | 0.6, 0.45, 10, tamed | 1.71 | 5.6 / 0.8 / 0.2% | 20 / 53 / 24 / 2.4 / 0.1% | 72 / 101 / 149 | 0.4% | 25 |
+| Gentler vertical noise | 0.6, 0.6, 10, tamed; `noise_scale.height` 400 | 1.83 | 6.8 / 1.4 / 0.3% | 18 / 52 / 28 / 1.9 / 0% | 72 / 101 / 135 | 0.5% | 26 |
+| Blending 40, low base | 0.6, 0.45, 40, tamed | 1.48 | 4.3 / 0.4 / 0.1% | 25 / 54 / 19 / 1.7 / 0% | 72 / 99 / 142 | 0.1% | 26 |
+| Blending 40 | 0.6, 0.6, 40, tamed | 1.72 | 5.6 / 0.6 / 0.1% | 20 / 50 / 27 / 2.8 / 0.1% | 72 / 103 / 156 | 0.3% | 29 |
+| Blending 80 | 0.6, 0.65, 80, tamed | 1.49 | 4.4 / 0.4 / 0.0% | 26 / 51 / 22 / 1.9 / 0% | 72 / 101 / 142 | 0.1% | 22 |
+| Shallower rivers | 0.7, 0.5, 40, tamed; rivers `-0.35;0.0` | 1.65 | 5.1 / 0.6 / 0.1% | 22 / 52 / 24 / 2.5 / 0.2% | 72 / 103 / 170 | 0.2% | 20 |
+| **Third pass (shipped)** | 0.7, 0.5, 40, tamed | 1.65 | 5.2 / 0.6 / 0.1% | 22 / 51 / 24 / 2.5 / 0.2% | 72 / 103 / 170 | 0.2% | 26 |
+
+Lowering the base does most of the smoothing; the blending removes most of what is left of the walls and floating rock; the contrast decides how much the extreme hills keep. A gentler vertical noise (Moderner Beta's `noise_scale.height`, 684.412; 400 and 250 tried) did the opposite of what was hoped: it took the overhangs away but made the slopes steeper. Even more blending (80) or a lower base (0.45) come closest to Beta's numbers but leave almost no overhangs and flatter extreme hills; the shipped mix keeps a few of both.
+
+For more drama, the "Blending 40" row (base 0.6, contrast 0.6) keeps more hills and overhangs; the second pass's numbers (contrast 0.45, base 0.85, blending 10, no `height_overrides`) bring back its rougher land.
+
+The Eternal Return baselines were recorded again for the new terrain: the old-caves carving fingerprint (25 of its 27 chunks changed) and the ore census, where coal fell from 19,174 to 17,470 ores (less high ground for coal's upper veins, mostly in ice plains, forests and birch forests) and gold from 4,645 to 4,579 (the badlands' extra gold runs from y 32 up, and badlands hills are lower now); every other ore stayed within 0.5 percent. The control worlds (vanilla, Moderner Beta's 1.6.4, 1.6.4 amplified and Beta 1.7.3) still match their fingerprints, and their maps came out pixel for pixel the same.
+
+**Second pass (superseded, after playtesting the first).** The first pass (below) gave mountains up to y 307, 200-block spires and many floating islands, and the change from plain to spire was sudden. That came from multiplying each biome's own height range by 2.5: extreme hills, hills variants and mushroom islands became far more rugged than deserts (median relief 64 blocks against 12 on the land-rich test area). The second pass cuts that multiplier to 0.45 and adds a fixed 0.85 to every land biome instead, so every biome gets a similar Beta-style roll and the hilly biomes are only somewhat hillier (median relief 10 to 27 blocks by biome; Beta 9 to 15). The land lift is roughly halved too.
 
 Swamps stay flat (median relief 2): they sit below the "land only" cut-off, as in 1.6.4.
 
 The knobs, most important first (Moderner Beta's names in brackets):
 
-| Knob | Shipped (first pass; 1.6.4) | What it does |
+| Knob | Shipped (second pass; first pass; 1.6.4) | What it does |
 |---|---|---|
-| Boost land only (`forced_biome_height.modifyOnlyPositiveDepth`) | true (true; false) | The boosts below apply to land biomes only. Ocean floors keep their 1.6.4 depth, which is what keeps 1.6.4's coastlines and ocean sizes. |
-| Biome contrast (`scaleWeight`) | 0.45 (2.5; 1) | Multiplies each biome's own ruggedness. High values make extreme hills and hills variants far wilder than plains; low values make every biome roll alike. |
-| Base ruggedness (`scaleOffset`) | 0.85 (0.6; 0) | Ruggedness added to every land biome: rolling hills, cliffs, overhangs. Around 1.0 and above, floating rock becomes common. |
-| Land height (`depthWeight`, `depthOffset`) | 1.2, 0.2 (1.6, 0.5; 1, 0) | How high land sits above the sea. Plains sit around y 70. |
-| Terrain ceiling (noise settings height) | 320 (320; 128) | Where terrain has to stop. Not reached any more, but leaves room. |
-| Depth noise strength (`noise_landmass.depth.influence`) | 0.2 (0.2; 0.2) | Beta's 1.0 breaks the coastline into islets; 0.35 made little difference. |
-| Sampled scale noise (`noise_landmass.scale.sample`) | off (off; off) | Beta's random roughness. It also roughens ocean floors, so it scatters islets across the oceans. |
-| Vertical stretch (`noise_scale.stretchY`) | 12 (12; 12) | Lower values (9) give taller, thinner spikes. |
+| Boost land only (`forced_biome_height.modifyOnlyPositiveDepth`) | true (true; true; false) | The boosts below apply to land biomes only. Ocean floors keep their 1.6.4 depth, which is what keeps 1.6.4's coastlines and ocean sizes. |
+| Biome contrast (`scaleWeight`) | 0.7 (0.45; 2.5; 1) | Multiplies each biome's own ruggedness. High values make extreme hills and hills variants far wilder than plains; low values make every biome roll alike. |
+| Base ruggedness (`scaleOffset`) | 0.5 (0.85; 0.6; 0) | Ruggedness added to every land biome: rolling hills, cliffs, overhangs. Around 0.85 the land is bumpy and ledged everywhere; around 1.0 and above, floating rock becomes common. |
+| Noise blending (`noise_scale.limitBlending`, knob `limit_blending`) | 40 (10; 10; 10) | How wide the band is where the terrain's two 3D noises blend into each other. Narrow (Beta's and 1.6.4's 10) makes sudden walls and ledges where the two disagree; 40 smooths most of them away; 80 leaves almost no overhangs. Applies to ocean floors too. |
+| Plateau hills (`forced_biome_height.heightOverrides`, knob `height_overrides`) | jungle and savanna hills `0.6;0.8`, badlands hills `0.8;0.5` (jungle hills `1.8;0.5`, savanna and badlands hills `1.8;0.2`) | Height (depth;scale) of the hills variants that 1.6.4 or Moderner Beta's tags give a plateau. A plateau rises as a flat-topped block with sheer sides; these are raised rolling hills. |
+| Land height (`depthWeight`, `depthOffset`) | 1.2, 0.2 (1.2, 0.2; 1.6, 0.5; 1, 0) | How high land sits above the sea. Plains sit around y 70. |
+| Terrain ceiling (noise settings height) | 320 (320; 320; 128) | Where terrain has to stop. Not reached any more, but leaves room. |
+| Depth noise strength (`noise_landmass.depth.influence`) | 0.2 (0.2; 0.2; 0.2) | Beta's 1.0 breaks the coastline into islets; 0.35 made little difference. |
+| Sampled scale noise (`noise_landmass.scale.sample`) | off (off; off; off) | Beta's random roughness. It also roughens ocean floors, so it scatters islets across the oceans. |
+| Vertical stretch (`noise_scale.stretchY`) | 12 (12; 12; 12) | Lower values (9) give taller, thinner spikes. |
+| Vertical noise scale (`noise_scale.height`) | 684.412 (not a knob) | 400 or 250 take overhangs away but make slopes steeper (third pass, tried and dropped). |
 
 Second-pass variants, on the 2048 x 2048 area centred on 0,-1024 (the land-rich part of the map; `MAP_CENTRE=0,-1024 MAP_CLOSEUP=942,-420 MAP_SLICE_Z=-1328`). Contrast is `scaleWeight`, base is `scaleOffset`, lift is `depthWeight` / `depthOffset`:
 
@@ -159,11 +201,11 @@ For a little more drama, the "even more" numbers (`depth_weight` 1.3, `depth_off
 
 Moderner Beta works out the terrain's density only every 8 blocks of height (and every 4 across) and blends in straight lines between, as Beta and Release 1.6.4 did. Tops of hills hide that, but where rock hangs over open air the underside lands between two of those 8-block steps and comes out as a near-flat plane, often 10 to 20 blocks across: on the test seed, over squares of 8 x 8 chunks in seven biomes, 36 percent of the overhang undersides you can see from outside lay in flat patches of 12 columns or more at one height, the biggest 94 columns (a jungle overhang near 965, 100, 295). A finer step isn't an option: Moderner Beta's 1.6.4 terrain counts height in those steps, so halving them would double the height of every hill.
 
-So `OverhangRounder` (`com.eternalreturn.worldgen.terrain`) reshapes them. In Eternal Return worlds, the first time the cave carver sees a chunk, before any cave is carved, it finds every place above sea level where rock sits on open air with ground (or water) below, and moves that underside following smooth 3D noise from the world seed: it arches up into the rock by 0 to 6 blocks, and where there are at least 6 blocks of air below, rock hangs lower in places (up to 3 blocks), copying the underside's own block (or, when that is grass or sand, the first block above it that isn't). It never cuts closer than 3 blocks to the top of the overhang, never leaves less than 3 blocks of air under it, never leaves sand or gravel hanging, and only touches plain open air (not water or caves). Each column is handled from its own blocks and the noise, so overhangs line up across chunk borders. Thin floating slabs (3 or 4 blocks thick) can't arch, so their undersides still follow their tops.
+So `OverhangRounder` (`com.eternalreturn.worldgen.terrain`) reshapes them. In Eternal Return worlds, the first time the cave carver sees a chunk, before any cave is carved, it finds every place above sea level where rock sits on open air with ground (or water) below, and moves that underside following smooth 3D noise from the world seed: it arches up into the rock by 0 to 6 blocks, and where there are at least 6 blocks of air below, rock hangs lower in places (up to 3 blocks), copying the underside's own block (or, when that is grass or sand, the first block above it that isn't). It never cuts closer than 3 blocks to the top of the overhang, never leaves less than 3 blocks of air under it, never leaves sand or gravel hanging, and only touches plain open air (not water or caves). Each column is handled from its own blocks and the noise, so overhangs line up across chunk borders. Rock 3 blocks thick or less, with open air above it and at least 3 blocks of open air below, can't arch: those are floating sheets of grass and dirt, the kind plateau edges leave beside them, and since the third terrain pass the rounder removes them. A slab 4 blocks thick arches by at most a block.
 
-After it, 11 percent of the visible undersides lie in flat patches of 12 or more, the biggest 25 columns. The rest of the flat patches the survey finds are roofs of cave tunnels running just under the surface, which are as flat as any cave tunnel's roof.
+After it, 11 percent of the visible undersides lay in flat patches of 12 or more, the biggest 25 columns. The third pass's terrain has far fewer overhangs, so the survey now covers squares of 16 x 16 chunks: 616 visible terrain undersides, 9 percent of them (56) in flat patches of 12 or more, the biggest 18 columns. Without the floating-sheet removal it was 27 percent (biggest 84), and the second pass's terrain over the same squares 21 percent (biggest 125). The rest of the flat patches the survey finds are roofs of cave tunnels running just under the surface, which are as flat as any cave tunnel's roof.
 
-The setting `worldgen.roundOverhangs` (on by default) turns it off. Other worlds never change. Tests: `OverhangTests` (Eternal Return run) repeats the survey and fails if more than a fifth of the visible terrain undersides lie in flat patches of 12 or more columns, or any patch passes 48; with the setting off it fails (417 of 1,165, biggest 94). The old-caves control run turns the setting off, so it still matches the world as it was before the cave engine.
+The setting `worldgen.roundOverhangs` (on by default) turns it off. Other worlds never change. Tests: `OverhangTests` (Eternal Return run) repeats the survey and fails if more than a fifth of the visible terrain undersides lie in flat patches of 12 or more columns, or any patch passes 48, or there are 300 or fewer to judge; with the setting off it fails (311 of 976, biggest 73). The old-caves control run turns the setting off, so it still matches the world as it was before the cave engine.
 
 ### Map tool
 
@@ -174,11 +216,11 @@ The setting `worldgen.roundOverhangs` (on by default) turns it off. Other worlds
 - `land.png`: land (green) against water (blue)
 - `slice.png`: a side view (full height) through the row with the most high ground
 - `closeup.png`: a 512-block close-up of the area with the highest ground
-- `stats.json`: the numbers in the tables above, plus each biome's median relief (`terrain_mix.median_relief_by_biome`)
+- `stats.json`: the numbers in the tables above, plus each biome's median relief (`terrain_mix.median_relief_by_biome`) and where the highest ground is (`highest_ground`, x y z). Under `weirdness`, from 576 chunks spread over the map and generated to the surface step (before caves): land columns with air under their ground (overhangs, arches, floating rock); steps between neighbouring land columns (`steps_2_or_more`, `steps_4_or_more`, `steps_8_or_more`: the share of pairs whose ground differs by that much) and the 4-block share by biome (`steps_4_or_more_by_biome`); spikes (columns at least 4 blocks above every column two blocks away, per 1,000 land columns); and floating pieces (solid ground above sea level touching neither the layer just above the sea nor the chunk's sides)
 
 Options: `-PworldmapOut=<dir>` writes to `<dir>/<preset>/` instead; `-PworldmapCentre=x,z` moves the mapped area; `-PworldmapCloseup=x,z` and `-PworldmapSliceZ=z` pin the close-up and side view, so different settings can be compared on the same ground.
 
-`python tools/worldgen/compare_maps.py` rebuilds `overview.png` (height and land maps with the headline numbers) and `slices_compared.png` (the three side views). `python tools/worldgen/variants.py <variants.json>` renders a list of knob variants into `build/worldgen-variants/<name>/eternal_return/`, prints the stats for each, then restores the shipped preset; the `HALF`, `MAP_CENTRE`, `MAP_CLOSEUP` and `MAP_SLICE_Z` environment variables pass the options above.
+`python tools/worldgen/compare_maps.py` rebuilds `overview.png` (height and land maps with the headline numbers) and `slices_compared.png` (the three side views). `python tools/worldgen/before_after.py <before dir> <after dir> <out.png>` puts two runs of the same ground side by side (close-ups, side views and numbers; pin the close-up and side view so both show the same place); it drew `terrain_third_pass/before_after.png`. `python tools/worldgen/variants.py <variants.json>` renders a list of knob variants into `build/worldgen-variants/<name>/eternal_return/`, prints the stats for each, then restores the shipped preset; the `HALF`, `MAP_CENTRE`, `MAP_CLOSEUP` and `MAP_SLICE_Z` environment variables pass the options above.
 
 ## The cave engine (phase 3)
 
@@ -240,8 +282,8 @@ Share of the underground (everything below the ground surface) that is open, ove
 | y 16 to 31 | 6.6% | 5.0% | 4.1% |
 | y 32 to 47 | 4.6% | 3.7% | 3.4% |
 | y 48 to 63 | 2.2% | 2.9% | 1.1% |
-| y 64 to 79 | 1.1% | 3.1% | 0.2% |
-| **All** | **5.27%** | **4.55%** | **4.53%** |
+| y 64 to 79 | 0.9% | 2.8% | 0.2% |
+| **All** | **5.28%** | **4.54%** | **4.53%** |
 
 "Old caves" are Moderner Beta's 1.6.4-style caves on the identical terrain (the twin dimension with the engine off); the Release 1.6.4 world is Moderner Beta's own preset (its terrain is lower, hence the empty top rows). The new caves carry a little more in total (about a sixth more), mostly from 1.6.4's forking spaghetti at full frequency; they are a little emptier under hills and mountains. The spirals and toroidal rooms add 0.13 points (5.14% without them).
 
@@ -413,7 +455,7 @@ Before the change 47,381 stone-textured ores sat inside host stone in these squa
 ### Biome-specific ores
 
 - Badlands extra gold (vanilla's `ore_gold_extra`: 50 more gold veins per chunk from y 32 to 256): still there. The badlands square holds 883 gold ores against 357 to 474 in the other nine biomes; they are red sandstone gold ore now.
-- Emerald: vanilla's mountain emerald feature isn't used, because Eternal Return's extreme hills are Moderner Beta's `early_release_extreme_hills`. Moderner Beta gives that biome, and its plains, swampland and ice plains, its own emerald feature, `moderner_beta:ore_emerald_y95`: 11 tries per chunk of a vein of up to 8, from y 95 to the top of the world, 90 percent of the blocks dropped where they would touch air. So emerald generates in Eternal Return, but only in high ground. A survey of 24 x 24 chunks around the highest extreme hills within 3,000 blocks of spawn finds a few hundred emerald ores: 259 to 285 around 456, 2248 before cherry groves and the modern oceans reshuffled the biomes, 400 now around 968, -2296 (ground at y 143; 17 percent of that square's ground at y 95 or higher), about half of them andesite emerald ore and the rest in the plain stone of the biomes around. That is roughly 0.5 to 0.7 per chunk over the whole square, and about 3 to 4 per chunk's worth of ground above y 95. Release 1.6.4, by comparison, put 3 to 8 single emeralds per chunk below y 32 in extreme hills; vanilla 1.21's own mountain feature makes 100 tries per chunk (veins of up to 3) between y -16 and 480, so vanilla mountains hold far more. Nothing was added: emerald isn't missing, just rare and high. Raising it would be a new emerald feature for the extreme hills, in Eternal Return only.
+- Emerald: vanilla's mountain emerald feature isn't used, because Eternal Return's extreme hills are Moderner Beta's `early_release_extreme_hills`. Moderner Beta gives that biome, and its plains, swampland and ice plains, its own emerald feature, `moderner_beta:ore_emerald_y95`: 11 tries per chunk of a vein of up to 8, from y 95 to the top of the world, 90 percent of the blocks dropped where they would touch air. So emerald generates in Eternal Return, but only in high ground. A survey of 24 x 24 chunks around the highest extreme hills within 3,000 blocks of spawn finds a few hundred emerald ores: 259 to 285 around 456, 2248 before cherry groves and the modern oceans reshuffled the biomes, 400 around 968, -2296 (ground at y 143; 17 percent of that square's ground at y 95 or higher), and 403 there after the third terrain pass, which left 11 percent of the square's ground at y 95 or higher; about half of them are andesite emerald ore and the rest in the plain stone of the biomes around. That is roughly 0.5 to 0.7 per chunk over the whole square, and about 3 to 6 per chunk's worth of ground above y 95. Release 1.6.4, by comparison, put 3 to 8 single emeralds per chunk below y 32 in extreme hills; vanilla 1.21's own mountain feature makes 100 tries per chunk (veins of up to 3) between y -16 and 480, so vanilla mountains hold far more. Nothing was added: emerald isn't missing, just rare and high. Raising it would be a new emerald feature for the extreme hills, in Eternal Return only.
 
 ### Textures: the old look
 

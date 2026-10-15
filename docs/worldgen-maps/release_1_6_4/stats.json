@@ -14,6 +14,7 @@
     "p99": 104,
     "max": 124
   },
+  "highest_ground": "1224 124 -16",
   "water_depth": {
     "p5": 0,
     "p50": 12,
@@ -71,10 +72,26 @@
     "chunks_sampled": 576,
     "land_columns_with_overhang": 0.006,
     "air_blocks_under_ground_per_land_column": 0.151,
-    "tallest_ground_y": 122
+    "tallest_ground_y": 122,
+    "steps_2_or_more": 0.041,
+    "steps_4_or_more": 0.006,
+    "steps_8_or_more": 0.001,
+    "steps_4_or_more_by_biome": {
+      "beach": 0.0,
+      "desert": 0.0,
+      "early_release_extreme_hills": 0.023,
+      "early_release_ice_plains": 0.006,
+      "early_release_taiga": 0.003,
+      "forest": 0.0,
+      "jungle": 0.004,
+      "late_beta_plains": 0.0
+    },
+    "spikes_per_1000_land_columns": 0.046,
+    "floating_pieces": 0,
+    "floating_blocks_per_1000_land_columns": 0.0
   },
   "timing_ms": {
-    "sampling": 290696,
-    "chunks": 46213
+    "chunks": 45529,
+    "sampling": 140616
   }
 }

@@ -31,12 +31,16 @@ KNOBS = {
     'climate_height_scaling': False,
     'stretch_y': 12.0,
     'base_size': 8.5,
+    'limit_blending': 10.0,
     'depth_weight': 1.0,
     'depth_offset': 0.0,
     'scale_weight': 1.0,
     'height_scale_offset': 0.0,
     'modify_only_positive_depth': False,
     'noise_top': 320,
+    # Biome height overrides ("depth;scale", Moderner Beta's own format) on top of the preset's, by biome id
+    # (a height variant after '*', as in 'minecraft:jungle*hills').
+    'height_overrides': {},
     # Biome stone: block id -> the biomes whose stone it replaces, from just under the topsoil down to
     # bedrock (see docs/worldgen.md). Biomes under minecraft:stone, and any biome not listed, keep stone.
     'biome_stone': {},
@@ -158,6 +162,7 @@ land['depth']['negativeFlattening'] = KNOBS['depth_negative_flattening']
 cs['moderner_beta:noise_3d_settings']['climateHeightScaling'] = KNOBS['climate_height_scaling']
 cs['moderner_beta:noise_scale']['stretchY'] = KNOBS['stretch_y']
 cs['moderner_beta:noise_scale']['baseSize'] = KNOBS['base_size']
+cs['moderner_beta:noise_scale']['limitBlending'] = KNOBS['limit_blending']
 forced = cs['moderner_beta:forced_biome_height']
 forced['depthWeight'] = KNOBS['depth_weight']
 forced['depthOffset'] = KNOBS['depth_offset']
@@ -168,6 +173,9 @@ forced['modifyOnlyPositiveDepth'] = KNOBS['modify_only_positive_depth']
 # flat-topped block; a raised, rolling highland (and higher hills) suits them better, like vanilla's meadows.
 forced['heightOverrides']['minecraft:cherry_grove'] = '0.35;0.6'
 forced['heightOverrides']['minecraft:cherry_grove*hills'] = '0.6;0.7'
+# The knobs' own overrides: the third terrain pass turns the plateau-height hills of jungles (1.6.4's 1.8;0.5),
+# savannas and badlands (1.8;0.2 from Moderner Beta's tags) into raised rolling hills, like the cherry groves.
+forced['heightOverrides'].update(KNOBS['height_overrides'])
 # Ocean heights, as Moderner Beta's Release 1.17.1 preset sets them. Its height table only covers the
 # biomes it believes a world can produce, which misses the deep cold, deep frozen and deep lukewarm
 # oceans and the deep warm one (warm_ocean*deep) that the ocean climate step makes; without these lines

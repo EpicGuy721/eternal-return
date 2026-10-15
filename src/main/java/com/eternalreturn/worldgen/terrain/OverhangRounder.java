@@ -19,8 +19,11 @@ import net.minecraft.world.gen.noise.NoiseConfig;
  * are carved, each such underside moves by a few blocks following smooth 3D noise: it arches up into
  * the rock by 0 to 6 blocks, and where there are at least 6 blocks of air below, rock hangs lower in
  * places (up to 3 blocks). It never cuts closer than 3 blocks to the top of the overhang, never leaves
- * less than 3 blocks of open air under it, and only touches open air (not water) and the overhang's own rock. Each column is handled from its own blocks and the world
- * seed's noise alone, so the result matches across chunk borders whatever order chunks generate in.
+ * less than 3 blocks of open air under it, and only touches open air (not water) and the overhang's own rock.
+ * Rock too thin to arch (3 blocks or less, open air above and at least 3 blocks of it below) is a floating
+ * sheet, the kind plateau edges leave beside them, and is removed. Each column is handled from its own
+ * blocks and the world seed's noise alone, so the result matches across chunk borders whatever order
+ * chunks generate in.
  */
 public final class OverhangRounder {
 	/** The most an underside arches up into the rock, in blocks. */
@@ -33,6 +36,8 @@ public final class OverhangRounder {
 	private static final int KEEP_ROCK = 3;
 	/** Open air left under a lowered underside, at least. */
 	private static final int KEEP_AIR = 3;
+	/** Rock this thin or thinner, with open air above and KEEP_AIR or more below, is a floating sheet and goes. */
+	private static final int THIN_SHEET = 3;
 
 	private OverhangRounder() {
 	}
@@ -68,6 +73,12 @@ public final class OverhangRounder {
 					}
 					if (chunk.getBlockState(pos.set(x, y - 1 - gap, z)).isAir()) {
 						// Open to the void (or cave air already): leave it.
+						y -= gap;
+						rockTop = Integer.MIN_VALUE;
+						continue;
+					}
+					if (rockTop - y + 1 <= THIN_SHEET && gap >= KEEP_AIR && chunk.getBlockState(pos.set(x, rockTop + 1, z)).isOf(Blocks.AIR)) {
+						changed += clear(chunk, pos, x, y, rockTop, z);
 						y -= gap;
 						rockTop = Integer.MIN_VALUE;
 						continue;
@@ -109,6 +120,14 @@ public final class OverhangRounder {
 			chunk.setBlockState(pos.set(x, y + i, z), Blocks.AIR.getDefaultState(), false);
 		}
 		return Math.max(0, blocks);
+	}
+
+	/** Removes a floating sheet: the rock from y up to top. */
+	private static int clear(Chunk chunk, BlockPos.Mutable pos, int x, int y, int top, int z) {
+		for (int i = y; i <= top; i++) {
+			chunk.setBlockState(pos.set(x, i, z), Blocks.AIR.getDefaultState(), false);
+		}
+		return top - y + 1;
 	}
 
 	/** Hangs rock below y: the underside's own stone, or the first solid stone above it when that is soil or sand. */
