@@ -221,5 +221,7 @@
 	"entity.eternalreturn.dynamite": "Dynamite",
 	"item.eternalreturn.asylum_papers": "Asylum Papers",
 	"item.eternalreturn.necronomicon": "Necronomicon",
-	"item.eternalreturn.necronomicon.full": "You already have %s servants"
+	"item.eternalreturn.necronomicon.full": "You already have %s servants",
+	"tooltip.eternalreturn.heals": "Heals %s ❤",
+	"tooltip.eternalreturn.heals_over": "Heals %s ❤ over %s s"
 }

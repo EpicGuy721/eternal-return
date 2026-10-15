@@ -151,7 +151,8 @@ The plan, status, terrain settings and maps are in [docs/worldgen.md](docs/world
 | Herds panic together | `HerdPanic`, `LivingEntitySurvivalMixin`; entity tag `herd_animals` |
 | Blindness cuts a mob's follow range | `BlindMobs`, `LivingEntitySurvivalMixin` |
 | Glowing creatures are seen through walls | `LivingEntitySurvivalMixin` |
-| Eating times, hits stop eating, raw food poisons | `Food`, `ItemEatTimeMixin`, `DrinkTimeMixin`, `LivingEntitySurvivalMixin`; item tags `snack_foods`, `meal_foods`, `raw_foods` |
+| No hunger; food heals, each food with its own stack size, eating time, healing and effects | table `src/main/resources/eternalreturn/foods.json`, read by `Meals`; `HungerManagerMixin`, `PlayerEntityMealsMixin`, `CakeBlockMixin`, `SaturationEffectMixin`, `HoneyBottleMixin`, `LivingEntitySurvivalMixin`; client `HungerBarMixin`, tooltip in `EternalReturnClient` |
+| Drinks take a second, hits stop eating, raw food poisons | `Food`, `DrinkTimeMixin`, `LivingEntitySurvivalMixin`; item tag `raw_foods` |
 | Cut vines, petals on water, pig litters, stunted babies | `Farming`, `VineBlockMixin`, `PlantBlockMixin`, `PinkPetalsItemMixin`, `PassiveEntityMixin`, `survival/AnimalEntityMixin` |
 | Dispensers place blocks; obsidian pressure plate; pistons move chests; chains link blocks | `com.eternalreturn.blocks.Redstone`, `ChainLinks`; `mixin/redstone`; client `MovingBlockEntities`, `PistonBlockEntityRendererMixin` (moving chests stay drawn) |
 | Glass item frames; dyed item frames | `com.eternalreturn.blocks.Frames`; `mixin/frames`; client `FrameModels`, `ItemFrameEntityRendererMixin`; item tag `minecraft:dyeable`; vanilla frame models with a tintable back panel (`assets/minecraft/models/block/template_item_frame*.json`) and two-layer item icons |
@@ -373,7 +374,52 @@ Villagers that existed before this update, and babies until they grow up, start 
 
 **Glowing.** A creature with the Glowing effect can be seen through blocks: mobs that would only notice you in plain sight spot you behind walls, up to 128 blocks.
 
-**Eating and drinking.** How long eating takes depends on the food: snacks (dried kelp, berries, cookies, carrots, apples, beetroot, melon slices, raw potatoes) 0.8 seconds, meals (stews, soups, steak, cooked porkchop, pumpkin pie) 2.4 seconds, everything else vanilla's 1.6. Potions, milk, honey and ominous bottles take 1 second. Getting hurt stops you eating or drinking (the food isn't used). Raw meat and fish, this mod's fish included, poison you for 5 seconds 70% of the time.
+**No hunger.** The food bar is gone: it stays full, so you can always sprint, and you never starve. Health doesn't come back by itself either (except on Peaceful): food heals you, each kind its own way. Snacks heal a little at once and are quick to eat; cooked food and meals heal more, spread over a few seconds, and most give a perk; healing from several foods runs side by side. Ordinary food can only be eaten when you're hurt; food with a perk (the "any time" column) whenever you like. The Hunger effect (rotten flesh, raw chicken, pufferfish) halves food healing while it lasts; the Saturation effect heals. A slice of cake heals 2 ❤ over 3 s. Each food's healing and effects are in its tooltip. The mod's fish are left as they were (64 a stack, 1.6 s) and heal like raw salmon. Raw meat and fish still poison you 70% of the time. Potions, milk and ominous bottles take a second to drink; getting hurt still stops you eating. The table is `src/main/resources/eternalreturn/foods.json` (❤ = a heart):
+
+| Food | Stack | Eating time | Heals | Over | Any time | Effects |
+|---|---|---|---|---|---|---|
+| Sweet berries | 64 | 0.6 s | 0.5 ❤ | at once |  |  |
+| Glow berries | 64 | 0.6 s | 0.5 ❤ | at once | yes | Night vision (30 s) |
+| Melon slice | 64 | 0.6 s | 1 ❤ | at once |  |  |
+| Dried kelp | 64 | 0.4 s | 0.5 ❤ | at once |  |  |
+| Cookie | 64 | 0.6 s | 1 ❤ | at once | yes | Speed (10 s) |
+| Carrot | 64 | 0.8 s | 1 ❤ | at once |  |  |
+| Beetroot | 64 | 0.8 s | 0.5 ❤ | at once |  |  |
+| Potato | 64 | 1 s | 0.5 ❤ | at once |  |  |
+| Poisonous potato | 64 | 1 s | - | at once |  | its own (as vanilla) |
+| Apple | 32 | 1.2 s | 2 ❤ | 2 s |  |  |
+| Chorus fruit | 64 | 1 s | 1 ❤ | at once | yes |  |
+| Spider eye | 64 | 1 s | - | at once |  | its own (as vanilla) |
+| Rotten flesh | 64 | 1.6 s | 1 ❤ | at once |  | its own (as vanilla) |
+| Raw beef | 32 | 1.6 s | 1.5 ❤ | at once |  |  |
+| Raw porkchop | 32 | 1.6 s | 1.5 ❤ | at once |  |  |
+| Raw mutton | 32 | 1.6 s | 1 ❤ | at once |  |  |
+| Raw chicken | 32 | 1.6 s | 1 ❤ | at once |  | its own (as vanilla) |
+| Raw rabbit | 32 | 1.2 s | 1 ❤ | at once |  |  |
+| Raw cod | 32 | 1.2 s | 0.5 ❤ | at once |  |  |
+| Raw salmon | 32 | 1.2 s | 1 ❤ | at once |  |  |
+| Tropical fish | 32 | 1 s | 0.5 ❤ | at once |  |  |
+| Pufferfish | 16 | 1.6 s | - | at once |  | its own (as vanilla) |
+| Cooked cod | 32 | 1.2 s | 2.5 ❤ | 3 s | yes | Water breathing (30 s) |
+| Cooked salmon | 32 | 1.6 s | 3.5 ❤ | 4 s | yes | Dolphins grace (20 s) |
+| Cooked rabbit | 32 | 1.2 s | 2.5 ❤ | 3 s | yes | Jump boost (30 s) |
+| Cooked chicken | 32 | 1.6 s | 3.5 ❤ | 5 s | yes | Speed (20 s) |
+| Cooked mutton | 16 | 2 s | 4.5 ❤ | 6 s | yes | Resistance (20 s) |
+| Cooked porkchop | 16 | 2.4 s | 5.5 ❤ | 8 s | yes | Absorption (1:00) |
+| Steak | 16 | 2.4 s | 6 ❤ | 10 s | yes | Strength (20 s) |
+| Baked potato | 32 | 1.6 s | 3 ❤ | 5 s |  |  |
+| Bread | 32 | 1.6 s | 3.5 ❤ | 6 s |  |  |
+| Pumpkin pie | 8 | 2.4 s | 6 ❤ | 8 s | yes | Luck (3:00) |
+| Mushroom stew | 1 | 2.4 s | 5 ❤ | 10 s | yes | Resistance (30 s) |
+| Beetroot soup | 1 | 2.4 s | 4 ❤ | 6 s | yes | Haste (1:00) |
+| Rabbit stew | 1 | 3.2 s | 9 ❤ | 15 s | yes | Speed (1:00), Jump boost (1:00) |
+| Suspicious stew | 1 | 2.4 s | 3 ❤ | 6 s | yes |  |
+| Golden carrot | 32 | 1.2 s | 3 ❤ | 3 s | yes | Night vision (3:00) |
+| Golden apple | 16 | 1.6 s | 4 ❤ | 4 s | yes | its own (as vanilla) |
+| Enchanted golden apple | 8 | 1.6 s | 10 ❤ | 5 s | yes | its own (as vanilla) |
+| Honey bottle | 16 | 2 s | 2 ❤ | 4 s | yes |  |
+
+Stacks bigger than a food's new stack size (from before this change) stay as they are until split.
 
 **Farming.** Right-click a vine with shears and it stops growing. Pink petals can be placed on still water, like lily pads: right-click the water, from any angle. Pigs have litters of 2 or 3 piglets, or 2 to 5 if a parent was fed a golden carrot (golden carrots are pig food now). A baby animal fed a poisonous potato is poisoned half the time, and one poisoned that way never grows up.
 
@@ -435,7 +481,7 @@ Creatures keep their gear and name. The stone works before a creature's own righ
 - `bookshelfBias`: the multipliers above, plus `booksCanUnlockNonTableEnchantments` (off by default) to let shelved books make the table offer treasure enchantments like Frost Walker.
 - `fortune`: toggles for hoes and shears.
 - `fishing`: `fishRequireBait`; `baits` (item to `lureSeconds`, `nightLureSeconds`, `lava`; config files with the old worms, glow bait and infernal bait are reset to the new list once); `lavaFishingOutsideNether`; `hostileCatchChance` (default 0.03) and `hostileCatches` (mob to `weight` and `oceanOnly`; the ids are mob ids, or `drowned_guardian_jockey` / `drowned_elder_guardian_jockey`); `overfishing` (`enabled`, `radius` 6, `freeCatches` 3, `slowdownPerCatch` 0.5, `maxSlowdown` 4, `recoveryMinutes` 5).
-- `survival`: `bedsSkipNight` (off), `rememberedBeds` (3), `beaconsBlockMonsters`, `animalsOnlySpawnNearBeacons`, `animalsGetHungry`, `hungryAfterDays` (0.5), `grazeChance` (per second, 0.125), `daysBeforeStarving` (3), `starveDamageSeconds` (30), `herdPanic` and `herdPanicRadius` (16), `blindFollowRange` (2), `spawnerMobsDropNothing`; `armorWeight` (material to a full set's slowdown; gold is lighter than iron now, and config files with the old gold weight are moved to the new one once), `snowFalls`, `cropGrowthOutsideIdealBiome` (0.25); `hitsInterruptEating`, `rawFoodPoisonChance` (0.7), `pigLitters`, `poisonousPotatoStuntChance` (0.5); `glowingSeenThroughWalls`.
+- `survival`: `bedsSkipNight` (off), `rememberedBeds` (3), `beaconsBlockMonsters`, `animalsOnlySpawnNearBeacons`, `animalsGetHungry`, `hungryAfterDays` (0.5), `grazeChance` (per second, 0.125), `daysBeforeStarving` (3), `starveDamageSeconds` (30), `herdPanic` and `herdPanicRadius` (16), `blindFollowRange` (2), `spawnerMobsDropNothing`; `armorWeight` (material to a full set's slowdown; gold is lighter than iron now, and config files with the old gold weight are moved to the new one once), `snowFalls`, `cropGrowthOutsideIdealBiome` (0.25); `removeHunger` (on: no hunger, food heals), `hitsInterruptEating`, `rawFoodPoisonChance` (0.7), `pigLitters`, `poisonousPotatoStuntChance` (0.5); `glowingSeenThroughWalls`.
 - `enchantmentsExtra`: `ascensionCurseRises`.
 - `redstone`: `dispensersPlaceBlocks`, `pistonsMoveBlockEntities`, `chainsLinkBlocks`, `minecartSpeedMultiplier` (3).
 - `villagers`: `onlyFishermenBuy`; `fishPriceMultiplier` (default 2, applied to vanilla's own fish trades; the mod's fish pay what `eternalreturn/fish.json` says); `traderVillageVillagers` (3) and `traderVillageRadius` (64), `asylumPapersPrice` (16, 0 for none); `needs`: `enabled`, `daysBeforePriceRise` (2), `emeraldsPerMissingNeed` (5), `daysBeforeRefusal` (7), `maxOtherAdultsInSight` (1), `exerciseBlocks` (8), `minWorkstationDistance` (8), `closedAtNight`, `nightStart` (13000) and `nightEnd` (23000), `healWithFood` and `eatChance` (0.25).
@@ -633,3 +679,4 @@ Survival and blocks (any world, survival mode):
 120. Dungeons (Eternal Return world): explore caves: dungeons turn up twice as often, some of stone bricks, some of bricks. In the Nether: dungeons of nether bricks with wither skeleton, blaze or witch spawners, and nether wart growing wild on soul sand.
 121. Strongholds (Eternal Return world): `/locate structure minecraft:stronghold` a few times from different places: about a third stand at ground level. Inside: illagers in the rooms, and an illusioner in the portal room.
 122. Baby squid: `/summon squid ~ ~ ~ {IsBaby:1b}` in water: the small squid is drawn right where it is (it used to float off to one side).
+123. No hunger: in survival there's no food bar; sprint as long as you like. Take some fall damage: your health stays down. Eat a melon slice (much quicker than bread): 1 ❤ back at once. Eat a steak: 6 ❤ come back over 10 seconds, and you get Strength for 20 s. At full health, bread won't be eaten but a cooked chicken will (it gives Speed). Hover any food to see what it heals.

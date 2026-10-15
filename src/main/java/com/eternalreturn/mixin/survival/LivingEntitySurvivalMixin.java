@@ -39,6 +39,10 @@ public abstract class LivingEntitySurvivalMixin {
 	private void eternalreturn$rawFood(net.minecraft.world.World world, net.minecraft.item.ItemStack stack, net.minecraft.component.type.FoodComponent food,
 			CallbackInfoReturnable<net.minecraft.item.ItemStack> cir) {
 		Food.ate((LivingEntity) (Object) this, stack);
+		// No hunger: the food heals instead (Meals).
+		if ((Object) this instanceof net.minecraft.entity.player.PlayerEntity player && com.eternalreturn.survival.Meals.enabled()) {
+			com.eternalreturn.survival.Meals.ate(player, stack);
+		}
 	}
 
 	/** A blinded mob notices and follows targets only within a couple of blocks (BlindMobs). */

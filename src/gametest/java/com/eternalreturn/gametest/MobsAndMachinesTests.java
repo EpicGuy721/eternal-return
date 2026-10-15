@@ -108,14 +108,13 @@ public class MobsAndMachinesTests implements FabricGameTest {
 		ServerWorld world = ctx.getWorld();
 		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(1, 1, 1));
 		try {
-			ctx.assertTrue(new ItemStack(Items.SWEET_BERRIES).getMaxUseTime(player) == 16, "berries are a snack");
-			ctx.assertTrue(new ItemStack(Items.COOKED_BEEF).getMaxUseTime(player) == 48, "steak is a meal");
-			ctx.assertTrue(new ItemStack(Items.BREAD).getMaxUseTime(player) == 32, "bread is normal");
-			ctx.assertTrue(new ItemStack(Items.POTION).getMaxUseTime(player) == 20 && new ItemStack(Items.MILK_BUCKET).getMaxUseTime(player) == 20
-					&& new ItemStack(Items.HONEY_BOTTLE).getMaxUseTime(player) == 20, "drinks take a second");
+			// Each food's own eating time is in the food table (FoodTests); drinks take a second.
+			ctx.assertTrue(new ItemStack(Items.POTION).getMaxUseTime(player) == 20 && new ItemStack(Items.MILK_BUCKET).getMaxUseTime(player) == 20,
+					"drinks take a second");
 
-			// A player who just joined can't be hurt for a few seconds: the eating check goes through Food directly.
-			player.getHungerManager().setFoodLevel(10);
+			// A player who just joined can't be hurt for a few seconds: the eating check goes through Food directly. Food is only
+			// eaten when hurt (Meals), and steak can always be eaten (it gives Strength).
+			player.setHealth(10.0F);
 			player.setStackInHand(Hand.MAIN_HAND, new ItemStack(Items.COOKED_BEEF));
 			player.setCurrentHand(Hand.MAIN_HAND);
 			ctx.assertTrue(player.isUsingItem(), "eating started");

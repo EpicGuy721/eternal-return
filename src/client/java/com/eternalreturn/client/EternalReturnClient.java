@@ -36,6 +36,29 @@ public class EternalReturnClient implements ClientModInitializer {
 			}
 			List<Text> extra = new ArrayList<>();
 
+			// Food: how much it heals and how fast, and its effects (Meals).
+			com.eternalreturn.survival.Meals.Heal heal = com.eternalreturn.survival.Meals.enabled() ? com.eternalreturn.survival.Meals.heal(stack) : null;
+			if (heal != null) {
+				String hearts = String.format(java.util.Locale.ROOT, heal.health() % 2.0F == 0.0F ? "%.0f" : "%.1f", heal.health() / 2.0F);
+				extra.add((heal.seconds() > 0.0F
+						? Text.translatable("tooltip.eternalreturn.heals_over", hearts, String.format(java.util.Locale.ROOT, "%.0f", heal.seconds()))
+						: Text.translatable("tooltip.eternalreturn.heals", hearts)).formatted(Formatting.RED));
+				var food = stack.get(net.minecraft.component.DataComponentTypes.FOOD);
+				if (food != null) {
+					for (var effect : food.effects()) {
+						MutableText line = Text.translatable(effect.effect().getTranslationKey());
+						if (effect.effect().getAmplifier() > 0) {
+							line.append(" ").append(Text.translatable("enchantment.level." + (effect.effect().getAmplifier() + 1)));
+						}
+						line.append(" (").append(net.minecraft.entity.effect.StatusEffectUtil.getDurationText(effect.effect(), 1.0F, 20.0F)).append(")");
+						if (effect.probability() < 1.0F) {
+							line.append(String.format(java.util.Locale.ROOT, ", %.0f%%", effect.probability() * 100.0F));
+						}
+						extra.add(line.formatted(effect.effect().getEffectType().value().isBeneficial() ? Formatting.BLUE : Formatting.RED));
+					}
+				}
+			}
+
 			int cap = EnchantCaps.capFor(stack);
 			if (cap != EnchantCaps.UNCAPPED) {
 				int used = EnchantCaps.pointsUsed(stack);

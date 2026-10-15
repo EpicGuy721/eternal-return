@@ -5,6 +5,7 @@
 	"client": [
 		"AnvilScreenMixin",
 		"EnchantmentScreenMixin",
+		"HungerBarMixin",
 		"ItemFrameEntityRendererMixin",
 		"PistonBlockEntityRendererMixin",
 		"mobs.CreeperEntityRendererMixin",

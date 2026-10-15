@@ -1,0 +1,433 @@
+{
+	"_doc": "Every food: stack size, eating time in seconds, health healed (half hearts) over so many seconds (0: at once), whether it can be eaten at full health, and its effects (\"vanilla\": its own). Read by the game (com.eternalreturn.survival.Meals); the mod's fish are left as they are and heal like raw salmon. Cake is a block: each slice heals \"cake\".",
+	"foods": {
+		"minecraft:sweet_berries": {
+			"stack": 64,
+			"eat_seconds": 0.6,
+			"heal": 1,
+			"heal_seconds": 0,
+			"always_edible": false,
+			"effects": []
+		},
+		"minecraft:glow_berries": {
+			"stack": 64,
+			"eat_seconds": 0.6,
+			"heal": 1,
+			"heal_seconds": 0,
+			"always_edible": true,
+			"effects": [
+				{
+					"effect": "minecraft:night_vision",
+					"seconds": 30,
+					"level": 1,
+					"chance": 1.0
+				}
+			]
+		},
+		"minecraft:melon_slice": {
+			"stack": 64,
+			"eat_seconds": 0.6,
+			"heal": 2,
+			"heal_seconds": 0,
+			"always_edible": false,
+			"effects": []
+		},
+		"minecraft:dried_kelp": {
+			"stack": 64,
+			"eat_seconds": 0.4,
+			"heal": 1,
+			"heal_seconds": 0,
+			"always_edible": false,
+			"effects": []
+		},
+		"minecraft:cookie": {
+			"stack": 64,
+			"eat_seconds": 0.6,
+			"heal": 2,
+			"heal_seconds": 0,
+			"always_edible": true,
+			"effects": [
+				{
+					"effect": "minecraft:speed",
+					"seconds": 10,
+					"level": 1,
+					"chance": 1.0
+				}
+			]
+		},
+		"minecraft:carrot": {
+			"stack": 64,
+			"eat_seconds": 0.8,
+			"heal": 2,
+			"heal_seconds": 0,
+			"always_edible": false,
+			"effects": []
+		},
+		"minecraft:beetroot": {
+			"stack": 64,
+			"eat_seconds": 0.8,
+			"heal": 1,
+			"heal_seconds": 0,
+			"always_edible": false,
+			"effects": []
+		},
+		"minecraft:potato": {
+			"stack": 64,
+			"eat_seconds": 1.0,
+			"heal": 1,
+			"heal_seconds": 0,
+			"always_edible": false,
+			"effects": []
+		},
+		"minecraft:poisonous_potato": {
+			"stack": 64,
+			"eat_seconds": 1.0,
+			"heal": 0,
+			"heal_seconds": 0,
+			"always_edible": false,
+			"effects": "vanilla"
+		},
+		"minecraft:apple": {
+			"stack": 32,
+			"eat_seconds": 1.2,
+			"heal": 4,
+			"heal_seconds": 2,
+			"always_edible": false,
+			"effects": []
+		},
+		"minecraft:chorus_fruit": {
+			"stack": 64,
+			"eat_seconds": 1.0,
+			"heal": 2,
+			"heal_seconds": 0,
+			"always_edible": true,
+			"effects": []
+		},
+		"minecraft:spider_eye": {
+			"stack": 64,
+			"eat_seconds": 1.0,
+			"heal": 0,
+			"heal_seconds": 0,
+			"always_edible": false,
+			"effects": "vanilla"
+		},
+		"minecraft:rotten_flesh": {
+			"stack": 64,
+			"eat_seconds": 1.6,
+			"heal": 2,
+			"heal_seconds": 0,
+			"always_edible": false,
+			"effects": "vanilla"
+		},
+		"minecraft:beef": {
+			"stack": 32,
+			"eat_seconds": 1.6,
+			"heal": 3,
+			"heal_seconds": 0,
+			"always_edible": false,
+			"effects": []
+		},
+		"minecraft:porkchop": {
+			"stack": 32,
+			"eat_seconds": 1.6,
+			"heal": 3,
+			"heal_seconds": 0,
+			"always_edible": false,
+			"effects": []
+		},
+		"minecraft:mutton": {
+			"stack": 32,
+			"eat_seconds": 1.6,
+			"heal": 2,
+			"heal_seconds": 0,
+			"always_edible": false,
+			"effects": []
+		},
+		"minecraft:chicken": {
+			"stack": 32,
+			"eat_seconds": 1.6,
+			"heal": 2,
+			"heal_seconds": 0,
+			"always_edible": false,
+			"effects": "vanilla"
+		},
+		"minecraft:rabbit": {
+			"stack": 32,
+			"eat_seconds": 1.2,
+			"heal": 2,
+			"heal_seconds": 0,
+			"always_edible": false,
+			"effects": []
+		},
+		"minecraft:cod": {
+			"stack": 32,
+			"eat_seconds": 1.2,
+			"heal": 1,
+			"heal_seconds": 0,
+			"always_edible": false,
+			"effects": []
+		},
+		"minecraft:salmon": {
+			"stack": 32,
+			"eat_seconds": 1.2,
+			"heal": 2,
+			"heal_seconds": 0,
+			"always_edible": false,
+			"effects": []
+		},
+		"minecraft:tropical_fish": {
+			"stack": 32,
+			"eat_seconds": 1.0,
+			"heal": 1,
+			"heal_seconds": 0,
+			"always_edible": false,
+			"effects": []
+		},
+		"minecraft:pufferfish": {
+			"stack": 16,
+			"eat_seconds": 1.6,
+			"heal": 0,
+			"heal_seconds": 0,
+			"always_edible": false,
+			"effects": "vanilla"
+		},
+		"minecraft:cooked_cod": {
+			"stack": 32,
+			"eat_seconds": 1.2,
+			"heal": 5,
+			"heal_seconds": 3,
+			"always_edible": true,
+			"effects": [
+				{
+					"effect": "minecraft:water_breathing",
+					"seconds": 30,
+					"level": 1,
+					"chance": 1.0
+				}
+			]
+		},
+		"minecraft:cooked_salmon": {
+			"stack": 32,
+			"eat_seconds": 1.6,
+			"heal": 7,
+			"heal_seconds": 4,
+			"always_edible": true,
+			"effects": [
+				{
+					"effect": "minecraft:dolphins_grace",
+					"seconds": 20,
+					"level": 1,
+					"chance": 1.0
+				}
+			]
+		},
+		"minecraft:cooked_rabbit": {
+			"stack": 32,
+			"eat_seconds": 1.2,
+			"heal": 5,
+			"heal_seconds": 3,
+			"always_edible": true,
+			"effects": [
+				{
+					"effect": "minecraft:jump_boost",
+					"seconds": 30,
+					"level": 1,
+					"chance": 1.0
+				}
+			]
+		},
+		"minecraft:cooked_chicken": {
+			"stack": 32,
+			"eat_seconds": 1.6,
+			"heal": 7,
+			"heal_seconds": 5,
+			"always_edible": true,
+			"effects": [
+				{
+					"effect": "minecraft:speed",
+					"seconds": 20,
+					"level": 1,
+					"chance": 1.0
+				}
+			]
+		},
+		"minecraft:cooked_mutton": {
+			"stack": 16,
+			"eat_seconds": 2.0,
+			"heal": 9,
+			"heal_seconds": 6,
+			"always_edible": true,
+			"effects": [
+				{
+					"effect": "minecraft:resistance",
+					"seconds": 20,
+					"level": 1,
+					"chance": 1.0
+				}
+			]
+		},
+		"minecraft:cooked_porkchop": {
+			"stack": 16,
+			"eat_seconds": 2.4,
+			"heal": 11,
+			"heal_seconds": 8,
+			"always_edible": true,
+			"effects": [
+				{
+					"effect": "minecraft:absorption",
+					"seconds": 60,
+					"level": 1,
+					"chance": 1.0
+				}
+			]
+		},
+		"minecraft:cooked_beef": {
+			"stack": 16,
+			"eat_seconds": 2.4,
+			"heal": 12,
+			"heal_seconds": 10,
+			"always_edible": true,
+			"effects": [
+				{
+					"effect": "minecraft:strength",
+					"seconds": 20,
+					"level": 1,
+					"chance": 1.0
+				}
+			]
+		},
+		"minecraft:baked_potato": {
+			"stack": 32,
+			"eat_seconds": 1.6,
+			"heal": 6,
+			"heal_seconds": 5,
+			"always_edible": false,
+			"effects": []
+		},
+		"minecraft:bread": {
+			"stack": 32,
+			"eat_seconds": 1.6,
+			"heal": 7,
+			"heal_seconds": 6,
+			"always_edible": false,
+			"effects": []
+		},
+		"minecraft:pumpkin_pie": {
+			"stack": 8,
+			"eat_seconds": 2.4,
+			"heal": 12,
+			"heal_seconds": 8,
+			"always_edible": true,
+			"effects": [
+				{
+					"effect": "minecraft:luck",
+					"seconds": 180,
+					"level": 1,
+					"chance": 1.0
+				}
+			]
+		},
+		"minecraft:mushroom_stew": {
+			"stack": 1,
+			"eat_seconds": 2.4,
+			"heal": 10,
+			"heal_seconds": 10,
+			"always_edible": true,
+			"effects": [
+				{
+					"effect": "minecraft:resistance",
+					"seconds": 30,
+					"level": 1,
+					"chance": 1.0
+				}
+			]
+		},
+		"minecraft:beetroot_soup": {
+			"stack": 1,
+			"eat_seconds": 2.4,
+			"heal": 8,
+			"heal_seconds": 6,
+			"always_edible": true,
+			"effects": [
+				{
+					"effect": "minecraft:haste",
+					"seconds": 60,
+					"level": 1,
+					"chance": 1.0
+				}
+			]
+		},
+		"minecraft:rabbit_stew": {
+			"stack": 1,
+			"eat_seconds": 3.2,
+			"heal": 18,
+			"heal_seconds": 15,
+			"always_edible": true,
+			"effects": [
+				{
+					"effect": "minecraft:speed",
+					"seconds": 60,
+					"level": 1,
+					"chance": 1.0
+				},
+				{
+					"effect": "minecraft:jump_boost",
+					"seconds": 60,
+					"level": 1,
+					"chance": 1.0
+				}
+			]
+		},
+		"minecraft:suspicious_stew": {
+			"stack": 1,
+			"eat_seconds": 2.4,
+			"heal": 6,
+			"heal_seconds": 6,
+			"always_edible": true,
+			"effects": []
+		},
+		"minecraft:golden_carrot": {
+			"stack": 32,
+			"eat_seconds": 1.2,
+			"heal": 6,
+			"heal_seconds": 3,
+			"always_edible": true,
+			"effects": [
+				{
+					"effect": "minecraft:night_vision",
+					"seconds": 180,
+					"level": 1,
+					"chance": 1.0
+				}
+			]
+		},
+		"minecraft:golden_apple": {
+			"stack": 16,
+			"eat_seconds": 1.6,
+			"heal": 8,
+			"heal_seconds": 4,
+			"always_edible": true,
+			"effects": "vanilla"
+		},
+		"minecraft:enchanted_golden_apple": {
+			"stack": 8,
+			"eat_seconds": 1.6,
+			"heal": 20,
+			"heal_seconds": 5,
+			"always_edible": true,
+			"effects": "vanilla"
+		},
+		"minecraft:honey_bottle": {
+			"stack": 16,
+			"eat_seconds": 2.0,
+			"heal": 4,
+			"heal_seconds": 4,
+			"always_edible": true,
+			"effects": []
+		}
+	},
+	"cake": {
+		"heal": 4,
+		"seconds": 3
+	}
+}

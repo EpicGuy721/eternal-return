@@ -305,6 +305,11 @@ public final class EternalReturnConfig {
 
 	/** Beds, beacons, animals and a few mob rules (com.eternalreturn.survival). */
 	public static final class SurvivalTweaks {
+		/**
+		 * No hunger: the food bar stays full and hidden, health never regenerates by itself (except on Peaceful), and
+		 * food heals instead, each kind its own way (Meals; the table is eternalreturn/foods.json).
+		 */
+		public boolean removeHunger = true;
 		/** False: however many players sleep, the night never skips; beds only set the respawn point. */
 		public boolean bedsSkipNight = false;
 		/** How many beds each player remembers; when the newest is gone, respawning uses the next one that works. */
