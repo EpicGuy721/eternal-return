@@ -15,6 +15,7 @@
     "minecraft:vindicator",
     "minecraft:evoker",
     "minecraft:illusioner",
-    "minecraft:witch"
+    "minecraft:witch",
+    "eternalreturn:vampire"
   ]
 }

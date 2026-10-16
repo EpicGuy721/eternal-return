@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/door_bottom_left",
+  "textures": {
+    "bottom": "eternalreturn:block/maple_door_bottom",
+    "top": "eternalreturn:block/maple_door_top"
+  }
+}

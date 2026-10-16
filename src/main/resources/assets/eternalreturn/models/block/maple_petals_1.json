@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/flowerbed_1",
+  "textures": {
+    "flowerbed": "eternalreturn:block/maple_petals",
+    "stem": "eternalreturn:block/maple_petals_stem"
+  }
+}

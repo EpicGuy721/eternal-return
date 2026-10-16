@@ -179,6 +179,12 @@ public final class EternalReturnConfig {
 		public boolean mobParkour = true;
 		/** No wither can be summoned within this many blocks of bedrock (0: anywhere). */
 		public int witherBedrockDistance = 8;
+		/** Weight of each of the brown, black and sun bears among creatures in forest biomes (0: none). Needs a restart. */
+		public int bearSpawnWeight = 3;
+		/** Seconds a villager bitten by a vampire or its bat takes to turn into a vampire. */
+		public int vampireTurnSeconds = 30;
+		/** Seconds of Poison a vampire's bat gives a player it bites. */
+		public int vampireBatPoisonSeconds = 5;
 		/** Chance a zombie, skeleton or creeper spawns large (twice the size). */
 		public double largeVariantChance = 0.005;
 	}

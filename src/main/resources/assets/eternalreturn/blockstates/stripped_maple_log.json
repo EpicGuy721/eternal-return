@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "eternalreturn:block/stripped_maple_log_x"
+    },
+    "axis=y": {
+      "model": "eternalreturn:block/stripped_maple_log_y"
+    },
+    "axis=z": {
+      "model": "eternalreturn:block/stripped_maple_log_z"
+    }
+  }
+}

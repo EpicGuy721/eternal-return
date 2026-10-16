@@ -25,6 +25,7 @@
     {
       "id": "moderner_beta:beta_oak_forest",
       "required": false
-    }
+    },
+    "eternalreturn:autumnal_forest"
   ]
 }
