@@ -29,16 +29,18 @@ import java.util.TreeMap;
  * carvers); trees and plants count as gap. An underside is "visible" when the ground within a few blocks
  * lies lower than it, so it can be seen from outside: a terrain overhang or the roof of a cave mouth.
  * Undersides at the same height that touch form a flat patch; big flat patches look unnatural.
- * Moderner Beta's terrain alone leaves most terrain overhangs with a near-flat underside (on the test
- * seed, 36 percent of visible terrain undersides lay in flat patches of 12 or more columns, the biggest
- * 94); OverhangRounder arches them, so at most a fifth may lie in such patches and none may pass 48.
+ * Moderner Beta's terrain alone leaves many terrain overhangs with a near-flat underside (on the test
+ * seed, over these squares, 311 of 976 visible terrain undersides lie in flat patches of 12 or more
+ * columns, the biggest 73); OverhangRounder arches them and removes floating sheets too thin to arch, so
+ * at most a fifth may lie in such patches and none may pass 48. The squares are 16 x 16 chunks: the
+ * smoother terrain of the third tuning pass has far fewer overhangs, and 8 x 8 held too few to judge.
  * Cave roofs are counted too, for the record.
  */
 public class OverhangTests implements FabricGameTest {
 	public static final String OVERHANG_BATCH = "overhang";
 	private static final String[] BIOMES = {"moderner_beta:early_release_extreme_hills", "minecraft:forest", "moderner_beta:early_release_taiga",
 			"minecraft:savanna", "minecraft:jungle", "moderner_beta:early_release_ice_plains", "minecraft:cherry_grove"};
-	private static final int SQUARE = 8;
+	private static final int SQUARE = 16;
 	private static final int REACH = 5;
 
 	private record Underside(int y, boolean cave, int floor) {

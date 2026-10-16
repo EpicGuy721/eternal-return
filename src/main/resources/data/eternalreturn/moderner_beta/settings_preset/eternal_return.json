@@ -669,12 +669,14 @@
       "heightOverrides": {
         "minecraft:desert*hills": "0.3;0.8",
         "minecraft:forest*hills": "0.3;0.7",
-        "minecraft:jungle*hills": "1.8;0.5",
+        "minecraft:jungle*hills": "0.6;0.8",
         "moderner_beta:early_release_extreme_hills": "0.3;1.5",
         "moderner_beta:early_release_ice_plains*hills": "0.3;1.3",
         "moderner_beta:early_release_taiga*hills": "0.3;0.8",
         "minecraft:cherry_grove": "0.35;0.6",
         "minecraft:cherry_grove*hills": "0.6;0.7",
+        "minecraft:savanna*hills": "0.6;0.8",
+        "minecraft:badlands*hills": "0.8;0.5",
         "minecraft:ocean": "-1.0;0.2",
         "minecraft:cold_ocean": "-1.0;0.2",
         "minecraft:lukewarm_ocean": "-1.0;0.2",
@@ -687,8 +689,8 @@
         "minecraft:warm_ocean*deep": "-1.0;0.2"
       },
       "modifyOnlyPositiveDepth": true,
-      "scaleOffset": 0.85,
-      "scaleWeight": 0.45
+      "scaleOffset": 0.5,
+      "scaleWeight": 0.7
     },
     "moderner_beta:noise_3d_settings": {
       "arraySurfaceNoise": true,
@@ -731,7 +733,7 @@
       "fixedOffset": 1.0,
       "forestNoiseOctaves": 8,
       "height": 684.412,
-      "limitBlending": 10.0,
+      "limitBlending": 40.0,
       "lowerLimit": 512.0,
       "mainNoiseX": 80.0,
       "mainNoiseY": 160.0,

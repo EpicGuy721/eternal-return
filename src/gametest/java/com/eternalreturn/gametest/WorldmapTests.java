@@ -107,6 +107,7 @@ public class WorldmapTests implements FabricGameTest {
 		Map<String, Integer> biomeCounts = new HashMap<>();
 		double slopeSum = 0;
 		int slopeCount = 0;
+		int[] highest = {Integer.MIN_VALUE, 0, 0};
 		for (int px = 0; px < SIZE; px++) {
 			for (int pz = 0; pz < SIZE; pz++) {
 				int h = height[px][pz];
@@ -114,6 +115,9 @@ public class WorldmapTests implements FabricGameTest {
 				if (land[px][pz]) {
 					landCount++;
 					landHeights.add(h);
+					if (h > highest[0]) {
+						highest = new int[]{h, px * STEP - HALF + CX, pz * STEP - HALF + CZ};
+					}
 					if (px + 1 < SIZE && height[px + 1][pz] > sea) {
 						slopeSum += Math.abs(height[px + 1][pz] - h);
 						slopeCount++;
@@ -131,6 +135,7 @@ public class WorldmapTests implements FabricGameTest {
 		stats.put("water_share", round(1.0 - (double) landCount / total));
 		stats.put("ocean_biome_share", round((double) oceanBiomeCount / total));
 		stats.put("land_height", percentiles(landHeights));
+		stats.put("highest_ground", highest[1] + " " + highest[0] + " " + highest[2]);
 		stats.put("water_depth", percentiles(waterDepths));
 		stats.put("land_roughness_blocks_per_4", round(slopeCount == 0 ? 0 : slopeSum / slopeCount));
 		stats.put("landmasses", landmasses(land));
@@ -150,7 +155,7 @@ public class WorldmapTests implements FabricGameTest {
 		int[] closeupCentre = closeupProperty != null ? blockPair(closeupProperty, 1) : mostRuggedWindow(height, sea);
 		stats.put("closeup_centre", closeupCentre[0] + ", " + closeupCentre[1]);
 		BufferedImage closeup = closeup(world, generator, noise, sea, closeupCentre[0], closeupCentre[1]);
-		stats.put("weirdness", weirdness(world, sea));
+		stats.put("weirdness", weirdness(world, biomeSource, noise, sea));
 		long generated = System.currentTimeMillis();
 		stats.put("timing_ms", Map.of("sampling", sampled - started, "chunks", generated - sampled));
 
@@ -293,22 +298,41 @@ public class WorldmapTests implements FabricGameTest {
 		return result;
 	}
 
+	/** Steps between neighbouring columns, in blocks, counted by the roughness numbers of {@link #weirdness}. */
+	private static final int[] STEP_LIMITS = {2, 4, 8};
+	/** A spike stands at least this many blocks above every column two blocks away. */
+	private static final int SPIKE_RISE = 4;
+
 	/**
 	 * Fully generates (to the surface step) a grid of chunks spread over the map and counts land
 	 * columns that have air under solid ground above sea level: overhangs, arches, floating land.
+	 * Block by block in the same chunks: how steep the ground is (steps between neighbouring columns),
+	 * spikes (columns standing well above everything two blocks away), and floating pieces (solid
+	 * ground above sea level joined to nothing below it or at the chunk's sides).
 	 */
-	private static Map<String, Object> weirdness(ServerWorld world, int sea) {
+	private static Map<String, Object> weirdness(ServerWorld world, BiomeSource biomeSource, NoiseConfig noise, int sea) {
 		int spacing = (2 * HALF / 16) / WEIRDNESS_GRID;
+		int levels = world.getTopY() - 1 - sea;
 		int landColumns = 0;
 		int overhangColumns = 0;
 		int floatingBlocks = 0;
 		int tallest = world.getBottomY();
+		long stepPairs = 0;
+		long[] stepCounts = new long[STEP_LIMITS.length];
+		// By biome (the biome at the ground of the column): {pairs, steps of 4 or more}
+		Map<String, long[]> stepsByBiome = new HashMap<>();
+		int spikes = 0;
+		int floatingPieces = 0;
+		int floatingPieceBlocks = 0;
 		for (int gx = 0; gx < WEIRDNESS_GRID; gx++) {
 			for (int gz = 0; gz < WEIRDNESS_GRID; gz++) {
 				int chunkX = (CX - HALF) / 16 + gx * spacing + spacing / 2;
 				int chunkZ = (CZ - HALF) / 16 + gz * spacing + spacing / 2;
 				Chunk chunk = world.getChunk(chunkX, chunkZ, ChunkStatus.SURFACE, true);
 				BlockPos.Mutable pos = new BlockPos.Mutable();
+				int[][] tops = new int[16][16];
+				String[][] biomes = new String[16][16];
+				boolean[] solidAt = new boolean[16 * 16 * levels];
 				for (int x = 0; x < 16; x++) {
 					for (int z = 0; z < 16; z++) {
 						int top = world.getBottomY();
@@ -316,6 +340,7 @@ public class WorldmapTests implements FabricGameTest {
 						boolean overhang = false;
 						for (int y = world.getTopY() - 1; y > sea; y--) {
 							boolean solid = isGround(chunk.getBlockState(pos.set(chunkX * 16 + x, y, chunkZ * 16 + z)));
+							solidAt[(x * 16 + z) * levels + y - sea - 1] = solid;
 							if (solid && !seenSolid) {
 								seenSolid = true;
 								top = y;
@@ -324,6 +349,9 @@ public class WorldmapTests implements FabricGameTest {
 								floatingBlocks++;
 							}
 						}
+						tops[x][z] = seenSolid ? top : Integer.MIN_VALUE;
+						biomes[x][z] = biomeSource.getBiome(BiomeCoords.fromBlock(chunkX * 16 + x), BiomeCoords.fromBlock(seenSolid ? top : sea),
+								BiomeCoords.fromBlock(chunkZ * 16 + z), noise.getMultiNoiseSampler()).getKey().map(key -> key.getValue().getPath()).orElse("?");
 						if (seenSolid) {
 							landColumns++;
 							tallest = Math.max(tallest, top);
@@ -333,6 +361,33 @@ public class WorldmapTests implements FabricGameTest {
 						}
 					}
 				}
+				for (int x = 0; x < 16; x++) {
+					for (int z = 0; z < 16; z++) {
+						if (tops[x][z] == Integer.MIN_VALUE) {
+							continue;
+						}
+						for (int[] next : new int[][]{{x + 1, z}, {x, z + 1}}) {
+							if (next[0] < 16 && next[1] < 16 && tops[next[0]][next[1]] != Integer.MIN_VALUE) {
+								int step = Math.abs(tops[next[0]][next[1]] - tops[x][z]);
+								stepPairs++;
+								long[] byBiome = stepsByBiome.computeIfAbsent(biomes[x][z], key -> new long[2]);
+								byBiome[0]++;
+								byBiome[1] += step >= 4 ? 1 : 0;
+								for (int i = 0; i < STEP_LIMITS.length; i++) {
+									if (step >= STEP_LIMITS[i]) {
+										stepCounts[i]++;
+									}
+								}
+							}
+						}
+						if (x >= 2 && z >= 2 && x < 14 && z < 14 && isSpike(tops, x, z)) {
+							spikes++;
+						}
+					}
+				}
+				int[] piece = floatingPieces(solidAt, levels);
+				floatingPieces += piece[0];
+				floatingPieceBlocks += piece[1];
 			}
 		}
 		Map<String, Object> result = new LinkedHashMap<>();
@@ -340,7 +395,90 @@ public class WorldmapTests implements FabricGameTest {
 		result.put("land_columns_with_overhang", landColumns == 0 ? 0 : round((double) overhangColumns / landColumns));
 		result.put("air_blocks_under_ground_per_land_column", landColumns == 0 ? 0 : round((double) floatingBlocks / landColumns));
 		result.put("tallest_ground_y", tallest);
+		for (int i = 0; i < STEP_LIMITS.length; i++) {
+			result.put("steps_" + STEP_LIMITS[i] + "_or_more", stepPairs == 0 ? 0 : round((double) stepCounts[i] / stepPairs));
+		}
+		Map<String, Double> steepByBiome = new java.util.TreeMap<>();
+		stepsByBiome.forEach((id, counts) -> {
+			if (counts[0] >= 500) {
+				steepByBiome.put(id, round((double) counts[1] / counts[0]));
+			}
+		});
+		result.put("steps_4_or_more_by_biome", steepByBiome);
+		result.put("spikes_per_1000_land_columns", landColumns == 0 ? 0 : round(1000.0 * spikes / landColumns));
+		result.put("floating_pieces", floatingPieces);
+		result.put("floating_blocks_per_1000_land_columns", landColumns == 0 ? 0 : round(1000.0 * floatingPieceBlocks / landColumns));
 		return result;
+	}
+
+	/** Whether the column is the highest of the 5 x 5 around it and stands SPIKE_RISE above every column two blocks away. */
+	private static boolean isSpike(int[][] tops, int x, int z) {
+		int top = tops[x][z];
+		for (int dx = -2; dx <= 2; dx++) {
+			for (int dz = -2; dz <= 2; dz++) {
+				int other = tops[x + dx][z + dz];
+				if (other > top || (Math.max(Math.abs(dx), Math.abs(dz)) == 2 && other > top - SPIKE_RISE)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Pieces of solid ground above sea level in one chunk that touch neither the lowest layer above
+	 * sea level nor the chunk's sides (6-neighbour flood fill): {pieces, blocks}. Pieces that reach a
+	 * side may join ground in the next chunk, so they never count.
+	 */
+	private static int[] floatingPieces(boolean[] solidAt, int levels) {
+		boolean[] grounded = new boolean[solidAt.length];
+		int[] stack = new int[solidAt.length];
+		int size = 0;
+		for (int i = 0; i < solidAt.length; i++) {
+			int column = i / levels;
+			int x = column / 16;
+			int z = column % 16;
+			if (solidAt[i] && (i % levels == 0 || x == 0 || z == 0 || x == 15 || z == 15)) {
+				grounded[i] = true;
+				stack[size++] = i;
+			}
+		}
+		fill(solidAt, grounded, stack, size, levels);
+		int pieces = 0;
+		int blocks = 0;
+		for (int i = 0; i < solidAt.length; i++) {
+			if (solidAt[i] && !grounded[i]) {
+				pieces++;
+				grounded[i] = true;
+				stack[0] = i;
+				blocks += fill(solidAt, grounded, stack, 1, levels);
+			}
+		}
+		return new int[]{pieces, blocks};
+	}
+
+	/** Flood-fills solid blocks from the stack, marking them; returns how many blocks it took off the stack. */
+	private static int fill(boolean[] solidAt, boolean[] marked, int[] stack, int size, int levels) {
+		int taken = 0;
+		while (size > 0) {
+			int i = stack[--size];
+			taken++;
+			int level = i % levels;
+			int column = i / levels;
+			int x = column / 16;
+			int z = column % 16;
+			int[] neighbours = {
+					level > 0 ? i - 1 : -1, level < levels - 1 ? i + 1 : -1,
+					x > 0 ? i - 16 * levels : -1, x < 15 ? i + 16 * levels : -1,
+					z > 0 ? i - levels : -1, z < 15 ? i + levels : -1};
+			for (int n : neighbours) {
+				if (n >= 0 && solidAt[n] && !marked[n]) {
+					marked[n] = true;
+					stack[size++] = n;
+				}
+			}
+		}
+		return taken;
 	}
 
 	private static boolean isGround(BlockState state) {
