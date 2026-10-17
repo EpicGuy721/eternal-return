@@ -48,6 +48,18 @@
       "beta_swampland": 12,
       "beta_taiga": 15,
       "beta_tundra": 11
+    },
+    "mix_by_biome": {
+      "beta_desert": "37 / 54 / 8 / 0% of 568",
+      "beta_forest": "28 / 50 / 19 / 3% of 2637",
+      "beta_plains": "34 / 47 / 18 / 1% of 374",
+      "beta_rainforest": "29 / 46 / 22 / 3% of 97",
+      "beta_savanna": "33 / 54 / 12 / 1% of 1129",
+      "beta_seasonal_forest": "22 / 51 / 23 / 4% of 529",
+      "beta_shrubland": "29 / 49 / 20 / 2% of 1016",
+      "beta_swampland": "23 / 50 / 25 / 2% of 254",
+      "beta_taiga": "18 / 48 / 27 / 8% of 439",
+      "beta_tundra": "32 / 53 / 14 / 1% of 911"
     }
   },
   "biome_share": {
@@ -89,7 +101,7 @@
     "floating_blocks_per_1000_land_columns": 0.0
   },
   "timing_ms": {
-    "chunks": 47922,
-    "sampling": 130755
+    "sampling": 130879,
+    "chunks": 50651
   }
 }

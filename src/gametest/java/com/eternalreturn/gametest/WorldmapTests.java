@@ -108,6 +108,8 @@ public class WorldmapTests implements FabricGameTest {
 		double slopeSum = 0;
 		int slopeCount = 0;
 		int[] highest = {Integer.MIN_VALUE, 0, 0};
+		// By biome: {land samples, samples with ground at y 95 or higher} (Moderner Beta's emerald ore only generates from y 95 up)
+		Map<String, int[]> highByBiome = new HashMap<>();
 		for (int px = 0; px < SIZE; px++) {
 			for (int pz = 0; pz < SIZE; pz++) {
 				int h = height[px][pz];
@@ -118,6 +120,9 @@ public class WorldmapTests implements FabricGameTest {
 					if (h > highest[0]) {
 						highest = new int[]{h, px * STEP - HALF + CX, pz * STEP - HALF + CZ};
 					}
+					int[] high = highByBiome.computeIfAbsent(biome[px][pz], key -> new int[2]);
+					high[0]++;
+					high[1] += h - 1 >= 95 ? 1 : 0;
 					if (px + 1 < SIZE && height[px + 1][pz] > sea) {
 						slopeSum += Math.abs(height[px + 1][pz] - h);
 						slopeCount++;
@@ -136,6 +141,15 @@ public class WorldmapTests implements FabricGameTest {
 		stats.put("ocean_biome_share", round((double) oceanBiomeCount / total));
 		stats.put("land_height", percentiles(landHeights));
 		stats.put("highest_ground", highest[1] + " " + highest[0] + " " + highest[2]);
+		Map<String, Object> highShares = new java.util.TreeMap<>();
+		int landSamples = highByBiome.values().stream().mapToInt(c -> c[0]).sum();
+		highByBiome.forEach((id, counts) -> {
+			if (counts[0] >= 1000) {
+				highShares.put(id.substring(id.indexOf(':') + 1), Map.of("share_of_biome", round((double) counts[1] / counts[0]),
+						"share_of_all_land", round((double) counts[1] / landSamples)));
+			}
+		});
+		stats.put("ground_at_or_above_y95_by_biome", highShares);
 		stats.put("water_depth", percentiles(waterDepths));
 		stats.put("land_roughness_blocks_per_4", round(slopeCount == 0 ? 0 : slopeSum / slopeCount));
 		stats.put("landmasses", landmasses(land));
@@ -254,6 +268,7 @@ public class WorldmapTests implements FabricGameTest {
 		int[] classCounts = new int[RELIEF_LIMITS.length];
 		int windows = 0;
 		Map<String, List<Integer>> reliefByBiome = new HashMap<>();
+		Map<String, int[]> classesByBiome = new HashMap<>();
 		for (int px = 0; px + window <= SIZE; px += window) {
 			for (int pz = 0; pz + window <= SIZE; pz += window) {
 				int high = Integer.MIN_VALUE;
@@ -279,7 +294,15 @@ public class WorldmapTests implements FabricGameTest {
 						break;
 					}
 				}
-				reliefByBiome.computeIfAbsent(biome[px + window / 2][pz + window / 2], key -> new ArrayList<>()).add(relief);
+				String centreBiome = biome[px + window / 2][pz + window / 2];
+				reliefByBiome.computeIfAbsent(centreBiome, key -> new ArrayList<>()).add(relief);
+				int[] classes = classesByBiome.computeIfAbsent(centreBiome, key -> new int[RELIEF_LIMITS.length]);
+				for (int i = 0; i < RELIEF_LIMITS.length; i++) {
+					if (relief < RELIEF_LIMITS[i]) {
+						classes[i]++;
+						break;
+					}
+				}
 			}
 		}
 		Map<String, Object> result = new LinkedHashMap<>();
@@ -295,6 +318,16 @@ public class WorldmapTests implements FabricGameTest {
 				.forEach(e -> medians.put(e.getKey().substring(e.getKey().indexOf(':') + 1),
 						e.getValue().stream().mapToInt(Integer::intValue).sorted().toArray()[e.getValue().size() / 2]));
 		result.put("median_relief_by_biome", medians);
+		// Each biome's own mix: the share of its windows that are flat, rolling, hilly, and mountains or extreme.
+		Map<String, String> mixes = new java.util.TreeMap<>();
+		classesByBiome.forEach((id, classes) -> {
+			int count = java.util.Arrays.stream(classes).sum();
+			if (count >= 20) {
+				mixes.put(id.substring(id.indexOf(':') + 1), String.format(java.util.Locale.ROOT, "%.0f / %.0f / %.0f / %.0f%% of %d",
+						100.0 * classes[0] / count, 100.0 * classes[1] / count, 100.0 * classes[2] / count, 100.0 * (classes[3] + classes[4]) / count, count));
+			}
+		});
+		result.put("mix_by_biome", mixes);
 		return result;
 	}
 

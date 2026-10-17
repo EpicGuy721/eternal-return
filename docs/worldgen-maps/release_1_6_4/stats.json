@@ -48,6 +48,18 @@
       "early_release_swampland": 2,
       "early_release_taiga": 8,
       "late_beta_plains": 6
+    },
+    "mix_by_biome": {
+      "beach": "35 / 60 / 5 / 0% of 20",
+      "desert": "70 / 25 / 6 / 0% of 849",
+      "early_release_extreme_hills": "10 / 27 / 48 / 15% of 589",
+      "early_release_ice_plains": "44 / 35 / 16 / 5% of 1027",
+      "early_release_swampland": "92 / 8 / 0 / 0% of 63",
+      "early_release_taiga": "46 / 48 / 7 / 0% of 498",
+      "forest": "61 / 36 / 3 / 0% of 500",
+      "jungle": "31 / 39 / 26 / 4% of 621",
+      "late_beta_plains": "69 / 30 / 1 / 0% of 385",
+      "river": "10 / 55 / 27 / 8% of 62"
     }
   },
   "biome_share": {
@@ -91,7 +103,7 @@
     "floating_blocks_per_1000_land_columns": 0.0
   },
   "timing_ms": {
-    "chunks": 45529,
-    "sampling": 140616
+    "chunks": 47496,
+    "sampling": 139163
   }
 }

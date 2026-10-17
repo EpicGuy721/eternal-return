@@ -1,17 +1,17 @@
 {
   "seed": 173164,
   "slice_area": "384 x 384 blocks from -1472, -1344",
-  "default_open_share": "5.28%",
-  "default_open_share_by_band": "-64:4.0% -48:6.4% -32:7.4% -16:7.0% 0:8.0% 16:6.6% 32:4.6% 48:2.2% 64:0.9% 80:0.5% 96:1.2% 112:0.1%",
-  "old_caves_open_share": "0.54%",
-  "old_caves_open_share_by_band": "-64:0.3% -48:0.9% -32:0.9% -16:0.5% 0:0.5% 16:0.6% 32:0.3% 48:0.3% 64:0.5% 80:0.5% 96:1.3% 112:0.1%",
+  "default_open_share": "5.42%",
+  "default_open_share_by_band": "-64:4.0% -48:6.4% -32:7.4% -16:7.0% 0:8.0% 16:6.6% 32:4.6% 48:2.2% 64:1.0% 80:0.9% 96:0.0%",
+  "old_caves_open_share": "0.57%",
+  "old_caves_open_share_by_band": "-64:0.3% -48:0.9% -32:0.9% -16:0.5% 0:0.5% 16:0.6% 32:0.3% 48:0.3% 64:0.8% 80:1.2% 96:0.0%",
   "gallery_forced_open_share": {
-    "spaghetti": "8.16% open",
-    "ravine": "9.08% open",
-    "large": "5.92% open",
+    "spaghetti": "8.19% open",
+    "ravine": "9.10% open",
+    "large": "5.99% open",
     "vertical": "4.51% open",
-    "zigzag": "2.45% open",
-    "ribbed": "5.46% open",
+    "zigzag": "2.44% open",
+    "ribbed": "5.47% open",
     "spiral": "3.07% open",
     "toroidal": "3.61% open"
   },
@@ -26,28 +26,28 @@
         "y": -11,
         "z": -1127,
         "cave_air_within_2_blocks": true,
-        "ground_y": 82
+        "ground_y": 73
       },
       {
         "x": -1304,
         "y": -58,
         "z": -1121,
         "cave_air_within_2_blocks": false,
-        "ground_y": 77
+        "ground_y": 71
       },
       {
         "x": -1363,
         "y": -9,
         "z": -1107,
         "cave_air_within_2_blocks": true,
-        "ground_y": 80
+        "ground_y": 78
       },
       {
         "x": -1275,
         "y": 61,
         "z": -1050,
         "cave_air_within_2_blocks": true,
-        "ground_y": 81
+        "ground_y": 76
       }
     ],
     "ravine": [
@@ -56,28 +56,28 @@
         "y": 15,
         "z": -1140,
         "cave_air_within_2_blocks": true,
-        "ground_y": 91
+        "ground_y": 77
       },
       {
         "x": -1266,
         "y": 14,
         "z": -1166,
         "cave_air_within_2_blocks": true,
-        "ground_y": 99
+        "ground_y": 85
       },
       {
         "x": -1222,
         "y": -9,
         "z": -1132,
         "cave_air_within_2_blocks": true,
-        "ground_y": 72
+        "ground_y": 71
       },
       {
         "x": -1226,
         "y": -29,
         "z": -1084,
         "cave_air_within_2_blocks": true,
-        "ground_y": 80
+        "ground_y": 79
       }
     ],
     "large": [
@@ -86,14 +86,14 @@
         "y": -23,
         "z": -1094,
         "cave_air_within_2_blocks": true,
-        "ground_y": 87
+        "ground_y": 79
       },
       {
         "x": -1446,
         "y": 1,
         "z": -1241,
         "cave_air_within_2_blocks": true,
-        "ground_y": 68
+        "ground_y": 69
       },
       {
         "x": -1141,
@@ -109,28 +109,28 @@
         "y": 51,
         "z": -1129,
         "cave_air_within_2_blocks": true,
-        "ground_y": 73
+        "ground_y": 68
       },
       {
         "x": -1298,
         "y": 0,
         "z": -1207,
         "cave_air_within_2_blocks": true,
-        "ground_y": 91
+        "ground_y": 77
       },
       {
         "x": -1223,
         "y": -18,
         "z": -1130,
         "cave_air_within_2_blocks": true,
-        "ground_y": 71
+        "ground_y": 70
       },
       {
         "x": -1302,
         "y": 23,
         "z": -1217,
         "cave_air_within_2_blocks": true,
-        "ground_y": 93
+        "ground_y": 79
       }
     ],
     "zigzag": [
@@ -139,7 +139,7 @@
         "y": 37,
         "z": -1196,
         "cave_air_within_2_blocks": true,
-        "ground_y": 98
+        "ground_y": 80
       },
       {
         "x": -1229,
@@ -153,14 +153,14 @@
         "y": -37,
         "z": -1162,
         "cave_air_within_2_blocks": true,
-        "ground_y": 70
+        "ground_y": 67
       },
       {
         "x": -1266,
         "y": 7,
         "z": -1064,
         "cave_air_within_2_blocks": true,
-        "ground_y": 80
+        "ground_y": 75
       }
     ],
     "ribbed": [
@@ -169,21 +169,21 @@
         "y": -46,
         "z": -1176,
         "cave_air_within_2_blocks": true,
-        "ground_y": 104
+        "ground_y": 87
       },
       {
         "x": -1304,
         "y": -3,
         "z": -1146,
         "cave_air_within_2_blocks": true,
-        "ground_y": 91
+        "ground_y": 76
       },
       {
         "x": -1305,
         "y": 9,
         "z": -1211,
         "cave_air_within_2_blocks": true,
-        "ground_y": 98
+        "ground_y": 81
       },
       {
         "x": -1245,
@@ -199,14 +199,14 @@
         "y": 37,
         "z": -1181,
         "cave_air_within_2_blocks": true,
-        "ground_y": 100
+        "ground_y": 81
       },
       {
         "x": -1232,
         "y": 43,
         "z": -1198,
         "cave_air_within_2_blocks": true,
-        "ground_y": 80
+        "ground_y": 78
       },
       {
         "x": -1215,
@@ -262,7 +262,7 @@
       "z": 4290,
       "start_y": -37,
       "radius": 76.5,
-      "ground_y": 81
+      "ground_y": 86
     },
     {
       "x": 2879,
@@ -276,7 +276,7 @@
       "z": 689,
       "start_y": 1,
       "radius": 75.5,
-      "ground_y": 40
+      "ground_y": 39
     },
     {
       "x": -4376,
@@ -297,7 +297,7 @@
       "z": 3620,
       "start_y": -34,
       "radius": 72.2,
-      "ground_y": 31
+      "ground_y": 32
     }
   ],
   "giant_cavern_checked": {

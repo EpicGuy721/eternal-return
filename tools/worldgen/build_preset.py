@@ -41,6 +41,16 @@ KNOBS = {
     # Biome height overrides ("depth;scale", Moderner Beta's own format) on top of the preset's, by biome id
     # (a height variant after '*', as in 'minecraft:jungle*hills').
     'height_overrides': {},
+    # Terrain shape from the noise, not the biome: "depth;scale" for every land biome the biome layers can
+    # produce (with its hills, edge and other height variants), so they all share one height. None: each
+    # biome keeps its own.
+    'land_height': None,
+    # Biomes (with their height variants) that keep their own height even with land_height set.
+    'land_height_except': [],
+    # Scale (the second half of "depth;scale") for oceans and rivers, whose depth stays as it is. Negative
+    # enough, it cancels the sampled scale noise over water. None: as Moderner Beta has it.
+    'water_scale': None,
+    'scale_variation': 1.121,
     # Biome stone: block id -> the biomes whose stone it replaces, from just under the topsoil down to
     # bedrock (see docs/worldgen.md). Biomes under minecraft:stone, and any biome not listed, keep stone.
     'biome_stone': {},
@@ -157,6 +167,7 @@ land = cs['moderner_beta:noise_landmass']
 land['scale']['sample'] = KNOBS['scale_sample']
 land['scale']['influence'] = KNOBS['scale_influence']
 land['scale']['offset'] = KNOBS['scale_offset']
+land['scale']['variation'] = KNOBS['scale_variation']
 land['depth']['influence'] = KNOBS['depth_influence']
 land['depth']['negativeFlattening'] = KNOBS['depth_negative_flattening']
 cs['moderner_beta:noise_3d_settings']['climateHeightScaling'] = KNOBS['climate_height_scaling']
@@ -169,6 +180,7 @@ forced['depthOffset'] = KNOBS['depth_offset']
 forced['scaleWeight'] = KNOBS['scale_weight']
 forced['scaleOffset'] = KNOBS['height_scale_offset']
 forced['modifyOnlyPositiveDepth'] = KNOBS['modify_only_positive_depth']
+# (With land_height set, below, every land biome shares one height and these per-biome heights give way to it.)
 # Cherry groves: Moderner Beta gives them a plateau height (1.5;0.6), which these knobs turn into a sheer
 # flat-topped block; a raised, rolling highland (and higher hills) suits them better, like vanilla's meadows.
 forced['heightOverrides']['minecraft:cherry_grove'] = '0.35;0.6'
@@ -185,6 +197,47 @@ for ocean in ['ocean', 'cold_ocean', 'lukewarm_ocean', 'warm_ocean', 'frozen_oce
 for ocean in ['deep_ocean', 'deep_cold_ocean', 'deep_lukewarm_ocean', 'deep_frozen_ocean']:
     forced['heightOverrides']['minecraft:' + ocean] = '-1.8;0.2'
 forced['heightOverrides']['minecraft:warm_ocean*deep'] = '-1.0;0.2'
+
+
+def pipeline_biomes(node, found):
+    """Every biome id (with its height variant, as in 'minecraft:jungle*hills') the biome layers can produce."""
+    if isinstance(node, dict):
+        if node.get('type') == 'biome' and isinstance(node.get('value'), str):
+            found.add(node['value'])
+        for key, value in node.items():
+            if key in ('biome', 'result') and isinstance(value, str):
+                found.add(value)
+            elif key == 'biomes' and isinstance(value, list):
+                found.update(v for v in value if isinstance(v, str))
+            elif key in ('targets', 'biomeSpecificRivers') and isinstance(value, dict):
+                found.update(value.keys())
+                found.update(v for v in value.values() if isinstance(v, str))
+            pipeline_biomes(value, found)
+    elif isinstance(node, list):
+        for value in node:
+            pipeline_biomes(value, found)
+
+
+# Terrain shape from the noise, not the biome. Every land biome gets the same height (land_height), so flat,
+# rolling and hilly ground come from Beta's sampled scale noise (scale_sample, scale_influence) wherever it
+# falls, as in Beta 1.7.3. Oceans and rivers keep their depth, so seas, coastlines and rivers stay where they
+# are; water_scale gives them a scale negative enough to cancel the scale noise, which would otherwise raise
+# islets out of the sea and bars across rivers. Beaches and mushroom island shores (the coast) keep their own.
+WATER = {b for b in forced['heightOverrides'] if 'ocean' in b} | {'minecraft:river', 'minecraft:frozen_river'}
+COAST = {'minecraft:beach', 'minecraft:snowy_beach', 'minecraft:stony_shore', 'minecraft:mushroom_fields*shore'}
+if KNOBS['water_scale'] is not None:
+    for biome in sorted(WATER):
+        depth = forced['heightOverrides'].get(biome, '-0.5;0.0').split(';')[0]
+        forced['heightOverrides'][biome] = f"{depth};{KNOBS['water_scale']}"
+if KNOBS['land_height'] is not None:
+    produced = set()
+    pipeline_biomes(pipeline, produced)
+    for biome in sorted(produced):
+        # (Skipping '~' and '#' entries: negated biomes and tags in the layers' conditions.)
+        if (':' in biome and biome[0] not in '~#' and not biome.startswith('minecraft:the_void')
+                and 'ocean' not in biome and 'river' not in biome and biome not in COAST
+                and biome.split('*')[0] not in KNOBS['land_height_except']):
+            forced['heightOverrides'][biome] = KNOBS['land_height']
 
 preset['name'] = {'color': 'gold', 'translate': f'createWorld.customize.modern_beta.preset.name.{NS}.eternal_return'}
 preset['description'] = {'translate': f'createWorld.customize.modern_beta.preset.desc.{NS}.eternal_return'}
