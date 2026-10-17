@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "eternalreturn:block/maple_log_x"
+    },
+    "axis=y": {
+      "model": "eternalreturn:block/maple_log_y"
+    },
+    "axis=z": {
+      "model": "eternalreturn:block/maple_log_z"
+    }
+  }
+}
