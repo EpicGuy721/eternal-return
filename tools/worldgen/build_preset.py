@@ -87,8 +87,10 @@ pipeline = preset['biomeSettings']['moderner_beta:fractal_layers']['pipeline']
 CLASSIC = ['minecraft:desert', 'minecraft:forest', 'moderner_beta:early_release_extreme_hills',
            'moderner_beta:early_release_swampland', 'moderner_beta:late_beta_plains',
            'moderner_beta:early_release_taiga', 'minecraft:jungle']
-ADDED = ['minecraft:birch_forest', 'minecraft:savanna', 'minecraft:badlands', 'minecraft:dark_forest', 'minecraft:cherry_grove']
-# Each 1.6.4 biome twice, each added biome once: the added five make up about a quarter of temperate land.
+ADDED = ['minecraft:birch_forest', 'minecraft:savanna', 'minecraft:badlands', 'minecraft:dark_forest', 'minecraft:cherry_grove',
+         'eternalreturn:autumnal_forest']
+# Each 1.6.4 biome twice, each added biome once: the added six make up about a quarter of temperate land.
+# (The autumnal forest has no hills variant: with one land height for every biome, a hills variant would change nothing.)
 step(pipeline, 'biome_pool', 'moderner_beta:random_biome')['biomes'] = CLASSIC + CLASSIC + ADDED
 
 WITH_HILLS = ['minecraft:birch_forest', 'minecraft:savanna', 'minecraft:badlands', 'minecraft:cherry_grove']

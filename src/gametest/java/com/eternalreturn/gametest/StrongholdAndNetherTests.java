@@ -114,7 +114,9 @@ public class StrongholdAndNetherTests implements FabricGameTest {
 		ctx.assertTrue(illusioners == 1, illusioners + " illusioners (one in the portal room)");
 		// About half the rooms have one or two, and the odd corridor one; small strongholds have few rooms.
 		ctx.assertTrue(illagers >= 1, "no illagers in a stronghold with " + rooms + " rooms");
-		ctx.assertTrue(mobs.stream().allMatch(MobEntity::isPersistent), "stronghold illagers stay");
+		// Only the illagers: animals that spawned with the land around a stronghold at ground level are inside its box too.
+		ctx.assertTrue(mobs.stream().filter(mob -> mob.getType() == EntityType.ILLUSIONER || ILLAGERS.contains(mob.getType())).allMatch(MobEntity::isPersistent),
+				"stronghold illagers stay");
 		mobs.forEach(MobEntity::discard);
 		ctx.complete();
 	}

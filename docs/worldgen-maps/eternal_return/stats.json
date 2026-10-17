@@ -5,8 +5,8 @@
   "area_blocks": "4096 x 4096 centred on 0,0",
   "world_height": "-64 to 320",
   "sea_level": 63,
-  "water_share": 0.571,
-  "ocean_biome_share": 0.448,
+  "water_share": 0.572,
+  "ocean_biome_share": 0.45,
   "land_height": {
     "p5": 64,
     "p50": 71,
@@ -16,56 +16,60 @@
   },
   "highest_ground": "60 144 1300",
   "ground_at_or_above_y95_by_biome": {
+    "autumnal_forest": {
+      "share_of_biome": 0.05,
+      "share_of_all_land": 0.003
+    },
     "badlands": {
-      "share_of_biome": 0.084,
-      "share_of_all_land": 0.004
+      "share_of_biome": 0.07,
+      "share_of_all_land": 0.001
     },
     "beach": {
       "share_of_biome": 0.025,
       "share_of_all_land": 0.001
     },
     "birch_forest": {
-      "share_of_biome": 0.003,
+      "share_of_biome": 0.008,
       "share_of_all_land": 0.0
     },
     "cherry_grove": {
-      "share_of_biome": 0.023,
+      "share_of_biome": 0.035,
       "share_of_all_land": 0.001
     },
     "dark_forest": {
-      "share_of_biome": 0.046,
-      "share_of_all_land": 0.001
+      "share_of_biome": 0.035,
+      "share_of_all_land": 0.002
     },
     "desert": {
-      "share_of_biome": 0.048,
-      "share_of_all_land": 0.003
+      "share_of_biome": 0.011,
+      "share_of_all_land": 0.001
     },
     "early_release_extreme_hills": {
-      "share_of_biome": 0.031,
-      "share_of_all_land": 0.003
+      "share_of_biome": 0.049,
+      "share_of_all_land": 0.005
     },
     "early_release_ice_plains": {
       "share_of_biome": 0.005,
       "share_of_all_land": 0.001
     },
     "early_release_swampland": {
-      "share_of_biome": 0.032,
-      "share_of_all_land": 0.001
+      "share_of_biome": 0.028,
+      "share_of_all_land": 0.002
     },
     "early_release_taiga": {
-      "share_of_biome": 0.035,
-      "share_of_all_land": 0.004
+      "share_of_biome": 0.03,
+      "share_of_all_land": 0.003
     },
     "forest": {
-      "share_of_biome": 0.026,
+      "share_of_biome": 0.042,
       "share_of_all_land": 0.004
     },
     "jungle": {
-      "share_of_biome": 0.04,
+      "share_of_biome": 0.047,
       "share_of_all_land": 0.003
     },
     "late_beta_plains": {
-      "share_of_biome": 0.034,
+      "share_of_biome": 0.044,
       "share_of_all_land": 0.003
     },
     "river": {
@@ -73,8 +77,8 @@
       "share_of_all_land": 0.0
     },
     "savanna": {
-      "share_of_biome": 0.051,
-      "share_of_all_land": 0.002
+      "share_of_biome": 0.005,
+      "share_of_all_land": 0.0
     }
   },
   "water_depth": {
@@ -84,80 +88,83 @@
     "p99": 32,
     "max": 33
   },
-  "land_roughness_blocks_per_4": 1.584,
+  "land_roughness_blocks_per_4": 1.575,
   "landmasses": {
-    "count_over_1_chunk": 75,
-    "count_over_256x256": 7,
-    "largest_blocks": 5568176,
-    "largest_share_of_land": 0.774
+    "count_over_1_chunk": 69,
+    "count_over_256x256": 6,
+    "largest_blocks": 5640032,
+    "largest_share_of_land": 0.785
   },
   "terrain_mix": {
     "window_blocks": 32,
-    "land_windows": 6143,
-    "flat": 0.285,
-    "rolling": 0.482,
-    "hilly": 0.209,
-    "mountains": 0.024,
+    "land_windows": 6131,
+    "flat": 0.294,
+    "rolling": 0.478,
+    "hilly": 0.205,
+    "mountains": 0.023,
     "extreme": 0.0,
     "median_relief_by_biome": {
-      "badlands": 16,
-      "beach": 20,
-      "birch_forest": 12,
-      "cherry_grove": 11,
-      "dark_forest": 14,
-      "desert": 14,
-      "forest": 13,
-      "jungle": 15,
+      "autumnal_forest": 15,
+      "badlands": 13,
+      "beach": 21,
+      "birch_forest": 9,
+      "cherry_grove": 13,
+      "dark_forest": 13,
+      "desert": 9,
+      "forest": 12,
+      "jungle": 17,
       "river": 22,
       "savanna": 12,
-      "early_release_extreme_hills": 13,
+      "early_release_extreme_hills": 14,
       "early_release_ice_plains": 8,
-      "early_release_swampland": 11,
+      "early_release_swampland": 14,
       "early_release_taiga": 12,
-      "late_beta_plains": 12
+      "late_beta_plains": 13
     },
     "mix_by_biome": {
-      "badlands": "18 / 43 / 35 / 5% of 277",
-      "beach": "0 / 43 / 53 / 4% of 47",
-      "birch_forest": "17 / 67 / 16 / 0% of 103",
-      "cherry_grove": "33 / 48 / 16 / 3% of 159",
-      "dark_forest": "20 / 52 / 27 / 2% of 123",
-      "desert": "20 / 47 / 28 / 5% of 449",
-      "early_release_extreme_hills": "24 / 52 / 23 / 1% of 563",
+      "autumnal_forest": "21 / 47 / 28 / 4% of 345",
+      "badlands": "25 / 47 / 23 / 4% of 115",
+      "beach": "2 / 37 / 56 / 5% of 43",
+      "birch_forest": "38 / 35 / 27 / 0% of 95",
+      "cherry_grove": "28 / 48 / 20 / 3% of 162",
+      "dark_forest": "24 / 51 / 24 / 1% of 419",
+      "desert": "40 / 50 / 9 / 1% of 537",
+      "early_release_extreme_hills": "19 / 50 / 28 / 3% of 624",
       "early_release_ice_plains": "43 / 49 / 8 / 0% of 1245",
-      "early_release_swampland": "21 / 60 / 17 / 2% of 224",
-      "early_release_taiga": "32 / 46 / 20 / 2% of 765",
-      "forest": "25 / 53 / 21 / 2% of 857",
-      "jungle": "21 / 45 / 28 / 6% of 439",
-      "late_beta_plains": "30 / 44 / 24 / 2% of 578",
-      "river": "7 / 38 / 42 / 13% of 90",
-      "savanna": "32 / 37 / 29 / 2% of 210"
+      "early_release_swampland": "24 / 46 / 24 / 5% of 281",
+      "early_release_taiga": "30 / 49 / 19 / 3% of 685",
+      "forest": "29 / 46 / 23 / 2% of 545",
+      "jungle": "15 / 44 / 35 / 6% of 404",
+      "late_beta_plains": "30 / 44 / 24 / 1% of 419",
+      "river": "1 / 42 / 47 / 10% of 91",
+      "savanna": "23 / 62 / 15 / 0% of 107"
     }
   },
   "biome_share": {
-    "minecraft:ocean": 0.119,
-    "minecraft:lukewarm_ocean": 0.096,
+    "minecraft:ocean": 0.12,
+    "minecraft:lukewarm_ocean": 0.095,
     "moderner_beta:early_release_ice_plains": 0.085,
-    "minecraft:river": 0.066,
-    "minecraft:forest": 0.063,
-    "moderner_beta:early_release_taiga": 0.059,
+    "minecraft:river": 0.065,
     "minecraft:deep_ocean": 0.056,
     "minecraft:cold_ocean": 0.055,
+    "moderner_beta:early_release_taiga": 0.05,
+    "moderner_beta:early_release_extreme_hills": 0.048,
     "minecraft:deep_lukewarm_ocean": 0.045,
-    "moderner_beta:early_release_extreme_hills": 0.044,
-    "minecraft:warm_ocean": 0.041,
-    "moderner_beta:late_beta_plains": 0.041,
-    "minecraft:jungle": 0.038,
-    "minecraft:desert": 0.034,
+    "minecraft:warm_ocean": 0.042,
+    "minecraft:desert": 0.039,
+    "minecraft:forest": 0.038,
+    "minecraft:jungle": 0.035,
+    "minecraft:dark_forest": 0.031,
+    "moderner_beta:late_beta_plains": 0.031,
     "minecraft:beach": 0.029,
-    "moderner_beta:early_release_swampland": 0.022,
-    "minecraft:badlands": 0.021,
+    "moderner_beta:early_release_swampland": 0.028,
+    "eternalreturn:autumnal_forest": 0.027,
     "minecraft:deep_cold_ocean": 0.017,
-    "minecraft:savanna": 0.016,
+    "minecraft:cherry_grove": 0.014,
     "minecraft:frozen_ocean": 0.014,
-    "minecraft:cherry_grove": 0.012,
-    "minecraft:dark_forest": 0.009,
-    "minecraft:birch_forest": 0.007,
+    "minecraft:birch_forest": 0.008,
+    "minecraft:badlands": 0.008,
+    "minecraft:savanna": 0.008,
     "minecraft:deep_frozen_ocean": 0.006,
     "minecraft:frozen_river": 0.006,
     "minecraft:mushroom_fields": 0.001
@@ -166,36 +173,37 @@
   "closeup_centre": "0, 1536",
   "weirdness": {
     "chunks_sampled": 576,
-    "land_columns_with_overhang": 0.005,
-    "air_blocks_under_ground_per_land_column": 0.067,
+    "land_columns_with_overhang": 0.004,
+    "air_blocks_under_ground_per_land_column": 0.042,
     "tallest_ground_y": 127,
-    "steps_2_or_more": 0.047,
+    "steps_2_or_more": 0.044,
     "steps_4_or_more": 0.006,
     "steps_8_or_more": 0.001,
     "steps_4_or_more_by_biome": {
-      "badlands": 0.004,
-      "beach": 0.027,
-      "birch_forest": 0.009,
-      "cherry_grove": 0.016,
-      "dark_forest": 0.003,
-      "desert": 0.008,
-      "early_release_extreme_hills": 0.007,
+      "autumnal_forest": 0.003,
+      "badlands": 0.0,
+      "beach": 0.019,
+      "birch_forest": 0.0,
+      "cherry_grove": 0.012,
+      "dark_forest": 0.013,
+      "desert": 0.0,
+      "early_release_extreme_hills": 0.005,
       "early_release_ice_plains": 0.001,
-      "early_release_swampland": 0.001,
-      "early_release_taiga": 0.004,
-      "forest": 0.007,
-      "frozen_ocean": 0.02,
-      "jungle": 0.01,
-      "late_beta_plains": 0.006,
-      "river": 0.05,
-      "savanna": 0.002
+      "early_release_swampland": 0.009,
+      "early_release_taiga": 0.005,
+      "forest": 0.003,
+      "frozen_ocean": 0.03,
+      "jungle": 0.019,
+      "late_beta_plains": 0.001,
+      "river": 0.056,
+      "savanna": 0.016
     },
-    "spikes_per_1000_land_columns": 0.032,
+    "spikes_per_1000_land_columns": 0.033,
     "floating_pieces": 0,
     "floating_blocks_per_1000_land_columns": 0.0
   },
   "timing_ms": {
-    "sampling": 499600,
-    "chunks": 187307
+    "chunks": 128835,
+    "sampling": 560290
   }
 }

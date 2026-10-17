@@ -1,94 +1,94 @@
 {
   "minecraft:badlands": {
-    "_square_from_chunk": -7899967,
-    "coal_ore": 1587,
-    "copper_ore": 1472,
-    "diamond_ore": 397,
-    "gold_ore": 1017,
-    "iron_ore": 1182,
-    "lapis_ore": 412,
-    "redstone_ore": 540
+    "_square_from_chunk": -2300079,
+    "coal_ore": 1226,
+    "copper_ore": 1148,
+    "diamond_ore": 395,
+    "gold_ore": 981,
+    "iron_ore": 1282,
+    "lapis_ore": 420,
+    "redstone_ore": 559
   },
   "minecraft:desert": {
-    "_square_from_chunk": 1299953,
-    "coal_ore": 859,
-    "copper_ore": 972,
-    "diamond_ore": 364,
-    "gold_ore": 370,
-    "iron_ore": 1198,
-    "lapis_ore": 375,
-    "redstone_ore": 627
+    "_square_from_chunk": 6900033,
+    "coal_ore": 1203,
+    "copper_ore": 1213,
+    "diamond_ore": 284,
+    "gold_ore": 301,
+    "iron_ore": 1102,
+    "lapis_ore": 310,
+    "redstone_ore": 451
   },
   "moderner_beta:early_release_ice_plains": {
     "_square_from_chunk": -2700027,
     "coal_ore": 2090,
     "copper_ore": 1828,
-    "diamond_ore": 424,
+    "diamond_ore": 425,
     "emerald_ore": 3,
     "gold_ore": 474,
-    "iron_ore": 1342,
+    "iron_ore": 1343,
     "lapis_ore": 437,
     "redstone_ore": 614
   },
   "minecraft:forest": {
-    "_square_from_chunk": -4299979,
-    "coal_ore": 1511,
-    "copper_ore": 1337,
-    "diamond_ore": 344,
-    "gold_ore": 392,
-    "iron_ore": 1245,
-    "lapis_ore": 365,
-    "redstone_ore": 488
+    "_square_from_chunk": 4900045,
+    "coal_ore": 1499,
+    "copper_ore": 1341,
+    "diamond_ore": 386,
+    "gold_ore": 382,
+    "iron_ore": 1130,
+    "lapis_ore": 396,
+    "redstone_ore": 584
   },
   "minecraft:jungle": {
-    "_square_from_chunk": 6100017,
-    "coal_ore": 1650,
-    "copper_ore": 1532,
-    "diamond_ore": 360,
-    "gold_ore": 420,
-    "iron_ore": 1361,
-    "lapis_ore": 446,
-    "redstone_ore": 639
+    "_square_from_chunk": 6099961,
+    "coal_ore": 1630,
+    "copper_ore": 1477,
+    "diamond_ore": 423,
+    "gold_ore": 438,
+    "iron_ore": 1289,
+    "lapis_ore": 410,
+    "redstone_ore": 570
   },
   "minecraft:birch_forest": {
-    "_square_from_chunk": -3500047,
-    "coal_ore": 1489,
-    "copper_ore": 1465,
-    "diamond_ore": 386,
-    "gold_ore": 428,
-    "iron_ore": 1322,
-    "lapis_ore": 437,
-    "redstone_ore": 568
+    "_square_from_chunk": 9300061,
+    "coal_ore": 1732,
+    "copper_ore": 1449,
+    "diamond_ore": 387,
+    "gold_ore": 432,
+    "iron_ore": 1162,
+    "lapis_ore": 416,
+    "redstone_ore": 556
   },
   "moderner_beta:late_beta_plains": {
-    "_square_from_chunk": -2700063,
-    "coal_ore": 1911,
-    "copper_ore": 1492,
-    "diamond_ore": 265,
-    "gold_ore": 326,
-    "iron_ore": 1155,
-    "lapis_ore": 335,
-    "redstone_ore": 481
+    "_square_from_chunk": -5100011,
+    "coal_ore": 1684,
+    "copper_ore": 1504,
+    "diamond_ore": 428,
+    "gold_ore": 397,
+    "iron_ore": 1312,
+    "lapis_ore": 370,
+    "redstone_ore": 574
   },
   "moderner_beta:early_release_extreme_hills": {
-    "_square_from_chunk": 4099961,
-    "coal_ore": 1412,
-    "copper_ore": 1278,
-    "diamond_ore": 343,
-    "gold_ore": 368,
-    "iron_ore": 1268,
-    "lapis_ore": 404,
-    "redstone_ore": 553
+    "_square_from_chunk": 1299953,
+    "coal_ore": 1531,
+    "copper_ore": 1274,
+    "diamond_ore": 364,
+    "gold_ore": 370,
+    "iron_ore": 1228,
+    "lapis_ore": 398,
+    "redstone_ore": 627
   },
   "minecraft:savanna": {
-    "_square_from_chunk": -6300095,
-    "coal_ore": 1943,
-    "copper_ore": 1675,
-    "diamond_ore": 426,
-    "gold_ore": 465,
-    "iron_ore": 1260,
-    "lapis_ore": 408,
-    "redstone_ore": 629
+    "_square_from_chunk": 6100013,
+    "coal_ore": 1738,
+    "copper_ore": 1484,
+    "diamond_ore": 369,
+    "gold_ore": 416,
+    "iron_ore": 1174,
+    "lapis_ore": 404,
+    "redstone_ore": 528
   },
   "moderner_beta:early_release_taiga": {
     "_square_from_chunk": -5100019,
@@ -101,34 +101,34 @@
     "redstone_ore": 571
   },
   "all": {
-    "coal_ore": 16666,
-    "copper_ore": 14760,
-    "diamond_ore": 3689,
+    "coal_ore": 16547,
+    "copper_ore": 14427,
+    "diamond_ore": 3841,
     "emerald_ore": 3,
-    "gold_ore": 4661,
-    "iron_ore": 12655,
-    "lapis_ore": 4061,
-    "redstone_ore": 5710
+    "gold_ore": 4592,
+    "iron_ore": 12344,
+    "lapis_ore": 4003,
+    "redstone_ore": 5634
   },
   "emerald_survey": {
-    "centre_ground_y": 120,
-    "centre_x": 2184,
-    "centre_z": -632,
+    "centre_ground_y": 139,
+    "centre_x": 1352,
+    "centre_z": -1400,
     "chunks": 576,
-    "columns_with_ground_at_or_above_y95": 15171,
-    "emerald_ore": 46,
-    "emerald_ore_in_host_stone": 46
+    "columns_with_ground_at_or_above_y95": 19215,
+    "emerald_ore": 442,
+    "emerald_ore_in_host_stone": 141
   },
   "checks": {
     "stone_ores_inside_host_stone": 0
   },
   "variants_open_to_caves_by_host": {
-    "andesite": 388,
-    "diorite": 185,
-    "granite": 221,
+    "andesite": 421,
+    "diorite": 246,
+    "granite": 419,
     "hardened_packed_ice": 17,
-    "hardened_sandstone": 142,
-    "red_sandstone": 54
+    "hardened_sandstone": 77,
+    "red_sandstone": 143
   },
   "biome_stone_off": {
     "host_stone_blocks_besides_blobs": 0,

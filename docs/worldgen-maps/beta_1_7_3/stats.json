@@ -15,6 +15,48 @@
     "max": 122
   },
   "highest_ground": "-372 122 -696",
+  "ground_at_or_above_y95_by_biome": {
+    "beta_desert": {
+      "share_of_biome": 0.006,
+      "share_of_all_land": 0.0
+    },
+    "beta_forest": {
+      "share_of_biome": 0.046,
+      "share_of_all_land": 0.015
+    },
+    "beta_plains": {
+      "share_of_biome": 0.04,
+      "share_of_all_land": 0.002
+    },
+    "beta_rainforest": {
+      "share_of_biome": 0.033,
+      "share_of_all_land": 0.0
+    },
+    "beta_savanna": {
+      "share_of_biome": 0.015,
+      "share_of_all_land": 0.002
+    },
+    "beta_seasonal_forest": {
+      "share_of_biome": 0.051,
+      "share_of_all_land": 0.003
+    },
+    "beta_shrubland": {
+      "share_of_biome": 0.035,
+      "share_of_all_land": 0.005
+    },
+    "beta_swampland": {
+      "share_of_biome": 0.043,
+      "share_of_all_land": 0.001
+    },
+    "beta_taiga": {
+      "share_of_biome": 0.066,
+      "share_of_all_land": 0.004
+    },
+    "beta_tundra": {
+      "share_of_biome": 0.014,
+      "share_of_all_land": 0.002
+    }
+  },
   "water_depth": {
     "p5": 0,
     "p50": 2,
@@ -101,7 +143,7 @@
     "floating_blocks_per_1000_land_columns": 0.0
   },
   "timing_ms": {
-    "sampling": 130879,
-    "chunks": 50651
+    "sampling": 224950,
+    "chunks": 90725
   }
 }

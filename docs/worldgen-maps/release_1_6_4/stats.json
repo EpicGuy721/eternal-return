@@ -15,6 +15,52 @@
     "max": 124
   },
   "highest_ground": "1224 124 -16",
+  "ground_at_or_above_y95_by_biome": {
+    "beach": {
+      "share_of_biome": 0.0,
+      "share_of_all_land": 0.0
+    },
+    "desert": {
+      "share_of_biome": 0.002,
+      "share_of_all_land": 0.0
+    },
+    "early_release_extreme_hills": {
+      "share_of_biome": 0.124,
+      "share_of_all_land": 0.017
+    },
+    "early_release_ice_plains": {
+      "share_of_biome": 0.034,
+      "share_of_all_land": 0.007
+    },
+    "early_release_swampland": {
+      "share_of_biome": 0.0,
+      "share_of_all_land": 0.0
+    },
+    "early_release_taiga": {
+      "share_of_biome": 0.003,
+      "share_of_all_land": 0.0
+    },
+    "forest": {
+      "share_of_biome": 0.001,
+      "share_of_all_land": 0.0
+    },
+    "jungle": {
+      "share_of_biome": 0.027,
+      "share_of_all_land": 0.004
+    },
+    "late_beta_plains": {
+      "share_of_biome": 0.0,
+      "share_of_all_land": 0.0
+    },
+    "ocean": {
+      "share_of_biome": 0.0,
+      "share_of_all_land": 0.0
+    },
+    "river": {
+      "share_of_biome": 0.0,
+      "share_of_all_land": 0.0
+    }
+  },
   "water_depth": {
     "p5": 0,
     "p50": 12,
@@ -103,7 +149,7 @@
     "floating_blocks_per_1000_land_columns": 0.0
   },
   "timing_ms": {
-    "chunks": 47496,
-    "sampling": 139163
+    "chunks": 75943,
+    "sampling": 236171
   }
 }

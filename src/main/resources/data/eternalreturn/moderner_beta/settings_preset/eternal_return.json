@@ -238,7 +238,8 @@
             "minecraft:savanna",
             "minecraft:badlands",
             "minecraft:dark_forest",
-            "minecraft:cherry_grove"
+            "minecraft:cherry_grove",
+            "eternalreturn:autumnal_forest"
           ],
           "id": "biome_pool",
           "seed": 200
@@ -687,6 +688,7 @@
         "minecraft:warm_ocean*deep": "-1.0;-1.2",
         "minecraft:frozen_river": "-0.5;-1.2",
         "minecraft:river": "-0.5;-1.2",
+        "eternalreturn:autumnal_forest": "0.1;0.05",
         "minecraft:badlands": "0.1;0.05",
         "minecraft:badlands*hills": "0.1;0.05",
         "minecraft:birch_forest": "0.1;0.05",

@@ -2370,7 +2370,8 @@
                 "biome_is": [
                   "minecraft:forest",
                   "moderner_beta:early_release_taiga",
-                  "moderner_beta:early_release_extreme_hills"
+                  "moderner_beta:early_release_extreme_hills",
+                  "eternalreturn:autumnal_forest"
                 ]
               },
               "then_run": {

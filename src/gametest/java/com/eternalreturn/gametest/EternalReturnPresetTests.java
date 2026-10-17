@@ -29,7 +29,7 @@ public class EternalReturnPresetTests implements FabricGameTest {
 			"minecraft:desert", "minecraft:forest", "minecraft:jungle", "minecraft:mushroom_fields",
 			"moderner_beta:late_beta_plains", "moderner_beta:early_release_extreme_hills", "moderner_beta:early_release_taiga",
 			"moderner_beta:early_release_swampland", "moderner_beta:early_release_ice_plains",
-			"minecraft:birch_forest", "minecraft:savanna", "minecraft:badlands", "minecraft:dark_forest");
+			"minecraft:birch_forest", "minecraft:savanna", "minecraft:badlands", "minecraft:dark_forest", "eternalreturn:autumnal_forest");
 	private static final Set<String> CAVE_BIOMES = Set.of("minecraft:lush_caves", "minecraft:dripstone_caves", "minecraft:deep_dark");
 
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = GameTestWorld.ETERNAL_RETURN_BATCH, tickLimit = 200_000)
