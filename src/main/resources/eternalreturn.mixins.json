@@ -9,6 +9,7 @@
 		"EnchantmentHelperMixin",
 		"EnchantmentMixin",
 		"EnchantmentScreenHandlerMixin",
+		"GemAnvilMixin",
 		"GrindstoneScreenHandlerMixin",
 		"ItemMixin",
 		"ItemStackMixin",
@@ -58,6 +59,7 @@
 		"mobs.SpiderEntityMixin",
 		"mobs.SpiderGoalsMixin",
 		"mobs.WaterCreatureEntityMixin",
+		"mobs.WitherBossMixin",
 		"mobs.WitherSkeletonMixin",
 		"mobs.WitherSummonMixin",
 		"mobs.WolfNetherSpawnMixin",
@@ -139,7 +141,8 @@
 		"worldgen.StructurePlacementCalculatorMixin",
 		"worldgen.StructureStartMixin",
 		"worldgen.StructureWeightSamplerMixin",
-		"worldgen.SurfaceBuilderMixin"
+		"worldgen.SurfaceBuilderMixin",
+		"worldgen.TreeFeatureAzaleaMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

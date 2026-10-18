@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/stairs",
+  "textures": {
+    "bottom": "eternalreturn:block/azalea_planks",
+    "side": "eternalreturn:block/azalea_planks",
+    "top": "eternalreturn:block/azalea_planks"
+  }
+}

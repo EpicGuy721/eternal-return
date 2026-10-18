@@ -197,6 +197,8 @@ public final class EternalReturnConfig {
 		public double witherSkeletonHealth = 80.0;
 		/** Wither skeletons shoot wither skulls at targets 8 to 32 blocks away. */
 		public boolean witherSkeletonSkulls = true;
+		/** The Wither circles its target, and at half health explodes, calls three wither skeletons and comes down through blocks. */
+		public boolean witherRework = true;
 		/** Phantoms come on one night in this many, whether or not anyone slept (0: vanilla's insomnia instead). */
 		public int phantomNightChance = 13;
 		/**
@@ -453,6 +455,8 @@ public final class EternalReturnConfig {
 	public static final class WorldgenTweaks {
 		/** No tuff blobs in Eternal Return worlds (newly generated chunks). */
 		public boolean noTuff = true;
+		/** Chance an oak becomes an azalea tree as Eternal Return worlds generate (newly generated chunks). */
+		public double azaleaTreeChance = 0.05;
 		/**
 		 * Debug only: carves one straight 3x3 tunnel at y=20 along z=8, through every chunk on that
 		 * row. It checks that this mod's carvers run under the active world generator.
@@ -634,7 +638,7 @@ public final class EternalReturnConfig {
 
 		if (loaded == null) {
 			loaded = new EternalReturnConfig();
-			loaded.materialsVersion = 1;
+			loaded.materialsVersion = 2;
 			loaded.fishing.baitsVersion = BAITS_VERSION;
 			loaded.worldgen.caves.typesVersion = CaveTypes.SETTINGS_VERSION;
 		}
@@ -652,7 +656,7 @@ public final class EternalReturnConfig {
 			}
 			loaded.survival.armorWeightVersion = 1;
 		}
-		if (loaded.materialsVersion < 1) {
+		if (loaded.materialsVersion < 2) {
 			loaded.updateMaterials();
 		}
 		if (loaded.worldgen == null) {
@@ -680,6 +684,14 @@ public final class EternalReturnConfig {
 	 * and armor weights are added, and Soul Speed is disabled.
 	 */
 	private void updateMaterials() {
+		if (this.materialsVersion >= 1) {
+			// Version 2: gold swords' Looting I.
+			if (this.inherentEnchantments != null) {
+				this.inherentEnchantments.putIfAbsent("eternalreturn:inherent/gold_swords", Map.of("minecraft:looting", 1));
+			}
+			this.materialsVersion = 2;
+			return;
+		}
 		Map<String, Map<String, Integer>> old = new LinkedHashMap<>();
 		old.put("eternalreturn:inherent/iron_gear", Map.of("minecraft:unbreaking", 1));
 		old.put("eternalreturn:inherent/gold_tools", Map.of("minecraft:fortune", 1));
@@ -713,7 +725,7 @@ public final class EternalReturnConfig {
 			this.survival.armorWeight.putIfAbsent("eternalreturn:copper", 0.15);
 			this.survival.armorWeight.putIfAbsent("eternalreturn:rosegold", 0.10);
 		}
-		this.materialsVersion = 1;
+		this.materialsVersion = 2;
 	}
 
 	private Compiled compile() {
@@ -808,6 +820,7 @@ public final class EternalReturnConfig {
 	private static Map<String, Map<String, Integer>> defaultInherent() {
 		Map<String, Map<String, Integer>> m = new LinkedHashMap<>();
 		m.put("eternalreturn:inherent/iron_gear", Map.of("minecraft:unbreaking", 1));
+		m.put("eternalreturn:inherent/gold_swords", Map.of("minecraft:looting", 1));
 		m.put("eternalreturn:inherent/gold_hoes", Map.of("minecraft:fortune", 1));
 		m.put("eternalreturn:inherent/gold_tools", Map.of("minecraft:silk_touch", 1));
 		m.put("eternalreturn:inherent/gold_armor", Map.of("minecraft:fire_protection", 1));

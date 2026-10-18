@@ -5,6 +5,11 @@
     "#eternalreturn:ore_variants",
     "#eternalreturn:concrete_cut_blocks",
     "eternalreturn:obsidian_pressure_plate",
-    "eternalreturn:copper_rail"
+    "eternalreturn:copper_rail",
+    "eternalreturn:ruby_ore",
+    "eternalreturn:sapphire_ore",
+    "eternalreturn:nether_ruby_ore",
+    "eternalreturn:ruby_block",
+    "eternalreturn:sapphire_block"
   ]
 }

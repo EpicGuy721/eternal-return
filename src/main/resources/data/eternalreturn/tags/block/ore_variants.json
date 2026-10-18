@@ -7,6 +7,8 @@
     "#eternalreturn:ore_variants/redstone",
     "#eternalreturn:ore_variants/lapis",
     "#eternalreturn:ore_variants/diamond",
-    "#eternalreturn:ore_variants/emerald"
+    "#eternalreturn:ore_variants/emerald",
+    "#eternalreturn:ore_variants/ruby",
+    "#eternalreturn:ore_variants/sapphire"
   ]
 }

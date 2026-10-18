@@ -33,7 +33,10 @@ public final class ForestRendering {
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	public static void register() {
 		for (Woods.Wood wood : Woods.all()) {
-			BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getCutout(), wood.door, wood.trapdoor, wood.sapling, wood.pottedSapling);
+			BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getCutout(), wood.door, wood.trapdoor);
+			if (wood.sapling != null) {
+				BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getCutout(), wood.sapling, wood.pottedSapling);
+			}
 			BlockRenderLayerMap.INSTANCE.putBlocks(RenderLayer.getCutoutMipped(), wood.leaves.toArray(Block[]::new));
 			EntityRendererRegistry.register(WoodBoats.boat(wood.name), ctx -> new WoodBoatRenderer(ctx, wood.name, false));
 			EntityRendererRegistry.register(WoodBoats.chestBoat(wood.name), ctx -> new WoodBoatRenderer(ctx, wood.name, true));

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column_uv_locked_x",
+  "textures": {
+    "end": "eternalreturn:block/stripped_azalea_log_top",
+    "side": "eternalreturn:block/stripped_azalea_log"
+  }
+}

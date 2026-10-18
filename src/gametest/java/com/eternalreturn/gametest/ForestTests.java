@@ -97,7 +97,7 @@ public class ForestTests implements FabricGameTest {
 				ctx.assertTrue(chest.isOf(Items.CHEST), n + " planks make a chest: " + chest);
 				ctx.assertTrue(p.isIn(ItemTags.PLANKS) && new ItemStack(wood.log).isIn(ItemTags.LOGS_THAT_BURN) && wood.log.getDefaultState().isIn(BlockTags.LOGS),
 						n + " planks and logs are in their tags");
-				ctx.assertTrue(wood.leaves.stream().allMatch(leaf -> leaf.getDefaultState().isIn(BlockTags.LEAVES)) && wood.sapling.getDefaultState().isIn(BlockTags.SAPLINGS),
+				ctx.assertTrue(wood.leaves.stream().allMatch(leaf -> leaf.getDefaultState().isIn(BlockTags.LEAVES)) && (wood.sapling == null || wood.sapling.getDefaultState().isIn(BlockTags.SAPLINGS)),
 						n + " leaves and sapling tags");
 				ctx.assertTrue(AbstractFurnaceBlockEntity.canUseAsFuel(p) && AbstractFurnaceBlockEntity.canUseAsFuel(new ItemStack(wood.boat)), n + " burns");
 				ctx.assertTrue(BlockEntityType.SIGN.supports(wood.sign.getDefaultState()) && BlockEntityType.SIGN.supports(wood.wallSign.getDefaultState())
@@ -126,7 +126,7 @@ public class ForestTests implements FabricGameTest {
 	public void saplingsGrowTheirTrees(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
 		floor(ctx, Blocks.GRASS_BLOCK);
-		for (Woods.Wood wood : Woods.all()) {
+		for (Woods.Wood wood : List.of(Woods.MAPLE, Woods.PALE_OAK)) {
 			BlockPos rel = wood == Woods.MAPLE ? new BlockPos(2, 1, 2) : new BlockPos(5, 1, 5);
 			BlockPos abs = ctx.getAbsolutePos(rel);
 			world.setBlockState(abs, wood.sapling.getDefaultState().with(SaplingBlock.STAGE, 1));
@@ -217,7 +217,7 @@ public class ForestTests implements FabricGameTest {
 
 	// ---------- vampires ----------
 
-	/** A vampire dies leaving nothing behind: no items, no experience. */
+	/** A vampire dies leaving no experience, and only rubies (1 to 3). */
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "vampires_night", tickLimit = 60)
 	public void vampiresDropNothing(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
@@ -230,7 +230,7 @@ public class ForestTests implements FabricGameTest {
 		ctx.runAtTick(ctx.getTick() + 30, () -> {
 			Box box = new Box(ctx.getAbsolutePos(BlockPos.ORIGIN)).expand(12.0);
 			ctx.assertTrue(vampire.isDead(), "the vampire died");
-			ctx.assertTrue(world.getEntitiesByClass(ItemEntity.class, box, e -> true).isEmpty(), "no items");
+			ctx.assertTrue(world.getEntitiesByClass(ItemEntity.class, box, e -> !e.getStack().isOf(com.eternalreturn.items.Gems.RUBY)).isEmpty(), "only rubies");
 			ctx.assertTrue(world.getEntitiesByClass(ExperienceOrbEntity.class, box, e -> true).isEmpty(), "no experience");
 			FishingTests.disconnect(player);
 			ctx.complete();

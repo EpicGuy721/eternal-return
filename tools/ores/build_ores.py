@@ -39,6 +39,20 @@ def vanilla_json(path):
     return json.loads(JAR.read(path))
 
 
+def game_json(block_id, folder):
+    """A block's file (blockstate or loot table): this mod's own for its blocks (rubies, sapphires: tools/gems), else
+    vanilla's."""
+    namespace, path = block_id.split(':')
+    if namespace == NS:
+        kind = 'assets' if folder == 'blockstates' else 'data'
+        return json.load(open(os.path.join(RES, kind, NS, folder, path + '.json'), encoding='utf-8'))
+    return vanilla_json(f'{"assets" if folder == "blockstates" else "data"}/minecraft/{folder}/{path}.json')
+
+
+# This mod's own base ores (tools/gems makes them): not variants, so left alone by the clean-up below.
+OWN_ORES = {ore['block'].split(':')[1] for ore in TABLE['ores'].values() if ore['block'].startswith(NS + ':')} | set(TABLE.get('keep', []))
+
+
 def vanilla_texture(texture_id):
     namespace, path = texture_id.split(':')
     assert namespace == 'minecraft', texture_id
@@ -85,7 +99,8 @@ for old in glob.glob(os.path.join(RES, 'assets/eternalreturn/blockstates/*_ore.j
         glob.glob(os.path.join(RES, 'assets/eternalreturn/models/block/*_ore.json')) + \
         glob.glob(os.path.join(RES, 'assets/eternalreturn/models/item/*_ore.json')) + \
         glob.glob(os.path.join(RES, 'data/eternalreturn/loot_table/blocks/*_ore.json')):
-    os.remove(old)
+    if os.path.basename(old)[:-5] not in OWN_ORES:
+        os.remove(old)
 
 # ---------------------------------------------------------------- textures and models
 overlays = {}
@@ -119,11 +134,11 @@ for host_name, host in TABLE['hosts'].items():
             'textures': {'top': host_faces['top'], 'bottom': host_faces['bottom'], 'side': host_faces['side'],
                          'particle': host_faces['side'], 'overlay': f'{NS}:block/ore_overlay/{ore_name}'}})
         write_json(f'assets/{NS}/models/item/{name}.json', {'parent': f'{NS}:block/{name}'})
-        states = vanilla_json(f'assets/minecraft/blockstates/{path_of(ore["block"])}.json')['variants']
+        states = game_json(ore['block'], 'blockstates')['variants']
         write_json(f'assets/{NS}/blockstates/{name}.json', {'variants': {key: {'model': f'{NS}:block/{name}'} for key in states}})
 
         # Loot: vanilla's table for the stone ore, with the Silk Touch branch giving this block.
-        loot = json.dumps(vanilla_json(f'data/minecraft/loot_table/blocks/{path_of(ore["block"])}.json'))
+        loot = json.dumps(game_json(ore['block'], 'loot_table/blocks'))
         assert loot.count(f'"name": "{ore["block"]}"') == 1, ore['block']
         loot = json.loads(loot.replace(f'"name": "{ore["block"]}"', f'"name": "{NS}:{name}"'))
         loot['random_sequence'] = f'{NS}:blocks/{name}'
@@ -140,13 +155,27 @@ for ore_name, ore in TABLE['ores'].items():
     write_json(f'data/{NS}/tags/block/ore_variants/{ore_name}.json', {'values': variants[ore_name]})
     write_json(f'data/{NS}/tags/item/ore_variants/{ore_name}.json', {'values': variants[ore_name]})
     all_variants.append(tag)
-    # The vanilla <ore>_ores tags (Fabric's c:ores/<ore> and c:ores include them).
-    vanilla_tag = path_of(ore['block']).replace('_ore', '_ores')
+    # The vanilla <ore>_ores tags (Fabric's c:ores/<ore> and c:ores include them); this mod's own ores get
+    # eternalreturn:<ore>_ores, with the base ore in it too.
+    ore_tag = path_of(ore['block']).replace('_ore', '_ores')
+    own = ore['block'].startswith(NS + ':')
     for kind in ['block', 'item']:
-        write_json(f'data/minecraft/tags/{kind}/{vanilla_tag}.json', {'replace': False, 'values': [tag]})
+        if own:
+            write_json(f'data/{NS}/tags/{kind}/{ore_tag}.json', {'values': [ore['block'], tag] + ore.get('also', [])})
+        else:
+            write_json(f'data/minecraft/tags/{kind}/{ore_tag}.json', {'replace': False, 'values': [tag]})
     for tool, members in needs.items():
-        if ore['block'] in members:
+        if ore['block'] in members or ore.get('needs') == tool:
             needs_ours[tool].append(tag)
+            if own:
+                needs_ours[tool] += [ore['block']] + ore.get('also', [])
+# This mod's own ores join the shared c:ores tags, as Fabric gives vanilla's.
+own_names = [name for name, ore in TABLE['ores'].items() if ore['block'].startswith(NS + ':')]
+for kind in ['block', 'item']:
+    for name in own_names:
+        write_json(f'data/c/tags/{kind}/ores/{name}.json', {'values': [f'#{NS}:{name}_ores']})
+    if own_names:
+        write_json(f'data/c/tags/{kind}/ores.json', {'replace': False, 'values': [f'#c:ores/{name}' for name in own_names]})
 write_json(f'data/{NS}/tags/block/ore_variants.json', {'values': all_variants})
 write_json(f'data/{NS}/tags/item/ore_variants.json', {'values': all_variants})
 for tool, tags in needs_ours.items():
@@ -158,9 +187,10 @@ for tool, tags in needs_ours.items():
 
 # ---------------------------------------------------------------- smelting and blasting
 recipes = {}
-for entry in JAR.namelist():
-    if entry.startswith('data/minecraft/recipe/') and entry.endswith('.json'):
-        recipe = vanilla_json(entry)
+own_recipes = [os.path.relpath(p, RES).replace(os.sep, '/') for p in glob.glob(os.path.join(RES, 'data', NS, 'recipe', '*.json'))]
+for entry in JAR.namelist() + own_recipes:
+    if (entry.startswith('data/minecraft/recipe/') or entry in own_recipes) and entry.endswith('.json'):
+        recipe = vanilla_json(entry) if entry.startswith('data/minecraft/') else json.load(open(os.path.join(RES, entry), encoding='utf-8'))
         if recipe.get('type') in ('minecraft:smelting', 'minecraft:blasting'):
             ingredient = recipe.get('ingredient')
             if isinstance(ingredient, dict) and 'item' in ingredient:

@@ -4,6 +4,11 @@
     "#eternalreturn:ore_variants/gold",
     "#eternalreturn:ore_variants/redstone",
     "#eternalreturn:ore_variants/diamond",
-    "#eternalreturn:ore_variants/emerald"
+    "#eternalreturn:ore_variants/emerald",
+    "#eternalreturn:ore_variants/ruby",
+    "eternalreturn:ruby_ore",
+    "eternalreturn:nether_ruby_ore",
+    "#eternalreturn:ore_variants/sapphire",
+    "eternalreturn:sapphire_ore"
   ]
 }
