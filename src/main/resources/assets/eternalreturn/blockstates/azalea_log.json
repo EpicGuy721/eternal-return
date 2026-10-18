@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "eternalreturn:block/azalea_log_x"
+    },
+    "axis=y": {
+      "model": "eternalreturn:block/azalea_log_y"
+    },
+    "axis=z": {
+      "model": "eternalreturn:block/azalea_log_z"
+    }
+  }
+}

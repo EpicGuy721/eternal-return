@@ -41,9 +41,11 @@ for jar in JARS:
         NAMES[name] = jar
 
 # Pale oak's leaves come in three colours; maple's in one.
+# Azalea has neither: its trees wear vanilla's azalea leaves, and vanilla's azalea bush is its sapling.
 WOODS = {
-    'maple': {'leaves': ['maple_leaves']},
-    'pale_oak': {'leaves': ['red_pale_oak_leaves', 'orange_pale_oak_leaves', 'yellow_pale_oak_leaves']},
+    'maple': {'leaves': ['maple_leaves'], 'sapling': True},
+    'pale_oak': {'leaves': ['red_pale_oak_leaves', 'orange_pale_oak_leaves', 'yellow_pale_oak_leaves'], 'sapling': True},
+    'azalea': {'leaves': [], 'sapling': False},
 }
 
 
@@ -83,6 +85,8 @@ for wood, spec in WOODS.items():
         m = re.match(r'(assets|data)/minecraft/(.+?)/((?:stripped_)?cherry_[a-z_]+|potted_cherry_sapling)\.json$', path)
         if not m or 'cherry_leaves' in path or 'worldgen' in path or '/tags/' in path or 'cherry_bees' in path:
             continue
+        if 'sapling' in path and not spec['sapling']:
+            continue
         kind, folder, name = m.groups()
         new = swap(f'minecraft:{name}', wood).split(':')[1]
         copy(path, f'{kind}/{NS}/{folder}/{new}.json', wood)
@@ -115,7 +119,7 @@ for path in sorted(NAMES):
         elif value == 'minecraft:pink_petals':
             added.append(f'{NS}:maple_petals')
         elif re.fullmatch(r'minecraft:(stripped_|potted_)?cherry_[a-z_]+', value):
-            added += [swap(value, wood) for wood in WOODS]
+            added += [swap(value, wood) for wood in WOODS if 'sapling' not in value or WOODS[wood]['sapling']]
     if added:
         tags[(m.group(1), m.group(2))] = added
 OWN_TAGS = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'generated_tags.txt')
@@ -186,6 +190,10 @@ write_json(f'data/{NS}/worldgen/placed_feature/maple_checked.json', {
     'placement': [{'type': 'minecraft:block_predicate_filter', 'predicate': {
         'type': 'minecraft:would_survive', 'state': {'Name': f'{NS}:maple_sapling', 'Properties': {'stage': '0'}}}}]})
 # The forest: a dense mix, three maples to two pale oaks, about as thick as a forest.
+# Azalea: vanilla's azalea tree, on an azalea trunk (AzaleaTrees puts it in place of some oaks in Eternal Return worlds).
+azalea = json.loads(read('data/minecraft/worldgen/configured_feature/azalea_tree.json'))
+azalea['config']['trunk_provider'] = provider(f'{NS}:azalea_log')
+write_json(f'data/{NS}/worldgen/configured_feature/azalea_tree.json', azalea)
 write_json(f'data/{NS}/worldgen/configured_feature/trees_autumnal_forest.json', {'type': 'minecraft:random_selector', 'config': {
     'features': [{'chance': 0.4, 'feature': {'feature': f'{NS}:pale_oak', 'placement': []}}],
     'default': f'{NS}:maple_checked'}})

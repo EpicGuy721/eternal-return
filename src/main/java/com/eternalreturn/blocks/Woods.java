@@ -68,9 +68,11 @@ public final class Woods {
 	public static final SimpleParticleType MAPLE_LEAF_PARTICLE = Registry.register(Registries.PARTICLE_TYPE, EternalReturn.id("maple_leaves"),
 			FabricParticleTypes.simple());
 
-	public static final Wood MAPLE = new Wood("maple", MapColor.ORANGE, MapColor.BROWN, List.of("maple_leaves"), true);
+	public static final Wood MAPLE = new Wood("maple", MapColor.ORANGE, MapColor.BROWN, List.of("maple_leaves"), true, true);
 	public static final Wood PALE_OAK = new Wood("pale_oak", MapColor.OFF_WHITE, MapColor.LIGHT_GRAY,
-			List.of("red_pale_oak_leaves", "orange_pale_oak_leaves", "yellow_pale_oak_leaves"), false);
+			List.of("red_pale_oak_leaves", "orange_pale_oak_leaves", "yellow_pale_oak_leaves"), false, true);
+	/** Azalea: its trees wear vanilla's azalea leaves, and vanilla's azalea bush is its sapling, so it has neither. */
+	public static final Wood AZALEA = new Wood("azalea", MapColor.LIME, MapColor.TERRACOTTA_BROWN, List.of(), false, false);
 
 	public static final Block MAPLE_PETALS = block("maple_petals", new FlowerbedBlock(AbstractBlock.Settings.copy(Blocks.PINK_PETALS).mapColor(MapColor.ORANGE)));
 	public static final Item MAPLE_PETALS_ITEM = item("maple_petals", new BlockItem(MAPLE_PETALS, new Item.Settings()));
@@ -119,7 +121,10 @@ public final class Woods {
 		public final Block hangingSign;
 		public final Block wallHangingSign;
 		public final List<Block> leaves = new ArrayList<>();
+		/** Null for azalea (vanilla's azalea bush). */
+		@org.jetbrains.annotations.Nullable
 		public final Block sapling;
+		@org.jetbrains.annotations.Nullable
 		public final Block pottedSapling;
 		public final Item signItem;
 		public final Item hangingSignItem;
@@ -128,7 +133,7 @@ public final class Woods {
 		/** Building blocks, in creative-tab order. */
 		final List<Item> building = new ArrayList<>();
 
-		Wood(String name, MapColor planksColor, MapColor barkColor, List<String> leafNames, boolean fallingLeaves) {
+		Wood(String name, MapColor planksColor, MapColor barkColor, List<String> leafNames, boolean fallingLeaves, boolean ownSapling) {
 			this.name = name;
 			this.setType = BlockSetTypeBuilder.copyOf(BlockSetType.OAK).register(EternalReturn.id(name));
 			this.woodType = WoodTypeBuilder.copyOf(WoodType.OAK).register(EternalReturn.id(name), this.setType);
@@ -163,11 +168,16 @@ public final class Woods {
 				this.leaves.add(blockWithItem(leafName, fallingLeaves ? new MapleLeavesBlock(settings) : new LeavesBlock(settings)));
 			}
 			this.building.removeAll(this.leaves.stream().map(Block::asItem).toList());
-			RegistryKey<net.minecraft.world.gen.feature.ConfiguredFeature<?, ?>> tree = RegistryKey.of(RegistryKeys.CONFIGURED_FEATURE, EternalReturn.id(name));
-			SaplingGenerator generator = new SaplingGenerator(EternalReturn.id(name).toString(), Optional.empty(), Optional.of(tree), Optional.empty());
-			this.sapling = block(name + "_sapling", new SaplingBlock(generator, AbstractBlock.Settings.copy(Blocks.OAK_SAPLING)));
-			item(name + "_sapling", new BlockItem(this.sapling, new Item.Settings()));
-			this.pottedSapling = block("potted_" + name + "_sapling", new FlowerPotBlock(this.sapling, AbstractBlock.Settings.copy(Blocks.POTTED_OAK_SAPLING)));
+			if (ownSapling) {
+				RegistryKey<net.minecraft.world.gen.feature.ConfiguredFeature<?, ?>> tree = RegistryKey.of(RegistryKeys.CONFIGURED_FEATURE, EternalReturn.id(name));
+				SaplingGenerator generator = new SaplingGenerator(EternalReturn.id(name).toString(), Optional.empty(), Optional.of(tree), Optional.empty());
+				this.sapling = block(name + "_sapling", new SaplingBlock(generator, AbstractBlock.Settings.copy(Blocks.OAK_SAPLING)));
+				item(name + "_sapling", new BlockItem(this.sapling, new Item.Settings()));
+				this.pottedSapling = block("potted_" + name + "_sapling", new FlowerPotBlock(this.sapling, AbstractBlock.Settings.copy(Blocks.POTTED_OAK_SAPLING)));
+			} else {
+				this.sapling = null;
+				this.pottedSapling = null;
+			}
 			WoodBoats.register(name);
 			this.boat = item(name + "_boat", new WoodBoats.BoatItem(name, false, new Item.Settings().maxCount(1)));
 			this.chestBoat = item(name + "_chest_boat", new WoodBoats.BoatItem(name, true, new Item.Settings().maxCount(1)));
@@ -197,7 +207,9 @@ public final class Woods {
 				flammable.add(leaf, 30, 60);
 				CompostingChanceRegistry.INSTANCE.add(leaf, 0.3F);
 			}
-			CompostingChanceRegistry.INSTANCE.add(this.sapling, 0.3F);
+			if (this.sapling != null) {
+				CompostingChanceRegistry.INSTANCE.add(this.sapling, 0.3F);
+			}
 		}
 	}
 
@@ -210,7 +222,7 @@ public final class Woods {
 	}
 
 	public static List<Wood> all() {
-		return List.of(MAPLE, PALE_OAK);
+		return List.of(MAPLE, PALE_OAK, AZALEA);
 	}
 
 	public static void register() {
@@ -239,8 +251,10 @@ public final class Woods {
 					entries.addAfter(leaves, leaf);
 					leaves = leaf.asItem();
 				}
-				entries.addAfter(sapling, wood.sapling);
-				sapling = wood.sapling.asItem();
+				if (wood.sapling != null) {
+					entries.addAfter(sapling, wood.sapling);
+					sapling = wood.sapling.asItem();
+				}
 			}
 			entries.addAfter(Items.PINK_PETALS, MAPLE_PETALS_ITEM);
 		});

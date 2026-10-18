@@ -27,29 +27,55 @@ public final class InherentEnchantments {
 	private InherentEnchantments() {
 	}
 
+	/**
+	 * An item's own inherent enchantments, in place of its material's (a ruby's reroll, com.eternalreturn.items.Gems):
+	 * custom data eternalreturn_inherent, enchantment id to level.
+	 */
+	public static final String OVERRIDE = "eternalreturn_inherent";
+
 	public static boolean hasRules(ItemStack stack) {
 		if (stack.isEmpty()) {
 			return false;
 		}
+		return !rules(stack).isEmpty();
+	}
+
+	/** The free levels this stack gets: its own (OVERRIDE) if it has them, else its material's, by tag. */
+	public static Map<RegistryKey<Enchantment>, Integer> rules(ItemStack stack) {
+		Map<RegistryKey<Enchantment>, Integer> out = new java.util.LinkedHashMap<>();
+		net.minecraft.component.type.NbtComponent data = stack.get(net.minecraft.component.DataComponentTypes.CUSTOM_DATA);
+		if (data != null && data.contains(OVERRIDE)) {
+			net.minecraft.nbt.NbtCompound own = data.copyNbt().getCompound(OVERRIDE);
+			for (String id : own.getKeys()) {
+				net.minecraft.util.Identifier key = net.minecraft.util.Identifier.tryParse(id);
+				if (key != null) {
+					out.put(RegistryKey.of(RegistryKeys.ENCHANTMENT, key), own.getInt(id));
+				}
+			}
+			return out;
+		}
 		for (EternalReturnConfig.InherentRule rule : EternalReturnConfig.rules().inherent()) {
 			if (stack.isIn(rule.tag())) {
-				return true;
+				rule.levels().forEach((key, level) -> out.merge(key, level, Math::max));
 			}
 		}
-		return false;
+		return out;
+	}
+
+	public static void setOverride(ItemStack stack, Map<RegistryKey<Enchantment>, Integer> levels) {
+		net.minecraft.component.type.NbtComponent.set(net.minecraft.component.DataComponentTypes.CUSTOM_DATA, stack, nbt -> {
+			net.minecraft.nbt.NbtCompound own = new net.minecraft.nbt.NbtCompound();
+			levels.forEach((key, level) -> own.putInt(key.getValue().toString(), level));
+			nbt.put(OVERRIDE, own);
+		});
 	}
 
 	/** The free level this stack gets for the given enchantment, or 0. */
 	public static int inherentLevel(ItemStack stack, RegistryEntry<Enchantment> enchantment) {
 		int best = 0;
-		for (EternalReturnConfig.InherentRule rule : EternalReturnConfig.rules().inherent()) {
-			if (!stack.isIn(rule.tag())) {
-				continue;
-			}
-			for (Map.Entry<RegistryKey<Enchantment>, Integer> e : rule.levels().entrySet()) {
-				if (enchantment.matchesKey(e.getKey())) {
-					best = Math.max(best, e.getValue());
-				}
+		for (Map.Entry<RegistryKey<Enchantment>, Integer> e : rules(stack).entrySet()) {
+			if (enchantment.matchesKey(e.getKey())) {
+				best = Math.max(best, e.getValue());
 			}
 		}
 		return best;
@@ -66,22 +92,17 @@ public final class InherentEnchantments {
 		boolean changed = false;
 		RegistryWrapper.Impl<Enchantment> enchantments = null;
 
-		for (EternalReturnConfig.InherentRule rule : EternalReturnConfig.rules().inherent()) {
-			if (!stack.isIn(rule.tag())) {
+		for (Map.Entry<RegistryKey<Enchantment>, Integer> e : rules(stack).entrySet()) {
+			if (EnchantLevels.levelOf(stack, e.getKey()) >= e.getValue()) {
 				continue;
 			}
-			for (Map.Entry<RegistryKey<Enchantment>, Integer> e : rule.levels().entrySet()) {
-				if (EnchantLevels.levelOf(stack, e.getKey()) >= e.getValue()) {
-					continue;
-				}
-				if (enchantments == null) {
-					enchantments = lookup.getWrapperOrThrow(RegistryKeys.ENCHANTMENT);
-				}
-				Optional<RegistryEntry.Reference<Enchantment>> entry = enchantments.getOptional(e.getKey());
-				if (entry.isPresent()) {
-					stack.addEnchantment(entry.get(), e.getValue());
-					changed = true;
-				}
+			if (enchantments == null) {
+				enchantments = lookup.getWrapperOrThrow(RegistryKeys.ENCHANTMENT);
+			}
+			Optional<RegistryEntry.Reference<Enchantment>> entry = enchantments.getOptional(e.getKey());
+			if (entry.isPresent()) {
+				stack.addEnchantment(entry.get(), e.getValue());
+				changed = true;
 			}
 		}
 		return changed;

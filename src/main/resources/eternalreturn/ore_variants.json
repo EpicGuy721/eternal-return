@@ -1,5 +1,5 @@
 {
-  "_comment": "Ore variants: every ore in every host stone (block eternalreturn:<host>_<ore>_ore). The game reads this at startup to register the blocks; tools/ores/build_ores.py reads it to write their models, textures, loot tables, recipes and tags. Adding an ore or a host is one entry here plus a rerun of the script. An ore copies its vanilla block's behaviour; its overlay is a 16x16 image with transparency (path from the repository root), drawn over the host's texture. A host gives the block it replaces and its textures per face (all, or top/bottom/side).",
+  "_comment": "Ore variants: every ore in every host stone (block eternalreturn:<host>_<ore>_ore). The game reads this at startup to register the blocks; tools/ores/build_ores.py reads it to write their models, textures, loot tables, recipes and tags. Adding an ore or a host is one entry here plus a rerun of the script. This mod's own ores (ruby, sapphire: tools/gems/build_gems.py makes their base blocks, run it first) name themselves as their deepslate version too, say which tool tier they need ('needs') and list other base blocks for their tags ('also'); 'keep' lists base ore files the clean-up must leave alone. An ore copies its vanilla block's behaviour; its overlay is a 16x16 image with transparency (path from the repository root), drawn over the host's texture. A host gives the block it replaces and its textures per face (all, or top/bottom/side).",
   "ores": {
     "coal": {"block": "minecraft:coal_ore", "deepslate": "minecraft:deepslate_coal_ore",
       "overlay": "tools/ores/overlays/coal.png"},
@@ -16,8 +16,13 @@
     "diamond": {"block": "minecraft:diamond_ore", "deepslate": "minecraft:deepslate_diamond_ore",
       "overlay": "tools/ores/overlays/diamond.png"},
     "emerald": {"block": "minecraft:emerald_ore", "deepslate": "minecraft:deepslate_emerald_ore",
-      "overlay": "tools/ores/overlays/emerald.png"}
+      "overlay": "tools/ores/overlays/emerald.png"},
+    "ruby": {"block": "eternalreturn:ruby_ore", "deepslate": "eternalreturn:ruby_ore", "needs": "iron",
+      "also": ["eternalreturn:nether_ruby_ore"], "overlay": "tools/ores/overlays/ruby.png"},
+    "sapphire": {"block": "eternalreturn:sapphire_ore", "deepslate": "eternalreturn:sapphire_ore", "needs": "iron",
+      "overlay": "tools/ores/overlays/sapphire.png"}
   },
+  "keep": ["nether_ruby_ore"],
   "hosts": {
     "andesite": {"block": "minecraft:andesite", "textures": {"all": "minecraft:block/andesite"}},
     "diorite": {"block": "minecraft:diorite", "textures": {"all": "minecraft:block/diorite"}},

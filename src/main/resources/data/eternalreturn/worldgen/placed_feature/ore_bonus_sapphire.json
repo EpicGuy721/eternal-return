@@ -1,0 +1,30 @@
+{
+  "feature": "eternalreturn:ore_sapphire",
+  "placement": [
+    {
+      "type": "eternalreturn:eternal_return_only"
+    },
+    {
+      "type": "minecraft:count",
+      "count": 14
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:height_range",
+      "height": {
+        "type": "minecraft:trapezoid",
+        "min_inclusive": {
+          "absolute": -144
+        },
+        "max_inclusive": {
+          "absolute": 16
+        }
+      }
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

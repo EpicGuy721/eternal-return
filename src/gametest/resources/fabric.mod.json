@@ -40,7 +40,8 @@
 			"com.eternalreturn.gametest.CombatPotionFarmTests",
 			"com.eternalreturn.gametest.MobVillagerCartTests",
 			"com.eternalreturn.gametest.ForestTests",
-			"com.eternalreturn.gametest.MaterialsMobsAndRulesTests"
+			"com.eternalreturn.gametest.MaterialsMobsAndRulesTests",
+			"com.eternalreturn.gametest.GemsWitherAndAzaleaTests"
 		]
 	},
 	"mixins": [

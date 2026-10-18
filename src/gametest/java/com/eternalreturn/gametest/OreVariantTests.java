@@ -83,8 +83,10 @@ public class OreVariantTests implements FabricGameTest {
 				check(problems, block.getDefaultState().isIn(tag) == vanilla.getDefaultState().isIn(tag), name + " tag " + tag.id());
 			}
 			String ore = variant.ore().name();
-			TagKey<Block> oreTag = TagKey.of(RegistryKeys.BLOCK, Identifier.ofVanilla(ore + "_ores"));
-			TagKey<net.minecraft.item.Item> oreItemTag = TagKey.of(RegistryKeys.ITEM, Identifier.ofVanilla(ore + "_ores"));
+			// Vanilla's ores' tags (minecraft:iron_ores...), this mod's own ores' (eternalreturn:ruby_ores...).
+			String namespace = Registries.BLOCK.getId(vanilla).getNamespace();
+			TagKey<Block> oreTag = TagKey.of(RegistryKeys.BLOCK, Identifier.of(namespace, ore + "_ores"));
+			TagKey<net.minecraft.item.Item> oreItemTag = TagKey.of(RegistryKeys.ITEM, Identifier.of(namespace, ore + "_ores"));
 			TagKey<Block> conventionTag = TagKey.of(RegistryKeys.BLOCK, Identifier.of("c", "ores/" + ore));
 			TagKey<Block> conventionOres = TagKey.of(RegistryKeys.BLOCK, Identifier.of("c", "ores"));
 			check(problems, vanilla.getDefaultState().isIn(oreTag), "vanilla " + vanilla + " not in " + oreTag.id());

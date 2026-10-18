@@ -38,6 +38,8 @@ public class EternalReturn implements ModInitializer {
 	public void onInitialize() {
 		EternalReturnConfig.load();
 		ModEntities.register();
+		com.eternalreturn.items.Gems.register();
+		com.eternalreturn.worldgen.ores.OreBonuses.register();
 		OceanSpawns.register();
 		FishingItems.register();
 		FishingLoot.register();

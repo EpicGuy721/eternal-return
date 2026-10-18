@@ -18,7 +18,13 @@ public final class EnchantCaps {
 	private EnchantCaps() {
 	}
 
+	/** The capacity of this stack: its material's, plus one if a sapphire was added to it (com.eternalreturn.items.Gems). */
 	public static int capFor(ItemStack stack) {
+		int cap = materialCap(stack);
+		return cap != UNCAPPED && com.eternalreturn.items.Gems.sapphired(stack) ? cap + 1 : cap;
+	}
+
+	private static int materialCap(ItemStack stack) {
 		if (stack.isEmpty()) {
 			return UNCAPPED;
 		}
