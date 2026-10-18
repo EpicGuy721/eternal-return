@@ -1,7 +1,11 @@
 package com.eternalreturn.mixin.worldgen;
 
+import com.eternalreturn.EternalReturn;
 import com.eternalreturn.worldgen.caves.CaveWorlds;
+import com.eternalreturn.worldgen.caves.OldCaveFluids;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.random.Random;
@@ -16,6 +20,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.function.Function;
@@ -37,5 +42,20 @@ public abstract class ConfiguredCarverMixin {
 		if (CaveWorlds.skipsCarver(context, this.carver())) {
 			cir.setReturnValue(false);
 		}
+	}
+
+	/** The old caves, when they run in an Eternal Return world: air, not the sea-level water an aquifer-less world would give them (OldCaveFluids). */
+	@ModifyVariable(method = "carve", at = @At("HEAD"), argsOnly = true)
+	private AquiferSampler eternalreturn$oldCaveFluids(AquiferSampler aquiferSampler, CarverContext context, Chunk chunk,
+			Function<BlockPos, RegistryEntry<Biome>> posToBiome, Random random, AquiferSampler original, ChunkPos pos, CarvingMask mask) {
+		if (!CaveWorlds.isEternalReturn(context) || !(context instanceof CaveWorlds.Context extras)) {
+			return aquiferSampler;
+		}
+		Identifier id = Registries.CARVER.getId(this.carver());
+		if (id != null && id.getNamespace().equals(EternalReturn.MOD_ID)) {
+			return aquiferSampler;
+		}
+		AquiferSampler fill = OldCaveFluids.forChunk(extras.eternalreturn$generator(), chunk);
+		return fill != null ? fill : aquiferSampler;
 	}
 }

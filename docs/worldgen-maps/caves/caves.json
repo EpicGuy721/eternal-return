@@ -3,17 +3,17 @@
   "slice_area": "384 x 384 blocks from -1472, -1344",
   "default_open_share": "5.42%",
   "default_open_share_by_band": "-64:4.0% -48:6.4% -32:7.4% -16:7.0% 0:8.0% 16:6.6% 32:4.6% 48:2.2% 64:1.0% 80:0.9% 96:0.0%",
-  "old_caves_open_share": "0.57%",
-  "old_caves_open_share_by_band": "-64:0.3% -48:0.9% -32:0.9% -16:0.5% 0:0.5% 16:0.6% 32:0.3% 48:0.3% 64:0.8% 80:1.2% 96:0.0%",
+  "old_caves_open_share": "0.56%",
+  "old_caves_open_share_by_band": "-64:0.3% -48:0.8% -32:0.9% -16:0.5% 0:0.5% 16:0.6% 32:0.3% 48:0.3% 64:0.8% 80:1.2% 96:0.0%",
   "gallery_forced_open_share": {
-    "spaghetti": "8.19% open",
-    "ravine": "9.10% open",
-    "large": "5.99% open",
-    "vertical": "4.51% open",
-    "zigzag": "2.44% open",
-    "ribbed": "5.47% open",
-    "spiral": "3.07% open",
-    "toroidal": "3.61% open"
+    "spaghetti": "10.38% open",
+    "ravine": "8.98% open",
+    "large": "4.96% open",
+    "vertical": "1.64% open",
+    "zigzag": "1.01% open",
+    "ribbed": "4.91% open",
+    "spiral": "2.01% open",
+    "toroidal": "3.52% open"
   },
   "shape_views": {
     "spiral": "99244 -7 80084 (top of the tube: 99234 -8 80084)",
@@ -248,7 +248,7 @@
       "z": 2451,
       "start_y": -27,
       "radius": 80.0,
-      "ground_y": 31
+      "ground_y": -30
     },
     {
       "x": 1624,
@@ -276,7 +276,7 @@
       "z": 689,
       "start_y": 1,
       "radius": 75.5,
-      "ground_y": 39
+      "ground_y": -26
     },
     {
       "x": -4376,
@@ -290,14 +290,14 @@
       "z": -751,
       "start_y": -29,
       "radius": 72.3,
-      "ground_y": 34
+      "ground_y": -29
     },
     {
       "x": -3464,
       "z": 3620,
       "start_y": -34,
       "radius": 72.2,
-      "ground_y": 32
+      "ground_y": -27
     }
   ],
   "giant_cavern_checked": {

@@ -1,7 +1,7 @@
 """Builds a before/after picture of two map runs of the same ground: the two close-ups side by side, the two
 side views one above the other, and the headline numbers of each. Needs Pillow.
 
-Usage: python tools/worldgen/before_after.py <before dir> <after dir> <out.png> [before label] [after label]
+Usage: python tools/worldgen/before_after.py <before dir> <after dir> <out.png> [before label] [after label] [lowest y] [highest y]
 Each dir is a map run's output (height.png, closeup.png, slice.png, stats.json), e.g. docs/worldgen-maps/eternal_return.
 Pin the close-up and side view (-PworldmapCloseup, -PworldmapSliceZ) so both runs show the same ground.
 """
@@ -16,7 +16,7 @@ labels = sys.argv[4:6] if len(sys.argv) > 5 else ['Before', 'After']
 CLOSEUP = 512
 GAP = 10
 SLICE_WIDTH = 2 * CLOSEUP + GAP
-SLICE_LOW, SLICE_HIGH = 40, 200
+SLICE_LOW, SLICE_HIGH = (int(sys.argv[6]), int(sys.argv[7])) if len(sys.argv) > 7 else (40, 200)
 
 
 def numbers(s):

@@ -472,6 +472,24 @@ public final class EternalReturnConfig {
 		 */
 		public boolean roundOverhangs = true;
 		/**
+		 * Deep oceans: in Eternal Return worlds the sea floor falls in steps away from the coast, a shelf at
+		 * about y 30, then a steep drop to about y 0 and, further out, another to about y -30 (see
+		 * docs/worldgen.md). Off: the ocean depths of the preset. Other worlds never change.
+		 */
+		public boolean deepOceans = true;
+		/**
+		 * Sinkholes: in Eternal Return worlds, very rarely, the ground drops into a pit down to the lava
+		 * near the bottom of the world, flooded from sea level down, like the sinkholes of 1.18 and 1.19.
+		 * Other worlds never change.
+		 */
+		public boolean sinkholes = true;
+		/**
+		 * Floating islands: in Eternal Return worlds, rare islands above y 225, 10 to 60 blocks across with a
+		 * pointed underside, made of the ground of the biome below them (sand over an ocean). Newly generated
+		 * chunks only. Other worlds never change.
+		 */
+		public boolean floatingIslands = true;
+		/**
 		 * In Eternal Return worlds only strongholds, mineshafts, nether fossils and end cities are placed, in
 		 * every dimension (structure-like features such as geodes and dungeons stay). Blazes spawn in soul
 		 * sand valleys and basalt deltas there instead of fortresses. Other worlds never change.

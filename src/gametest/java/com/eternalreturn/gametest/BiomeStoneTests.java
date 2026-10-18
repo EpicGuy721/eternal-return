@@ -59,6 +59,8 @@ public class BiomeStoneTests implements FabricGameTest {
 		table.put("moderner_beta:early_release_taiga", Blocks.ANDESITE);
 		table.put("moderner_beta:early_release_extreme_hills", Blocks.ANDESITE);
 		table.put("eternalreturn:autumnal_forest", Blocks.ANDESITE);
+		table.put("minecraft:old_growth_pine_taiga", Blocks.ANDESITE);
+		table.put("minecraft:old_growth_spruce_taiga", Blocks.ANDESITE);
 		table.put("minecraft:birch_forest", Blocks.DIORITE);
 		table.put("minecraft:jungle", Blocks.GRANITE);
 		table.put("minecraft:savanna", Blocks.GRANITE);

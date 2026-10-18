@@ -51,6 +51,16 @@ KNOBS = {
     # enough, it cancels the sampled scale noise over water. None: as Moderner Beta has it.
     'water_scale': None,
     'scale_variation': 1.121,
+    # Old growth taigas: one in this many taiga patches surrounded by taiga becomes old growth pine or
+    # spruce taiga (half each). None: no old growth taigas.
+    'old_growth_taiga_chance': None,
+    # Moderner Beta's bottom slide, in 8-block noise cells: how far up from the bottom of the world the
+    # terrain is pushed back to solid. Only shows where the ground would otherwise fall that low (sinkholes).
+    # None: as Moderner Beta has it (3).
+    'bottom_slide_size': None,
+    # Vanilla's aquifers in the noise settings. Off: every open space below sea level fills with water down
+    # to the lava level (y -54), so sinkholes are clean deep lakes. None: as Moderner Beta has it (on).
+    'aquifers': None,
     # Biome stone: block id -> the biomes whose stone it replaces, from just under the topsoil down to
     # bedrock (see docs/worldgen.md). Biomes under minecraft:stone, and any biome not listed, keep stone.
     'biome_stone': {},
@@ -102,6 +112,25 @@ for s in pipeline:
         for term in s['predicate']['terms']:
             if term.get('condition') == 'moderner_beta:in_set':
                 term['biomes'] += WITH_HILLS
+
+# Old growth taigas, later versions' rarer taiga variants: right after the hills step, some taiga patches
+# whose four neighbours are taiga become old growth pine or old growth spruce taiga (half each).
+if KNOBS['old_growth_taiga_chance']:
+    after_hills = next(i for i, s in enumerate(pipeline) if s['type'] == 'moderner_beta:conditional_overlay'
+                       and s.get('onMatch', {}).get('value') == 'hills') + 1
+    pipeline[after_hills:after_hills] = [
+        {'type': 'moderner_beta:weighted_pool', 'id': 'old_growth_taiga', 'seed': 1001, 'targets': [
+            {'data': {'type': 'biome', 'value': 'minecraft:old_growth_pine_taiga'}, 'weight': 1},
+            {'data': {'type': 'biome', 'value': 'minecraft:old_growth_spruce_taiga'}, 'weight': 1}]},
+        {'type': 'moderner_beta:conditional_overlay', 'parent': 'land', 'id': 'land',
+         'onMatch': {'type': 'layer', 'value': 'old_growth_taiga'},
+         'otherwise': {'type': 'biome', 'value': 'minecraft:the_void*null'},
+         'predicate': {'condition': 'moderner_beta:all_of', 'terms': [
+             {'biome': 'moderner_beta:early_release_taiga', 'condition': 'moderner_beta:single_match'},
+             {'condition': 'moderner_beta:identical_neighbor', 'diagonal': False, 'requiredCount': 4},
+             {'condition': 'moderner_beta:random_chance', 'denominator': KNOBS['old_growth_taiga_chance'], 'numerator': 1}]},
+         'seed': 1002},
+    ]
 
 # ---------------------------------------------------------------- oceans: deep oceans and ocean temperatures
 # Taken from Moderner Beta's Release 1.17.1 preset (the 1.7 deep ocean layer and the 1.13 ocean climate).
@@ -176,6 +205,8 @@ cs['moderner_beta:noise_3d_settings']['climateHeightScaling'] = KNOBS['climate_h
 cs['moderner_beta:noise_scale']['stretchY'] = KNOBS['stretch_y']
 cs['moderner_beta:noise_scale']['baseSize'] = KNOBS['base_size']
 cs['moderner_beta:noise_scale']['limitBlending'] = KNOBS['limit_blending']
+if KNOBS['bottom_slide_size'] is not None:
+    cs['moderner_beta:noise_slide']['bottomSize'] = KNOBS['bottom_slide_size']
 forced = cs['moderner_beta:forced_biome_height']
 forced['depthWeight'] = KNOBS['depth_weight']
 forced['depthOffset'] = KNOBS['depth_offset']
@@ -249,6 +280,8 @@ write(f'data/{NS}/moderner_beta/settings_preset/eternal_return.json', preset)
 noise = mb_json('worldgen/noise_settings/overworld_256.json')
 noise['noise']['min_y'] = -64
 noise['noise']['height'] = KNOBS['noise_top'] + 64
+if KNOBS['aquifers'] is not None:
+    noise['aquifers_enabled'] = KNOBS['aquifers']
 # Biome stone: after every topsoil, beach and badlands-band rule, so it only reaches what would stay
 # stone. Switched by the config setting worldgen.biomeStone (the eternalreturn:biome_stone_enabled
 # condition). No blending: each block takes the stone of the biome it is in.

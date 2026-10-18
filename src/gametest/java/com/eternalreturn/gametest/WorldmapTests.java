@@ -179,12 +179,125 @@ public class WorldmapTests implements FabricGameTest {
 		ImageIO.write(landImage(land), "png", out.resolve("land.png").toFile());
 		ImageIO.write(slice, "png", out.resolve("slice.png").toFile());
 		ImageIO.write(closeup, "png", out.resolve("closeup.png").toFile());
+		if (com.eternalreturn.worldgen.EternalReturnServer.active()) {
+			featureImages(world, generator, noise, sea, out, stats);
+		}
 		try (Writer writer = Files.newBufferedWriter(out.resolve("stats.json"))) {
 			new GsonBuilder().setPrettyPrinting().create().toJson(stats, writer);
 		}
 		EternalReturn.LOGGER.info("[worldmap] wrote {} | water {} | landmasses {} | weirdness {}", out, stats.get("water_share"),
 				stats.get("landmasses"), stats.get("weirdness"));
 		ctx.complete();
+	}
+
+	// ------------------------------------------------------------------ Eternal Return terrain features
+
+	/**
+	 * Eternal Return worlds: a picture of the nearest floating island over land (side view through its
+	 * middle and the view from above, from fully generated chunks, 4 pixels per block) and of the nearest
+	 * sinkhole on land (side view, 3 pixels per block), into island.png and sinkhole.png.
+	 */
+	private static void featureImages(ServerWorld world, ChunkGenerator generator, NoiseConfig noise, int sea, Path out, Map<String, Object> stats) throws IOException {
+		BiomeSource biomes = generator.getBiomeSource();
+		com.eternalreturn.worldgen.terrain.FloatingIslands.Island island = null;
+		for (int cx = -6; cx < 6; cx++) {
+			for (int cz = -6; cz < 6; cz++) {
+				var candidate = com.eternalreturn.worldgen.terrain.FloatingIslands.inCell(noise, cx, cz);
+				if (candidate == null || candidate.radius() < 14) {
+					continue;
+				}
+				String id = biomes.getBiome(BiomeCoords.fromBlock(candidate.x()), BiomeCoords.fromBlock(sea), BiomeCoords.fromBlock(candidate.z()), noise.getMultiNoiseSampler())
+						.getKey().map(key -> key.getValue().toString()).orElse("?");
+				if (id.contains("ocean") || id.contains("river") || id.contains("beach")) {
+					continue;
+				}
+				if (island == null || Math.abs(candidate.x()) + Math.abs(candidate.z()) < Math.abs(island.x()) + Math.abs(island.z())) {
+					island = candidate;
+				}
+			}
+		}
+		if (island != null) {
+			int reach = island.radius() + 4;
+			for (int x = (island.x() - reach) >> 4; x <= (island.x() + reach) >> 4; x++) {
+				for (int z = (island.z() - reach) >> 4; z <= (island.z() + reach) >> 4; z++) {
+					world.getChunk(x, z, ChunkStatus.FULL, true);
+				}
+			}
+			int width = 2 * reach;
+			int low = island.top() - island.depth() - 6;
+			int high = island.top() + 24;
+			int scale = 4;
+			BufferedImage image = new BufferedImage(width * scale * 2 + 20, (high - low) * scale, BufferedImage.TYPE_INT_RGB);
+			Graphics2D g = image.createGraphics();
+			g.setColor(Color.WHITE);
+			g.fillRect(0, 0, image.getWidth(), image.getHeight());
+			BlockPos.Mutable pos = new BlockPos.Mutable();
+			for (int i = 0; i < width; i++) {
+				int x = island.x() - reach + i;
+				// Side view through the middle.
+				for (int y = low; y < high; y++) {
+					BlockState state = world.getBlockState(pos.set(x, y, island.z()));
+					int rgb = state.isAir() ? 0xCFE3F5 : colour(world, pos, state);
+					g.setColor(new Color(rgb));
+					g.fillRect(i * scale, (high - 1 - y) * scale, scale, scale);
+				}
+				// From above: the top block of each column, shaded by height.
+				for (int j = 0; j < width && j * scale < image.getHeight(); j++) {
+					int z = island.z() - reach + j;
+					int top = Math.min(high, world.getTopY(Heightmap.Type.WORLD_SURFACE, x, z)) - 1;
+					BlockState state = world.getBlockState(pos.set(x, top, z));
+					int rgb = top < low ? 0x9DB8D9 : colour(world, pos, state);
+					g.setColor(new Color(rgb));
+					g.fillRect(width * scale + 20 + i * scale, j * scale, scale, scale);
+				}
+			}
+			g.dispose();
+			ImageIO.write(image, "png", out.resolve("island.png").toFile());
+			stats.put("island_pictured", island.x() + " " + island.top() + " " + island.z() + " radius " + island.radius());
+		}
+		com.eternalreturn.worldgen.terrain.TerrainShape.Sinkhole hole = null;
+		for (int cx = -3; cx < 3; cx++) {
+			for (int cz = -3; cz < 3; cz++) {
+				var candidate = com.eternalreturn.worldgen.terrain.TerrainShape.plannedSinkhole(world.getSeed(), cx, cz);
+				if (candidate == null || candidate.radius() < 18) {
+					continue;
+				}
+				int floor = generator.getHeight(candidate.x(), candidate.z(), Heightmap.Type.OCEAN_FLOOR_WG, world, noise);
+				if (floor > -30) {
+					continue;
+				}
+				if (hole == null || Math.abs(candidate.x()) + Math.abs(candidate.z()) < Math.abs(hole.x()) + Math.abs(hole.z())) {
+					hole = candidate;
+				}
+			}
+		}
+		if (hole != null) {
+			int reach = hole.radius() * 2 + 10;
+			for (int x = (hole.x() - reach) >> 4; x <= (hole.x() + reach) >> 4; x++) {
+				world.getChunk(x, hole.z() >> 4, ChunkStatus.FULL, true);
+			}
+			int low = world.getBottomY();
+			int high = sea + 50;
+			int scale = 3;
+			BufferedImage image = new BufferedImage(2 * reach * scale, (high - low) * scale, BufferedImage.TYPE_INT_RGB);
+			Graphics2D g = image.createGraphics();
+			BlockPos.Mutable pos = new BlockPos.Mutable();
+			for (int i = 0; i < 2 * reach; i++) {
+				for (int y = low; y < high; y++) {
+					BlockState state = world.getBlockState(pos.set(hole.x() - reach + i, y, hole.z()));
+					g.setColor(new Color(state.isAir() ? (y == sea ? 0x9DB8D9 : 0xCFE3F5) : colour(world, pos, state)));
+					g.fillRect(i * scale, (high - 1 - y) * scale, scale, scale);
+				}
+			}
+			g.dispose();
+			ImageIO.write(image, "png", out.resolve("sinkhole.png").toFile());
+			stats.put("sinkhole_pictured", hole.x() + " " + hole.z() + " radius " + hole.radius());
+		}
+	}
+
+	private static int colour(ServerWorld world, BlockPos pos, BlockState state) {
+		int rgb = state.getMapColor(world, pos).color;
+		return rgb == 0 ? 0x707070 : rgb;
 	}
 
 	// ------------------------------------------------------------------ statistics helpers
@@ -687,7 +800,7 @@ public class WorldmapTests implements FabricGameTest {
 		Object[][] palette = {
 				{"ocean", 0x000070}, {"frozen_ocean", 0x7070D6}, {"deep_ocean", 0x000030}, {"cold_ocean", 0x202070}, {"lukewarm_ocean", 0x0060B0},
 				{"warm_ocean", 0x00A0B0}, {"deep_lukewarm_ocean", 0x003C70}, {"deep_cold_ocean", 0x181840}, {"deep_frozen_ocean", 0x404090},
-				{"cherry_grove", 0xFF9FD0}, {"autumnal_forest", 0xD8641E}, {"river", 0x0000FF}, {"frozen_river", 0xA0A0FF}, {"beach", 0xFADE55}, {"snowy_beach", 0xFAF0C0},
+				{"cherry_grove", 0xFF9FD0}, {"autumnal_forest", 0xD8641E}, {"old_growth_pine_taiga", 0x596651}, {"old_growth_spruce_taiga", 0x818E79}, {"river", 0x0000FF}, {"frozen_river", 0xA0A0FF}, {"beach", 0xFADE55}, {"snowy_beach", 0xFAF0C0},
 				{"desert", 0xFA9418}, {"forest", 0x056621}, {"birch_forest", 0x307444}, {"dark_forest", 0x40511A}, {"jungle", 0x537B09},
 				{"savanna", 0xBDB25F}, {"badlands", 0xD94515}, {"plains", 0x8DB360}, {"swamp", 0x07F9B2}, {"taiga", 0x0B6659},
 				{"snowy_plains", 0xFFFFFF}, {"snowy_taiga", 0x31554A}, {"mushroom_fields", 0xFF00FF}, {"windswept_hills", 0x606060},

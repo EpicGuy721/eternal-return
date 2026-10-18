@@ -380,6 +380,60 @@
           "seed": 1000
         },
         {
+          "type": "moderner_beta:weighted_pool",
+          "id": "old_growth_taiga",
+          "seed": 1001,
+          "targets": [
+            {
+              "data": {
+                "type": "biome",
+                "value": "minecraft:old_growth_pine_taiga"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "minecraft:old_growth_spruce_taiga"
+              },
+              "weight": 1
+            }
+          ]
+        },
+        {
+          "type": "moderner_beta:conditional_overlay",
+          "parent": "land",
+          "id": "land",
+          "onMatch": {
+            "type": "layer",
+            "value": "old_growth_taiga"
+          },
+          "otherwise": {
+            "type": "biome",
+            "value": "minecraft:the_void*null"
+          },
+          "predicate": {
+            "condition": "moderner_beta:all_of",
+            "terms": [
+              {
+                "biome": "moderner_beta:early_release_taiga",
+                "condition": "moderner_beta:single_match"
+              },
+              {
+                "condition": "moderner_beta:identical_neighbor",
+                "diagonal": false,
+                "requiredCount": 4
+              },
+              {
+                "condition": "moderner_beta:random_chance",
+                "denominator": 2,
+                "numerator": 1
+              }
+            ]
+          },
+          "seed": 1002
+        },
+        {
           "type": "moderner_beta:modal_zoom",
           "parent": "land",
           "id": "land_0",
@@ -698,6 +752,8 @@
         "minecraft:forest": "0.1;0.05",
         "minecraft:jungle": "0.1;0.05",
         "minecraft:mushroom_fields": "0.1;0.05",
+        "minecraft:old_growth_pine_taiga": "0.1;0.05",
+        "minecraft:old_growth_spruce_taiga": "0.1;0.05",
         "minecraft:plains": "0.1;0.05",
         "minecraft:savanna": "0.1;0.05",
         "minecraft:savanna*hills": "0.1;0.05",
@@ -765,7 +821,7 @@
     },
     "moderner_beta:noise_slide": {
       "bottomOffset": 0,
-      "bottomSize": 3,
+      "bottomSize": 1,
       "bottomTarget": 15,
       "topOffset": 0,
       "topSize": 3,

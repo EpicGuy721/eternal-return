@@ -29,7 +29,8 @@ public class EternalReturnPresetTests implements FabricGameTest {
 			"minecraft:desert", "minecraft:forest", "minecraft:jungle", "minecraft:mushroom_fields",
 			"moderner_beta:late_beta_plains", "moderner_beta:early_release_extreme_hills", "moderner_beta:early_release_taiga",
 			"moderner_beta:early_release_swampland", "moderner_beta:early_release_ice_plains",
-			"minecraft:birch_forest", "minecraft:savanna", "minecraft:badlands", "minecraft:dark_forest", "eternalreturn:autumnal_forest");
+			"minecraft:birch_forest", "minecraft:savanna", "minecraft:badlands", "minecraft:dark_forest", "eternalreturn:autumnal_forest",
+			"minecraft:old_growth_pine_taiga", "minecraft:old_growth_spruce_taiga");
 	private static final Set<String> CAVE_BIOMES = Set.of("minecraft:lush_caves", "minecraft:dripstone_caves", "minecraft:deep_dark");
 
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = GameTestWorld.ETERNAL_RETURN_BATCH, tickLimit = 200_000)
@@ -78,6 +79,8 @@ public class EternalReturnPresetTests implements FabricGameTest {
 			BlockPos.Mutable pos = new BlockPos.Mutable();
 			for (int x = 0; x < 16; x++) {
 				for (int z = 0; z < 16; z++) {
+					// Under the sea floor only: deep oceans reach down to about y -30.
+					int floor = chunk.sampleHeightmap(net.minecraft.world.Heightmap.Type.OCEAN_FLOOR, x, z);
 					for (int y = -64; y < 40; y++) {
 						var state = chunk.getBlockState(pos.set(c[0] * 16 + x, y, c[1] * 16 + z));
 						String blockId = Registries.BLOCK.getId(state.getBlock()).getPath();
@@ -88,7 +91,7 @@ public class EternalReturnPresetTests implements FabricGameTest {
 							deepslate++;
 							deepslateKinds.merge(blockId + "@y" + (y >> 3 << 3), 1, Integer::sum);
 						}
-						if (y < 0) {
+						if (y < Math.min(0, floor)) {
 							cellsBelowZero++;
 							if (!state.isAir() && state.getFluidState().isEmpty()) {
 								solidBelowZero++;

@@ -2,6 +2,7 @@ package com.eternalreturn.worldgen.caves;
 
 import com.eternalreturn.config.EternalReturnConfig;
 import com.eternalreturn.config.EternalReturnConfig.CaveTypeSettings;
+import com.eternalreturn.worldgen.terrain.FloatingIslands;
 import com.eternalreturn.worldgen.terrain.OverhangRounder;
 import com.mojang.serialization.Codec;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -29,7 +30,8 @@ import java.util.function.Function;
  * the source chunk, and simulates them in full; only the parts inside the chunk being carved are written.
  * Carving works only from the seed, the source position and the chunk's own blocks, so it matches
  * across chunk borders and doesn't depend on which chunks generated first.
- * Before any cave is carved in a chunk, it also rounds the chunk's overhangs (OverhangRounder).
+ * Before any cave is carved in a chunk, it also rounds the chunk's overhangs (OverhangRounder) and builds
+ * its part of any floating island (FloatingIslands).
  * Outside Eternal Return worlds it does nothing.
  */
 public class CaveSystemCarver extends Carver<CarverConfig> {
@@ -118,6 +120,9 @@ public class CaveSystemCarver extends Carver<CarverConfig> {
 				: (x, z) -> generator.getHeight(x, z, Heightmap.Type.OCEAN_FLOOR_WG, chunk, context.getNoiseConfig());
 		if (EternalReturnConfig.get().worldgen.roundOverhangs) {
 			OverhangRounder.round(chunk, context.getNoiseConfig(), seaLevel);
+		}
+		if (EternalReturnConfig.get().worldgen.floatingIslands) {
+			FloatingIslands.build(chunk, context.getNoiseConfig(), seaLevel);
 		}
 		current = new ChunkCarver(chunk, mask, state -> state.isIn(config.replaceable), minY, maxY, config.lavaLevel.getY(context), seaLevel, water);
 		CURRENT.set(current);

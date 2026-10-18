@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Status of the hooks into Moderner Beta's surface pass (com.eternalreturn.mixin.compat), for the startup
+ * Status of the hooks into Moderner Beta's surface pass and column heights (com.eternalreturn.mixin.compat), for the startup
  * check and the tests. Plain Java with no game classes, because the mixin plugin uses it before the game
  * loads.
  */
@@ -15,6 +15,8 @@ public final class ModernerBetaHooks {
 	/** Times each hook ran. */
 	public static final AtomicLong SUITABLE_CHECKS = new AtomicLong();
 	public static final AtomicLong SURFACE_PASSES = new AtomicLong();
+	/** Chunk providers the column-height hook (ModernerBetaHeightMixin) has seen. */
+	public static final AtomicLong HEIGHT_PROVIDERS = new AtomicLong();
 
 	private ModernerBetaHooks() {
 	}

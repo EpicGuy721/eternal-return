@@ -83,22 +83,22 @@
   },
   "water_depth": {
     "p5": 1,
-    "p50": 15,
-    "p90": 29,
-    "p99": 32,
-    "max": 33
+    "p50": 57,
+    "p90": 91,
+    "p99": 95,
+    "max": 125
   },
   "land_roughness_blocks_per_4": 1.575,
   "landmasses": {
     "count_over_1_chunk": 69,
     "count_over_256x256": 6,
-    "largest_blocks": 5640032,
+    "largest_blocks": 5637952,
     "largest_share_of_land": 0.785
   },
   "terrain_mix": {
     "window_blocks": 32,
-    "land_windows": 6131,
-    "flat": 0.294,
+    "land_windows": 6128,
+    "flat": 0.293,
     "rolling": 0.478,
     "hilly": 0.205,
     "mountains": 0.023,
@@ -132,9 +132,9 @@
       "early_release_extreme_hills": "19 / 50 / 28 / 3% of 624",
       "early_release_ice_plains": "43 / 49 / 8 / 0% of 1245",
       "early_release_swampland": "24 / 46 / 24 / 5% of 281",
-      "early_release_taiga": "30 / 49 / 19 / 3% of 685",
+      "early_release_taiga": "30 / 49 / 18 / 3% of 667",
       "forest": "29 / 46 / 23 / 2% of 545",
-      "jungle": "15 / 44 / 35 / 6% of 404",
+      "jungle": "15 / 44 / 35 / 6% of 401",
       "late_beta_plains": "30 / 44 / 24 / 1% of 419",
       "river": "1 / 42 / 47 / 10% of 91",
       "savanna": "23 / 62 / 15 / 0% of 107"
@@ -147,7 +147,7 @@
     "minecraft:river": 0.065,
     "minecraft:deep_ocean": 0.056,
     "minecraft:cold_ocean": 0.055,
-    "moderner_beta:early_release_taiga": 0.05,
+    "moderner_beta:early_release_taiga": 0.048,
     "moderner_beta:early_release_extreme_hills": 0.048,
     "minecraft:deep_lukewarm_ocean": 0.045,
     "minecraft:warm_ocean": 0.042,
@@ -167,7 +167,9 @@
     "minecraft:savanna": 0.008,
     "minecraft:deep_frozen_ocean": 0.006,
     "minecraft:frozen_river": 0.006,
-    "minecraft:mushroom_fields": 0.001
+    "minecraft:mushroom_fields": 0.001,
+    "minecraft:old_growth_pine_taiga": 0.001,
+    "minecraft:old_growth_spruce_taiga": 0.0
   },
   "slice_z": -2032,
   "closeup_centre": "0, 1536",
@@ -182,7 +184,7 @@
     "steps_4_or_more_by_biome": {
       "autumnal_forest": 0.003,
       "badlands": 0.0,
-      "beach": 0.019,
+      "beach": 0.018,
       "birch_forest": 0.0,
       "cherry_grove": 0.012,
       "dark_forest": 0.013,
@@ -203,7 +205,9 @@
     "floating_blocks_per_1000_land_columns": 0.0
   },
   "timing_ms": {
-    "chunks": 128835,
-    "sampling": 560290
-  }
+    "sampling": 327425,
+    "chunks": 69263
+  },
+  "island_pictured": "-705 244 -428 radius 16",
+  "sinkhole_pictured": "-536 -1538 radius 29"
 }

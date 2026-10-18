@@ -4,6 +4,7 @@
 	"plugin": "com.eternalreturn.mixin.compat.ModernerBetaMixinPlugin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
+		"ModernerBetaHeightMixin",
 		"ModernerBetaSurfaceExtraMixin",
 		"ModernerBetaSurfaceMixin"
 	],

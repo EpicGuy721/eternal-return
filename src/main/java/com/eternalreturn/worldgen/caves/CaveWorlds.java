@@ -45,6 +45,19 @@ public final class CaveWorlds {
 		return eternalReturn != null && generator.getSettings().value().noiseRouter() == eternalReturn.noiseRouter();
 	}
 
+	/** The noise router of eternalreturn:eternal_return, remembered when the server makes its worlds (for code that has no registries at hand). */
+	private static volatile net.minecraft.world.gen.noise.NoiseRouter router;
+
+	public static void rememberRouter(net.minecraft.world.gen.noise.NoiseRouter eternalReturn) {
+		router = eternalReturn;
+	}
+
+	/** Whether this generator uses the Eternal Return noise settings, by the router remembered at server start. */
+	public static boolean usesEternalReturnSettings(NoiseChunkGenerator generator) {
+		net.minecraft.world.gen.noise.NoiseRouter known = router;
+		return known != null && generator.getSettings().value().noiseRouter() == known;
+	}
+
 	public static boolean isEternalReturn(CarverContext context) {
 		return context instanceof Context extras && extras.eternalreturn$isEternalReturn();
 	}

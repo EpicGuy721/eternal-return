@@ -38,6 +38,9 @@ public final class EternalReturnServer {
 		DimensionOptions overworld = dimensions.get(DimensionOptions.OVERWORLD);
 		active = overworld != null && overworld.chunkGenerator() instanceof NoiseChunkGenerator noise
 				&& CaveWorlds.usesEternalReturnSettings(noise, server.getRegistryManager());
+		server.getRegistryManager().getOptional(RegistryKeys.CHUNK_GENERATOR_SETTINGS)
+				.flatMap(registry -> registry.getOrEmpty(CaveWorlds.NOISE_SETTINGS))
+				.ifPresent(settings -> CaveWorlds.rememberRouter(settings.noiseRouter()));
 	}
 
 	public static boolean active() {

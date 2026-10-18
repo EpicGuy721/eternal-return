@@ -27,7 +27,8 @@ public class ModernerBetaMixinPlugin implements IMixinConfigPlugin {
 	/** Mixin class to {target method name, argument count, return descriptor}. */
 	private static final Map<String, Object[]> TARGETS = Map.of(
 			"com.eternalreturn.mixin.compat.ModernerBetaSurfaceMixin", new Object[]{"isBlockSuitableForSurface", 1, "Z"},
-			"com.eternalreturn.mixin.compat.ModernerBetaSurfaceExtraMixin", new Object[]{"provideSurfaceExtra", 5, "V"});
+			"com.eternalreturn.mixin.compat.ModernerBetaSurfaceExtraMixin", new Object[]{"provideSurfaceExtra", 5, "V"},
+			"com.eternalreturn.mixin.compat.ModernerBetaHeightMixin", new Object[]{"getHeightConfigAt", 2, "Lmod/bluestaggo/modernerbeta/level/biome/HeightConfig;"});
 
 	@Override
 	public void onLoad(String mixinPackage) {
@@ -59,9 +60,11 @@ public class ModernerBetaMixinPlugin implements IMixinConfigPlugin {
 		}
 		ModernerBetaHooks.APPLIED.put(hook, found);
 		if (!found) {
-			LOGGER.warn("Eternal Return: Moderner Beta has changed ({} has no {} with {} argument(s)), so the {} hook into its surface pass is off. "
-							+ "Eternal Return worlds still generate, but biome stone may show columns of plain stone under Moderner Beta's bare-rock patches. "
-							+ "Please report this with your Moderner Beta version.", targetClassName, target[0], target[1], hook);
+			String effect = hook.equals("ModernerBetaHeightMixin")
+					? "Eternal Return worlds still generate, but without deep stepped oceans or sinkholes."
+					: "Eternal Return worlds still generate, but biome stone may show columns of plain stone under Moderner Beta's bare-rock patches.";
+			LOGGER.warn("Eternal Return: Moderner Beta has changed ({} has no {} with {} argument(s)), so the {} hook is off. {} "
+							+ "Please report this with your Moderner Beta version.", targetClassName, target[0], target[1], hook, effect);
 		}
 		return found;
 	}

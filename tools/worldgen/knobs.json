@@ -11,6 +11,9 @@
   "limit_blending": 40.0,
   "land_height": "0.1;0.05",
   "water_scale": -1.2,
+  "old_growth_taiga_chance": 2,
+  "bottom_slide_size": 1,
+  "aquifers": false,
   "biome_stone": {
     "minecraft:stone": [
       "moderner_beta:late_beta_plains",
@@ -32,7 +35,9 @@
       "minecraft:forest",
       "moderner_beta:early_release_taiga",
       "moderner_beta:early_release_extreme_hills",
-      "eternalreturn:autumnal_forest"
+      "eternalreturn:autumnal_forest",
+      "minecraft:old_growth_pine_taiga",
+      "minecraft:old_growth_spruce_taiga"
     ],
     "minecraft:diorite": [
       "minecraft:birch_forest"

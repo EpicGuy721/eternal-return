@@ -7,7 +7,7 @@
       ]
     }
   ],
-  "aquifers_enabled": true,
+  "aquifers_enabled": false,
   "default_block": {
     "Name": "minecraft:stone"
   },
@@ -2371,7 +2371,9 @@
                   "minecraft:forest",
                   "moderner_beta:early_release_taiga",
                   "moderner_beta:early_release_extreme_hills",
-                  "eternalreturn:autumnal_forest"
+                  "eternalreturn:autumnal_forest",
+                  "minecraft:old_growth_pine_taiga",
+                  "minecraft:old_growth_spruce_taiga"
                 ]
               },
               "then_run": {
