@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class PinkPetalsBlockItemMixin {
 	@Inject(method = "useOnBlock", at = @At("HEAD"), cancellable = true)
 	private void eternalreturn$waterFirst(ItemUsageContext context, CallbackInfoReturnable<ActionResult> cir) {
-		if (!context.getStack().isOf(Items.PINK_PETALS) || context.getPlayer() == null) {
+		if (!(context.getStack().isOf(Items.PINK_PETALS) || context.getStack().isOf(com.eternalreturn.blocks.Woods.MAPLE_PETALS_ITEM)) || context.getPlayer() == null) {
 			return;
 		}
 		var player = context.getPlayer();

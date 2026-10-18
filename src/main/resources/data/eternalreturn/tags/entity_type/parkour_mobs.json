@@ -16,6 +16,8 @@
     "minecraft:evoker",
     "minecraft:illusioner",
     "minecraft:witch",
-    "eternalreturn:vampire"
+    "eternalreturn:vampire",
+    "eternalreturn:frostbite",
+    "eternalreturn:parched"
   ]
 }

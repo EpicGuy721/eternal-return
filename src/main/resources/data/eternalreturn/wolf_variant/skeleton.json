@@ -1,0 +1,6 @@
+{
+  "wild_texture": "eternalreturn:entity/wolf/wolf_skeleton",
+  "tame_texture": "eternalreturn:entity/wolf/wolf_skeleton_tame",
+  "angry_texture": "eternalreturn:entity/wolf/wolf_skeleton_angry",
+  "biomes": "#minecraft:is_nether"
+}

@@ -292,7 +292,7 @@ public class CursesItemsAndMobsTests implements FabricGameTest {
 	// ---------- the Necronomicon ----------
 
 	/**
-	 * Crafted from the philosopher's stone, a book and 7 wither skeleton skulls; raises up to 3 servants that leave
+	 * Creative-only; raises up to 3 servants that leave
 	 * their master alone, go for what their master hits, survive saving and loading, and drop nothing.
 	 */
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "servants", tickLimit = 200)
@@ -300,7 +300,9 @@ public class CursesItemsAndMobsTests implements FabricGameTest {
 		ServerWorld world = ctx.getWorld();
 		ItemStack s = new ItemStack(Items.WITHER_SKELETON_SKULL);
 		ItemStack book = craft(world, 3, 3, List.of(s, s, s, s, new ItemStack(PhilosophersStone.ITEM), s, s, new ItemStack(Items.BOOK), s));
-		ctx.assertTrue(book.isOf(Necronomicon.ITEM) && book.getMaxDamage() == 666, "crafted: " + book);
+		ctx.assertTrue(book.isEmpty(), "the Necronomicon is creative-only, not crafted: " + book);
+		book = new ItemStack(Necronomicon.ITEM);
+		ctx.assertTrue(book.getMaxDamage() == 666, "666 uses");
 		floor(ctx, 7);
 		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(0, 1, 0));
 		player.setStackInHand(Hand.MAIN_HAND, book);

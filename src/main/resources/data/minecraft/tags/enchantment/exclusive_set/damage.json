@@ -1,6 +1,8 @@
 {
-  "replace": false,
+  "replace": true,
   "values": [
-    "eternalreturn:cubism"
+    "minecraft:impaling",
+    "minecraft:density",
+    "minecraft:breach"
   ]
 }

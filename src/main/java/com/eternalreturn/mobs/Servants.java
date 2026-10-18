@@ -73,7 +73,12 @@ public final class Servants {
 
 	@Nullable
 	public static MobEntity summon(ServerWorld world, PlayerEntity master, Vec3d at) {
-		EntityType<? extends MobEntity> kind = KINDS.get(world.random.nextInt(KINDS.size()));
+		return summon(world, master, at, KINDS.get(world.random.nextInt(KINDS.size())));
+	}
+
+	/** A servant of the given kind (Necromancy's stored mobs). */
+	@Nullable
+	public static MobEntity summon(ServerWorld world, PlayerEntity master, Vec3d at, EntityType<? extends MobEntity> kind) {
 		MobEntity mob = kind.create(world);
 		if (mob == null) {
 			return null;

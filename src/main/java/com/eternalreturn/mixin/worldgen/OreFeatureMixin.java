@@ -18,6 +18,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /** Ore variants: host stones count as stone for ore targets, and an ore placed into one becomes its variant (see OrePlacement). */
 @Mixin(OreFeature.class)
 public abstract class OreFeatureMixin {
+	@Inject(method = "generate", at = @At("HEAD"), cancellable = true)
+	private void eternalreturn$noTuff(FeatureContext<OreFeatureConfig> context, CallbackInfoReturnable<Boolean> cir) {
+		if (OrePlacement.skipsTuff(context)) {
+			cir.setReturnValue(false);
+		}
+	}
+
 	@Inject(method = "generate", at = @At("HEAD"))
 	private void eternalreturn$enterOre(FeatureContext<OreFeatureConfig> context, CallbackInfoReturnable<Boolean> cir) {
 		OrePlacement.enter(context);

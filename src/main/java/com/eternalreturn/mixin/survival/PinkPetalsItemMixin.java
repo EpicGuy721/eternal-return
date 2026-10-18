@@ -30,7 +30,7 @@ public abstract class PinkPetalsItemMixin {
 	@Inject(method = "use", at = @At("HEAD"), cancellable = true)
 	private void eternalreturn$petalsOnWater(World world, PlayerEntity user, Hand hand, CallbackInfoReturnable<TypedActionResult<ItemStack>> cir) {
 		ItemStack stack = user.getStackInHand(hand);
-		if (!stack.isOf(Items.PINK_PETALS)) {
+		if (!(stack.isOf(Items.PINK_PETALS) || stack.isOf(com.eternalreturn.blocks.Woods.MAPLE_PETALS_ITEM))) {
 			return;
 		}
 		BlockHitResult water = raycast(world, user, RaycastContext.FluidHandling.SOURCE_ONLY);

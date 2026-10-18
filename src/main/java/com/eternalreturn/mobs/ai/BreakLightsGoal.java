@@ -50,6 +50,7 @@ public class BreakLightsGoal extends Goal {
 	public boolean canStart() {
 		if (--this.searchCooldown > 0 || this.zombie.getTarget() != null || !EternalReturnConfig.get().mobs.zombiesBreakLights
 				|| com.eternalreturn.mobs.LargeMobs.isLarge(this.zombie) || com.eternalreturn.mobs.Servants.isServant(this.zombie)
+				|| this.zombie.getCommandTags().contains(com.eternalreturn.mobs.ZombieVillagerJobs.UNDERGROUND)
 				|| !this.zombie.getWorld().getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING)) {
 			return false;
 		}

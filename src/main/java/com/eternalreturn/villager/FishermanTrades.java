@@ -20,8 +20,8 @@ import java.util.List;
  * <li>from novice, every bait for a few emeralds (fish.json "baits": chum, glistering melon, magma cream);</li>
  * <li>every fish he buys, from the level of its rarity (common at novice ... legendary at master), all at once
  * rather than a random two. He buys the freshwater fish of his own region only (his villager type: plains,
- * desert, savanna, snow, taiga, jungle or swamp), and every fish from the sea, cherry groves, underground
- * water and the Nether.</li>
+ * desert, savanna, snow, taiga, jungle or swamp), and every fish from the sea, cherry groves and underground
+ * water. Only a fisherman in the Nether buys the Nether's fish, and one moved out of it stops.</li>
  * </ul>
  * Added when he levels up, and topped up whenever a player opens his trades, so fishermen from before this
  * get them too. Trades for items the game no longer has (the old fish and baits) are dropped then.
@@ -34,6 +34,11 @@ public final class FishermanTrades {
 
 	/** The fixed trades a fisherman of this region and level has. */
 	public static List<TradeOffer> offers(String region, int level) {
+		return offers(region, level, false);
+	}
+
+	/** The same, for a fisherman in the Nether (who also buys its fish) or not. */
+	public static List<TradeOffer> offers(String region, int level, boolean inNether) {
 		List<TradeOffer> offers = new ArrayList<>();
 		for (FishTable.BaitOffer bait : FishTable.baits()) {
 			Item item = Registries.ITEM.get(bait.item());
@@ -42,7 +47,7 @@ public final class FishermanTrades {
 			}
 		}
 		for (FishTable.Fish fish : FishTable.fish()) {
-			if (fish.rarity().level() <= level && buys(region, fish)) {
+			if (fish.rarity().level() <= level && buys(region, fish) && (inNether || !fish.nether())) {
 				offers.add(new TradeOffer(new TradedItem(FishTable.item(fish), fish.sellCount()), new ItemStack(Items.EMERALD, fish.sellEmeralds()),
 						fish.rarity().maxUses(), fish.rarity().experience(), PRICE_MULTIPLIER));
 			}
@@ -65,7 +70,11 @@ public final class FishermanTrades {
 		}
 		TradeOfferList offers = villager.getOffers();
 		offers.removeIf(offer -> offer.getOriginalFirstBuyItem().isEmpty() || offer.getSellItem().isEmpty());
-		for (TradeOffer wanted : offers(region(villager), villager.getVillagerData().getLevel())) {
+		boolean inNether = villager.getWorld().getRegistryKey() == net.minecraft.world.World.NETHER;
+		if (!inNether) {
+			offers.removeIf(offer -> FishTable.fish().stream().anyMatch(fish -> fish.nether() && offer.getOriginalFirstBuyItem().isOf(FishTable.item(fish))));
+		}
+		for (TradeOffer wanted : offers(region(villager), villager.getVillagerData().getLevel(), inNether)) {
 			boolean present = offers.stream().anyMatch(offer -> offer.getOriginalFirstBuyItem().isOf(wanted.getOriginalFirstBuyItem().getItem())
 					&& offer.getSellItem().isOf(wanted.getSellItem().getItem()) && offer.getSecondBuyItem().isEmpty());
 			if (!present) {

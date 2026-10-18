@@ -1,0 +1,10 @@
+data/minecraft/tags/item/axes.json
+data/minecraft/tags/item/chest_armor.json
+data/minecraft/tags/item/cluster_max_harvestables.json
+data/minecraft/tags/item/foot_armor.json
+data/minecraft/tags/item/head_armor.json
+data/minecraft/tags/item/hoes.json
+data/minecraft/tags/item/leg_armor.json
+data/minecraft/tags/item/pickaxes.json
+data/minecraft/tags/item/shovels.json
+data/minecraft/tags/item/swords.json

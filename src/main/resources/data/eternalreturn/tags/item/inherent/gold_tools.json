@@ -1,8 +1,10 @@
 {
-  "values": [
-    "minecraft:golden_pickaxe",
-    "minecraft:golden_axe",
-    "minecraft:golden_shovel",
-    "minecraft:golden_hoe"
-  ]
+	"values": [
+		"minecraft:golden_pickaxe",
+		"minecraft:golden_axe",
+		"minecraft:golden_shovel",
+		"eternalreturn:rosegold_pickaxe",
+		"eternalreturn:rosegold_axe",
+		"eternalreturn:rosegold_shovel"
+	]
 }

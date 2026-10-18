@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "RRR",
+    "RMR",
+    "RRR"
+  ],
+  "key": {
+    "R": {
+      "item": "minecraft:firework_rocket"
+    },
+    "M": {
+      "item": "minecraft:phantom_membrane"
+    }
+  },
+  "result": {
+    "count": 8,
+    "id": "eternalreturn:dragon_rocket"
+  }
+}

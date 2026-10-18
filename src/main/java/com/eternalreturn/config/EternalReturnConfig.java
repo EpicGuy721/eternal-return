@@ -49,7 +49,15 @@ public final class EternalReturnConfig {
 	public Map<String, Map<String, Integer>> inherentEnchantments = defaultInherent();
 
 	/** Enchantments that can never be rolled by tables, loot, mobs or villagers. */
-	public List<String> disabledEnchantments = new ArrayList<>(List.of("minecraft:mending"));
+	public List<String> disabledEnchantments = new ArrayList<>(List.of("minecraft:mending", "minecraft:soul_speed"));
+
+	/**
+	 * Which defaults the material rules (enchantCaps, inherentEnchantments, disabledEnchantments, armor weights) were
+	 * written with: version 1 added copper and rose gold, gave gold tools Silk Touch (hoes Fortune), chainmail
+	 * Projectile Protection I, diamond armor Blast Protection I, netherite armor Unbreaking V, and removed Soul Speed.
+	 * Don't edit.
+	 */
+	public int materialsVersion;
 
 	public BookshelfBias bookshelfBias = new BookshelfBias();
 	public FortuneTweaks fortune = new FortuneTweaks();
@@ -185,6 +193,19 @@ public final class EternalReturnConfig {
 		public int vampireTurnSeconds = 30;
 		/** Seconds of Poison a vampire's bat gives a player it bites. */
 		public int vampireBatPoisonSeconds = 5;
+		/** Wither skeletons' health (vanilla 20). */
+		public double witherSkeletonHealth = 80.0;
+		/** Wither skeletons shoot wither skulls at targets 8 to 32 blocks away. */
+		public boolean witherSkeletonSkulls = true;
+		/** Phantoms come on one night in this many, whether or not anyone slept (0: vanilla's insomnia instead). */
+		public int phantomNightChance = 13;
+		/**
+		 * Mobs that no longer spawn naturally (spawn eggs, commands, breeding and structures still make them). Read
+		 * when the world loads.
+		 */
+		public List<String> noNaturalSpawns = new ArrayList<>(List.of("minecraft:allay", "minecraft:armadillo", "minecraft:axolotl",
+				"minecraft:camel", "minecraft:frog", "minecraft:glow_squid", "minecraft:sniffer", "minecraft:tadpole", "minecraft:turtle",
+				"minecraft:dolphin", "minecraft:goat"));
 		/** Chance a zombie, skeleton or creeper spawns large (twice the size). */
 		public double largeVariantChance = 0.005;
 	}
@@ -358,6 +379,10 @@ public final class EternalReturnConfig {
 		public boolean elytraRocketBoost = false;
 		/** How many drinkable, splash or lingering potions fit in a stack. Needs a restart. */
 		public int potionStackSize = 16;
+		/** Beds explode in the Nether and the End, as in vanilla (off: they just can't be slept in there). */
+		public boolean bedsExplode = false;
+		/** What a player drops on death never despawns. */
+		public boolean deathDropsStay = true;
 		/** False: however many players sleep, the night never skips; beds only set the respawn point. */
 		public boolean bedsSkipNight = false;
 		/** How many beds each player remembers; when the newest is gone, respawning uses the next one that works. */
@@ -416,6 +441,8 @@ public final class EternalReturnConfig {
 		m.put("minecraft:turtle", 0.03);
 		m.put("minecraft:chainmail", 0.08);
 		m.put("minecraft:iron", 0.15);
+		m.put("eternalreturn:copper", 0.15);
+		m.put("eternalreturn:rosegold", 0.10);
 		m.put("minecraft:netherite", 0.15);
 		m.put("minecraft:gold", 0.10);
 		m.put("minecraft:diamond", 0.30);
@@ -424,6 +451,8 @@ public final class EternalReturnConfig {
 
 	/** Overworld generation (see docs/worldgen.md). Changes need a restart, and only affect newly generated chunks. */
 	public static final class WorldgenTweaks {
+		/** No tuff blobs in Eternal Return worlds (newly generated chunks). */
+		public boolean noTuff = true;
 		/**
 		 * Debug only: carves one straight 3x3 tunnel at y=20 along z=8, through every chunk on that
 		 * row. It checks that this mod's carvers run under the active world generator.
@@ -587,6 +616,7 @@ public final class EternalReturnConfig {
 
 		if (loaded == null) {
 			loaded = new EternalReturnConfig();
+			loaded.materialsVersion = 1;
 			loaded.fishing.baitsVersion = BAITS_VERSION;
 			loaded.worldgen.caves.typesVersion = CaveTypes.SETTINGS_VERSION;
 		}
@@ -603,6 +633,9 @@ public final class EternalReturnConfig {
 				loaded.survival.armorWeight.put("minecraft:gold", 0.10);
 			}
 			loaded.survival.armorWeightVersion = 1;
+		}
+		if (loaded.materialsVersion < 1) {
+			loaded.updateMaterials();
 		}
 		if (loaded.worldgen == null) {
 			loaded.worldgen = new WorldgenTweaks();
@@ -621,6 +654,48 @@ public final class EternalReturnConfig {
 		} catch (IOException e) {
 			EternalReturn.LOGGER.warn("Could not write {}", path, e);
 		}
+	}
+
+	/**
+	 * Brings a config file from before the material rules of version 1 up to them: the inherent enchantments take the
+	 * new table if the file still had the old defaults (otherwise only the new tags' rules are added), the new caps
+	 * and armor weights are added, and Soul Speed is disabled.
+	 */
+	private void updateMaterials() {
+		Map<String, Map<String, Integer>> old = new LinkedHashMap<>();
+		old.put("eternalreturn:inherent/iron_gear", Map.of("minecraft:unbreaking", 1));
+		old.put("eternalreturn:inherent/gold_tools", Map.of("minecraft:fortune", 1));
+		old.put("eternalreturn:inherent/gold_armor", Map.of("minecraft:fire_protection", 1));
+		old.put("eternalreturn:inherent/diamond_tools", Map.of("minecraft:efficiency", 1));
+		old.put("eternalreturn:inherent/diamond_armor", Map.of("minecraft:protection", 1));
+		old.put("eternalreturn:inherent/netherite_tools", Map.of("minecraft:unbreaking", 5));
+		old.put("eternalreturn:inherent/netherite_armor", Map.of("minecraft:fire_protection", 5));
+		old.put("eternalreturn:inherent/chainmail_armor", Map.of("minecraft:projectile_protection", 5));
+		if (this.inherentEnchantments == null || old.equals(this.inherentEnchantments)) {
+			this.inherentEnchantments = defaultInherent();
+		} else {
+			defaultInherent().forEach(this.inherentEnchantments::putIfAbsent);
+		}
+		if (this.enchantCaps == null) {
+			this.enchantCaps = defaultCaps();
+		} else {
+			// Rebuilt in the default order (first match wins), keeping this file's numbers and its own extra tags.
+			Map<String, Integer> caps = new LinkedHashMap<>();
+			defaultCaps().forEach((tag, cap) -> caps.put(tag, this.enchantCaps.getOrDefault(tag, cap)));
+			this.enchantCaps.forEach(caps::putIfAbsent);
+			this.enchantCaps = caps;
+		}
+		if (this.disabledEnchantments == null) {
+			this.disabledEnchantments = new ArrayList<>();
+		}
+		if (!this.disabledEnchantments.contains("minecraft:soul_speed")) {
+			this.disabledEnchantments.add("minecraft:soul_speed");
+		}
+		if (this.survival != null && this.survival.armorWeight != null) {
+			this.survival.armorWeight.putIfAbsent("eternalreturn:copper", 0.15);
+			this.survival.armorWeight.putIfAbsent("eternalreturn:rosegold", 0.10);
+		}
+		this.materialsVersion = 1;
 	}
 
 	private Compiled compile() {
@@ -682,6 +757,8 @@ public final class EternalReturnConfig {
 	private static Map<String, Integer> defaultCaps() {
 		Map<String, Integer> m = new LinkedHashMap<>();
 		m.put("eternalreturn:enchant_cap/iron", 6);
+		m.put("eternalreturn:enchant_cap/copper", 8);
+		m.put("eternalreturn:enchant_cap/rosegold", 8);
 		m.put("eternalreturn:enchant_cap/gold", 10);
 		m.put("eternalreturn:enchant_cap/diamond", 7);
 		m.put("eternalreturn:enchant_cap/netherite", 4);
@@ -713,13 +790,14 @@ public final class EternalReturnConfig {
 	private static Map<String, Map<String, Integer>> defaultInherent() {
 		Map<String, Map<String, Integer>> m = new LinkedHashMap<>();
 		m.put("eternalreturn:inherent/iron_gear", Map.of("minecraft:unbreaking", 1));
-		m.put("eternalreturn:inherent/gold_tools", Map.of("minecraft:fortune", 1));
+		m.put("eternalreturn:inherent/gold_hoes", Map.of("minecraft:fortune", 1));
+		m.put("eternalreturn:inherent/gold_tools", Map.of("minecraft:silk_touch", 1));
 		m.put("eternalreturn:inherent/gold_armor", Map.of("minecraft:fire_protection", 1));
 		m.put("eternalreturn:inherent/diamond_tools", Map.of("minecraft:efficiency", 1));
-		m.put("eternalreturn:inherent/diamond_armor", Map.of("minecraft:protection", 1));
+		m.put("eternalreturn:inherent/diamond_armor", Map.of("minecraft:blast_protection", 1));
 		m.put("eternalreturn:inherent/netherite_tools", Map.of("minecraft:unbreaking", 5));
-		m.put("eternalreturn:inherent/netherite_armor", Map.of("minecraft:fire_protection", 5));
-		m.put("eternalreturn:inherent/chainmail_armor", Map.of("minecraft:projectile_protection", 5));
+		m.put("eternalreturn:inherent/netherite_armor", Map.of("minecraft:unbreaking", 5));
+		m.put("eternalreturn:inherent/chainmail_armor", Map.of("minecraft:projectile_protection", 1));
 		return m;
 	}
 }

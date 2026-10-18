@@ -69,6 +69,7 @@ public class EternalReturnPresetTests implements FabricGameTest {
 		// tuff blobs below y=0 would take their deepslate variant without the ore tag changes (tuff moved from
 		// deepslate_ore_replaceables to stone_ore_replaceables); caves exposing tuff to air made that reachable.
 		int deepslate = 0;
+		int tuff = 0;
 		Map<String, Integer> deepslateKinds = new TreeMap<>();
 		int solidBelowZero = 0;
 		int cellsBelowZero = 0;
@@ -80,6 +81,9 @@ public class EternalReturnPresetTests implements FabricGameTest {
 					for (int y = -64; y < 40; y++) {
 						var state = chunk.getBlockState(pos.set(c[0] * 16 + x, y, c[1] * 16 + z));
 						String blockId = Registries.BLOCK.getId(state.getBlock()).getPath();
+						if (blockId.equals("tuff")) {
+							tuff++;
+						}
 						if (blockId.contains("deepslate")) {
 							deepslate++;
 							deepslateKinds.merge(blockId + "@y" + (y >> 3 << 3), 1, Integer::sum);
@@ -95,6 +99,8 @@ public class EternalReturnPresetTests implements FabricGameTest {
 			}
 		}
 		ctx.assertTrue(deepslate == 0, deepslate + " deepslate blocks generated: " + deepslateKinds);
+		// And no tuff (worldgen.noTuff).
+		ctx.assertTrue(tuff == 0, tuff + " tuff blocks generated");
 		double solidShare = (double) solidBelowZero / cellsBelowZero;
 		ctx.assertTrue(solidShare > 0.85, "below y=0 should be solid rock (caves aside), only " + solidShare);
 

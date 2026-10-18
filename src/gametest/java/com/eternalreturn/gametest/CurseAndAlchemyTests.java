@@ -390,7 +390,9 @@ public class CurseAndAlchemyTests implements FabricGameTest {
 		CraftingRecipeInput input = CraftingRecipeInput.create(3, 3, List.of(a, l, a, l, d, l, a, l, a));
 		ItemStack crafted = world.getRecipeManager().getFirstMatch(RecipeType.CRAFTING, input, world).map(r -> r.value().craft(input, world.getRegistryManager()))
 				.orElse(ItemStack.EMPTY);
-		ctx.assertTrue(crafted.isOf(PhilosophersStone.ITEM) && crafted.getMaxDamage() == 777, "crafted: " + crafted);
+		ctx.assertTrue(crafted.isEmpty(), "the philosopher's stone is creative-only, not crafted: " + crafted);
+		crafted = new ItemStack(PhilosophersStone.ITEM);
+		ctx.assertTrue(crafted.getMaxDamage() == 777, "777 uses");
 
 		floor(ctx, 4);
 		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(0, 1, 0));

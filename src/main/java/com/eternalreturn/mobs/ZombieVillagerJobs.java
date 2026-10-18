@@ -31,8 +31,14 @@ public final class ZombieVillagerJobs {
 	private ZombieVillagerJobs() {
 	}
 
+	/** Marks a zombie that spawned out of the sky's sight: it leaves lights alone (BreakLightsGoal). */
+	public static final String UNDERGROUND = "eternalreturn_underground";
+
 	/** As a zombie spawns, after its own gear. */
 	public static void onSpawn(ZombieEntity zombie, ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason reason) {
+		if (!world.isSkyVisible(zombie.getBlockPos())) {
+			zombie.addCommandTag(UNDERGROUND);
+		}
 		if (zombie instanceof ZombieVillagerEntity villager && villager.getMainHandStack().isEmpty()) {
 			var profession = villager.getVillagerData().getProfession();
 			if (profession == VillagerProfession.FLETCHER) {

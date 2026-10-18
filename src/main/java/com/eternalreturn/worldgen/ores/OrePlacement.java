@@ -28,6 +28,14 @@ public final class OrePlacement {
 				&& CaveWorlds.usesEternalReturnSettings(generator, context.getWorld().getRegistryManager()));
 	}
 
+	/** No tuff blobs in Eternal Return worlds (worldgen.noTuff): an ore feature that only places tuff. */
+	public static boolean skipsTuff(FeatureContext<net.minecraft.world.gen.feature.OreFeatureConfig> context) {
+		return EternalReturnConfig.get().worldgen.noTuff && !context.getConfig().targets.isEmpty()
+				&& context.getConfig().targets.stream().allMatch(target -> target.state.isOf(Blocks.TUFF))
+				&& context.getGenerator() instanceof NoiseChunkGenerator generator
+				&& CaveWorlds.usesEternalReturnSettings(generator, context.getWorld().getRegistryManager());
+	}
+
 	public static void exit() {
 		ACTIVE.set(false);
 	}

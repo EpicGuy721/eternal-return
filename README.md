@@ -54,6 +54,9 @@ The map tool runs the same way: `runWorldmapEternalReturn`, `runWorldmapBeta` an
 | Protections no longer conflict | `data/minecraft/tags/enchantment/exclusive_set/armor.json` emptied |
 | Inherent material enchants | `InherentEnchantments` + item tags under `tags/item/inherent/` |
 | Mending removed | `mending.json` neutered, removed from loot and trade tags, blocked in the roller |
+| Soul Speed removed | `soul_speed.json` neutered, out of piglin bartering and bastion chests (`gameplay/piglin_bartering`, `chests/bastion_other` replaced), blocked in the roller |
+| Necromancy (swords store the undead they kill and raise them as servants) | `necromancy.json`; `Necromancy`, `Servants`; tooltip in client `NewMobRendering` |
+| Sharpness, Smite, Bane of Arthropods and Cubism combine | `minecraft:exclusive_set/damage` replaced (impaling, density and breach only) |
 | Fortune on hoes multiplies crops | `BlockMixin` + `FortuneHelper` |
 | Fortune on shears multiplies wool | `fortune.json` + `SheepEntityMixin` + `ShearsDispenserBehaviorMixin` |
 | Curse of Invisibility | `invisibility_curse.json`; hiding in `ItemStackMixin`, `ItemMixin`, tooltip code |
@@ -84,6 +87,11 @@ The map tool runs the same way: `runWorldmapEternalReturn`, `runWorldmapBeta` an
 | Endermen only carry cactus, pumpkins and melons | block tag `minecraft:enderman_holdable` (replaced) |
 | Large zombies, skeletons and creepers | `LargeMobs` (the scale attribute), `ActiveTargetGoalMixin`, `CreeperEntityAccessor` |
 | Brown, black and sun bears in forests | `BearEntity`, `ForestMobs`; client `ForestRendering`; loot tables `eternalreturn:entities/<bear>` |
+| Frostbites, the parched, bone spiders, skeleton wolves, mooblooms and moolips | `NewMobs`; `FrostbiteEntity`, `ParchedEntity`, `BoneSpiderEntity`, `FlowerCowEntity`; `ZombieFrostbiteMixin`, `WolfNetherSpawnMixin`, `SpawnRestrictionMixin`; `wolf_variant/skeleton.json`; biome tags `frostbite_biomes`, `parched_biomes`; client `NewMobRendering` |
+| Wither skeletons: four times the health, wither skulls from afar | `WitherSkeletonMixin`, `WitherSkullShotGoal` |
+| Phantoms come one night in 13 | `SpawnTweaks.isPhantomNight`, `PhantomSpawnerMixin` |
+| No natural allays, armadillos, axolotls, camels, frogs, glow squids, sniffers, tadpoles, turtles, dolphins or goats | `SpawnTweaks` (config `mobs.noNaturalSpawns`) |
+| Zombies that spawn out of the sky's sight leave lights alone | `ZombieVillagerJobs`, `BreakLightsGoal` |
 | Vampires (an illager of the autumnal forest): bats, bat form, villagers turned by a bite | `VampireEntity`, `VampireBatEntity`, `Vampires`, `ForestMobs`, `VillagerVampireMixin`; client `ForestRendering` |
 | More zombie villagers; witches in the Nether | `SpawnTweaks` |
 | Pillagers in boats at sea | `PillagerBoats`, `BoatEntityPillagerMixin`, `MobEntitySpawnMixin` (they keep their boat) |
@@ -115,6 +123,7 @@ The plan, status, terrain settings and maps are in [docs/worldgen.md](docs/world
 | Biome list: Release 1.6.4 plus birch forest, savanna, badlands, dark forest, cherry grove and every modern ocean | biome layers in the settings preset |
 | No lush caves, dripstone caves or deep dark | settings preset (`caveBiomeSettings`: none) |
 | No deepslate | settings preset (`deepslate_generation` off); tuff moved from block tag `minecraft:deepslate_ore_replaceables` to `minecraft:stone_ore_replaceables`, so ores in tuff blobs stay stone ores |
+| No tuff (Eternal Return worlds) | `OrePlacement.skipsTuff`, `OreFeatureMixin` |
 | Only strongholds, mineshafts, nether fossils and end cities in Eternal Return worlds (all three dimensions) | `EternalReturnServer`, `MinecraftServerMixin`, `StructurePlacementCalculatorMixin` |
 | No trial chambers, ocean monuments or ocean shrines in Eternal Return worlds | settings preset (`structure_modifiers`: trial chambers and monuments removed, Moderner Beta's ocean shrine override dropped) |
 | Cave engine: eight cave types, only in Eternal Return worlds | `com.eternalreturn.worldgen.caves` (`CaveSystemCarver`, `CaveTypes`, one class per type in `types/`); `worldgen/configured_carver/caves.json`; block tag `eternalreturn:carvable` |
@@ -154,6 +163,7 @@ The plan, status, terrain settings and maps are in [docs/worldgen.md](docs/world
 | Villagers' chores: smiths repair golems, clerics heal, farmers feed babies, shepherds shear, fishermen fish | `VillagerChores`, `VillagerEntityMixin` |
 | No golems summoned by villagers; no discount for curing | `VillagerEntityMixin` |
 | Villager needs, shop hours, healing with food | `VillagerNeeds`; `VillagerEntityMixin` (ticking, saving, gossip, trading, prices), `SleepTaskMixin` (privacy); messages in `lang/en_us.json` |
+| Masons in the Nether sell Nether blocks; mud instead of dripstone; only fishermen in the Nether buy Nether fish | `MasonTrades`, `VillagerMasonMixin`; `FishermanTrades` |
 
 ### Survival and blocks
 
@@ -187,6 +197,10 @@ The plan, status, terrain settings and maps are in [docs/worldgen.md](docs/world
 | Wool and concrete stairs and slabs | `com.eternalreturn.blocks.CutBlocks`; resources generated by `tools/blocks/build_blocks.py` |
 | Carpets stack up to 16 layers | `CarpetLayers`, `CarpetBlockMixin`; vanilla carpet blockstates and loot tables replaced by `tools/blocks/build_blocks.py` |
 | Maple and pale oak wood sets; maple petals | `com.eternalreturn.blocks.Woods`, `com.eternalreturn.items.WoodBoats`; client `ForestRendering`, `WoodBoatRenderer`; resources generated by `tools/woods/build_woods.py` from vanilla's cherry set (textures in `assets/eternalreturn/textures`) |
+| Copper and rose gold tools, armor and horse armor | `com.eternalreturn.items.Materials`; resources generated by `tools/materials/build_materials.py` (hand-made worn and horse armor textures in `tools/materials/textures`, with gold armor's new worn look) |
+| Freezing (an effect), ice balls, potions of Freezing | `Freezing`, `LivingEntityFreezingMixin`; `IceBall`; `Potions2` |
+| Dragon rockets | `DragonRocket` |
+| Beds don't explode in the Nether or the End; a dead player's drops never despawn; Nether dungeons have their own loot | `BedNoExplosionMixin`; `DeathDropsMixin`; loot table `eternalreturn:chests/nether_dungeon`, `Dungeons.chestLoot` |
 
 ## How the systems behave
 
@@ -221,16 +235,29 @@ A forest of maples and pale oaks (Eternal Return worlds). The grass is golden, s
 
 ### Enchanting
 
-**Capacity.** Points used = sum of enchantment levels, minus inherent levels, minus curse levels. Iron 6, gold 10, diamond 7, netherite 4, chainmail 5, bows and crossbows 6, fishing rods 7. Anything not in a cap tag (wood, stone, leather, modded copper, tridents, shears, maces...) is uncapped. The tooltip shows `Enchant capacity: used / cap`.
+**Capacity.** Points used = sum of enchantment levels, minus inherent levels, minus curse levels. Iron 6, copper 8, rose gold 8, gold 10, chainmail 5, diamond 7, netherite 4, bows and crossbows 6, fishing rods 7. Anything not in a cap tag (wood, stone, leather, other mods' copper, tridents, shears, maces...) is uncapped. The tooltip shows `Enchant capacity: used / cap`.
 
 - The enchanting table, villager gear, mob gear and `enchant_with_levels` loot all roll inside the remaining capacity. If an enchantment would overflow, its level is trimmed to fit rather than dropped.
 - The anvil refuses any result that adds points past the cap and shows `Over capacity: X / Y` in place of the old cost label. Renaming, repairing, and adding curses always work, even on an item that is already over its cap.
 
-**Inherent enchantments** are real enchantments stored on the item, so vanilla damage, loot, and tooltips all read them normally. They act as a free baseline: on an iron sword, Unbreaking III costs 2 points, not 3. They are added when an item enters a player's inventory, when a mob equips it, and on smithing upgrades. Gear that only has its inherent enchantments does not glint, can still go in an enchanting table, and keeps them through the grindstone.
+**Inherent enchantments** by material:
+
+| Material | Inherent | Capacity |
+|---|---|---|
+| Iron (tools, weapons, armor) | Unbreaking I | 6 |
+| Copper | none | 8 |
+| Rose gold | Fortune I on hoes; Silk Touch on pickaxes, axes and shovels; Fire Protection I on armor | 8 |
+| Gold | Fortune I on hoes; Silk Touch on pickaxes, axes and shovels; Fire Protection I on armor | 10 |
+| Chainmail | Projectile Protection I | 5 |
+| Diamond | Efficiency I on tools; Blast Protection I on armor | 7 |
+| Netherite | Unbreaking V (tools, weapons and armor) | 4 |
+
+They are real enchantments stored on the item, so vanilla damage, loot, and tooltips all read them normally. They act as a free baseline: on an iron sword, Unbreaking III costs 2 points, not 3. They are added when an item enters a player's inventory, when a mob equips it, and on smithing upgrades. Gear that only has its inherent enchantments does not glint, can still go in an enchanting table, and keeps them through the grindstone.
 
 - Diamond to netherite: the diamond's free Efficiency I is removed before netherite's free Unbreaking V is added, so you keep exactly the levels you paid for.
-- Golden and diamond swords get nothing, since Fortune and Efficiency do nothing on a sword. Add them to the tags if you want it anyway.
-- Golden tools' free Fortune I means they can never take Silk Touch (vanilla makes the two exclusive).
+- Golden, rose gold and diamond swords get nothing. Add them to the tags if you want it anyway.
+- Golden and rose gold pickaxes, axes and shovels come with Silk Touch, so they can never take Fortune (vanilla makes the two exclusive); their hoes come with Fortune.
+- Gear made before these rules keeps what it was given then (old chainmail keeps its Projectile Protection V). Config files from before them are updated to the new table once, unless they had been edited.
 
 **Bookshelf bias.** Chiseled bookshelves are read from the same ring of positions as regular bookshelves, with the same "air between" rule. They add no enchanting power, so a table needs regular shelves for power and chiseled ones for steering. The ring has 32 spots, so 15 regular shelves still leave room for 17 chiseled ones. For each enchantment found on shelved books:
 
@@ -280,6 +307,12 @@ All four have scrolls and book recipes like the other enchantments.
 
 Both have scrolls and book recipes like the other enchantments.
 
+**Necromancy.** A new sword enchantment, I to V: an undead mob the sword kills is stored in it, one per level (not the Wither, nor phantoms), and the tooltip lists them: `[Stored: Zombie]`. Sneak and right-click to raise the first one stored as your servant (see the Necronomicon): it follows you and fights for you.
+
+**Sharpness, Smite, Bane of Arthropods and Cubism** can all go on the same weapon now.
+
+**Soul Speed** is gone, like Mending: it does nothing, can't be put on anything, and no longer turns up in piglin bartering or bastion chests.
+
 **Growth.** A new armor enchantment, levels I to V: each level adds half a heart (1 point) of max health, on each piece that has it, so Growth V on all four pieces is ten extra hearts. Enchanting tables, loot and librarians offer it like other armor enchantments, and its levels count toward the piece's capacity.
 
 ### Mobs
@@ -316,7 +349,7 @@ Both have scrolls and book recipes like the other enchantments.
 
 A fish's odds come from its rarity, among whatever else bites in that spot at that moment, so a legendary fish might come up once in about a hundred catches where it lives, and the same spot gives different fish by day and night or in rain. Some examples: the bluegill (common, plains and forests or rivers, by day), the european eel (rare, rivers or swamps, on rainy nights), the opah (epic, oceans, under a full moon), the oarfish (legendary, oceans over 12 or more blocks of water, in thunderstorms), the echo fish (legendary, underground water below y 0, under a new moon), the wither bonefish (legendary, lava in soul sand valleys or basalt deltas).
 
-**Fishermen.** Every fisherman buys fish, and sells chum, glistering melon slices and magma cream for an emerald, from novice on. He buys every fish of a rarity at once when he reaches its level (common at novice, uncommon at apprentice, rare at journeyman, epic at expert, legendary at master), not a random two, at the price in the fish table: from 8 common fish for an emerald to 12 emeralds for a legendary one. Which fish depends on his region, the biome he was born or cured in, which also sets his clothes: he buys the freshwater fish of his own region only (plains: plains, forests, rivers and beaches; desert and savanna: dry lands; snow: snowy lands; taiga: taigas and mountains; jungle; swamp), and every fisherman buys fish from the sea, cherry groves, underground water and the Nether. A plains fisherman buys 41 of the fish, the others 31 to 35. Vanilla's own fish trades (cod, salmon, tropical fish, pufferfish) still turn up now and then, at double the emeralds. Fishermen from before this get the new trades the next time you open their trade screen, and trades for fish that no longer exist are dropped.
+**Fishermen.** Every fisherman buys fish, and sells chum, glistering melon slices and magma cream for an emerald, from novice on. He buys every fish of a rarity at once when he reaches its level (common at novice, uncommon at apprentice, rare at journeyman, epic at expert, legendary at master), not a random two, at the price in the fish table: from 8 common fish for an emerald to 12 emeralds for a legendary one. Which fish depends on his region, the biome he was born or cured in, which also sets his clothes: he buys the freshwater fish of his own region only (plains: plains, forests, rivers and beaches; desert and savanna: dry lands; snow: snowy lands; taiga: taigas and mountains; jungle; swamp), and every fisherman buys fish from the sea, cherry groves and underground water. Only a fisherman in the Nether buys the Nether's fish, and one taken out of the Nether stops. A plains fisherman buys 41 of the fish, the others 31 to 35. Vanilla's own fish trades (cod, salmon, tropical fish, pufferfish) still turn up now and then, at double the emeralds. Fishermen from before this get the new trades the next time you open their trade screen, and trades for fish that no longer exist are dropped.
 
 Villagers in Moderner Beta's biomes, which Eternal Return worlds use for taigas, ice plains, swamps and extreme hills, now get the region vanilla gives its own biome of that kind (ice plains snow, taiga and extreme hills taiga, swampland swamp) instead of plains.
 
@@ -362,6 +395,8 @@ Villagers that existed before this update, and babies until they grow up, start 
 
 A chore they can't reach in 30 seconds is given up.
 
+**Masons.** A mason who reaches a new level in the Nether sells Nether blocks instead of vanilla's: nether bricks, blackstone and netherrack at novice, then basalt, polished blackstone bricks and cracked nether bricks, then red nether bricks, polished and smooth basalt and chiseled nether bricks, then gilded blackstone, crying obsidian and chiseled polished blackstone, and at master quartz blocks and pillars and magma blocks (two of each level's). Elsewhere, masons sell mud where they would sell dripstone blocks.
+
 **Golems.** Villagers no longer summon iron golems, so golems don't spawn by themselves; build them.
 
 **Cures.** Curing a zombie villager no longer makes it, or its neighbours, sell to you at a discount.
@@ -370,7 +405,11 @@ A chore they can't reach in 30 seconds is given up.
 
 ### Survival
 
-**Beds.** Sleeping never skips the night, however many players sleep: a bed only sets your respawn point (by day too, as in vanilla), and you get up when you like (morning wakes you as usual). Lying down still resets the phantom timer. Each player remembers the last 3 beds that set their spawn point. If you die and your bed is gone (or blocked), you respawn at the bed before it, then the one before that; only if none of the three works do you go to world spawn. Respawn anchors and spawn points set by command are left alone.
+**Beds in the Nether and the End** don't explode: they just can't be slept in ("You can only sleep in the Overworld").
+
+**Death.** What you drop when you die never despawns: it lies there until someone picks it up.
+
+**Beds.** Sleeping never skips the night, however many players sleep: a bed only sets your respawn point (by day too, as in vanilla), and you get up when you like (morning wakes you as usual). (Phantoms come on their own nights now, see Mobs.) Each player remembers the last 3 beds that set their spawn point. If you die and your bed is gone (or blocked), you respawn at the bed before it, then the one before that; only if none of the three works do you go to world spawn. Respawn anchors and spawn points set by command are left alone.
 
 **Beacons.** A beacon needs no pyramid, only a clear beam to the sky, and every effect can be picked from the start (Regeneration is a first choice now). It gives one effect, not two. What you pay it with decides how far it reaches and how much effect it can store up on you:
 
@@ -435,6 +474,24 @@ Each second you spend in range adds a second of the effect, up to that limit, an
 **Bears.** Brown, black and sun bears live in every forest biome (any world): one or two at a time, each kind a little rarer than wolves. They behave like polar bears: neutral, they fight back when hit, a mother goes for anyone near her cub, and they drop fish. Brown bears are the size of a polar bear, black bears a little smaller, sun bears smaller still.
 
 **Vampires** are illagers that spawn in autumnal forests at night, in the open. They are very fast (faster than a vindicator), go after players, villagers and iron golems, and burn in daylight. In a fight a vampire calls up two or three bats every 10 to 15 seconds (at most four at once): they fly at its target and bite, and a bite poisons a player for 5 seconds. A villager bitten by a vampire or one of its bats gives off red specks and turns into a vampire 30 seconds later (vampires leave a bitten villager alone). Below a third of its health with a player within 8 blocks, a vampire turns into a bat and flies away; once no player has been within 16 blocks for 5 seconds, it lands and turns back, with the health it had. Its bats vanish after 30 seconds. Vampires drop nothing, not even experience.
+
+**Frostbites** are zombies of the cold: in snowy biomes four zombies in five are frostbites, and a zombie left in powder snow for 15 seconds turns into one. They have a little more health (12 hearts), their hits give Freezing (10 seconds), and one in six carries ice balls in its off hand and throws them from 4 to 16 blocks.
+
+**The parched** are skeletons of the desert: four in five skeletons there. They don't burn in daylight, and their arrows give Weakness (15 seconds).
+
+**Bone spiders** are rare spiders of the Nether with four times a spider's health (32 hearts); their bite withers (4 seconds on Easy, 7 on Normal, 15 on Hard). One in six comes with a wither skeleton riding it.
+
+**Skeleton wolves** are wolves of the Nether, in packs of one to three (about one Nether animal spawn in four): a wolf variant (tame them, breed them, as any wolf), the only wolves that spawn there. Fire and lava can't hurt them.
+
+**Mooblooms** (autumnal forests) and **moolips** (cherry groves) are cows with dandelions and pink tulips on their backs. A bucket milks them; a bowl gets suspicious stew (a moobloom's gives Saturation, a moolip's Fire Resistance or Weakness). They drop what a cow does, and a dandelion or a pink tulip.
+
+**Wither skeletons** have four times the health (40 hearts) and shoot wither skulls, as the Wither does, at targets 8 to 32 blocks away; up close they still use their swords.
+
+**Phantoms** come on one night in 13, picked by the world's seed, whether or not anyone has slept: that night they come for every player out under the sky as if they hadn't slept for days; on the other nights none come.
+
+**Removed mobs.** Allays, armadillos, axolotls, camels, frogs, glow squids, sniffers, tadpoles, turtles, dolphins and goats no longer spawn naturally. Spawn eggs, commands, breeding and structures still make them, and ones already in a world stay.
+
+**Zombies and lights** (again): a zombie that spawned out of the sky's sight (in a cave, a dungeon) leaves torches and other lights alone.
 
 **Spiders** fling a ball of web at you from 4 to 16 blocks away every 6 seconds or so; if it hits, you're stuck in a cobweb where you stand (it stays until broken). Cave spiders too.
 
@@ -503,6 +560,10 @@ Stacks bigger than a food's new stack size (from before this change) stay as the
 
 **Potions** stack to 16 (drinking, splash and lingering). An awkward potion and a diamond brew a Potion of Haste (redstone makes it last 8 minutes, glowstone makes it Haste II). Potions of the same kind (all drinking, all splash or all lingering) mix in a crafting grid: two to nine of them make one potion with all their effects, keeping the stronger (then the longer) of any effect they share, up to 8 effects; the other bottles come back empty.
 
+**Freezing** is a new effect: it freezes you as powder snow does (frost creeps over the screen and you shiver), slowing you over 7 seconds to half your speed; then it hurts, 1.5 every 2 seconds (blazes, magma cubes and striders take 7.5). Leather armor (any piece, or leather horse armor on a horse) keeps it off while worn, and so does standing in fire or lava (being on fire doesn't); the effect stays but you don't freeze. Frostbites give it; potions of Freezing are brewed from an awkward potion and an ice ball (redstone makes it last longer).
+
+**Ice balls** (an ice block makes 4) are thrown like snowballs and hurt by how fast they're going: 1.395 times their speed in blocks a tick, rounded up, so 3 at point blank and 1 from a distance, as they slow down sharply. They do no extra damage to blazes, and can hit whoever threw them ("was pummeled by").
+
 **Rain** makes crops, sugar cane, bamboo, cocoa beans and sweet berry bushes grow twice as fast while it falls on them (cocoa, under its tree's leaves, only needs it to be raining in its biome).
 
 **Bone meal** works on sugar cane and cactus (a block taller, up to 3) and on nether wart (a stage older).
@@ -535,7 +596,7 @@ Stacks bigger than a food's new stack size (from before this change) stay as the
 
 ### The philosopher's stone
 
-Crafted from a diamond in the middle, lapis lazuli on the four sides and amethyst shards in the four corners. It lasts 777 uses. Right-click:
+Creative-only (no recipe). It lasts 777 uses. Right-click:
 
 - a block, to transmute it: glass and sand, grass and dirt, cobblestone and stone, stone bricks and cracked stone bricks, mossy cobblestone and mossy stone bricks, ice and packed ice, clay and terracotta, melon and pumpkin, obsidian and crying obsidian, sandstone and red sandstone, soul sand and soul soil, nether bricks and red nether bricks, coarse dirt and podzol, concrete and concrete powder of the same colour, gravel and tuff, netherrack and blackstone, mud and packed mud, snow and powder snow, each into the other and back; granite to diorite to andesite and round again; logs, planks and leaves to the next wood (oak, spruce, birch, jungle, acacia, dark oak, cherry); wool to the next colour. A log keeps the way it lies. It only makes blocks an Eternal Return world can give you: no mangrove or bamboo wood, and no moss. Concrete powder made next to water sets straight back into concrete, so nothing happens and no use is spent;
 - a creature: a pig into a zombified piglin and back, a cow into a mooshroom, a villager into a witch, a squid into a glow squid, a cod into a salmon, a slime into a magma cube (same size), a spider into a cave spider, a donkey into a mule, and each back again; a zombie into a husk, a husk into a drowned, a drowned into a zombie; a skeleton into a stray, a stray into a bogged, a bogged into a skeleton. A sheep gets random wool, a horse gets a new coat colour or new markings (one or the other, at random), a creeper is charged (or uncharged), and rabbits, foxes, axolotls, llamas and frogs change colour.
@@ -544,13 +605,17 @@ Creatures keep their gear and name. The stone works before a creature's own righ
 
 ### Items
 
-**Necronomicon.** A philosopher's stone in the middle, a book below it, and 7 wither skeleton skulls around them. It lasts 666 uses. Right-click a block (or the air) to raise a random undead servant there: a zombie, husk, drowned, skeleton, stray, bogged, wither skeleton or zombified piglin, with the gear it would spawn with. A servant follows you (and catches up if you get more than 24 blocks ahead), goes for whatever attacks you and whatever you attack, and fights back when something hurts it (not when you do); otherwise it leaves every mob and player alone. It never despawns, burns in daylight like any undead (a helmet helps), and drops nothing when it dies, not even experience. You can have 3 at once; once one dies, you can raise another.
+**Necronomicon.** Creative-only for now (no recipe). It lasts 666 uses. Right-click a block (or the air) to raise a random undead servant there: a zombie, husk, drowned, skeleton, stray, bogged, wither skeleton or zombified piglin, with the gear it would spawn with. A servant follows you (and catches up if you get more than 24 blocks ahead), goes for whatever attacks you and whatever you attack, and fights back when something hurts it (not when you do); otherwise it leaves every mob and player alone. It never despawns, burns in daylight like any undead (a helmet helps), and drops nothing when it dies, not even experience. You can have 3 at once; once one dies, you can raise another.
 
 **Dynamite.** 2 gunpowder, a paper and a string make one. Throw it (or fire it from a dispenser): it bounces to a stop and goes off 2 seconds after it was thrown, a little weaker than TNT, breaking blocks as TNT does.
 
 **Asylum papers.** Every wandering trader sells them, one for 16 emeralds. Right-click a block (or the air) and a villager arrives: an adult with no job yet, dressed for the biome.
 
 **Netherite** gear is crafted like diamond gear, from netherite ingots (8 for a chestplate, 2 and a stick for a sword); diamond gear can no longer be upgraded at a smithing table.
+
+**Copper and rose gold.** Copper ingots make copper tools and armor, between stone and iron: the tools mine what stone tools mine, a little faster, and last 190 uses; the armor protects between leather and chainmail and weighs as much as iron. Four gold and four copper ingots make 8 rose gold ingots: rose gold tools dig as fast as gold with copper's 190 uses and mine what stone mines; its armor protects as gold's does and weighs as little. Both make horse armor too (7 ingots, in an H). Gold armor has a brighter look when worn.
+
+**Dragon rockets** (8 firework rockets around a phantom membrane make 8) are the only rockets that boost a gliding elytra now.
 
 **Minecarts** run up to three times as fast (24 blocks a second at top speed, on any rail). Each tick a cart takes three of vanilla's steps instead of one long jump, so it keeps to curves and slopes and still trips detector and activator rails at full speed; off the rails it moves as in vanilla. Players are sent a cart's position every tick, so riding a fast cart is smooth.
 
@@ -579,17 +644,18 @@ Creatures keep their gear and name. The stone works before a creature's own righ
 - `bookshelfBias`: the multipliers above, plus `booksCanUnlockNonTableEnchantments` (off by default) to let shelved books make the table offer treasure enchantments like Frost Walker.
 - `fortune`: toggles for hoes and shears.
 - `fishing`: `fishRequireBait`; `baits` (item to `lureSeconds`, `nightLureSeconds`, `lava`; config files with the old worms, glow bait and infernal bait are reset to the new list once); `lavaFishingOutsideNether`; `hostileCatchChance` (default 0.03) and `hostileCatches` (mob to `weight` and `oceanOnly`; the ids are mob ids, or `drowned_guardian_jockey` / `drowned_elder_guardian_jockey`); `overfishing` (`enabled`, `radius` 6, `freeCatches` 3, `slowdownPerCatch` 0.5, `maxSlowdown` 4, `recoveryMinutes` 5).
-- `survival`: `bedsSkipNight` (off), `rememberedBeds` (3), `beaconsBlockMonsters`, `animalsOnlySpawnNearBeacons`, `animalsGetHungry`, `hungryAfterDays` (0.5), `grazeChance` (per second, 0.125), `daysBeforeStarving` (3), `starveDamageSeconds` (30), `herdPanic` and `herdPanicRadius` (16), `blindFollowRange` (2), `spawnerMobsDropNothing`; `armorWeight` (material to a full set's slowdown; gold is lighter than iron now, and config files with the old gold weight are moved to the new one once), `snowFalls`, `cropGrowthOutsideIdealBiome` (0.25); `removeHunger` (on: no hunger, food heals), `hitsInterruptEating`, `rawFoodPoisonChance` (0.7), `pigLitters`, `poisonousPotatoStuntChance` (0.5); `glowingSeenThroughWalls`; `beaconRework` (no pyramids, one effect, range by payment); `rainGrowthMultiplier` (2), `saplingsPlantThemselves`; `sweepingNeedsEnchantment`, `snowballsKnockBack` and `thrownKnockback` (0.2; a punch is 0.4), `elytraRocketBoost` (off), `potionStackSize` (16).
+- `survival`: `bedsSkipNight` (off), `rememberedBeds` (3), `beaconsBlockMonsters`, `animalsOnlySpawnNearBeacons`, `animalsGetHungry`, `hungryAfterDays` (0.5), `grazeChance` (per second, 0.125), `daysBeforeStarving` (3), `starveDamageSeconds` (30), `herdPanic` and `herdPanicRadius` (16), `blindFollowRange` (2), `spawnerMobsDropNothing`; `armorWeight` (material to a full set's slowdown; gold is lighter than iron now, and config files with the old gold weight are moved to the new one once), `snowFalls`, `cropGrowthOutsideIdealBiome` (0.25); `removeHunger` (on: no hunger, food heals), `hitsInterruptEating`, `rawFoodPoisonChance` (0.7), `pigLitters`, `poisonousPotatoStuntChance` (0.5); `glowingSeenThroughWalls`; `beaconRework` (no pyramids, one effect, range by payment); `rainGrowthMultiplier` (2), `saplingsPlantThemselves`; `sweepingNeedsEnchantment`, `snowballsKnockBack` and `thrownKnockback` (0.2; a punch is 0.4), `elytraRocketBoost` (off), `potionStackSize` (16), `bedsExplode` (off), `deathDropsStay`.
 - `enchantmentsExtra`: `ascensionCurseRises`.
 - `redstone`: `dispensersPlaceBlocks`, `pistonsMoveBlockEntities`, `chainsLinkBlocks`, `minecartSpeedMultiplier` (3, a whole number: vanilla steps a tick), `minecartChains`.
 - `villagers`: `onlyFishermenBuy`; `fishPriceMultiplier` (default 2, applied to vanilla's own fish trades; the mod's fish pay what `eternalreturn/fish.json` says); `traderVillageVillagers` (3) and `traderVillageRadius` (64), `asylumPapersPrice` (16, 0 for none); `needs`: `enabled`, `daysBeforePriceRise` (2), `emeraldsPerMissingNeed` (5), `daysBeforeRefusal` (7), `maxOtherAdultsInSight` (1), `exerciseBlocks` (8), `minWorkstationDistance` (8), `closedAtNight`, `nightStart` (13000) and `nightEnd` (23000), `healWithFood` and `eatChance` (0.25); `chores`, `villagersSummonGolems` (off), `cureDiscount` (off).
 - `worldgen`: `debugTunnel` (off by default). Carves one straight 3x3 tunnel at y=20 along z=8 through every chunk on that row, to check that this mod's carvers run under the current world generator. Needs a restart, and only affects newly generated chunks.
 - `worldgen.biomeStone` (on by default; Eternal Return worlds only, newly generated chunks only): each biome's stone under the topsoil. Off: plain stone everywhere.
+- `worldgen.noTuff` (on: no tuff blobs in Eternal Return worlds, newly generated chunks only).
 - `worldgen.moreDungeons`, `netherDungeonAttempts` (6 per chunk), `netherWartPatchChance` (0.3), `surfaceStrongholdChance` (a third), `strongholdIllagers` (Eternal Return worlds only, newly generated chunks only).
 - `worldgen.onlyEssentialStructures` (on by default; Eternal Return worlds only): only strongholds, mineshafts, nether fossils and end cities, in all three dimensions, and blazes outside fortresses.
 - `worldgen.roundOverhangs` (on by default; Eternal Return worlds only, newly generated chunks only): overhang undersides arch and bulge instead of lying almost flat, and floating sheets of rock too thin to arch (3 blocks or less) are removed. Off: the terrain as Moderner Beta makes it.
 - `worldgen.caves` (Eternal Return worlds only; newly generated chunks only): `enabled` (the new caves); `oldCaves` (off: vanilla's, Moderner Beta's and other mods' cave carvers don't run there); `density` (multiplies every weight); per type under `types` (`spaghetti`, `ravine`, `large`, `vertical`, `zigzag`, `ribbed`, `spiral`, `toroidal`): `enabled`, `weight` (caves starting per 100 chunks), `minY` and `maxY` (where a cave starts), `minRadius` and `maxRadius`, and for `large` a `typicalRadius` (the most common size; a few caverns reach toward `maxRadius`); `spiral` and `toroidal` also have `minSize` and `maxSize` (the spiral's coil radius, the room's ring radius). Config files from before the first cave tuning are reset to the new type defaults once (`typesVersion`). Debug: `debugForceCaveType` (a type id: only that type, at a high rate) and `debugLogCaveStarts` (writes `type,x,y,z` of every cave start to `eternalreturn-cave-starts.csv` in the game folder).
-- `mobs`: baby chance, baby speed, and baby creeper fuse and blast multipliers; armor and armor-enchant chances, each written as `base + perDifficulty x clamped local difficulty`; the underground-creeper toggle and its sky-light limit; jockey, fishing rod, ender pearl and sword chances; fishing rod pull strength; the boat-breaking toggle; `guardianSpawnWeight` (4) and `elderGuardianSpawnWeight` (1) in ocean biomes (0 turns them off; read when the world loads), `elderGuardianSpawnChance` (0.25) and `elderGuardianSpacing` (96 blocks); `slimeSize8Chance` (0.08), `slimeSize16Chance` (0.02), `slimesInNightRain`; `waterBabyChance` (0.15); `spiderWebCooldownSeconds` (6), `miningZombieChance` (0.15), `spawnerZombiesDig`, `zombiesHuntAnimals`, `babyZombieAnimalJockeyChance` (0.05), `phantomSkeletonChance` (0.1), `slimeSkeletonChance` (0.05); `beehiveHeadChance` (0.1), `tntHeadChance` (0.001), `zombiesBreakLights`, `netherWitherSkeletonWeight` (2; 0 for fortresses only, read when the world loads); `zombieVillagerShare` (0.15), `netherWitchWeight` (2), `largeVariantChance` (0.005), `pillagerBoatChance` (0.15 a minute at sea); `bearSpawnWeight` (3, each kind, in forests; needs a restart), `vampireTurnSeconds` (30), `vampireBatPoisonSeconds` (5); `zombieHorsemanChance` (0.02), `pillagersBackOff`, `endPhantomWeight` (2; read when the world loads), `sheepFleeWolves`, `mobParkour`, `witherBedrockDistance` (8; 0 for none).
+- `mobs`: baby chance, baby speed, and baby creeper fuse and blast multipliers; armor and armor-enchant chances, each written as `base + perDifficulty x clamped local difficulty`; the underground-creeper toggle and its sky-light limit; jockey, fishing rod, ender pearl and sword chances; fishing rod pull strength; the boat-breaking toggle; `guardianSpawnWeight` (4) and `elderGuardianSpawnWeight` (1) in ocean biomes (0 turns them off; read when the world loads), `elderGuardianSpawnChance` (0.25) and `elderGuardianSpacing` (96 blocks); `slimeSize8Chance` (0.08), `slimeSize16Chance` (0.02), `slimesInNightRain`; `waterBabyChance` (0.15); `spiderWebCooldownSeconds` (6), `miningZombieChance` (0.15), `spawnerZombiesDig`, `zombiesHuntAnimals`, `babyZombieAnimalJockeyChance` (0.05), `phantomSkeletonChance` (0.1), `slimeSkeletonChance` (0.05); `beehiveHeadChance` (0.1), `tntHeadChance` (0.001), `zombiesBreakLights`, `netherWitherSkeletonWeight` (2; 0 for fortresses only, read when the world loads); `zombieVillagerShare` (0.15), `netherWitchWeight` (2), `largeVariantChance` (0.005), `pillagerBoatChance` (0.15 a minute at sea); `bearSpawnWeight` (3, each kind, in forests; needs a restart), `witherSkeletonHealth` (80), `witherSkeletonSkulls`, `phantomNightChance` (13; 0 for vanilla's insomnia), `noNaturalSpawns` (the removed mobs), `vampireTurnSeconds` (30), `vampireBatPoisonSeconds` (5); `zombieHorsemanChance` (0.02), `pillagersBackOff`, `endPhantomWeight` (2; read when the world loads), `sheepFleeWolves`, `mobParkour`, `witherBedrockDistance` (8; 0 for none).
 
 Which items belong to each tier is controlled by tags in `data/eternalreturn/tags/item/`, so modded gear can be added with a datapack and no code changes. The same goes for mobs: `data/eternalreturn/tags/entity_type/` decides which mobs can be babies (`baby_variants`, which only works for skeleton-type mobs and creepers), which get the boosted armor (`armored_spawns`), and which can ride spiders (`jockey_riders`).
 
@@ -636,6 +702,12 @@ Fishing data lives in the same place. The item tag `raw_fish` is what chum accep
 - Woods: the maple and pale oak blocks and items are added to every vanilla tag cherry's are in (planks, logs that burn, leaves, saplings, signs, boats, the wooden ones...), so other mods that go by those tags (fuel, recipes, tools) take them. Their boats are entity types of their own (`eternalreturn:maple_boat` and so on), since vanilla's list of boat woods is fixed; dispensers don't place them.
 - Bears spawn in every forest biome (vanilla's `minecraft:is_forest` tag), in any world type. The autumnal forest only generates in Eternal Return worlds.
 - Vampires are in the vanilla entity tag `minecraft:illager`.
+- Copper and rose gold gear is added to vanilla's item tags (swords, pickaxes, armor slots...), and so to the enchantable and trimmable tags built from them. A mod's own copper tools are separate items and keep their own rules.
+- Gold armor's worn textures (`assets/minecraft/textures/models/armor/gold_layer_*.png`) are replaced; a resource pack with its own wins.
+- Soul Speed is neutered like Mending; the piglin bartering and `bastion_other` loot tables are replaced (vanilla's, minus Soul Speed). A datapack replacing those wins.
+- `minecraft:exclusive_set/damage` is replaced: Sharpness, Smite, Bane of Arthropods and Cubism no longer exclude each other (density, breach and impaling still do).
+- Removed mobs: their spawn entries are taken out of every biome in every world type; mods that add them to biomes after this mod may bring them back.
+- Wolves may spawn in the Nether (skeleton wolves) in any world type.
 
 ## Quick test checklist
 
@@ -684,7 +756,7 @@ World type (needs Moderner Beta): create a creative world with World Type "Etern
 34. `1352 -1400`: high extreme hills, about y 139 (where the emerald survey looks). `264 -696`: low extreme hills, about y 68. `/tp @s -385 67 -448` puts you on the ground under an ice plains overhang whose underside is about 35 blocks up: look up and around, it arches and bulges instead of lying flat (on worlds made before this update, overhang undersides are almost flat).
 35. `-312 -1208`: badlands with terracotta bands, at about y 70.
 36. `-2040 1160`: a mushroom island. `-376 -376`: ice plains. `-632 392`: dark forest. `1288 -1272`: a cherry grove, a stretch of pink cherry trees and petals. `-204 0`: an autumnal forest.
-37. Anywhere: F3 never shows `lush_caves`, `dripstone_caves` or `deep_dark`. Dig down to y -60: the biome's stone all the way (with the usual granite, diorite, andesite and, below y 0, tuff blobs), bedrock at -64, ores like diamond and redstone in their normal stone texture, no deepslate.
+37. Anywhere: F3 never shows `lush_caves`, `dripstone_caves` or `deep_dark`. Dig down to y -60: the biome's stone all the way (with the usual granite, diorite and andesite blobs, and no tuff), bedrock at -64, ores like diamond and redstone in their normal stone texture, no deepslate.
 38. With World Type "Moderner Beta", its Customize screen lists Eternal Return in its own category, with its icon.
 
 Oceans and structures (same world; a new one if it was made before this update). `/tp @s X Y Z`, in spectator mode with night vision underwater:
@@ -805,3 +877,12 @@ Survival and blocks (any world, survival mode):
 140. The autumnal forest (an Eternal Return world): golden grass with orange and red patches, maples and pale oaks, fallen leaves on the ground. `/locate biome eternalreturn:autumnal_forest` finds one.
 141. Bears: `/summon eternalreturn:brown_bear` (and `black_bear`, `sun_bear`): they wander; hit one and it fights back. In any forest they turn up with new land.
 142. Vampires: at night in an autumnal forest (or `/summon eternalreturn:vampire` at night): it runs at you fast, and soon a few bats come at you; a bite poisons you. Let one bite a villager (`/summon villager` nearby): red specks, and half a minute later a vampire stands in its place. Get one low and stay close: it bursts into a bat and flies off, and comes back as a vampire once you are away. At dawn it burns. It drops nothing.
+143. Copper and rose gold: craft rose gold ingots (4 gold, 4 copper), then a rose gold pickaxe: it has Silk Touch and digs fast. A copper pickaxe mines iron ore but not diamond ore. Put on copper armor: you're as slow as in iron.
+144. Necromancy: `/enchant @s eternalreturn:necromancy 3` on a sword, kill a zombie and a skeleton: the tooltip lists them. Sneak and right-click: the zombie rises at your side and follows you.
+145. Freezing: `/effect give @s eternalreturn:freezing 30`: frost over the screen, slower and slower, then it hurts. Put on leather boots: it stops. Throw an ice ball at a cow up close, then from far off: the first hits harder.
+146. New mobs: in a snowy biome at night, frostbites (icy zombies); in a desert by day, the parched shooting Weakness arrows without burning; in the Nether, a bone spider (maybe with a wither skeleton on it) and a skeleton wolf now and then. In an autumnal forest, mooblooms (yellow, dandelions); in a cherry grove, moolips (pink, tulips): use a bowl on one for suspicious stew.
+147. Wither skeletons: stand 15 blocks from one in the Nether: it shoots wither skulls at you. It takes a lot of hitting (40 hearts).
+148. Phantoms: on most nights none come, sleep or not; on about one night in 13 they come for anyone outside.
+149. Dragon rockets: craft them (8 rockets, a phantom membrane), glide with an elytra and use one: a boost. An ordinary rocket does nothing.
+150. Beds: place one in the Nether and right-click it: "You can only sleep in the Overworld", no explosion. Die with a full inventory and come back much later: everything is still there.
+151. Villagers: a mason that levels up in the Nether sells nether bricks, blackstone and so on; a fisherman in the Nether buys Nether fish, one in the Overworld doesn't.

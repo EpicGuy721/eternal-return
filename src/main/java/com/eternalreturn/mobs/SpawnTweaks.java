@@ -23,7 +23,28 @@ public final class SpawnTweaks {
 	private SpawnTweaks() {
 	}
 
+	/**
+	 * Whether tonight is a phantom night (one in mobs.phantomNightChance), the same for the whole night: from the
+	 * world's seed and the day's number.
+	 */
+	public static boolean isPhantomNight(net.minecraft.server.world.ServerWorld world) {
+		int chance = EternalReturnConfig.get().mobs.phantomNightChance;
+		long day = (world.getTimeOfDay() + 12000L) / 24000L;
+		long mixed = world.getSeed() * 6364136223846793005L + day * 1442695040888963407L;
+		mixed ^= mixed >>> 31;
+		return chance > 0 && Math.floorMod(mixed, (long) chance) == 0;
+	}
+
 	public static void register() {
+		for (String id : EternalReturnConfig.get().mobs.noNaturalSpawns) {
+			net.minecraft.util.Identifier type = net.minecraft.util.Identifier.tryParse(id);
+			if (type == null || !net.minecraft.registry.Registries.ENTITY_TYPE.containsId(type)) {
+				continue;
+			}
+			net.minecraft.entity.EntityType<?> entity = net.minecraft.registry.Registries.ENTITY_TYPE.get(type);
+			BiomeModifications.create(EternalReturn.id("no_" + type.getPath())).add(ModificationPhase.REMOVALS, BiomeSelectors.all(),
+					context -> context.getSpawnSettings().removeSpawnsOfEntityType(entity));
+		}
 		BiomeModifications.create(EternalReturn.id("zombie_villagers")).add(ModificationPhase.POST_PROCESSING,
 				context -> context.getBiome().getSpawnSettings().getSpawnEntries(SpawnGroup.MONSTER).getEntries().stream()
 						.anyMatch(entry -> entry.type == EntityType.ZOMBIE_VILLAGER),

@@ -31,6 +31,10 @@ public final class Potions2 {
 	public static final RegistryEntry<Potion> LONG_HASTE = register("long_haste", new Potion("haste", new StatusEffectInstance(StatusEffects.HASTE, 9600)));
 	public static final RegistryEntry<Potion> STRONG_HASTE = register("strong_haste", new Potion("haste", new StatusEffectInstance(StatusEffects.HASTE, 1800, 1)));
 	public static final RegistryEntry<Potion> BLINDNESS = register("blindness", new Potion("blindness", new StatusEffectInstance(StatusEffects.BLINDNESS, 900)));
+	public static final RegistryEntry<Potion> FREEZING = register("freezing",
+			new Potion("freezing", new StatusEffectInstance(com.eternalreturn.survival.Freezing.EFFECT, 600)));
+	public static final RegistryEntry<Potion> LONG_FREEZING = register("long_freezing",
+			new Potion("freezing", new StatusEffectInstance(com.eternalreturn.survival.Freezing.EFFECT, 1800)));
 	public static final RegistryEntry<Potion> BAD_LUCK = register("bad_luck", new Potion("bad_luck", new StatusEffectInstance(StatusEffects.UNLUCK, 6000)));
 	public static final RecipeSerializer<PotionMixingRecipe> MIXING = Registry.register(Registries.RECIPE_SERIALIZER, EternalReturn.id("potion_mixing"),
 			new SpecialRecipeSerializer<>(PotionMixingRecipe::new));
@@ -47,6 +51,8 @@ public final class Potions2 {
 			builder.registerPotionRecipe(Potions.AWKWARD, Items.DIAMOND, HASTE);
 			builder.registerPotionRecipe(HASTE, Items.REDSTONE, LONG_HASTE);
 			builder.registerPotionRecipe(HASTE, Items.GLOWSTONE_DUST, STRONG_HASTE);
+			builder.registerPotionRecipe(Potions.AWKWARD, com.eternalreturn.items.IceBall.ITEM, FREEZING);
+			builder.registerPotionRecipe(FREEZING, Items.REDSTONE, LONG_FREEZING);
 		});
 		DefaultItemComponentEvents.MODIFY.register(context -> {
 			int size = EternalReturnConfig.get().survival.potionStackSize;

@@ -47,6 +47,13 @@ public abstract class DungeonFeatureMixin {
 		return Dungeons.wall(vanilla);
 	}
 
+	/** A Nether dungeon's chest has its own loot (eternalreturn:chests/nether_dungeon). */
+	@ModifyArg(method = "generate", index = 3, at = @At(value = "INVOKE",
+			target = "Lnet/minecraft/inventory/LootableInventory;setLootTable(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/random/Random;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/registry/RegistryKey;)V"))
+	private net.minecraft.registry.RegistryKey<net.minecraft.loot.LootTable> eternalreturn$netherLoot(net.minecraft.registry.RegistryKey<net.minecraft.loot.LootTable> vanilla) {
+		return Dungeons.chestLoot(vanilla);
+	}
+
 	@Inject(method = "getMobSpawnerEntity", at = @At("HEAD"), cancellable = true)
 	private void eternalreturn$netherMobs(Random random, CallbackInfoReturnable<EntityType<?>> cir) {
 		EntityType<?> mob = Dungeons.spawnerMob(random);

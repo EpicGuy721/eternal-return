@@ -13,16 +13,19 @@
       "item": "minecraft:amethyst_shard"
     },
     "X": {
-      "item": "minecraft:soul_sand"
+      "item": "minecraft:bone"
     },
     "Y": {
-      "item": "minecraft:soul_soil"
+      "item": "minecraft:rotten_flesh"
+    },
+    "Z": {
+      "item": "minecraft:soul_sand"
     }
   },
   "pattern": [
     "DXD",
-    "ABA",
-    "DYD"
+    "YBZ",
+    "DAD"
   ],
   "result": {
     "count": 1,
@@ -30,7 +33,7 @@
     "components": {
       "minecraft:stored_enchantments": {
         "levels": {
-          "minecraft:soul_speed": 1
+          "eternalreturn:necromancy": 1
         }
       }
     }

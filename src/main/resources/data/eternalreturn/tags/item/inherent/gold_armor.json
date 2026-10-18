@@ -1,8 +1,12 @@
 {
-  "values": [
-    "minecraft:golden_helmet",
-    "minecraft:golden_chestplate",
-    "minecraft:golden_leggings",
-    "minecraft:golden_boots"
-  ]
+	"values": [
+		"minecraft:golden_helmet",
+		"minecraft:golden_chestplate",
+		"minecraft:golden_leggings",
+		"minecraft:golden_boots",
+		"eternalreturn:rosegold_helmet",
+		"eternalreturn:rosegold_chestplate",
+		"eternalreturn:rosegold_leggings",
+		"eternalreturn:rosegold_boots"
+	]
 }

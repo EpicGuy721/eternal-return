@@ -40,10 +40,6 @@
     "minecraft:chain",
     "minecraft:slime_ball"
   ],
-  "minecraft:soul_speed": [
-    "minecraft:soul_sand",
-    "minecraft:soul_soil"
-  ],
   "minecraft:swift_sneak": [
     "minecraft:rabbit_foot",
     "minecraft:black_wool"
@@ -224,5 +220,10 @@
   "eternalreturn:autoload": [
     "minecraft:crossbow",
     "minecraft:hopper"
+  ],
+  "eternalreturn:necromancy": [
+    "minecraft:bone",
+    "minecraft:rotten_flesh",
+    "minecraft:soul_sand"
   ]
 }

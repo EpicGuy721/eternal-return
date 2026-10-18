@@ -104,6 +104,15 @@ public final class Dungeons {
 	}
 
 	@Nullable
+	public static final net.minecraft.registry.RegistryKey<net.minecraft.loot.LootTable> NETHER_LOOT = net.minecraft.registry.RegistryKey.of(
+			net.minecraft.registry.RegistryKeys.LOOT_TABLE, com.eternalreturn.EternalReturn.id("chests/nether_dungeon"));
+
+	/** The loot table of the dungeon being built: a Nether dungeon's own, else vanilla's. */
+	public static net.minecraft.registry.RegistryKey<net.minecraft.loot.LootTable> chestLoot(net.minecraft.registry.RegistryKey<net.minecraft.loot.LootTable> vanilla) {
+		Style style = STYLE.get();
+		return style != null && style.nether ? NETHER_LOOT : vanilla;
+	}
+
 	public static EntityType<?> spawnerMob(Random random) {
 		Style style = STYLE.get();
 		return style != null && style.nether ? NETHER_SPAWNERS.get(random.nextInt(NETHER_SPAWNERS.size())) : null;

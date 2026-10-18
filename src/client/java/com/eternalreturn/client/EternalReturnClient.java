@@ -25,6 +25,7 @@ public class EternalReturnClient implements ClientModInitializer {
 		EntityRendererRegistry.register(ModEntities.WEB, net.minecraft.client.render.entity.FlyingItemEntityRenderer::new);
 		EntityRendererRegistry.register(ModEntities.DYNAMITE, net.minecraft.client.render.entity.FlyingItemEntityRenderer::new);
 		ForestRendering.register();
+		NewMobRendering.register();
 		HardenedBlockModels.register();
 		OreVariantRendering.register();
 		FrameModels.register();

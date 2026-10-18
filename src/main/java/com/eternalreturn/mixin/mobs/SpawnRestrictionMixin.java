@@ -34,8 +34,9 @@ public abstract class SpawnRestrictionMixin {
 				cir.setReturnValue(false);
 			}
 		}
-		// Beacons: no monsters inside their area, animals only there (BeaconZones).
-		if (spawnReason == SpawnReason.NATURAL && !BeaconZones.allowsNaturalSpawn(world.toServerWorld(), type, pos)) {
+		// Beacons: no monsters inside their area, animals only there (BeaconZones); but skeleton wolves roam the Nether.
+		boolean netherWolf = type == EntityType.WOLF && world.toServerWorld().getRegistryKey() == net.minecraft.world.World.NETHER;
+		if (spawnReason == SpawnReason.NATURAL && !netherWolf && !BeaconZones.allowsNaturalSpawn(world.toServerWorld(), type, pos)) {
 			cir.setReturnValue(false);
 			return;
 		}

@@ -330,8 +330,10 @@ public class FishTableTests implements FabricGameTest {
 		VillagerEntity snowApprentice = fisherman(ctx, VillagerType.SNOW, 2);
 		ctx.assertTrue(pays(plainsMaster, fish("bluegill"), 6) == 1, "a plains fisherman buys 6 bluegill for 1 emerald");
 		ctx.assertTrue(pays(plainsMaster, fish("alaska_blackfish"), 2) == 0, "a plains fisherman doesn't buy alaska blackfish (snow)");
-		ctx.assertTrue(pays(plainsMaster, fish("herring"), 8) == 1 && pays(plainsMaster, fish("oarfish"), 1) == 12
-				&& pays(plainsMaster, fish("wither_bonefish"), 1) == 12, "every fisherman buys sea and Nether fish");
+		ctx.assertTrue(pays(plainsMaster, fish("herring"), 8) == 1 && pays(plainsMaster, fish("oarfish"), 1) == 12, "every fisherman buys sea fish");
+		ctx.assertTrue(pays(plainsMaster, fish("wither_bonefish"), 1) == 0, "but only a fisherman in the Nether buys Nether fish");
+		ctx.assertTrue(com.eternalreturn.villager.FishermanTrades.offers("plains", 5, true).stream()
+				.anyMatch(offer -> offer.getOriginalFirstBuyItem().isOf(fish("wither_bonefish"))), "one in the Nether buys wither bonefish");
 		ctx.assertTrue(pays(snowNovice, fish("bluegill"), 6) == 0 && pays(snowNovice, fish("herring"), 8) == 1, "a snow fisherman: herring, not bluegill");
 		ctx.assertTrue(pays(snowNovice, fish("alaska_blackfish"), 2) == 0 && pays(snowApprentice, fish("alaska_blackfish"), 2) == 1,
 				"alaska blackfish (uncommon) from apprentice");
@@ -348,7 +350,8 @@ public class FishTableTests implements FabricGameTest {
 			boolean bought = false;
 			for (VillagerType type : List.of(VillagerType.PLAINS, VillagerType.DESERT, VillagerType.SAVANNA, VillagerType.SNOW, VillagerType.TAIGA,
 					VillagerType.JUNGLE, VillagerType.SWAMP)) {
-				bought |= FishermanTrades.offers(Registries.VILLAGER_TYPE.getId(type).getPath(), 5).stream()
+				// Nether fish: by fishermen in the Nether.
+				bought |= FishermanTrades.offers(Registries.VILLAGER_TYPE.getId(type).getPath(), 5, fish.nether()).stream()
 						.anyMatch(o -> o.getOriginalFirstBuyItem().isOf(FishTable.item(fish)) && o.getSellItem().getCount() == fish.sellEmeralds());
 			}
 			ctx.assertTrue(bought, "nobody buys " + fish.id());
