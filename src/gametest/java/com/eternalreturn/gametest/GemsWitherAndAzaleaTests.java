@@ -147,6 +147,9 @@ public class GemsWitherAndAzaleaTests implements FabricGameTest {
 		ItemStack sword = new ItemStack(Items.GOLDEN_SWORD);
 		InherentEnchantments.apply(sword, world.getRegistryManager());
 		ctx.assertTrue(EnchantmentHelper.getLevel(enchantment(world, "minecraft:looting"), sword) == 1, "gold swords: Looting I");
+		ItemStack rose = new ItemStack(com.eternalreturn.items.Materials.ROSEGOLD.get(0));
+		InherentEnchantments.apply(rose, world.getRegistryManager());
+		ctx.assertTrue(EnchantmentHelper.getLevel(enchantment(world, "minecraft:looting"), rose) == 1, "rose gold swords too");
 		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(2, 1, 2));
 		try {
 			for (var type : List.of(EntityType.VINDICATOR, EntityType.EVOKER, com.eternalreturn.mobs.NewMobs.BONE_SPIDER,

@@ -260,7 +260,7 @@ A forest of maples and pale oaks (Eternal Return worlds). The grass is golden, s
 |---|---|---|
 | Iron (tools, weapons, armor) | Unbreaking I | 6 |
 | Copper | none | 8 |
-| Rose gold | Fortune I on hoes; Silk Touch on pickaxes, axes and shovels; Fire Protection I on armor | 8 |
+| Rose gold | Looting I on swords; Fortune I on hoes; Silk Touch on pickaxes, axes and shovels; Fire Protection I on armor | 8 |
 | Gold | Looting I on swords; Fortune I on hoes; Silk Touch on pickaxes, axes and shovels; Fire Protection I on armor | 10 |
 | Chainmail | Projectile Protection I | 5 |
 | Diamond | Efficiency I on tools; Blast Protection I on armor | 7 |
@@ -269,7 +269,7 @@ A forest of maples and pale oaks (Eternal Return worlds). The grass is golden, s
 They are real enchantments stored on the item, so vanilla damage, loot, and tooltips all read them normally. They act as a free baseline: on an iron sword, Unbreaking III costs 2 points, not 3. They are added when an item enters a player's inventory, when a mob equips it, and on smithing upgrades. Gear that only has its inherent enchantments does not glint, can still go in an enchanting table, and keeps them through the grindstone.
 
 - Diamond to netherite: the diamond's free Efficiency I is removed before netherite's free Unbreaking V is added, so you keep exactly the levels you paid for.
-- Golden, rose gold and diamond swords get nothing. Add them to the tags if you want it anyway.
+- Golden and rose gold swords get Looting I; diamond swords get nothing.
 - Golden and rose gold pickaxes, axes and shovels come with Silk Touch, so they can never take Fortune (vanilla makes the two exclusive); their hoes come with Fortune.
 - Gear made before these rules keeps what it was given then (old chainmail keeps its Projectile Protection V). Config files from before them are updated to the new table once, unless they had been edited.
 
