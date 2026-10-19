@@ -7,6 +7,7 @@ import com.eternalreturn.mobs.entity.BoneSpiderEntity;
 import com.eternalreturn.mobs.entity.FlowerCowEntity;
 import com.eternalreturn.mobs.entity.FrostbiteEntity;
 import com.eternalreturn.mobs.entity.ParchedEntity;
+import com.eternalreturn.mobs.entity.SoldierEntity;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.biome.v1.ModificationPhase;
@@ -36,8 +37,8 @@ import net.minecraft.world.biome.SpawnSettings;
 
 /**
  * Frostbites (cold biomes), the parched (deserts), bone spiders (the Nether), skeleton wolves (a wolf variant of the
- * Nether, data/eternalreturn/wolf_variant/skeleton.json), beholders (rare, the Nether), mooblooms (autumnal forests) and
- * moolips (cherry groves).
+ * Nether, data/eternalreturn/wolf_variant/skeleton.json), beholders (rare, the Nether), soldiers (deep caves, below y 0),
+ * mooblooms (autumnal forests) and moolips (cherry groves).
  * Frostbites and the parched take most of the zombies' and skeletons' place where they live, as strays do in the
  * snow: biome tags eternalreturn:frostbite_biomes and eternalreturn:parched_biomes.
  */
@@ -52,6 +53,8 @@ public final class NewMobs {
 	public static final EntityType<BeholderEntity> BEHOLDER = type("beholder",
 			EntityType.Builder.<BeholderEntity>create(BeholderEntity::new, SpawnGroup.MONSTER).makeFireImmune().dimensions(4.0F, 4.0F).eyeHeight(2.25F)
 					.maxTrackingRange(10));
+	public static final EntityType<SoldierEntity> SOLDIER = type("soldier",
+			EntityType.Builder.<SoldierEntity>create(SoldierEntity::new, SpawnGroup.MONSTER).dimensions(0.6F, 2.2F).eyeHeight(1.94F).maxTrackingRange(8));
 	public static final EntityType<FlowerCowEntity> MOOBLOOM = type("moobloom",
 			EntityType.Builder.<FlowerCowEntity>create(FlowerCowEntity::new, SpawnGroup.CREATURE).dimensions(0.9F, 1.4F).eyeHeight(1.3F).maxTrackingRange(10));
 	public static final EntityType<FlowerCowEntity> MOOLIP = type("moolip",
@@ -76,12 +79,14 @@ public final class NewMobs {
 		FabricDefaultAttributeRegistry.register(PARCHED, AbstractSkeletonEntity.createAbstractSkeletonAttributes());
 		FabricDefaultAttributeRegistry.register(BONE_SPIDER, BoneSpiderEntity.createBoneSpiderAttributes());
 		FabricDefaultAttributeRegistry.register(BEHOLDER, BeholderEntity.createBeholderAttributes());
+		FabricDefaultAttributeRegistry.register(SOLDIER, SoldierEntity.createSoldierAttributes());
 		FabricDefaultAttributeRegistry.register(MOOBLOOM, CowEntity.createCowAttributes());
 		FabricDefaultAttributeRegistry.register(MOOLIP, CowEntity.createCowAttributes());
 		SpawnRestriction.register(FROSTBITE, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, HostileEntity::canSpawnInDark);
 		SpawnRestriction.register(PARCHED, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, HostileEntity::canSpawnInDark);
 		SpawnRestriction.register(BONE_SPIDER, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, HostileEntity::canSpawnInDark);
 		SpawnRestriction.register(BEHOLDER, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, BeholderEntity::canSpawn);
+		SpawnRestriction.register(SOLDIER, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, SoldierEntity::canSpawn);
 		SpawnRestriction.register(MOOBLOOM, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, AnimalEntity::isValidNaturalSpawn);
 		SpawnRestriction.register(MOOLIP, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, AnimalEntity::isValidNaturalSpawn);
 
@@ -103,6 +108,9 @@ public final class NewMobs {
 		BiomeModifications.create(EternalReturn.id("nether_beholders")).add(ModificationPhase.ADDITIONS, BiomeSelectors.foundInTheNether(),
 				context -> context.getSpawnSettings().addSpawn(SpawnGroup.MONSTER, new SpawnSettings.SpawnEntry(BEHOLDER, 3, 1, 1)));
 		FullEnchant.register();
+		// Deep caves only (SoldierEntity.canSpawn: below y 0), alone or in pairs.
+		BiomeModifications.create(EternalReturn.id("soldiers")).add(ModificationPhase.ADDITIONS, BiomeSelectors.foundInOverworld(),
+				context -> context.getSpawnSettings().addSpawn(SpawnGroup.MONSTER, new SpawnSettings.SpawnEntry(SOLDIER, 15, 1, 2)));
 		BiomeModifications.create(EternalReturn.id("nether_wolves")).add(ModificationPhase.ADDITIONS, BiomeSelectors.foundInTheNether(),
 				context -> context.getSpawnSettings().addSpawn(SpawnGroup.CREATURE, new SpawnSettings.SpawnEntry(EntityType.WOLF, 20, 1, 3)));
 		BiomeModifications.create(EternalReturn.id("mooblooms")).add(ModificationPhase.ADDITIONS,
@@ -115,6 +123,7 @@ public final class NewMobs {
 		Item parched = egg("parched", PARCHED, 0xC8B78A, 0x5E5546);
 		Item boneSpider = egg("bone_spider", BONE_SPIDER, 0x3A1A22, 0xE6E0D2);
 		Item beholder = egg("beholder", BEHOLDER, 0x4A1426, 0xE8DCC0);
+		Item soldier = egg("soldier", SOLDIER, 0x3B2A1E, 0x2A2A2E);
 		Item moobloom = egg("moobloom", MOOBLOOM, 0xF4D23A, 0xFFF6C8);
 		Item moolip = egg("moolip", MOOLIP, 0xEFA2C6, 0xFFE3F0);
 		ItemGroupEvents.modifyEntriesEvent(ItemGroups.SPAWN_EGGS).register(entries -> {
@@ -122,6 +131,7 @@ public final class NewMobs {
 			entries.addAfter(Items.PANDA_SPAWN_EGG, parched);
 			entries.addAfter(Items.BLAZE_SPAWN_EGG, boneSpider);
 			entries.addAfter(Items.GHAST_SPAWN_EGG, beholder);
+			entries.addAfter(Items.SKELETON_SPAWN_EGG, soldier);
 			entries.addAfter(Items.MOOSHROOM_SPAWN_EGG, moobloom, moolip);
 		});
 	}
