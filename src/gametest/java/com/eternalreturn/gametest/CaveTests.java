@@ -137,18 +137,23 @@ public class CaveTests implements FabricGameTest {
 	/**
 	 * Every spiral that lies wholly inside the square (found by replaying the seed, see CaveReplay):
 	 * the tunnel is open along its planned helix, which drops at a steady rate, and the column around
-	 * its axis (3 x 3 blocks, from the bottom of the spiral to its top) is solid rock.
+	 * its axis (3 x 3 blocks, from the bottom of the spiral to its top) is solid rock. A spiral whose
+	 * footprint overlaps another's is skipped: at the forced rate one cuts through the other's column.
 	 */
 	private static String spiralShapes(CaveRegion region, int lavaY) {
 		CaveTypeSettings settings = EternalReturnConfig.get().worldgen.caves.types.get("spiral");
 		List<String> checked = new ArrayList<>();
 		String problem = null;
+		List<SpiralCave.Plan> plans = new ArrayList<>();
 		for (CaveReplay.Start start : CaveReplay.starts(region.world, "spiral", CaveTypes.byId("spiral").forcedWeight(), settings,
 				region.chunkX0, region.chunkZ0, region.size)) {
-			SpiralCave.Plan plan = SpiralCave.plan(start.random(), settings, start.x() + 0.5, start.y() + 0.5, start.z() + 0.5,
-					CaveReplay.minCentreY(region.world), CaveReplay.maxCentreY(region.world));
+			plans.add(SpiralCave.plan(start.random(), settings, start.x() + 0.5, start.y() + 0.5, start.z() + 0.5,
+					CaveReplay.minCentreY(region.world), CaveReplay.maxCentreY(region.world)));
+		}
+		for (SpiralCave.Plan plan : plans) {
 			double reach = plan.coilRadius() + plan.tubeRadius() + 2;
-			if (!inside(region, plan.centreX(), plan.centreZ(), reach)) {
+			if (!inside(region, plan.centreX(), plan.centreZ(), reach) || plans.stream().anyMatch(other -> other != plan
+					&& Math.hypot(other.centreX() - plan.centreX(), other.centreZ() - plan.centreZ()) < reach + other.coilRadius() + other.tubeRadius() + 2)) {
 				continue;
 			}
 			int open = 0;
@@ -182,22 +187,28 @@ public class CaveTests implements FabricGameTest {
 			}
 		}
 		EternalReturn.LOGGER.info("[cave-test] spiral shapes: {}", checked);
-		return checked.isEmpty() ? "no spiral lay wholly inside the square" : problem;
+		return checked.isEmpty() ? "no spiral lay wholly inside the square, clear of the others" : problem;
 	}
 
 	/**
 	 * Every toroidal room wholly inside the square: open all round the middle of its ring, and the hole
 	 * (inside the ring, in the ring's own plane, so tilted rooms are checked properly) is solid rock: the pillar.
+	 * A room whose footprint overlaps another's is skipped: at the forced rate one cuts through the other's pillar.
 	 */
 	private static String toroidalShapes(CaveRegion region, int lavaY) {
 		CaveTypeSettings settings = EternalReturnConfig.get().worldgen.caves.types.get("toroidal");
 		List<String> checked = new ArrayList<>();
 		String problem = null;
+		List<ToroidalCave.Plan> plans = new ArrayList<>();
 		for (CaveReplay.Start start : CaveReplay.starts(region.world, "toroidal", CaveTypes.byId("toroidal").forcedWeight(), settings,
 				region.chunkX0, region.chunkZ0, region.size)) {
-			ToroidalCave.Plan plan = ToroidalCave.plan(start.random(), settings, start.x() + 0.5, start.y() + 0.5, start.z() + 0.5,
-					CaveReplay.minCentreY(region.world), CaveReplay.maxCentreY(region.world));
-			if (!inside(region, plan.x(), plan.z(), plan.ringRadius() + plan.tubeRadius() + 2)) {
+			plans.add(ToroidalCave.plan(start.random(), settings, start.x() + 0.5, start.y() + 0.5, start.z() + 0.5,
+					CaveReplay.minCentreY(region.world), CaveReplay.maxCentreY(region.world)));
+		}
+		for (ToroidalCave.Plan plan : plans) {
+			double reach = plan.ringRadius() + plan.tubeRadius() + 2;
+			if (!inside(region, plan.x(), plan.z(), reach) || plans.stream().anyMatch(other -> other != plan
+					&& Math.hypot(other.x() - plan.x(), other.z() - plan.z()) < reach + other.ringRadius() + other.tubeRadius() + 2)) {
 				continue;
 			}
 			int ringOpen = 0;
@@ -235,7 +246,7 @@ public class CaveTests implements FabricGameTest {
 			}
 		}
 		EternalReturn.LOGGER.info("[cave-test] toroidal shapes: {}", checked);
-		return checked.isEmpty() ? "no toroidal room lay wholly inside the square" : problem;
+		return checked.isEmpty() ? "no toroidal room lay wholly inside the square, clear of the others" : problem;
 	}
 
 	private static boolean inside(CaveRegion region, double x, double z, double reach) {
@@ -243,6 +254,32 @@ public class CaveTests implements FabricGameTest {
 		int z0 = region.chunkZ0 * 16;
 		int size = region.size * 16;
 		return x - reach >= x0 && x + reach < x0 + size && z - reach >= z0 && z + reach < z0 + size;
+	}
+
+	/**
+	 * The first square at chunkX0, from chunkZ0 northward in steps of 64 chunks, whose biomes (every 2
+	 * chunks, a chunk beyond its edges too) are all land: under the deep sea floor (y -30) there is too
+	 * little rock above the lava level for a forced type to show its shape.
+	 */
+	private static int landSquareZ(ServerWorld world, int chunkX0, int chunkZ0) {
+		net.minecraft.world.gen.chunk.ChunkGenerator generator = world.getChunkManager().getChunkGenerator();
+		net.minecraft.world.gen.noise.NoiseConfig noise = world.getChunkManager().getNoiseConfig();
+		for (int step = 0; step < 64; step++) {
+			int z0 = chunkZ0 - step * 64;
+			boolean land = true;
+			for (int dx = -1; dx <= SQUARE + 1 && land; dx += 2) {
+				for (int dz = -1; dz <= SQUARE + 1 && land; dz += 2) {
+					String id = BiomeStoneTests.id(generator.getBiomeSource().getBiome(
+							net.minecraft.world.biome.source.BiomeCoords.fromBlock((chunkX0 + dx) * 16 + 8), net.minecraft.world.biome.source.BiomeCoords.fromBlock(64),
+							net.minecraft.world.biome.source.BiomeCoords.fromBlock((z0 + dz) * 16 + 8), noise.getMultiNoiseSampler()));
+					land = !id.contains("ocean") && !id.contains("river");
+				}
+			}
+			if (land) {
+				return z0;
+			}
+		}
+		return chunkZ0;
 	}
 
 	/** A type-specific shape check over the measured square: null when it passes, else what went wrong. */
@@ -270,7 +307,7 @@ public class CaveTests implements FabricGameTest {
 			ServerWorld twin = world.getServer().getWorld(TWIN);
 			ctx.assertTrue(twin != null, "twin dimension missing (run with preset eternalreturn_test:eternal_return_twin)");
 			int chunkX0 = 3000 + index * 400;
-			int chunkZ0 = 3000;
+			int chunkZ0 = landSquareZ(world, chunkX0, 3000);
 			// One chunk generated after everything around it here, first in the twin; another the other way round.
 			ChunkPos lastHere = new ChunkPos(chunkX0 + SQUARE / 2, chunkZ0 + SQUARE / 2);
 			ChunkPos firstHere = new ChunkPos(chunkX0 + 1, chunkZ0 + 1);

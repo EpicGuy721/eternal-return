@@ -63,7 +63,10 @@ public class ControlFingerprintTests implements FabricGameTest {
 		ctx.assertTrue(name != null, "no eternalreturn.gametest.fingerprint set for this run");
 		ServerWorld world = ctx.getWorld();
 		Map<String, String> hashes = fingerprint(world, true);
-		// No block of this mod's (an ore variant or a hardened block) turns up in these worlds.
+		// No block of this mod's turns up in these worlds. The Eternal Return world here (old caves, biome
+		// stone off) has this mod's own features (ruby and sapphire ore, azalea trees), but still no ore
+		// variant or hardened block, the blocks biome stone makes.
+		boolean eternalReturn = com.eternalreturn.worldgen.EternalReturnServer.active();
 		Map<String, Integer> ours = new java.util.TreeMap<>();
 		BlockPos.Mutable pos = new BlockPos.Mutable();
 		for (int[] centre : DECORATED_CENTRES) {
@@ -73,8 +76,9 @@ public class ControlFingerprintTests implements FabricGameTest {
 					for (int y = world.getBottomY(); y < world.getTopY(); y++) {
 						for (int x = 0; x < 16; x++) {
 							for (int z = 0; z < 16; z++) {
-								net.minecraft.util.Identifier id = net.minecraft.registry.Registries.BLOCK.getId(chunk.getBlockState(pos.set(chunkX * 16 + x, y, chunkZ * 16 + z)).getBlock());
-								if (id.getNamespace().equals(EternalReturn.MOD_ID)) {
+								net.minecraft.block.Block block = chunk.getBlockState(pos.set(chunkX * 16 + x, y, chunkZ * 16 + z)).getBlock();
+								net.minecraft.util.Identifier id = net.minecraft.registry.Registries.BLOCK.getId(block);
+								if (id.getNamespace().equals(EternalReturn.MOD_ID) && (!eternalReturn || biomeStoneBlock(block))) {
 									ours.merge(id.getPath(), 1, Integer::sum);
 								}
 							}
@@ -93,6 +97,13 @@ public class ControlFingerprintTests implements FabricGameTest {
 			return;
 		}
 		compare(ctx, name + "_features", hashes, "decorated terrain");
+	}
+
+	/** The blocks biome stone makes: ore variants and hardened blocks. */
+	private static boolean biomeStoneBlock(net.minecraft.block.Block block) {
+		return block instanceof com.eternalreturn.worldgen.ores.OreVariants.VariantOreBlock
+				|| block instanceof com.eternalreturn.worldgen.ores.OreVariants.VariantRedstoneOreBlock
+				|| block instanceof com.eternalreturn.worldgen.stone.HardenedBlocks.HardenedBlock;
 	}
 
 	private static void compare(TestContext ctx, String name, Map<String, String> hashes, String what) throws IOException {
