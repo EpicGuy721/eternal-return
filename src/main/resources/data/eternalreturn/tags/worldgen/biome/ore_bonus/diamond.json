@@ -1,0 +1,14 @@
+{
+  "values": [
+    {
+      "id": "moderner_beta:early_release_ice_plains",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:late_beta_ice_plains",
+      "required": false
+    },
+    "minecraft:snowy_plains",
+    "minecraft:ice_spikes"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "values": [
+    {
+      "id": "moderner_beta:early_release_extreme_hills",
+      "required": false
+    },
+    "minecraft:windswept_hills",
+    "minecraft:windswept_gravelly_hills"
+  ]
+}

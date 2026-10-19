@@ -10,7 +10,7 @@ Writes (all under src/main/resources):
   their models, blockstates, loot tables (Fortune and Silk Touch as diamond ore) and smelting recipes;
 - the ore features: ruby ore as lapis is (2 veins of 7 a chunk around y 0, 4 buried ones lower down), sapphire ore
   as many veins as diamond, each a single block, Nether ruby ore in netherrack, and the per-biome bonuses
-  (OreBonuses.BONUSES pairs each with its biomes). Each placed feature carries the eternalreturn:eternal_return_only
+  (each only in the biomes of its tag eternalreturn:ore_bonus/<ore>). Each placed feature carries the eternalreturn:eternal_return_only
   placement, so other worlds never get them.
 
 Do not hand-edit the generated files; change this script and rerun it.
@@ -108,7 +108,7 @@ def ore_feature(name, targets, size, discard=0.0, kind='minecraft:ore'):
         'discard_chance_on_air_exposure': discard, 'size': size, 'targets': targets}})
 
 
-def placed(name, feature, count, height, square=True, rarity=None):
+def placed(name, feature, count, height, square=True, rarity=None, biome_tag=None):
     placement = [ONLY]
     if rarity:
         placement.append({'type': 'minecraft:rarity_filter', 'chance': rarity})
@@ -117,6 +117,10 @@ def placed(name, feature, count, height, square=True, rarity=None):
     if square:
         placement.append({'type': 'minecraft:in_square'})
     placement += [{'type': 'minecraft:height_range', 'height': height}, {'type': 'minecraft:biome'}]
+    if biome_tag:
+        # Each bonus is in every biome's feature list (so its place in the decoration order, and its random seed, is
+        # the same every time the game starts) and places only in its own biomes, by tag.
+        placement.append({'type': f'{NS}:biome_tag', 'tag': biome_tag})
     write_json(f'data/{NS}/worldgen/placed_feature/{name}.json', {'feature': feature, 'placement': placement})
 
 
@@ -163,5 +167,5 @@ BONUS = {
     'quartz': ('minecraft:ore_quartz', 16, uniform(10, 117)),
 }
 for ore, (feature, count, height) in BONUS.items():
-    placed(f'ore_bonus_{ore}', feature, count, height)
+    placed(f'ore_bonus_{ore}', feature, count, height, biome_tag=f'{NS}:ore_bonus/{ore}')
 print('gems written:', ', '.join(GEMS), '-', len(BONUS), 'ore bonuses')

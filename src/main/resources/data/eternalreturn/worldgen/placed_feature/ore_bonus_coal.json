@@ -25,6 +25,10 @@
     },
     {
       "type": "minecraft:biome"
+    },
+    {
+      "type": "eternalreturn:biome_tag",
+      "tag": "eternalreturn:ore_bonus/coal"
     }
   ]
 }

@@ -48,6 +48,30 @@ public final class OreBonuses {
 		}
 	}
 
+	/** Places only where the biome is in the given tag (eternalreturn:biome_tag; the per-biome bonus ores). */
+	public static final class BiomeTagFilter extends PlacementModifier {
+		public static final MapCodec<BiomeTagFilter> CODEC = com.mojang.serialization.codecs.RecordCodecBuilder.mapCodec(instance -> instance.group(
+				net.minecraft.registry.tag.TagKey.unprefixedCodec(RegistryKeys.BIOME).fieldOf("tag").forGetter(filter -> filter.tag)).apply(instance, BiomeTagFilter::new));
+		private final net.minecraft.registry.tag.TagKey<Biome> tag;
+
+		public BiomeTagFilter(net.minecraft.registry.tag.TagKey<Biome> tag) {
+			this.tag = tag;
+		}
+
+		@Override
+		public Stream<BlockPos> getPositions(FeaturePlacementContext context, Random random, BlockPos pos) {
+			return context.getWorld().getBiome(pos).isIn(this.tag) ? Stream.of(pos) : Stream.empty();
+		}
+
+		@Override
+		public PlacementModifierType<?> getType() {
+			return BIOME_TAG;
+		}
+	}
+
+	public static final PlacementModifierType<BiomeTagFilter> BIOME_TAG = Registry.register(Registries.PLACEMENT_MODIFIER_TYPE,
+			EternalReturn.id("biome_tag"), () -> BiomeTagFilter.CODEC);
+
 	public static final PlacementModifierType<EternalReturnOnly> TYPE = Registry.register(Registries.PLACEMENT_MODIFIER_TYPE,
 			EternalReturn.id("eternal_return_only"), () -> EternalReturnOnly.CODEC);
 
@@ -66,36 +90,19 @@ public final class OreBonuses {
 		return RegistryKey.of(RegistryKeys.PLACED_FEATURE, EternalReturn.id(id));
 	}
 
-	@SafeVarargs
-	private static void bonus(String ore, RegistryKey<Biome>... biomes) {
-		BiomeModifications.addFeature(BiomeSelectors.includeByKey(biomes), GenerationStep.Feature.UNDERGROUND_ORES, feature("ore_bonus_" + ore));
-	}
-
-	private static RegistryKey<Biome> biome(String id) {
-		return RegistryKey.of(RegistryKeys.BIOME, net.minecraft.util.Identifier.of(id));
-	}
-
 	public static void register() {
 		for (String ore : List.of("ore_ruby", "ore_ruby_buried", "ore_sapphire")) {
 			BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(), GenerationStep.Feature.UNDERGROUND_ORES, feature(ore));
 		}
 		BiomeModifications.addFeature(BiomeSelectors.foundInTheNether(), GenerationStep.Feature.UNDERGROUND_DECORATION, feature("ore_ruby_nether"));
-		bonus("iron", biome("minecraft:old_growth_pine_taiga"), biome("minecraft:old_growth_spruce_taiga"), biome("minecraft:old_growth_birch_forest"));
-		bonus("coal", biome("minecraft:jungle"), biome("minecraft:sparse_jungle"), biome("minecraft:bamboo_jungle"), biome("minecraft:swamp"),
-				biome("minecraft:mangrove_swamp"), biome("moderner_beta:early_release_swampland"), biome("moderner_beta:late_beta_swampland"),
-				biome("moderner_beta:beta_swampland"), biome("moderner_beta:beta_rainforest"));
-		bonus("gold", biome("minecraft:badlands"), biome("minecraft:eroded_badlands"), biome("minecraft:wooded_badlands"));
-		bonus("lapis", biome("minecraft:desert"), biome("moderner_beta:beta_desert"));
-		bonus("emerald", biome("moderner_beta:early_release_extreme_hills"), biome("minecraft:windswept_hills"), biome("minecraft:windswept_gravelly_hills"));
-		bonus("redstone", biome("minecraft:mushroom_fields"));
-		BiomeModifications.addFeature(BiomeSelectors.tag(BiomeTags.IS_OCEAN), GenerationStep.Feature.UNDERGROUND_ORES, feature("ore_bonus_copper"));
-		bonus("diamond", biome("moderner_beta:early_release_ice_plains"), biome("moderner_beta:late_beta_ice_plains"), biome("minecraft:snowy_plains"),
-				biome("minecraft:ice_spikes"));
-		bonus("ruby", biome("minecraft:cherry_grove"));
-		bonus("sapphire", biome("eternalreturn:autumnal_forest"));
-		BiomeModifications.addFeature(BiomeSelectors.includeByKey(biome("minecraft:basalt_deltas")), GenerationStep.Feature.UNDERGROUND_DECORATION,
-				feature("ore_bonus_ancient_debris"));
-		BiomeModifications.addFeature(BiomeSelectors.includeByKey(biome("minecraft:nether_wastes")), GenerationStep.Feature.UNDERGROUND_DECORATION,
-				feature("ore_bonus_quartz"));
+		// Every bonus goes into every biome of its dimension, filtered to its own biomes by tag (BiomeTagFilter): a feature
+		// in only some biomes' lists can land in a different place in the decoration order from one start to the next,
+		// and so place differently.
+		for (String ore : List.of("iron", "coal", "gold", "lapis", "emerald", "redstone", "copper", "diamond", "ruby", "sapphire")) {
+			BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(), GenerationStep.Feature.UNDERGROUND_ORES, feature("ore_bonus_" + ore));
+		}
+		for (String ore : List.of("ancient_debris", "quartz")) {
+			BiomeModifications.addFeature(BiomeSelectors.foundInTheNether(), GenerationStep.Feature.UNDERGROUND_DECORATION, feature("ore_bonus_" + ore));
+		}
 	}
 }

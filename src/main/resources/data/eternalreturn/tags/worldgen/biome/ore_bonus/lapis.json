@@ -1,0 +1,9 @@
+{
+  "values": [
+    "minecraft:desert",
+    {
+      "id": "moderner_beta:beta_desert",
+      "required": false
+    }
+  ]
+}
