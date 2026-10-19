@@ -18,7 +18,7 @@ import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 
 /**
- * The beholder (BeholderModel, scaled up 4.5 times as the ghast is) and its eye beam, drawn as the guardian's is but
+ * The beholder (BeholderModel, scaled up 4.5 times as the ghast is; its shooting texture, mouth open, as it spits a fireball) and its eye beam, drawn as the guardian's is but
  * from dull red to burning orange as it charges.
  */
 public class BeholderRenderer extends MobEntityRenderer<BeholderEntity, BeholderModel<BeholderEntity>> {
@@ -31,7 +31,7 @@ public class BeholderRenderer extends MobEntityRenderer<BeholderEntity, Beholder
 
 	@Override
 	public Identifier getTexture(BeholderEntity entity) {
-		return BeholderModel.TEXTURE;
+		return entity.isShooting() ? BeholderModel.SHOOTING_TEXTURE : BeholderModel.TEXTURE;
 	}
 
 	@Override
