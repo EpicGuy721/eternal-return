@@ -9,6 +9,7 @@ import com.eternalreturn.mobs.entity.FlowerCowEntity;
 import com.eternalreturn.mobs.entity.FrostbiteEntity;
 import com.eternalreturn.mobs.entity.ParchedEntity;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
+import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
@@ -41,6 +42,8 @@ public final class NewMobRendering {
 		EntityRendererRegistry.register(NewMobs.FROSTBITE, FrostbiteRenderer::new);
 		EntityRendererRegistry.register(NewMobs.PARCHED, ParchedRenderer::new);
 		EntityRendererRegistry.register(NewMobs.BONE_SPIDER, BoneSpiderRenderer::new);
+		EntityModelLayerRegistry.registerModelLayer(BeholderModel.LAYER, BeholderModel::getTexturedModelData);
+		EntityRendererRegistry.register(NewMobs.BEHOLDER, BeholderRenderer::new);
 		EntityRendererRegistry.register(NewMobs.MOOBLOOM, ctx -> new FlowerCowRenderer(ctx, "moobloom"));
 		EntityRendererRegistry.register(NewMobs.MOOLIP, ctx -> new FlowerCowRenderer(ctx, "moolip"));
 		EntityRendererRegistry.register(IceBall.ENTITY, FlyingItemEntityRenderer::new);

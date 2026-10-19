@@ -89,6 +89,7 @@ The map tool runs the same way: `runWorldmapEternalReturn`, `runWorldmapBeta` an
 | Large zombies, skeletons and creepers | `LargeMobs` (the scale attribute), `ActiveTargetGoalMixin`, `CreeperEntityAccessor` |
 | Brown, black and sun bears in forests | `BearEntity`, `ForestMobs`; client `ForestRendering`; loot tables `eternalreturn:entities/<bear>` |
 | Frostbites, the parched, bone spiders, skeleton wolves, mooblooms and moolips | `NewMobs`; `FrostbiteEntity`, `ParchedEntity`, `BoneSpiderEntity`, `FlowerCowEntity`; `ZombieFrostbiteMixin`, `WolfNetherSpawnMixin`, `SpawnRestrictionMixin`; `wolf_variant/skeleton.json`; biome tags `frostbite_biomes`, `parched_biomes`; client `NewMobRendering` |
+| Beholders (rare, the Nether): eye beam, fireballs, rubies and fully enchanted gold gear | `NewMobs.BEHOLDER`, `BeholderEntity`; loot table `eternalreturn:entities/beholder`, loot function `eternalreturn:enchant_fully` (`FullEnchant`); client `BeholderModel`, `BeholderAnimations`, `BeholderRenderer` (model made in `tools/models/beholder.bbmodel`) |
 | Wither skeletons: four times the health, wither skulls from afar | `WitherSkeletonMixin`, `WitherSkullShotGoal` |
 | The Wither circles, then at half health explodes, calls wither skeletons and comes down through blocks | `WitherBossMixin` |
 | Illagers drop rubies, not emeralds; bone spiders drop bones | loot tables `minecraft:entities/vindicator`, `evoker`, `pillager` (replaced), `illusioner`, `eternalreturn:entities/vampire`, `bone_spider` |
@@ -499,6 +500,8 @@ Each second you spend in range adds a second of the effect, up to that limit, an
 **Frostbites** are zombies of the cold: in snowy biomes four zombies in five are frostbites, and a zombie left in powder snow for 15 seconds turns into one. They have a little more health (12 hearts), their hits give Freezing (10 seconds), and one in six carries ice balls in its off hand and throws them from 4 to 16 blocks.
 
 **The parched** are skeletons of the desert: four in five skeletons there. They don't burn in daylight, and their arrows give Weakness (15 seconds).
+
+**Beholders** are rare floating eyes of the Nether, as big as a ghast and six times as tough (30 hearts), with eight eyestalks and a fanged mouth. Like a ghast they drift about and hunt players up to 100 blocks off. A player within 24 blocks that it can see gets a beam from its great eye, as from a guardian: it locks on, glows from dull red to orange for 4 seconds, then hits (7 damage, 9 on Hard). Step out of range or duck behind blocks and the beam breaks: it spits a ghast's fireball from its mouth instead, which blasts the cover away. A player it can't see, it keeps hunting for 10 seconds. It drops 5 to 8 rubies and one gold tool or armor piece enchanted to its full capacity (10 points: Efficiency V and Unbreaking V on a pickaxe beside its Silk Touch, say), with no curses.
 
 **Bone spiders** are rare spiders of the Nether with four times a spider's health (32 hearts); their bite withers (4 seconds on Easy, 7 on Normal, 15 on Hard). One in six comes with a wither skeleton riding it.
 
@@ -923,3 +926,4 @@ Survival and blocks (any world, survival mode):
 156. Rubies, again: reroll a netherite pickaxe's Unbreaking V a few times: whatever comes up is at its top level (Silk Touch I, Efficiency V, Fortune V), never stuck at 1. Put a bow and a ruby in an anvil: it gains an enchantment at level 1 (it said "Inherent enchantment gained"). A fresh diamond sword has Sharpness I. Netherite: capacity 2, and a full set slows you as much as diamond.
 157. Azalea: bone meal an azalea bush: the tree that grows has an azalea trunk.
 158. Sinkholes: in a new Eternal Return world, fly over the deep sea: now and then a dark round pit about 100 blocks across drops from the sea floor to near the bottom of the world. A few are on land.
+159. Beholder: in the Nether (or with its spawn egg, next to the ghast's), a big dark red cube with eyestalks. Stand in its sight: a beam locks on and hurts after a few seconds. Hide behind blocks: fireballs instead. Kill it: 5 to 8 rubies and one fully enchanted gold tool or armor piece.
