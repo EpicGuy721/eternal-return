@@ -7,8 +7,8 @@ Writes src/main/resources/assets/eternalreturn/textures/entity/bird/<shape>/:
 - base.png: the bird's body, neck, head, wings and tail in light grays (shaded by face), tinted with its base colour;
 - pattern_<name>.png for cap, mask, breast, wings, tail and head: the same grays where the pattern lies, transparent
   elsewhere, tinted with its pattern colour and drawn over the base;
-- eyes.png: the eyes in white, tinted at render time: dark, or pale when the colour around them is dark, so they show;
-- details.png: what is never tinted: the beak or bill, legs and feet.
+- details.png: what is never tinted: the eyes (near black), the beak or bill, legs and feet. The palette's darkest
+  colours stay a little lighter than the eyes, so a black-headed bird's eyes still show.
 With a preview_dir, also writes preview_<shape>_<bird>.png there: birds with colours applied, for checking in Blockbench.
 Hand edits to these textures are lost when this is rerun.
 """
@@ -46,7 +46,7 @@ PATTERNS = {
 
 # The natural palette (birds.json will hold it; here for the previews).
 PALETTE = {
-    'black': (34, 31, 34), 'charcoal': (66, 64, 66), 'slate_grey': (112, 120, 128), 'pale_grey': (182, 186, 188),
+    'black': (70, 66, 70), 'charcoal': (96, 94, 96), 'slate_grey': (112, 120, 128), 'pale_grey': (182, 186, 188),
     'white': (238, 236, 230), 'cream': (234, 222, 186), 'buff': (214, 184, 132), 'tan': (176, 140, 96),
     'brown': (120, 86, 58), 'chestnut': (140, 64, 40), 'rust': (186, 94, 50), 'scarlet': (204, 40, 38),
     'orange': (232, 132, 40), 'yellow': (242, 202, 52), 'olive': (122, 126, 62), 'slate_blue': (78, 110, 172),
@@ -57,7 +57,7 @@ PREVIEWS = {
     'waterfowl': {'mallard_drake': ('pale_grey', 'head', 'olive'), 'mallard_hen': ('tan', 'wings', 'brown'),
                   'ruddy_duck': ('chestnut', 'cap', 'black')},
 }
-DARK_EYE, PALE_EYE = (22, 20, 24), (226, 220, 206)
+EYE = (18, 16, 20)
 
 
 def role(name):
@@ -123,20 +123,18 @@ def paint(shape):
                         for x, y in cells(rect, face, how if how in ('top', 'front', 'chin') else None):
                             image.putpixel((x, y), base.getpixel((x, y)))
         layers['pattern_' + pattern] = image
-    eyes = Image.new('RGBA', size)
     details = Image.new('RGBA', size)
     colours = SHAPES[shape]
     for part, rects in parts:
         if part == 'head':
-            eyes.putpixel((rects['east'][2] - 1, rects['east'][1]), (255, 255, 255, 255))
-            eyes.putpixel((rects['west'][0], rects['west'][1]), (255, 255, 255, 255))
+            details.putpixel((rects['east'][2] - 1, rects['east'][1]), EYE + (255,))
+            details.putpixel((rects['west'][0], rects['west'][1]), EYE + (255,))
         if part in ('beak', 'leg', 'foot'):
             colour = colours['beak' if part == 'beak' else 'legs']
             for face, rect in rects.items():
                 for x, y in cells(rect, face):
                     shade = 0.82 if face in ('down', 'south') else 1.0
                     details.putpixel((x, y), tuple(int(c * shade) for c in colour) + (255,))
-    layers['eyes'] = eyes
     layers['details'] = details
     return layers
 
@@ -151,13 +149,6 @@ def tint(image, colour):
     return out
 
 
-def eye_colour(base, pattern, colour, layers):
-    """Pale when the feathers around the eye are dark (the colour that shows at the eye: the pattern's if it covers it)."""
-    at = next((x, y) for x in range(layers['eyes'].width) for y in range(layers['eyes'].height) if layers['eyes'].getpixel((x, y))[3])
-    around = PALETTE[colour] if layers['pattern_' + pattern].getpixel(at)[3] else PALETTE[base]
-    return PALE_EYE if 0.299 * around[0] + 0.587 * around[1] + 0.114 * around[2] < 70 else DARK_EYE
-
-
 def main():
     for shape in SHAPES:
         layers = paint(shape)
@@ -169,7 +160,6 @@ def main():
             for bird, (base, pattern, colour) in PREVIEWS[shape].items():
                 image = tint(layers['base'], PALETTE[base])
                 image.alpha_composite(tint(layers['pattern_' + pattern], PALETTE[colour]))
-                image.alpha_composite(tint(layers['eyes'], eye_colour(base, pattern, colour, layers)))
                 image.alpha_composite(layers['details'])
                 image.save(os.path.join(sys.argv[1], f'preview_{shape}_{bird}.png'))
         print(shape, 'layers written:', ', '.join(layers))
