@@ -38,7 +38,7 @@ import net.minecraft.world.World;
  * a shot.
  */
 public final class Firearms {
-	public static final float DAMAGE = 10.0F;
+	public static final float DAMAGE = 20.0F;
 	public static final int ARMOR_WEAR = 10;
 	public static final int RELOAD = 60;
 	/** Blocks a tick. */
