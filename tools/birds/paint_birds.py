@@ -34,6 +34,7 @@ SHAPES = {
     'songbird': {'beak': (66, 58, 52), 'legs': (92, 72, 64), 'eyes': 'side', 'wing': ['###', '##.']},
     'waterfowl': {'beak': (196, 170, 70), 'legs': (214, 120, 46), 'eyes': 'side', 'wing': ['####', '###.']},
     'owl': {'beak': (70, 64, 58), 'legs': (120, 112, 100), 'eyes': 'front', 'wing': ['###', '##.', '###']},
+    'wader': {'beak': (190, 160, 70), 'legs': (100, 94, 78), 'eyes': 'side', 'wing': ['####', '##..']},
 }
 
 # Patterns by part role; ("head", "top") is the head's top row on its sides, ("head", "front") their front column.
@@ -58,6 +59,8 @@ PREVIEWS = {
                  'goldfinch': ('yellow', 'cap', 'black'), 'robin': ('brown', 'breast', 'rust')},
     'waterfowl': {'mallard_drake': ('pale_grey', 'head', 'olive'), 'mallard_hen': ('tan', 'wings', 'brown'),
                   'ruddy_duck': ('chestnut', 'cap', 'black')},
+    'wader': {'great_blue_heron': ('slate_grey', 'head', 'white'), 'scarlet_ibis': ('scarlet', 'wings', 'black'),
+              'egret': ('white', 'tail', 'white')},
     'owl': {'barn_owl': ('buff', 'mask', 'white'), 'snowy_owl': ('white', 'wings', 'pale_grey'),
             'great_horned_owl': ('brown', 'mask', 'tan')},
 }
