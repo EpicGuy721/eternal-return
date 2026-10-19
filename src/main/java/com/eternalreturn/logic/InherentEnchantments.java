@@ -156,9 +156,17 @@ public final class InherentEnchantments {
 	/**
 	 * Smithing upgrade (diamond to netherite): strip the old material's free levels so they do not
 	 * turn into "bought" levels on the new item, keep what the player actually paid for, then add
-	 * the new material's free levels.
+	 * the new material's free levels. A ruby's reroll (OVERRIDE) doesn't carry over: the new item gets its material's own.
 	 */
 	public static void transfer(ItemStack from, ItemStack to, RegistryWrapper.WrapperLookup lookup) {
+		net.minecraft.component.type.NbtComponent data = to.get(net.minecraft.component.DataComponentTypes.CUSTOM_DATA);
+		if (data != null && data.contains(OVERRIDE)) {
+			net.minecraft.component.type.NbtComponent.set(net.minecraft.component.DataComponentTypes.CUSTOM_DATA, to, nbt -> nbt.remove(OVERRIDE));
+			net.minecraft.component.type.NbtComponent left = to.get(net.minecraft.component.DataComponentTypes.CUSTOM_DATA);
+			if (left != null && left.isEmpty()) {
+				to.remove(net.minecraft.component.DataComponentTypes.CUSTOM_DATA);
+			}
+		}
 		if (hasRules(from)) {
 			EnchantmentHelper.apply(to, builder -> {
 				List<RegistryEntry<Enchantment>> present = new ArrayList<>(builder.getEnchantments());

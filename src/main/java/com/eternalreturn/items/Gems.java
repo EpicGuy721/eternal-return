@@ -24,6 +24,7 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.EnchantmentTags;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.intprovider.UniformIntProvider;
@@ -102,14 +103,21 @@ public final class Gems {
 
 	// ---------------------------------------------------------------- rubies
 
-	/** The anvil's result for an item and a ruby: the item, marked to have its inherent enchantment rerolled once taken. */
+	/** Items whose ruby rerolls always come out at the new enchantment's maximum level (netherite). */
+	public static final TagKey<Item> REROLLS_AT_MAX_LEVEL = TagKey.of(RegistryKeys.ITEM, EternalReturn.id("ruby_rerolls_at_max_level"));
+
+	/**
+	 * The anvil's result for an item and a ruby: the item, marked to have its inherent enchantment rerolled once taken
+	 * (or, if it has none, as a bow or a fishing rod, to be given one).
+	 */
 	public static ItemStack withRuby(ItemStack item, RegistryWrapper.WrapperLookup lookup) {
 		if (item.isEmpty() || rerollChoices(item, lookup).isEmpty()) {
 			return ItemStack.EMPTY;
 		}
 		ItemStack out = item.copy();
 		NbtComponent.set(DataComponentTypes.CUSTOM_DATA, out, nbt -> nbt.putBoolean(REROLL, true));
-		out.set(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable("tooltip.eternalreturn.ruby_reroll").formatted(Formatting.RED))));
+		String line = InherentEnchantments.hasRules(item) ? "tooltip.eternalreturn.ruby_reroll" : "tooltip.eternalreturn.ruby_grant";
+		out.set(DataComponentTypes.LORE, new LoreComponent(List.of(Text.translatable(line).formatted(Formatting.RED))));
 		return out;
 	}
 
@@ -129,25 +137,38 @@ public final class Gems {
 		reroll(stack, lookup, random);
 	}
 
-	/** One possible reroll: the inherent enchantment that goes and the one that comes, with its level. */
+	/**
+	 * One possible reroll: the inherent enchantment that goes (null when the item had none and gains one) and the one
+	 * that comes, with its level.
+	 */
 	public record Choice(RegistryEntry<Enchantment> old, RegistryEntry<Enchantment> replacement, int level) {
 	}
 
 	/**
 	 * Every way the item's inherent enchantment could be rerolled: each inherent enchantment it has, into any
 	 * enchantment that can go on the item (not a curse, nor one of the config's disabledEnchantments), isn't already
-	 * on it, and goes with its other enchantments, at the old level (capped at the new one's maximum).
+	 * on it, and goes with its other enchantments, at the old level (capped at the new one's maximum; always the
+	 * maximum on REROLLS_AT_MAX_LEVEL items). An item with no inherent enchantment (no rule gives it one) can gain any
+	 * of those at level 1.
 	 */
 	public static List<Choice> rerollChoices(ItemStack stack, RegistryWrapper.WrapperLookup lookup) {
 		List<Choice> choices = new ArrayList<>();
-		Map<RegistryEntry<Enchantment>, Integer> inherent = InherentEnchantments.inherentPortion(stack);
-		if (inherent.isEmpty()) {
-			return choices;
-		}
 		RegistryWrapper.Impl<Enchantment> registry = lookup.getWrapperOrThrow(RegistryKeys.ENCHANTMENT);
 		List<RegistryEntry.Reference<Enchantment>> pool = registry.streamEntries()
 				.filter(entry -> entry.value().isSupportedItem(stack) && !entry.isIn(EnchantmentTags.CURSE) && !EnchantLevels.isDisabled(entry))
 				.toList();
+		boolean atMax = stack.isIn(REROLLS_AT_MAX_LEVEL);
+		if (!InherentEnchantments.hasRules(stack)) {
+			for (RegistryEntry<Enchantment> candidate : pool) {
+				boolean clashes = stack.getEnchantments().getEnchantmentEntries().stream()
+						.anyMatch(entry -> !Enchantment.canBeCombined(entry.getKey(), candidate));
+				if (!clashes) {
+					choices.add(new Choice(null, candidate, atMax ? candidate.value().getMaxLevel() : 1));
+				}
+			}
+			return choices;
+		}
+		Map<RegistryEntry<Enchantment>, Integer> inherent = InherentEnchantments.inherentPortion(stack);
 		for (Map.Entry<RegistryEntry<Enchantment>, Integer> old : inherent.entrySet()) {
 			for (RegistryEntry<Enchantment> candidate : pool) {
 				if (inherent.keySet().stream().anyMatch(entry -> entry.matchesKey(candidate.getKey().orElseThrow()))) {
@@ -156,7 +177,8 @@ public final class Gems {
 				boolean clashes = stack.getEnchantments().getEnchantmentEntries().stream()
 						.anyMatch(entry -> !entry.getKey().equals(old.getKey()) && !Enchantment.canBeCombined(entry.getKey(), candidate));
 				if (!clashes) {
-					choices.add(new Choice(old.getKey(), candidate, Math.min(old.getValue(), candidate.value().getMaxLevel())));
+					int max = candidate.value().getMaxLevel();
+					choices.add(new Choice(old.getKey(), candidate, atMax ? max : Math.min(old.getValue(), max)));
 				}
 			}
 		}
@@ -172,9 +194,11 @@ public final class Gems {
 		Choice choice = choices.get(random.nextInt(choices.size()));
 		Map<RegistryEntry<Enchantment>, Integer> inherent = InherentEnchantments.inherentPortion(stack);
 		// The old one loses its free levels (any bought on top stay); the new one becomes this item's own inherent.
-		int had = net.minecraft.enchantment.EnchantmentHelper.getLevel(choice.old(), stack);
-		int keep = had - inherent.get(choice.old());
-		net.minecraft.enchantment.EnchantmentHelper.apply(stack, builder -> builder.set(choice.old(), Math.max(0, keep)));
+		if (choice.old() != null) {
+			int had = net.minecraft.enchantment.EnchantmentHelper.getLevel(choice.old(), stack);
+			int keep = had - inherent.get(choice.old());
+			net.minecraft.enchantment.EnchantmentHelper.apply(stack, builder -> builder.set(choice.old(), Math.max(0, keep)));
+		}
 		Map<RegistryKey<Enchantment>, Integer> own = new LinkedHashMap<>();
 		inherent.forEach((entry, level) -> {
 			if (!entry.equals(choice.old())) {

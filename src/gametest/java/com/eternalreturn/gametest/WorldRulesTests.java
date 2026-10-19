@@ -73,7 +73,7 @@ public class WorldRulesTests implements FabricGameTest {
 
 	// ---------- armor ----------
 
-	/** A full diamond set slows by 30% (Slowness II); netherite and iron by 15%; Weightless on the chestplate takes its 40% share off. */
+	/** A full diamond or netherite set slows by 30% (Slowness II), iron by 15%; Weightless on the chestplate takes its 40% share off. */
 	@GameTest(templateName = EMPTY_STRUCTURE)
 	public void armorWeighsDown(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
@@ -98,7 +98,7 @@ public class WorldRulesTests implements FabricGameTest {
 			double none = weightModifier(player);
 			ctx.assertTrue(Math.abs(diamond - 0.30) < 1e-9, "full diamond slows by 30%, got " + diamond);
 			ctx.assertTrue(Math.abs(weightless - 0.18) < 1e-9, "a Weightless diamond chestplate takes its 12% off, got " + weightless);
-			ctx.assertTrue(Math.abs(netheriteChest - 0.06) < 1e-9, "a netherite chestplate is 40% of 15%, got " + netheriteChest);
+			ctx.assertTrue(Math.abs(netheriteChest - 0.12) < 1e-9, "a netherite chestplate is 40% of 30%, got " + netheriteChest);
 			ctx.assertTrue(none == 0.0, "taking it all off removes the weight, got " + none);
 			ctx.assertTrue(enchantment(world, ArmorWeight.WEIGHTLESS).value().getMaxLevel() == 1, "Weightless has one level");
 		} finally {

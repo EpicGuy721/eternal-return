@@ -250,11 +250,11 @@ A forest of maples and pale oaks (Eternal Return worlds). The grass is golden, s
 
 **Each biome has more of one ore:** old growth taigas and birch forests iron, jungles and swamps coal, badlands gold, deserts lapis, extreme hills emerald, mushroom fields redstone, oceans copper, ice plains diamonds, cherry groves rubies, autumnal forests sapphires; in the Nether, basalt deltas ancient debris and nether wastes quartz.
 
-**Azalea trees** (an azalea trunk under azalea and flowering azalea leaves) grow in place of about one oak in 20.
+**Azalea trees** (an azalea trunk under azalea and flowering azalea leaves) grow in place of about one oak in 200. Bone meal on an azalea bush (in any world) grows one too, with an azalea trunk instead of vanilla's oak one.
 
 ### Enchanting
 
-**Capacity.** Points used = sum of enchantment levels, minus inherent levels, minus curse levels. Iron 6, copper 8, rose gold 8, gold 10, chainmail 5, diamond 7, netherite 4, bows and crossbows 6, fishing rods 7. Anything not in a cap tag (wood, stone, leather, other mods' copper, tridents, shears, maces...) is uncapped. The tooltip shows `Enchant capacity: used / cap`.
+**Capacity.** Points used = sum of enchantment levels, minus inherent levels, minus curse levels. Iron 6, copper 8, rose gold 8, gold 10, chainmail 5, diamond 7, netherite 2, bows and crossbows 6, fishing rods 7. Anything not in a cap tag (wood, stone, leather, other mods' copper, tridents, shears, maces...) is uncapped. The tooltip shows `Enchant capacity: used / cap`.
 
 - The enchanting table, villager gear, mob gear and `enchant_with_levels` loot all roll inside the remaining capacity. If an enchantment would overflow, its level is trimmed to fit rather than dropped.
 - The anvil refuses any result that adds points past the cap and shows `Over capacity: X / Y` in place of the old cost label. Renaming, repairing, and adding curses always work, even on an item that is already over its cap.
@@ -268,13 +268,13 @@ A forest of maples and pale oaks (Eternal Return worlds). The grass is golden, s
 | Rose gold | Looting I on swords; Fortune I on hoes; Silk Touch on pickaxes, axes and shovels; Fire Protection I on armor | 8 |
 | Gold | Looting I on swords; Fortune I on hoes; Silk Touch on pickaxes, axes and shovels; Fire Protection I on armor | 10 |
 | Chainmail | Projectile Protection I | 5 |
-| Diamond | Efficiency I on tools; Blast Protection I on armor | 7 |
-| Netherite | Unbreaking V (tools, weapons and armor) | 4 |
+| Diamond | Sharpness I on swords; Efficiency I on tools; Blast Protection I on armor | 7 |
+| Netherite | Unbreaking V (tools, weapons and armor) | 2 |
 
 They are real enchantments stored on the item, so vanilla damage, loot, and tooltips all read them normally. They act as a free baseline: on an iron sword, Unbreaking III costs 2 points, not 3. They are added when an item enters a player's inventory, when a mob equips it, and on smithing upgrades. Gear that only has its inherent enchantments does not glint, can still go in an enchanting table, and keeps them through the grindstone.
 
 - Diamond to netherite: the diamond's free Efficiency I is removed before netherite's free Unbreaking V is added, so you keep exactly the levels you paid for.
-- Golden and rose gold swords get Looting I; diamond swords get nothing.
+- Golden and rose gold swords get Looting I; diamond swords Sharpness I.
 - Golden and rose gold pickaxes, axes and shovels come with Silk Touch, so they can never take Fortune (vanilla makes the two exclusive); their hoes come with Fortune.
 - Gear made before these rules keeps what it was given then (old chainmail keeps its Projectile Protection V). Config files from before them are updated to the new table once, unless they had been edited.
 
@@ -328,7 +328,7 @@ Both have scrolls and book recipes like the other enchantments.
 
 **Necromancy.** A new sword enchantment, I to V: an undead mob the sword kills is stored in it, one per level (not the Wither, nor phantoms), and the tooltip lists them: `[Stored: Zombie]`. Sneak and right-click to raise the first one stored as your servant (see the Necronomicon): it follows you and fights for you.
 
-**Rubies and sapphires in the anvil.** Put an item with an inherent enchantment and a ruby in an anvil: the result only says its inherent enchantment is rerolled; take it and you find out what it became. It's any other enchantment that can go on that kind of item and goes with its other enchantments (never a curse, nor one switched off in `disabledEnchantments`, such as Mending), at the same level as the old one (capped at the new one's maximum): a netherite pickaxe's Unbreaking V might become Efficiency V or Silk Touch I, and a gold sword's Looting I might become Fire Aspect I or Sweeping Edge I. The new one stays: the item keeps it from then on, and the material's own doesn't come back. A sapphire raises an item's enchant capacity by one, once per item; only items with a capacity take one. Each uses one gem.
+**Rubies and sapphires in the anvil.** Put an item with an inherent enchantment and a ruby in an anvil: the result only says its inherent enchantment is rerolled; take it and you find out what it became. It's any other enchantment that can go on that kind of item and goes with its other enchantments (never a curse, nor one switched off in `disabledEnchantments`, such as Mending), at the same level as the old one (capped at the new one's maximum): a gold sword's Looting I might become Fire Aspect I or Sweeping Edge I. Netherite always gets the new enchantment's maximum level: a netherite pickaxe's Unbreaking V might become Efficiency V or Silk Touch I, and a later reroll of that Silk Touch I gives a full level again (item tag `eternalreturn:ruby_rerolls_at_max_level`). An item with no inherent enchantment (a bow, a fishing rod, copper or leather gear) gains one at level 1 instead. The new one stays: the item keeps it from then on, and the material's own doesn't come back. A sapphire raises an item's enchant capacity by one, once per item; only items with a capacity take one. Each uses one gem.
 
 **Sharpness, Smite, Bane of Arthropods and Cubism** can all go on the same weapon now.
 
@@ -454,7 +454,7 @@ Each second you spend in range adds a second of the effect, up to that limit, an
 
 **Blindness.** A blinded mob only notices and follows a target within 2 blocks (vanilla ignores blindness on mobs). Its follow range also limits how far it plans a path, so it shuffles about.
 
-**Armor weight.** Armor slows you down. A full set of diamond takes 30% off your walking speed, as much as Slowness II; iron and netherite 15% (Slowness I); gold 20%; chainmail 8%; leather and turtle shell 3%. The chestplate carries 40% of a set's weight, leggings 30%, helmet and boots 15% each, and the tooltip shows each piece's share. Weightless takes a piece's weight off.
+**Armor weight.** Armor slows you down. A full set of diamond or netherite takes 30% off your walking speed, as much as Slowness II; iron 15% (Slowness I); gold 20%; chainmail 8%; leather and turtle shell 3%. The chestplate carries 40% of a set's weight, leggings 30%, helmet and boots 15% each, and the tooltip shows each piece's share. Weightless takes a piece's weight off.
 
 **Heads.** In birch forests and cherry groves, 10% of zombies and skeletons (any kind) wear a beehive over their heads. Kill one and the hive breaks open: 3 angry bees come out after whoever killed it (or the nearest player). Anywhere, one zombie or skeleton in a thousand wears TNT instead, and explodes like TNT when it dies. Neither drops, and like any helmet they keep the mob from burning in daylight.
 
@@ -652,7 +652,7 @@ Creatures keep their gear and name. The stone works before a creature's own righ
 
 **Stairs and slabs.** Every color of wool and concrete has stairs and a slab (`eternalreturn:white_wool_stairs`, `eternalreturn:red_concrete_slab` and so on), after the full block in the Colored Blocks tab. Crafted like any stairs (6 blocks make 4) and slab (3 make 6); concrete ones also come from the stonecutter (1 block makes 1 stairs or 2 slabs). They behave like their block: wool ones burn, are quick to cut with shears and muffle sculk; concrete ones need a pickaxe.
 
-**Azalea** is a third new wood, a full set like maple's (logs, planks, doors, signs, boats and the rest). Its trees grow in place of some oaks; their leaves are vanilla's azalea leaves, and vanilla's azalea bush is the closest thing to its sapling.
+**Azalea** is a third new wood, a full set like maple's (logs, planks, doors, signs, boats and the rest). Its trees grow in place of some oaks; their leaves are vanilla's azalea leaves, and vanilla's azalea bush is its sapling: bone meal grows an azalea tree from it.
 
 **Maple and pale oak.** Two new woods, from the autumnal forest, each with everything a vanilla wood has: logs, wood, stripped logs and wood, planks, stairs, slabs, fences, fence gates, doors, trapdoors, pressure plates, buttons, signs, hanging signs, leaves, saplings (which also go in flower pots), boats and boats with chests. They craft, burn, strip with an axe and count as wood (for sticks, chests, crafting tables and so on) like vanilla's. Maple leaves are orange; pale oak's come in red, orange and yellow, and a pale oak sapling grows a tree of any of the three. Maple petals are fallen maple leaves, placed like pink petals (up to four to a block).
 
@@ -677,7 +677,7 @@ Creatures keep their gear and name. The stone works before a creature's own righ
 - `villagers`: `onlyFishermenBuy`; `fishPriceMultiplier` (default 2, applied to vanilla's own fish trades; the mod's fish pay what `eternalreturn/fish.json` says); `traderVillageVillagers` (3) and `traderVillageRadius` (64), `asylumPapersPrice` (16, 0 for none); `needs`: `enabled`, `daysBeforePriceRise` (2), `emeraldsPerMissingNeed` (5), `daysBeforeRefusal` (7), `maxOtherAdultsInSight` (1), `exerciseBlocks` (8), `minWorkstationDistance` (8), `closedAtNight`, `nightStart` (13000) and `nightEnd` (23000), `healWithFood` and `eatChance` (0.25); `chores`, `villagersSummonGolems` (off), `cureDiscount` (off).
 - `worldgen`: `debugTunnel` (off by default). Carves one straight 3x3 tunnel at y=20 along z=8 through every chunk on that row, to check that this mod's carvers run under the current world generator. Needs a restart, and only affects newly generated chunks.
 - `worldgen.biomeStone` (on by default; Eternal Return worlds only, newly generated chunks only): each biome's stone under the topsoil. Off: plain stone everywhere.
-- `worldgen.noTuff` (on: no tuff blobs in Eternal Return worlds, newly generated chunks only), `worldgen.azaleaTreeChance` (0.05).
+- `worldgen.noTuff` (on: no tuff blobs in Eternal Return worlds, newly generated chunks only), `worldgen.azaleaTreeChance` (0.005).
 - `worldgen.moreDungeons`, `netherDungeonAttempts` (6 per chunk), `netherWartPatchChance` (0.3), `surfaceStrongholdChance` (a third), `strongholdIllagers` (Eternal Return worlds only, newly generated chunks only).
 - `worldgen.onlyEssentialStructures` (on by default; Eternal Return worlds only): only strongholds, mineshafts, nether fossils and end cities, in all three dimensions, and blazes outside fortresses.
 - `worldgen.deepOceans`, `worldgen.sinkholes`, `worldgen.floatingIslands` (all on by default; Eternal Return worlds only, newly generated chunks only): the stepped sea floor, the sinkholes and the floating islands. Off: the sea floor as Moderner Beta makes it, no sinkholes, no islands.
@@ -920,3 +920,6 @@ Survival and blocks (any world, survival mode):
 153. The Wither: summon one in a big open space: it circles you instead of hovering. Bring it to half health: a blast, three wither skeletons, and it drops down to your level through any blocks in the way.
 154. Drops: kill a vindicator or an evoker: rubies, no emeralds. A gold sword has Looting I. A bone spider drops bones.
 155. Azalea: in a new Eternal Return world, look around oak forests and plains: now and then an azalea tree with pink-flowered leaves. Craft azalea planks, signs, boats from its logs.
+156. Rubies, again: reroll a netherite pickaxe's Unbreaking V a few times: whatever comes up is at its top level (Silk Touch I, Efficiency V, Fortune V), never stuck at 1. Put a bow and a ruby in an anvil: it gains an enchantment at level 1 (it said "Inherent enchantment gained"). A fresh diamond sword has Sharpness I. Netherite: capacity 2, and a full set slows you as much as diamond.
+157. Azalea: bone meal an azalea bush: the tree that grows has an azalea trunk.
+158. Sinkholes: in a new Eternal Return world, fly over the deep sea: now and then a dark round pit about 100 blocks across drops from the sea floor to near the bottom of the world. A few are on land.

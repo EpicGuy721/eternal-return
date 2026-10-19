@@ -57,7 +57,7 @@ The preset is all data. Without Moderner Beta installed, the world type and its 
 - Phase 3, part 2: done. Spiral and toroidal-room caves; maze, combination and circular-room caves dropped.
 - Phase 4, part 1 (biome stone): done. Each biome's stone from under the topsoil to bedrock, and two hardened blocks.
 - Phase 4, part 2 (ore variants): done. Every ore in every host stone, with old-style textures.
-- Terrain features: done. Deep oceans that fall in steps, rare sinkholes, rare floating islands, old growth taigas (see Terrain features).
+- Terrain features: done. Deep oceans that fall in steps, rare sinkholes (mostly in the sea, about 100 blocks across), rare floating islands, old growth taigas (see Terrain features).
 - Phase 4, part 3 (biomes and mineshafts): done. Cherry groves, every modern ocean, and mineshafts built from their biome's wood. Ocean monuments and Moderner Beta's ocean shrines were later removed from Eternal Return worlds; guardians spawn in the open sea instead (README, Mobs and Fishing).
 
 ## The Eternal Return preset
@@ -87,7 +87,7 @@ The later biomes work cleanly next to Moderner Beta's own: Moderner Beta ships h
 
 **No deepslate.** Moderner Beta's deepslate layer is off, so below y=0 the stone carries on unchanged (plain stone, or the biome's stone; see Biome stone). Vanilla still scatters tuff blobs below y=0, and an ore that lands in tuff would take its deepslate variant. Tuff is added to `stone_ore_replaceables` and taken out of `deepslate_ore_replaceables` (that file replaces vanilla's, leaving only deepslate), so those ores are always the stone kind; the second change matters once caves expose tuff to air, because vanilla's ore placer then falls back to the deepslate target. Both tag changes apply to every world: in a vanilla world, ores inside tuff blobs use the stone variant too. Trial chambers, which have a little cobbled-deepslate rubble, no longer generate in Eternal Return worlds. Moderner Beta's optional "Deepslate Blobs" datapack would still add deepslate if someone turned it on.
 
-**World height.** -64 to 320, all of it used. Bedrock at -64, solid stone with caves and ores from there to the surface, sea level 63, most land between 65 and 85, hills to about 100 and the tallest mountains around 145, in whichever biome the noise puts them. The open sea floor reaches y -30, sinkholes go down to about y -55, and rare floating islands sit between y 228 and 255. Moderner Beta's own 1.6.4 presets stop terrain at y=128; this preset lets it go higher, with room to spare up to 320. Don't turn on Moderner Beta's "Reduced Height" datapack with this preset: it moves the floor to y=0 for every world.
+**World height.** -64 to 320, all of it used. Bedrock at -64, solid stone with caves and ores from there to the surface, sea level 63, most land between 65 and 85, hills to about 100 and the tallest mountains around 145, in whichever biome the noise puts them. The open sea floor reaches y -30, sinkholes (mostly under the sea) go down to about y -55, and rare floating islands sit between y 228 and 255. Moderner Beta's own 1.6.4 presets stop terrain at y=128; this preset lets it go higher, with room to spare up to 320. Don't turn on Moderner Beta's "Reduced Height" datapack with this preset: it moves the floor to y=0 for every world.
 
 ## Terrain tuning
 
@@ -282,9 +282,7 @@ On the test seed, sampling the sea floor every 32 blocks over 8,000 x 8,000 bloc
 
 ### Sinkholes
 
-Release 1.19.2 sometimes opened huge pits in the land where the terrain noise went wild. Here they are a planned rarity: the world is split into squares of 1,024 blocks, and about a third of the squares holds a sinkhole, 20 to 70 blocks across, placed from the world seed alone; one that would land on an ocean, river or beach is dropped. A sinkhole is a round pit with a ragged edge and near-sheer walls, from the land straight down to about y -55 to -63, full of water up to sea level: a deep, dark lake that drops to the bottom of the world.
-
-Within 8,192 blocks of spawn the test seed has 35 sinkholes on land, about one per 2,800 x 2,800 blocks. 28 of them reach y -45 or lower, the shallowest y -32 (a small pit, which the terrain noise props up a little). The nearest is at x 781, z -387 (a swamp, 30 blocks across, floor y -50).
+Release 1.19.2 sometimes opened huge pits where the terrain noise went wild. Here they are a planned rarity, mostly in the sea: the world is split into squares of 1,024 blocks, and about a third of the squares holds a sinkhole, 84 to 116 blocks across, placed from the world seed alone. One whose centre lies in the sea is always made; one on land only one time in five (`TerrainShape.SINKHOLE_LAND_CHANCE`), and never on a river or beach. A sinkhole is a round pit with a ragged edge and near-sheer walls, from the sea floor (or the land) straight down to about y -55 to -63, full of water up to sea level: a dark blue hole that drops to the bottom of the world. The terrain test (`sinkholesReachTheBottom`) lists the test seed's sinkholes within 8,192 blocks of spawn and checks that most are in the sea and that each reaches the bottom.
 
 How: the same hook as the deep oceans gives the columns inside the pit a very low height and little ruggedness. Two preset changes were needed to let the pit reach the bottom and fill cleanly (`tools/worldgen/knobs.json`):
 - `bottom_slide_size` 1 (Moderner Beta's `noise_slide.bottomSize`, 3 before): the slide that keeps the bottom of the world solid started 24 blocks above bedrock and stopped the pits near y -30. Now it starts 8 blocks up. Nothing else changes: no other ground comes that low.

@@ -54,7 +54,9 @@ public final class EternalReturnConfig {
 	/**
 	 * Which defaults the material rules (enchantCaps, inherentEnchantments, disabledEnchantments, armor weights) were
 	 * written with: version 1 added copper and rose gold, gave gold tools Silk Touch (hoes Fortune), chainmail
-	 * Projectile Protection I, diamond armor Blast Protection I, netherite armor Unbreaking V, and removed Soul Speed.
+	 * Projectile Protection I, diamond armor Blast Protection I, netherite armor Unbreaking V, and removed Soul Speed;
+	 * version 2 gave gold swords Looting I; version 3 gave diamond swords Sharpness I, made netherite armor as heavy as
+	 * diamond and netherite's capacity 2, and made azalea trees rarer (worldgen.azaleaTreeChance 0.005).
 	 * Don't edit.
 	 */
 	public int materialsVersion;
@@ -445,7 +447,7 @@ public final class EternalReturnConfig {
 		m.put("minecraft:iron", 0.15);
 		m.put("eternalreturn:copper", 0.15);
 		m.put("eternalreturn:rosegold", 0.10);
-		m.put("minecraft:netherite", 0.15);
+		m.put("minecraft:netherite", 0.30);
 		m.put("minecraft:gold", 0.10);
 		m.put("minecraft:diamond", 0.30);
 		return m;
@@ -455,8 +457,8 @@ public final class EternalReturnConfig {
 	public static final class WorldgenTweaks {
 		/** No tuff blobs in Eternal Return worlds (newly generated chunks). */
 		public boolean noTuff = true;
-		/** Chance an oak becomes an azalea tree as Eternal Return worlds generate (newly generated chunks). */
-		public double azaleaTreeChance = 0.05;
+		/** Chance an oak becomes an azalea tree as Eternal Return worlds generate (newly generated chunks): 1 in 200. */
+		public double azaleaTreeChance = 0.005;
 		/**
 		 * Debug only: carves one straight 3x3 tunnel at y=20 along z=8, through every chunk on that
 		 * row. It checks that this mod's carvers run under the active world generator.
@@ -638,7 +640,7 @@ public final class EternalReturnConfig {
 
 		if (loaded == null) {
 			loaded = new EternalReturnConfig();
-			loaded.materialsVersion = 2;
+			loaded.materialsVersion = 3;
 			loaded.fishing.baitsVersion = BAITS_VERSION;
 			loaded.worldgen.caves.typesVersion = CaveTypes.SETTINGS_VERSION;
 		}
@@ -656,7 +658,7 @@ public final class EternalReturnConfig {
 			}
 			loaded.survival.armorWeightVersion = 1;
 		}
-		if (loaded.materialsVersion < 2) {
+		if (loaded.materialsVersion < 3) {
 			loaded.updateMaterials();
 		}
 		if (loaded.worldgen == null) {
@@ -685,11 +687,11 @@ public final class EternalReturnConfig {
 	 */
 	private void updateMaterials() {
 		if (this.materialsVersion >= 1) {
-			// Version 2: gold swords' Looting I.
-			if (this.inherentEnchantments != null) {
+			if (this.materialsVersion < 2 && this.inherentEnchantments != null) {
+				// Version 2: gold swords' Looting I.
 				this.inherentEnchantments.putIfAbsent("eternalreturn:inherent/gold_swords", Map.of("minecraft:looting", 1));
 			}
-			this.materialsVersion = 2;
+			this.updateMaterialsToVersion3();
 			return;
 		}
 		Map<String, Map<String, Integer>> old = new LinkedHashMap<>();
@@ -725,7 +727,27 @@ public final class EternalReturnConfig {
 			this.survival.armorWeight.putIfAbsent("eternalreturn:copper", 0.15);
 			this.survival.armorWeight.putIfAbsent("eternalreturn:rosegold", 0.10);
 		}
-		this.materialsVersion = 2;
+		this.updateMaterialsToVersion3();
+	}
+
+	/**
+	 * Version 3: diamond swords' Sharpness I; netherite armor as heavy as diamond, netherite's capacity 2 and azalea
+	 * trees 1 in 200 instead of 1 in 20, each only if the file still had the old default.
+	 */
+	private void updateMaterialsToVersion3() {
+		if (this.inherentEnchantments != null) {
+			this.inherentEnchantments.putIfAbsent("eternalreturn:inherent/diamond_swords", Map.of("minecraft:sharpness", 1));
+		}
+		if (this.enchantCaps != null && Integer.valueOf(4).equals(this.enchantCaps.get("eternalreturn:enchant_cap/netherite"))) {
+			this.enchantCaps.put("eternalreturn:enchant_cap/netherite", 2);
+		}
+		if (this.survival != null && this.survival.armorWeight != null && Double.valueOf(0.15).equals(this.survival.armorWeight.get("minecraft:netherite"))) {
+			this.survival.armorWeight.put("minecraft:netherite", 0.30);
+		}
+		if (this.worldgen != null && this.worldgen.azaleaTreeChance == 0.05) {
+			this.worldgen.azaleaTreeChance = 0.005;
+		}
+		this.materialsVersion = 3;
 	}
 
 	private Compiled compile() {
@@ -791,7 +813,7 @@ public final class EternalReturnConfig {
 		m.put("eternalreturn:enchant_cap/rosegold", 8);
 		m.put("eternalreturn:enchant_cap/gold", 10);
 		m.put("eternalreturn:enchant_cap/diamond", 7);
-		m.put("eternalreturn:enchant_cap/netherite", 4);
+		m.put("eternalreturn:enchant_cap/netherite", 2);
 		m.put("eternalreturn:enchant_cap/chainmail", 5);
 		m.put("eternalreturn:enchant_cap/bows", 6);
 		m.put("eternalreturn:enchant_cap/fishing_rods", 7);
@@ -824,6 +846,7 @@ public final class EternalReturnConfig {
 		m.put("eternalreturn:inherent/gold_hoes", Map.of("minecraft:fortune", 1));
 		m.put("eternalreturn:inherent/gold_tools", Map.of("minecraft:silk_touch", 1));
 		m.put("eternalreturn:inherent/gold_armor", Map.of("minecraft:fire_protection", 1));
+		m.put("eternalreturn:inherent/diamond_swords", Map.of("minecraft:sharpness", 1));
 		m.put("eternalreturn:inherent/diamond_tools", Map.of("minecraft:efficiency", 1));
 		m.put("eternalreturn:inherent/diamond_armor", Map.of("minecraft:blast_protection", 1));
 		m.put("eternalreturn:inherent/netherite_tools", Map.of("minecraft:unbreaking", 5));

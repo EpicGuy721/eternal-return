@@ -4,6 +4,7 @@ import com.eternalreturn.EternalReturn;
 import com.eternalreturn.config.EternalReturnConfig;
 import com.eternalreturn.worldgen.caves.CaveWorlds;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.SaplingGenerator;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.world.ChunkRegion;
@@ -12,13 +13,18 @@ import net.minecraft.world.gen.feature.ConfiguredFeature;
 import net.minecraft.world.gen.feature.TreeFeatureConfig;
 import net.minecraft.world.gen.feature.util.FeatureContext;
 
+import java.util.Optional;
+
 /**
  * Azalea trees (an azalea trunk under azalea and flowering azalea leaves, data eternalreturn:azalea_tree) now and
- * then (worldgen.azaleaTreeChance, 1 in 20) grow in place of an oak as Eternal Return worlds are generated
- * (TreeFeatureAzaleaMixin). Oak saplings still grow oaks, and other worlds are untouched.
+ * then (worldgen.azaleaTreeChance, 1 in 200) grow in place of an oak as Eternal Return worlds are generated
+ * (TreeFeatureAzaleaMixin). Oak saplings still grow oaks, and other worlds are untouched. Bone meal on an azalea
+ * bush grows this tree too, in every world (AzaleaBlockMixin).
  */
 public final class AzaleaTrees {
 	public static final RegistryKey<ConfiguredFeature<?, ?>> TREE = RegistryKey.of(RegistryKeys.CONFIGURED_FEATURE, EternalReturn.id("azalea_tree"));
+	/** What a bone-mealed azalea bush grows: this tree, in place of vanilla's oak-trunked one. */
+	public static final SaplingGenerator BUSH = new SaplingGenerator(EternalReturn.MOD_ID + ":azalea", Optional.empty(), Optional.of(TREE), Optional.empty());
 
 	private AzaleaTrees() {
 	}

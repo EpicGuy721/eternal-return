@@ -381,5 +381,6 @@
 	"block.eternalreturn.ruby_ore": "Ruby Ore",
 	"block.eternalreturn.sapphire_ore": "Sapphire Ore",
 	"block.eternalreturn.nether_ruby_ore": "Nether Ruby Ore",
-	"tooltip.eternalreturn.ruby_reroll": "Inherent enchantment rerolled: take it to see"
+	"tooltip.eternalreturn.ruby_reroll": "Inherent enchantment rerolled: take it to see",
+	"tooltip.eternalreturn.ruby_grant": "Inherent enchantment gained: take it to see"
 }

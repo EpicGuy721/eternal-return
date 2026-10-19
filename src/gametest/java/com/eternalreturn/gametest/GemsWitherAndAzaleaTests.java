@@ -134,6 +134,31 @@ public class GemsWitherAndAzaleaTests implements FabricGameTest {
 			ctx.assertTrue(choices.stream().anyMatch(c -> c.replacement().matchesKey(enchantment(world, "minecraft:fire_aspect").getKey().orElseThrow())),
 					"a gold sword's Looting can become Fire Aspect: " + choices.stream().map(c -> c.replacement().getIdAsString()).toList());
 			ctx.assertTrue(choices.stream().noneMatch(c -> c.replacement().isIn(net.minecraft.registry.tag.EnchantmentTags.CURSE)), "never a curse");
+			// Netherite: always the new one's maximum level (Unbreaking V never turns into a level-1 enchantment's level 1 and stays there).
+			ItemStack netheritePick = new ItemStack(Items.NETHERITE_PICKAXE);
+			InherentEnchantments.apply(netheritePick, world.getRegistryManager());
+			List<Gems.Choice> netherite = Gems.rerollChoices(netheritePick, world.getRegistryManager());
+			ctx.assertTrue(!netherite.isEmpty() && netherite.stream().allMatch(c -> c.level() == c.replacement().value().getMaxLevel()),
+					"netherite rerolls come out at the maximum: " + netherite.stream().map(c -> c.replacement().getIdAsString() + " " + c.level()).toList());
+			ItemStack nr = Gems.withRuby(netheritePick, world.getRegistryManager());
+			Gems.finishReroll(nr, world.getRegistryManager(), Random.create(3));
+			var unbreaking = enchantment(world, "minecraft:unbreaking");
+			ctx.assertTrue(EnchantmentHelper.getLevel(unbreaking, nr) == 0 && nr.getEnchantments().getEnchantmentEntries().stream()
+					.allMatch(e -> e.getIntValue() == e.getKey().value().getMaxLevel()), "rerolled netherite at the maximum: " + nr.getEnchantments());
+			// A bow has no inherent enchantment: a ruby gives it one, at level 1, which then stays as its own.
+			ItemStack bow = new ItemStack(Items.BOW);
+			ctx.assertTrue(!InherentEnchantments.hasRules(bow), "a bow has no inherent enchantment of its own");
+			ItemStack rubyBow = Gems.withRuby(bow, world.getRegistryManager());
+			ctx.assertTrue(Gems.pendingReroll(rubyBow), "a ruby takes a bow");
+			Gems.finishReroll(rubyBow, world.getRegistryManager(), Random.create(5));
+			ctx.assertTrue(rubyBow.getEnchantments().getSize() == 1 && rubyBow.getEnchantments().getEnchantmentEntries().iterator().next().getIntValue() == 1,
+					"the bow gained one enchantment at level 1: " + rubyBow.getEnchantments());
+			ctx.assertTrue(InherentEnchantments.isOnlyInherent(rubyBow), "and it's the bow's inherent enchantment now: " + rubyBow.getEnchantments());
+			// Diamond swords come with Sharpness I.
+			ItemStack diamondSword = new ItemStack(Items.DIAMOND_SWORD);
+			InherentEnchantments.apply(diamondSword, world.getRegistryManager());
+			ctx.assertTrue(EnchantmentHelper.getLevel(enchantment(world, "minecraft:sharpness"), diamondSword) == 1, "a diamond sword has Sharpness I: "
+					+ diamondSword.getEnchantments());
 			// Sapphires.
 			ItemStack sword = new ItemStack(Items.DIAMOND_SWORD);
 			int cap = EnchantCaps.capFor(sword);
@@ -200,6 +225,22 @@ public class GemsWitherAndAzaleaTests implements FabricGameTest {
 			ctx.assertTrue(wither.getHealth() <= wither.getMaxHealth() / 2.0F, "it can't heal back above half: " + wither.getHealth());
 			ctx.complete();
 		});
+	}
+
+	/** Bone meal on an azalea bush grows an azalea tree with an azalea trunk, not an oak one. */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "trees", skyAccess = true)
+	public void bonemealedAzalea(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		floor(ctx, Blocks.GRASS_BLOCK);
+		BlockPos at = ctx.getAbsolutePos(new BlockPos(4, 1, 4));
+		boolean grown = false;
+		for (int i = 0; i < 20 && !grown; i++) {
+			world.setBlockState(at, Blocks.AZALEA.getDefaultState());
+			((net.minecraft.block.AzaleaBlock) Blocks.AZALEA).grow(world, Random.create(i), at, Blocks.AZALEA.getDefaultState());
+			grown = !world.getBlockState(at).isOf(Blocks.AZALEA);
+		}
+		ctx.assertTrue(grown && world.getBlockState(at).isOf(Woods.AZALEA.log), "a bone-mealed azalea grows an azalea trunk: " + world.getBlockState(at));
+		ctx.complete();
 	}
 
 	/** The azalea tree has an azalea trunk and azalea leaves; oaks stay oaks outside Eternal Return worlds. */

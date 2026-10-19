@@ -25,8 +25,8 @@ import java.util.Map;
  * blocks, a steep drop to about y 0, and further out (about 170 blocks from land) another steep drop to
  * about y -30. The distance to land comes from the biome map (a distance field per 256-block region),
  * and both edges wander with noise.</li>
- * <li>Sinkholes: very rarely the ground drops into a pit down to the bottom of the world, which the
- * generator floods from sea level down, as 1.18 and 1.19 sometimes did.</li>
+ * <li>Sinkholes: very rarely the ground (mostly the sea floor) drops into a pit about 100 blocks across down to
+ * the bottom of the world, which the generator floods from sea level down, as 1.18 and 1.19 sometimes did.</li>
  * </ul>
  * Because the change is made where the generator gets its column heights, the height maps, the cave
  * carver's water checks and the map tool all see it. Other worlds never change.
@@ -50,6 +50,8 @@ public final class TerrainShape {
 	/** Sinkholes: one chance per square of this many blocks. */
 	public static final int SINKHOLE_CELL = 1024;
 	public static final double SINKHOLE_CHANCE = 0.35;
+	/** Most sinkholes are in the sea: one planned on land is kept only this often (never on a river or beach). */
+	public static final double SINKHOLE_LAND_CHANCE = 0.2;
 	public static final double SINKHOLE_FLOOR_Y = -58;
 	/** Terrain scale (ruggedness) inside a sinkhole. */
 	private static final float SINKHOLE_SCALE = 0.3F;
@@ -127,8 +129,8 @@ public final class TerrainShape {
 		}
 	}
 
-	/** A sinkhole: centre in blocks, radius in blocks. */
-	public record Sinkhole(int x, int z, int radius, long seed) {
+	/** A sinkhole: centre in blocks, radius in blocks; onLand: whether it is kept if its centre lies on land. */
+	public record Sinkhole(int x, int z, int radius, long seed, boolean onLand) {
 	}
 
 	static boolean isOcean(String biome) {
@@ -247,11 +249,12 @@ public final class TerrainShape {
 		int margin = 64;
 		int x = cellX * SINKHOLE_CELL + margin + random.nextInt(SINKHOLE_CELL - 2 * margin);
 		int z = cellZ * SINKHOLE_CELL + margin + random.nextInt(SINKHOLE_CELL - 2 * margin);
-		int radius = 10 + random.nextInt(25);
-		return new Sinkhole(x, z, radius, random.nextLong());
+		int radius = 42 + random.nextInt(17);
+		long seed = random.nextLong();
+		return new Sinkhole(x, z, radius, seed, random.nextDouble() < SINKHOLE_LAND_CHANCE);
 	}
 
-	/** The sinkholes of a cell that lie on land (their centre's biome is no ocean, river or beach). */
+	/** The sinkholes of a cell: in the sea, or (onLand) on land, never with their centre on a river or beach. */
 	private static List<Sinkhole> sinkholes(State state, int cellX, int cellZ) {
 		long key = ((long) cellX << 32) ^ (cellZ & 0xFFFFFFFFL);
 		synchronized (state.sinkholes) {
@@ -264,7 +267,7 @@ public final class TerrainShape {
 		Sinkhole planned = plannedSinkhole(state.seed, cellX, cellZ);
 		if (planned != null) {
 			String biome = state.biome(planned.x() >> 2, planned.z() >> 2);
-			if (!isOcean(biome) && !biome.contains("river") && !biome.contains("beach") && !biome.contains("shore")) {
+			if (keeps(planned, biome)) {
 				found.add(planned);
 			}
 		}
@@ -272,6 +275,14 @@ public final class TerrainShape {
 			state.sinkholes.put(key, found);
 		}
 		return found;
+	}
+
+	/** Whether a planned sinkhole whose centre lies in this biome is made. */
+	public static boolean keeps(Sinkhole hole, String biome) {
+		if (biome.contains("river") || biome.contains("beach") || biome.contains("shore")) {
+			return false;
+		}
+		return isOcean(biome) || hole.onLand();
 	}
 
 	/** Inside a sinkhole the ground drops to its floor, and the terrain noise calms (so the floor isn't propped up by it). */

@@ -97,9 +97,8 @@ public class TerrainFeatureTests implements FabricGameTest {
 	}
 
 	/**
-	 * The sinkholes planned within 8,192 blocks of spawn: every one whose centre lies on land is a pit
-	 * reaching near the bottom of the world, open down to the water (sea level) and flooded from there,
-	 * with ordinary ground around it.
+	 * The sinkholes made within 8,192 blocks of spawn (most in the sea, a few on land): every one is a pit
+	 * reaching near the bottom of the world, open down to the water (sea level) and flooded from there.
 	 */
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = TERRAIN_BATCH, tickLimit = 2_000_000)
 	public void sinkholesReachTheBottom(TestContext ctx) {
@@ -111,6 +110,7 @@ public class TerrainFeatureTests implements FabricGameTest {
 		List<String> shallow = new ArrayList<>();
 		List<Integer> deepest = new ArrayList<>();
 		List<String> dry = new ArrayList<>();
+		int inSea = 0;
 		TerrainShape.Sinkhole nearest = null;
 		int cells = 8192 / TerrainShape.SINKHOLE_CELL;
 		for (int cx = -cells; cx < cells; cx++) {
@@ -120,8 +120,11 @@ public class TerrainFeatureTests implements FabricGameTest {
 					continue;
 				}
 				String atCentre = biome(world, generator, noise, hole.x(), sea, hole.z());
-				if (atCentre.contains("ocean") || atCentre.contains("river") || atCentre.contains("beach") || atCentre.contains("shore")) {
+				if (!TerrainShape.keeps(hole, atCentre)) {
 					continue;
+				}
+				if (atCentre.contains("ocean")) {
+					inSea++;
 				}
 				int floor = generator.getHeight(hole.x(), hole.z(), Heightmap.Type.OCEAN_FLOOR_WG, world, noise) - 1;
 				int water = generator.getHeight(hole.x(), hole.z(), Heightmap.Type.WORLD_SURFACE_WG, world, noise) - 1;
@@ -139,7 +142,8 @@ public class TerrainFeatureTests implements FabricGameTest {
 				}
 			}
 		}
-		ctx.assertTrue(found.size() >= 3, "only " + found.size() + " sinkholes on land within 8,192 blocks: " + found);
+		ctx.assertTrue(found.size() >= 3, "only " + found.size() + " sinkholes within 8,192 blocks: " + found);
+		ctx.assertTrue(inSea * 2 > found.size(), "most sinkholes are in the sea, but only " + inSea + " of " + found.size() + ": " + found);
 		// The nearest one, generated for real: what fills it at the bottom.
 		String bottom = "?";
 		if (nearest != null) {
@@ -161,7 +165,7 @@ public class TerrainFeatureTests implements FabricGameTest {
 			}
 			ctx.assertTrue(solid == 0, solid + " non-fluid blocks in the nearest sinkhole between its floor (y " + planned + ") and sea level: " + bottom);
 		}
-		EternalReturn.LOGGER.info("[terrain] sinkholes on land within 8,192 blocks: {} | nearest {} | at its bottom {}", found, nearest, bottom);
+		EternalReturn.LOGGER.info("[terrain] sinkholes within 8,192 blocks ({} in the sea): {} | nearest {} | at its bottom {}", inSea, found, nearest, bottom);
 		ctx.assertTrue(shallow.isEmpty(), "sinkholes that don't reach y -25: " + shallow);
 		long bottom45 = deepest.stream().filter(floor -> floor <= -45).count();
 		ctx.assertTrue(bottom45 * 4 >= deepest.size() * 3, "only " + bottom45 + " of " + deepest.size() + " sinkholes reach y -45");
