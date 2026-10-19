@@ -38,6 +38,8 @@ public class SoldierEntity extends HostileEntity implements RangedAttackMob {
 	public static final float RANGE = 24.0F;
 	/** Ticks between shots (reloading). */
 	public static final int RELOAD = 70;
+	/** Ticks since his last shot, for the reload's sounds; -1 before the first. */
+	private int sinceShot = -1;
 	private static final TrackedData<Boolean> AIMING = DataTracker.registerData(SoldierEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
 
 	public SoldierEntity(EntityType<? extends SoldierEntity> type, World world) {
@@ -83,6 +85,9 @@ public class SoldierEntity extends HostileEntity implements RangedAttackMob {
 	@Override
 	protected void mobTick() {
 		super.mobTick();
+		if (this.sinceShot >= 0 && this.sinceShot < RELOAD) {
+			Firearms.reloadSounds(this, ++this.sinceShot, RELOAD);
+		}
 		LivingEntity target = this.getTarget();
 		this.dataTracker.set(AIMING, target != null && target.isAlive() && this.squaredDistanceTo(target) <= RANGE * RANGE && this.getVisibilityCache().canSee(target));
 	}
@@ -110,5 +115,6 @@ public class SoldierEntity extends HostileEntity implements RangedAttackMob {
 		Vec3d from = new Vec3d(this.getX(), this.getEyeY() - 0.15, this.getZ());
 		Vec3d direction = new Vec3d(target.getX(), target.getBodyY(0.6), target.getZ()).subtract(from);
 		Firearms.fire(this, direction, 4 - this.getWorld().getDifficulty().getId());
+		this.sinceShot = 0;
 	}
 }

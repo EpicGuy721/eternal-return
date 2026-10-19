@@ -34,7 +34,8 @@ import net.minecraft.world.World;
  * fast, and hits hard: DAMAGE (a projectile's damage, so armor and Projectile Protection soften it, and from a mob it
  * scales with difficulty), and it wears each armor piece the target has on by ARMOR_WEAR on top of the usual. A
  * rifle shoots one of the bullets in its holder's inventory (none needed in creative), then takes RELOAD ticks to
- * reload; it wears by 1 a shot.
+ * reload (reloadSounds: the bolt drawn back a second after the shot, and closed just before it's ready); it wears by 1
+ * a shot.
  */
 public final class Firearms {
 	public static final float DAMAGE = 10.0F;
@@ -74,6 +75,16 @@ public final class Firearms {
 		return bullet;
 	}
 
+	/** The reload's sounds, by ticks since the shot (out of RELOAD): the bolt drawn back, then closed. */
+	public static void reloadSounds(LivingEntity shooter, int sinceShot, int reload) {
+		World world = shooter.getWorld();
+		if (sinceShot == 20) {
+			world.playSound(null, shooter.getX(), shooter.getY(), shooter.getZ(), SoundEvents.ITEM_CROSSBOW_LOADING_START.value(), shooter.getSoundCategory(), 1.0F, 0.8F);
+		} else if (sinceShot == reload - 10) {
+			world.playSound(null, shooter.getX(), shooter.getY(), shooter.getZ(), SoundEvents.ITEM_CROSSBOW_LOADING_END.value(), shooter.getSoundCategory(), 1.0F, 0.8F);
+		}
+	}
+
 	public static class RifleItem extends Item {
 		public RifleItem(Settings settings) {
 			super(settings);
@@ -102,6 +113,17 @@ public final class Firearms {
 			user.getItemCooldownManager().set(this, RELOAD);
 			user.incrementStat(Stats.USED.getOrCreateStat(this));
 			return TypedActionResult.success(rifle, world.isClient());
+		}
+
+		/** The reload's sounds, while the rifle cools down after a shot. */
+		@Override
+		public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean selected) {
+			if (!world.isClient && entity instanceof PlayerEntity player) {
+				float left = player.getItemCooldownManager().getCooldownProgress(this, 0.0F);
+				if (left > 0.0F) {
+					reloadSounds(player, RELOAD - Math.round(left * RELOAD), RELOAD);
+				}
+			}
 		}
 	}
 
