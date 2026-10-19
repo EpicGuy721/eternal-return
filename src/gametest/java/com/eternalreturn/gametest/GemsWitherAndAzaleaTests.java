@@ -103,7 +103,7 @@ public class GemsWitherAndAzaleaTests implements FabricGameTest {
 
 	/**
 	 * A ruby in an anvil: the result only says the inherent enchantment is rerolled; taking it rerolls it (a gold
-	 * pickaxe's Silk Touch becomes another table enchantment, which stays). A sapphire: one more point of capacity, once.
+	 * pickaxe's Silk Touch becomes another enchantment, which stays; any that goes on the item can come up). A sapphire: one more point of capacity, once.
 	 */
 	@GameTest(templateName = EMPTY_STRUCTURE)
 	public void anvilGems(TestContext ctx) {
@@ -127,6 +127,13 @@ public class GemsWitherAndAzaleaTests implements FabricGameTest {
 			ItemStack before = preview.copy();
 			InherentEnchantments.apply(preview, world.getRegistryManager());
 			ctx.assertTrue(EnchantmentHelper.getLevel(silk, preview) == 0 && ItemStack.areEqual(before, preview), "and the material's own doesn't come back");
+			// Any enchantment that goes on the item can come up, not only the material table's (but no curses).
+			ItemStack goldSword = new ItemStack(Items.GOLDEN_SWORD);
+			InherentEnchantments.apply(goldSword, world.getRegistryManager());
+			List<Gems.Choice> choices = Gems.rerollChoices(goldSword, world.getRegistryManager());
+			ctx.assertTrue(choices.stream().anyMatch(c -> c.replacement().matchesKey(enchantment(world, "minecraft:fire_aspect").getKey().orElseThrow())),
+					"a gold sword's Looting can become Fire Aspect: " + choices.stream().map(c -> c.replacement().getIdAsString()).toList());
+			ctx.assertTrue(choices.stream().noneMatch(c -> c.replacement().isIn(net.minecraft.registry.tag.EnchantmentTags.CURSE)), "never a curse");
 			// Sapphires.
 			ItemStack sword = new ItemStack(Items.DIAMOND_SWORD);
 			int cap = EnchantCaps.capFor(sword);

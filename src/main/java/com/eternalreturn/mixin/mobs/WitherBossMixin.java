@@ -28,7 +28,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * <li>first phase: it closes in more slowly, and within 10 blocks of its target it circles round it, about 8 blocks
  * out, instead of hovering in place;</li>
  * <li>at half health, once: an explosion, three wither skeletons, and the second phase. It is faster now, drops down
- * to its target's level, and passes through blocks while it has a target. It can't heal back above half.</li>
+ * to its target's level (no faster than a walking player), and passes through blocks while it has a target. It
+ * can't heal back above half.</li>
  * </ul>
  * The second phase is saved as eternalreturn_phase_two.
  */
@@ -60,9 +61,15 @@ public abstract class WitherBossMixin extends HostileEntity {
 		double distance = flat.length();
 		Vec3d moved;
 		if (this.eternalreturn$phaseTwo) {
-			// Faster, and down to its target's level.
-			double dy = MathHelper.clamp((target.getY() + 1.0 - this.getY()) * 0.15, -0.35, 0.35);
-			moved = new Vec3d(velocity.x * 1.5, dy, velocity.z * 1.5);
+			// A little faster than the first phase's approach but still slow enough to hit (at most about a
+			// walking player's speed), and down to its target's level.
+			double dy = MathHelper.clamp((target.getY() + 1.0 - this.getY()) * 0.1, -0.2, 0.2);
+			Vec3d flatVelocity = new Vec3d(velocity.x * 0.7, 0.0, velocity.z * 0.7);
+			double speed = flatVelocity.length();
+			if (speed > 0.2) {
+				flatVelocity = flatVelocity.multiply(0.2 / speed);
+			}
+			moved = new Vec3d(flatVelocity.x, dy, flatVelocity.z);
 		} else if (distance > 10.0) {
 			moved = new Vec3d(velocity.x * 0.6, velocity.y, velocity.z * 0.6);
 		} else {

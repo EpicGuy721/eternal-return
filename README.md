@@ -328,7 +328,7 @@ Both have scrolls and book recipes like the other enchantments.
 
 **Necromancy.** A new sword enchantment, I to V: an undead mob the sword kills is stored in it, one per level (not the Wither, nor phantoms), and the tooltip lists them: `[Stored: Zombie]`. Sneak and right-click to raise the first one stored as your servant (see the Necronomicon): it follows you and fights for you.
 
-**Rubies and sapphires in the anvil.** Put an item with an inherent enchantment and a ruby in an anvil: the result only says its inherent enchantment is rerolled; take it and you find out what it became. It's another enchantment from the material table above that suits the item and goes with its other enchantments, at the same level as the old one (capped at the new one's maximum): a netherite pickaxe's Unbreaking V might become Efficiency V or Silk Touch I. The new one stays: the item keeps it from then on, and the material's own doesn't come back. A sapphire raises an item's enchant capacity by one, once per item; only items with a capacity take one. Each uses one gem.
+**Rubies and sapphires in the anvil.** Put an item with an inherent enchantment and a ruby in an anvil: the result only says its inherent enchantment is rerolled; take it and you find out what it became. It's any other enchantment that can go on that kind of item and goes with its other enchantments (never a curse, nor one switched off in `disabledEnchantments`, such as Mending), at the same level as the old one (capped at the new one's maximum): a netherite pickaxe's Unbreaking V might become Efficiency V or Silk Touch I, and a gold sword's Looting I might become Fire Aspect I or Sweeping Edge I. The new one stays: the item keeps it from then on, and the material's own doesn't come back. A sapphire raises an item's enchant capacity by one, once per item; only items with a capacity take one. Each uses one gem.
 
 **Sharpness, Smite, Bane of Arthropods and Cubism** can all go on the same weapon now.
 
@@ -506,7 +506,7 @@ Each second you spend in range adds a second of the effect, up to that limit, an
 
 **Mooblooms** (autumnal forests) and **moolips** (cherry groves) are cows with dandelions and pink tulips on their backs. A bucket milks them; a bowl gets suspicious stew (a moobloom's gives Saturation, a moolip's Fire Resistance or Weakness). They drop what a cow does, and a dandelion or a pink tulip.
 
-**The Wither** closes in more slowly and, within 10 blocks of its target, circles round it about 8 blocks out. At half health, once, it explodes, calls up three wither skeletons, and starts its second phase: faster, it comes down to its target's level and passes through blocks to get there, and it can't heal back above half.
+**The Wither** closes in more slowly and, within 10 blocks of its target, circles round it about 8 blocks out. At half health, once, it explodes, calls up three wither skeletons, and starts its second phase: a little faster, but never quicker than a walking player, it comes down to its target's level and passes through blocks to get there, and it can't heal back above half.
 
 **Illagers** drop rubies instead of emeralds (vindicators and pillagers 0 to 1, evokers 1 to 3, as do vampires; illusioners 0 to 1 with their potion), when a player kills them. **Bone spiders** drop bones on top of a spider's drops.
 

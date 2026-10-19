@@ -1,7 +1,7 @@
 package com.eternalreturn.items;
 
 import com.eternalreturn.EternalReturn;
-import com.eternalreturn.config.EternalReturnConfig;
+import com.eternalreturn.logic.EnchantLevels;
 import com.eternalreturn.logic.InherentEnchantments;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.block.AbstractBlock;
@@ -23,6 +23,7 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.EnchantmentTags;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.intprovider.UniformIntProvider;
@@ -32,7 +33,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Rubies and sapphires. Ruby ore is about as common as lapis (in the Nether too, in netherrack), sapphire ore as
@@ -134,9 +134,9 @@ public final class Gems {
 	}
 
 	/**
-	 * Every way the item's inherent enchantment could be rerolled: each inherent enchantment it has, into each
-	 * enchantment of the material table that fits the item, isn't already inherent on it, and goes with its other
-	 * enchantments, at the old level (capped at the new one's maximum).
+	 * Every way the item's inherent enchantment could be rerolled: each inherent enchantment it has, into any
+	 * enchantment that can go on the item (not a curse, nor one of the config's disabledEnchantments), isn't already
+	 * on it, and goes with its other enchantments, at the old level (capped at the new one's maximum).
 	 */
 	public static List<Choice> rerollChoices(ItemStack stack, RegistryWrapper.WrapperLookup lookup) {
 		List<Choice> choices = new ArrayList<>();
@@ -145,22 +145,12 @@ public final class Gems {
 			return choices;
 		}
 		RegistryWrapper.Impl<Enchantment> registry = lookup.getWrapperOrThrow(RegistryKeys.ENCHANTMENT);
-		List<RegistryKey<Enchantment>> pool = new ArrayList<>();
-		for (EternalReturnConfig.InherentRule rule : EternalReturnConfig.rules().inherent()) {
-			for (RegistryKey<Enchantment> key : rule.levels().keySet()) {
-				if (!pool.contains(key)) {
-					pool.add(key);
-				}
-			}
-		}
+		List<RegistryEntry.Reference<Enchantment>> pool = registry.streamEntries()
+				.filter(entry -> entry.value().isSupportedItem(stack) && !entry.isIn(EnchantmentTags.CURSE) && !EnchantLevels.isDisabled(entry))
+				.toList();
 		for (Map.Entry<RegistryEntry<Enchantment>, Integer> old : inherent.entrySet()) {
-			for (RegistryKey<Enchantment> key : pool) {
-				Optional<RegistryEntry.Reference<Enchantment>> found = registry.getOptional(key);
-				if (found.isEmpty() || inherent.keySet().stream().anyMatch(entry -> entry.matchesKey(key))) {
-					continue;
-				}
-				RegistryEntry<Enchantment> candidate = found.get();
-				if (!candidate.value().isSupportedItem(stack)) {
+			for (RegistryEntry<Enchantment> candidate : pool) {
+				if (inherent.keySet().stream().anyMatch(entry -> entry.matchesKey(candidate.getKey().orElseThrow()))) {
 					continue;
 				}
 				boolean clashes = stack.getEnchantments().getEnchantmentEntries().stream()
