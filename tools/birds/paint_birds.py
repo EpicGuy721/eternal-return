@@ -28,20 +28,22 @@ OUT = os.path.join(ROOT, 'src', 'main', 'resources', 'assets', 'eternalreturn', 
 SHADE = {'up': 250, 'north': 240, 'east': 230, 'west': 230, 'south': 215, 'down': 205}
 WING, TAIL = 226, 220
 
-# Per shape: the untinted colours of its beak (or bill), legs and feet.
+# Per shape: the untinted colours of its beak (or bill), legs and feet; where its eyes are (the head's sides, or its
+# face for owls); and its wings' outline, row by row from the top, front to back ("#" feather, "." see-through).
 SHAPES = {
-    'songbird': {'beak': (66, 58, 52), 'legs': (92, 72, 64)},
-    'waterfowl': {'beak': (196, 170, 70), 'legs': (214, 120, 46)},
+    'songbird': {'beak': (66, 58, 52), 'legs': (92, 72, 64), 'eyes': 'side', 'wing': ['###', '##.']},
+    'waterfowl': {'beak': (196, 170, 70), 'legs': (214, 120, 46), 'eyes': 'side', 'wing': ['####', '###.']},
+    'owl': {'beak': (70, 64, 58), 'legs': (120, 112, 100), 'eyes': 'front', 'wing': ['###', '##.', '###']},
 }
 
 # Patterns by part role; ("head", "top") is the head's top row on its sides, ("head", "front") their front column.
 PATTERNS = {
-    'cap': [('head', 'up'), ('head', 'top')],
+    'cap': [('head', 'up'), ('head', 'top'), ('tuft', None)],
     'mask': [('head', 'north'), ('head', 'front')],
     'breast': [('body', 'north'), ('body', 'down'), ('neck', 'north'), ('head', 'chin')],
     'wings': [('wing', None)],
     'tail': [('tail', None)],
-    'head': [('head', None), ('neck', None)],
+    'head': [('head', None), ('neck', None), ('tuft', None)],
 }
 
 # The natural palette (birds.json will hold it; here for the previews).
@@ -56,12 +58,14 @@ PREVIEWS = {
                  'goldfinch': ('yellow', 'cap', 'black'), 'robin': ('brown', 'breast', 'rust')},
     'waterfowl': {'mallard_drake': ('pale_grey', 'head', 'olive'), 'mallard_hen': ('tan', 'wings', 'brown'),
                   'ruddy_duck': ('chestnut', 'cap', 'black')},
+    'owl': {'barn_owl': ('buff', 'mask', 'white'), 'snowy_owl': ('white', 'wings', 'pale_grey'),
+            'great_horned_owl': ('brown', 'mask', 'tan')},
 }
 EYE = (18, 16, 20)
 
 
 def role(name):
-    for part in ('body', 'neck', 'head', 'wing', 'tail', 'beak', 'bill', 'leg', 'foot'):
+    for part in ('body', 'neck', 'head', 'wing', 'tail', 'tuft', 'beak', 'bill', 'leg', 'foot'):
         if name.startswith(part) or ('_' + part) in name:
             return 'beak' if part == 'bill' else part
     raise ValueError('no role for part ' + name)
@@ -92,6 +96,16 @@ def cells(rect, face, where=None):
             yield x, y
 
 
+def feathered(outline, rect, face, x, y):
+    """Whether a wing pixel is feather, by the shape's outline (front to back; the east face's front is its right edge)."""
+    x1, y1, x2, y2 = rect
+    if face not in ('east', 'west'):
+        return True
+    row = outline[min(y - y1, len(outline) - 1)]
+    along = (x2 - 1 - x) if face == 'east' else (x - x1)
+    return along < len(row) and row[along] == '#'
+
+
 def paint(shape):
     model = json.load(open(os.path.join(MODELS, f'bird_{shape}.bbmodel'), encoding='utf-8'))
     size = (model['resolution']['width'], model['resolution']['height'])
@@ -99,11 +113,13 @@ def paint(shape):
     rng = random.Random(shape)
     base = Image.new('RGBA', size)
     for part, rects in parts:
-        if part not in ('body', 'neck', 'head', 'wing', 'tail'):
+        if part not in ('body', 'neck', 'head', 'wing', 'tail', 'tuft'):
             continue
         for face, rect in rects.items():
             x1, y1, x2, y2 = rect
             for x, y in cells(rect, face):
+                if part == 'wing' and not feathered(SHAPES[shape]['wing'], rect, face, x, y):
+                    continue
                 g = (WING if part == 'wing' else TAIL if part == 'tail' else SHADE[face]) + rng.randint(-6, 6)
                 if part == 'wing' and face in ('east', 'west') and y == y1:
                     g += 12  # the wing's top edge (its shoulder) catches the light
@@ -126,9 +142,13 @@ def paint(shape):
     details = Image.new('RGBA', size)
     colours = SHAPES[shape]
     for part, rects in parts:
-        if part == 'head':
+        if part == 'head' and colours['eyes'] == 'side':
             details.putpixel((rects['east'][2] - 1, rects['east'][1]), EYE + (255,))
             details.putpixel((rects['west'][0], rects['west'][1]), EYE + (255,))
+        if part == 'head' and colours['eyes'] == 'front':
+            # Owls: the eyes on the face, at its top corners, either side of the beak.
+            details.putpixel((rects['north'][0], rects['north'][1]), EYE + (255,))
+            details.putpixel((rects['north'][2] - 1, rects['north'][1]), EYE + (255,))
         if part in ('beak', 'leg', 'foot'):
             colour = colours['beak' if part == 'beak' else 'legs']
             for face, rect in rects.items():
