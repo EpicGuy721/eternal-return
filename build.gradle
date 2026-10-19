@@ -34,7 +34,7 @@ def worldmapSeed = "173164"
 // -PrecordFingerprints writes new baselines to src/gametest/resources/fingerprints instead.
 def fingerprintRecord = project.hasProperty("recordFingerprints")
 		? ["gametest.fingerprintRecord": file("src/gametest/resources/fingerprints").absolutePath] : [:]
-// -PgametestBatches=a,b runs only those batches (handy for re-running one check of a long suite).
+// -PgametestBatches=a,b runs only those batches, in any run (handy for re-running one check of a suite).
 def batchOverride = project.hasProperty("gametestBatches") ? ["gametest.batches": project.property("gametestBatches").toString()] : [:]
 def gameTestRun = { String runName, String label, String dir, Map<String, String> props ->
 	loom.runs.create(runName) {
@@ -44,7 +44,7 @@ def gameTestRun = { String runName, String label, String dir, Map<String, String
 		runDir "build/gametest/${dir}"
 		vmArg "-Dfabric-api.gametest"
 		vmArg "-Dfabric-api.gametest.report-file=${file("build/gametest/${dir}/report.xml")}"
-		(props + (props.containsKey("gametest.fingerprint") ? fingerprintRecord : [:]) + (props.containsKey("gametest.batches") ? batchOverride : [:])).each { key, value -> vmArg "-Deternalreturn.${key}=${value}" }
+		(props + (props.containsKey("gametest.fingerprint") ? fingerprintRecord : [:]) + batchOverride).each { key, value -> vmArg "-Deternalreturn.${key}=${value}" }
 	}
 }
 gameTestRun("gametest", "Game Test (flat world)", "flat", [:])

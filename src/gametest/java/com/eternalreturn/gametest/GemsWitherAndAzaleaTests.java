@@ -227,6 +227,59 @@ public class GemsWitherAndAzaleaTests implements FabricGameTest {
 		});
 	}
 
+	/**
+	 * A netherite sword whose inherent enchantment a ruby turned into Sharpness V hits harder than a plain one, by
+	 * Sharpness V's 3 points (a zombie with its armor taken off: 8 against 11).
+	 */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "sword_damage")
+	public void rerolledSharpnessHits(TestContext ctx) throws ReflectiveOperationException {
+		ServerWorld world = ctx.getWorld();
+		floor(ctx, Blocks.STONE);
+		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(2, 1, 2));
+		try {
+			ItemStack plain = new ItemStack(Items.NETHERITE_SWORD);
+			InherentEnchantments.apply(plain, world.getRegistryManager());
+			var sharpness = enchantment(world, "minecraft:sharpness");
+			ItemStack sharp = null;
+			for (int seed = 0; seed < 200 && sharp == null; seed++) {
+				ItemStack tried = Gems.withRuby(plain, world.getRegistryManager());
+				Gems.finishReroll(tried, world.getRegistryManager(), Random.create(seed));
+				if (EnchantmentHelper.getLevel(sharpness, tried) > 0) {
+					sharp = tried;
+				}
+			}
+			ctx.assertTrue(sharp != null && EnchantmentHelper.getLevel(sharpness, sharp) == 5, "a reroll into Sharpness V: " + (sharp == null ? "none" : sharp.getEnchantments()));
+			float plainHit = hit(ctx, player, plain);
+			float sharpHit = hit(ctx, player, sharp);
+			EternalReturn.LOGGER.info("[sword damage] plain {} -> {}, rerolled {} -> {}", plain.getEnchantments(), plainHit, sharp.getEnchantments(), sharpHit);
+			ctx.assertTrue(Math.abs(plainHit - 8.0F) < 0.01F, "a plain netherite sword hits for 8, got " + plainHit);
+			ctx.assertTrue(Math.abs(sharpHit - 11.0F) < 0.01F, "with its Sharpness V it hits for 11, got " + sharpHit + " (" + sharp.getEnchantments() + ")");
+		} finally {
+			FishingTests.disconnect(player);
+		}
+		ctx.complete();
+	}
+
+	/** The damage one full-strength hit with this item does to an unarmored zombie. */
+	private static float hit(TestContext ctx, ServerPlayerEntity player, ItemStack sword) throws ReflectiveOperationException {
+		player.equipStack(net.minecraft.entity.EquipmentSlot.MAINHAND, sword.copy());
+		player.playerTick();
+		net.minecraft.entity.mob.ZombieEntity zombie = ctx.spawnEntity(EntityType.ZOMBIE, new BlockPos(3, 1, 2));
+		zombie.setAiDisabled(true);
+		zombie.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_ARMOR).setBaseValue(0.0);
+		player.setOnGround(true);
+		player.setSprinting(false);
+		player.fallDistance = 0.0F;
+		java.lang.reflect.Field ticks = net.minecraft.entity.LivingEntity.class.getDeclaredField("lastAttackedTicks");
+		ticks.setAccessible(true);
+		ticks.setInt(player, 100);
+		float before = zombie.getHealth();
+		player.attack(zombie);
+		float dealt = before - zombie.getHealth();
+		zombie.discard();
+		return dealt;
+	}
+
 	/** Bone meal on an azalea bush grows an azalea tree with an azalea trunk, not an oak one. */
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "trees", skyAccess = true)
 	public void bonemealedAzalea(TestContext ctx) {
