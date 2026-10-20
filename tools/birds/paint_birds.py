@@ -11,7 +11,8 @@ Writes src/main/resources/assets/eternalreturn/textures/entity/bird/<shape>/:
   elsewhere, tinted with its pattern colour and drawn over the base (a bird wears up to two patterns, each in its
   own colour);
 - details.png: what is never tinted: the eyes, the beak or bill, legs and feet.
-With a preview_dir, also writes preview_<shape>_<bird>.png there: birds with colours applied, for checking in Blockbench.
+Palette and presets come from src/main/resources/eternalreturn/birds.json. With a preview_dir, also writes
+preview_<model>_<preset>.png there: each preset with its colours applied, for checking in Blockbench.
 Hand edits to these textures are lost when this is rerun.
 """
 import json
@@ -52,41 +53,10 @@ PATTERNS = {
     'head': [('head', None), ('neck', None), ('tuft', None)],
 }
 
-# The natural palette (birds.json will hold it; here for the previews).
-PALETTE = {
-    'black': (34, 31, 36), 'pink': (238, 146, 166), 'slate_grey': (112, 120, 128), 'pale_grey': (182, 186, 188),
-    'white': (238, 236, 230), 'cream': (234, 222, 186), 'buff': (214, 184, 132), 'tan': (176, 140, 96),
-    'brown': (120, 86, 58), 'chestnut': (140, 64, 40), 'rust': (186, 94, 50), 'scarlet': (204, 40, 38),
-    'orange': (232, 132, 40), 'yellow': (242, 202, 52), 'olive': (122, 126, 62), 'slate_blue': (78, 110, 172),
-}
-# Each preset: its base colour, then up to two patterns with their colours (the second drawn over the first).
-PREVIEWS = {
-    'songbird': {'cardinal': ('scarlet', [('mask', 'black')]),
-                 'blue_jay': ('slate_blue', [('breast', 'white'), ('tail', 'black')]),
-                 'robin': ('brown', [('head', 'black'), ('breast', 'rust')]),
-                 'goldfinch': ('yellow', [('wings', 'black'), ('cap', 'black')]),
-                 'house_sparrow': ('tan', [('wings', 'brown'), ('cap', 'slate_grey')]),
-                 'bluebird': ('slate_blue', [('breast', 'rust')]),
-                 'chickadee': ('pale_grey', [('wings', 'slate_grey'), ('cap', 'black')]),
-                 'oriole': ('orange', [('wings', 'black'), ('head', 'black')])},
-    'corvid': {'crow': ('black', []), 'magpie': ('black', [('breast', 'white'), ('wings', 'slate_blue')]),
-               'jackdaw': ('slate_grey', [('wings', 'black'), ('cap', 'black')])},
-    'waterfowl': {'mallard_drake': ('pale_grey', [('breast', 'chestnut'), ('head', 'olive')]),
-                  'mallard_hen': ('tan', [('wings', 'brown'), ('cap', 'brown')]),
-                  'ruddy_duck': ('chestnut', [('mask', 'white'), ('cap', 'black')])},
-    'owl': {'barn_owl': ('buff', [('breast', 'white'), ('mask', 'white')]), 'snowy_owl': ('white', [('wings', 'pale_grey')]),
-            'great_horned_owl': ('brown', [('breast', 'buff'), ('mask', 'tan')])},
-    'woodpecker': {'red_headed_woodpecker': ('white', [('wings', 'black'), ('head', 'scarlet')]),
-                   'downy_woodpecker': ('white', [('wings', 'black'), ('cap', 'scarlet')]),
-                   'northern_flicker': ('tan', [('breast', 'cream'), ('cap', 'slate_grey')])},
-    'seagull': {'herring_gull': ('white', [('wings', 'pale_grey')]),
-                'laughing_gull': ('white', [('wings', 'slate_grey'), ('head', 'black')]),
-                'black_backed_gull': ('white', [('wings', 'black')])},
-    'wader': {'great_blue_heron': ('slate_grey', [('head', 'white'), ('cap', 'black')]),
-              'flamingo': ('pink', [('wings', 'scarlet')]), 'scarlet_ibis': ('scarlet', [('tail', 'black')])},
-}
-# Owls without ear tufts (in game the renderer hides the tufts; Blockbench can't, so their previews leave them blank).
-NO_TUFTS = {'barn_owl', 'snowy_owl'}
+# The palette, shapes and presets: the bird table, which the game reads too.
+TABLE = json.load(open(os.path.join(ROOT, 'src', 'main', 'resources', 'eternalreturn', 'birds.json'), encoding='utf-8'))
+PALETTE = {c['id']: tuple(int(c['rgb'][k:k + 2], 16) for k in (1, 3, 5)) for c in TABLE['palette']}
+SHAPE_TABLE = {shape['id']: shape for shape in TABLE['shapes']}
 EYE = (18, 16, 20)
 
 
@@ -260,19 +230,23 @@ def main():
         for name, image in layers.items():
             image.save(os.path.join(folder, name + '.png'))
         if len(sys.argv) > 1:
-            for bird, (base, patterns) in PREVIEWS[shape].items():
-                image = tint(layers['base'], PALETTE[base])
-                for pattern, colour in patterns:
-                    image.alpha_composite(tint(layers['pattern_' + pattern], PALETTE[colour]))
+            for preset in TABLE['presets']:
+                kind = SHAPE_TABLE[preset['shape']]
+                if kind['model'] != shape:
+                    continue
+                image = tint(layers['base'], PALETTE[preset['base']])
+                for layer in preset['patterns']:
+                    image.alpha_composite(tint(layers['pattern_' + layer['pattern']], PALETTE[layer['colour']]))
                 image.alpha_composite(layers['details'])
-                if bird in NO_TUFTS:
+                if not kind['tufts']:
+                    # In game the renderer hides the tufts; Blockbench can't, so the preview leaves them blank.
                     model = json.load(open(os.path.join(MODELS, f'bird_{shape}.bbmodel'), encoding='utf-8'))
                     for element in model['elements']:
                         if role(element['name']) == 'tuft':
                             for face, rect in faces(element).items():
                                 for x, y in cells(rect, face):
                                     image.putpixel((x, y), (0, 0, 0, 0))
-                image.save(os.path.join(sys.argv[1], f'preview_{shape}_{bird}.png'))
+                image.save(os.path.join(sys.argv[1], f'preview_{shape}_{preset["id"]}.png'))
         print(shape, 'layers written:', ', '.join(layers))
 
 

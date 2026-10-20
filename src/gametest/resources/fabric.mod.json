@@ -44,7 +44,8 @@
 			"com.eternalreturn.gametest.MaterialsMobsAndRulesTests",
 			"com.eternalreturn.gametest.GemsWitherAndAzaleaTests",
 			"com.eternalreturn.gametest.BeholderTests",
-			"com.eternalreturn.gametest.SoldierTests"
+			"com.eternalreturn.gametest.SoldierTests",
+			"com.eternalreturn.gametest.BirdTests"
 		]
 	},
 	"mixins": [

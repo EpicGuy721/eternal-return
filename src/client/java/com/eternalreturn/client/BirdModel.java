@@ -1,0 +1,57 @@
+package com.eternalreturn.client;
+
+import com.eternalreturn.birds.BirdEntity;
+import net.minecraft.client.model.ModelPart;
+import net.minecraft.client.render.entity.model.TintableCompositeModel;
+import net.minecraft.util.math.MathHelper;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * One bird shape's model (BirdModels, from its Blockbench model), tinted with the bird's base colour as a tropical fish's
+ * is. The head follows the bird's look, the legs step as it walks, and the tufts (an owl's ear tufts, a woodpecker's
+ * crest) show only on shapes that have them.
+ */
+public class BirdModel extends TintableCompositeModel<BirdEntity> {
+	private final ModelPart root;
+	private final ModelPart head;
+	private final ModelPart leftLeg;
+	private final ModelPart rightLeg;
+	private final List<ModelPart> tufts = new ArrayList<>();
+
+	public BirdModel(ModelPart root, BirdModels.Parts parts) {
+		this.root = root;
+		this.head = find(root, parts.head());
+		this.leftLeg = find(root, parts.leftLeg());
+		this.rightLeg = find(root, parts.rightLeg());
+		for (String[] tuft : parts.tufts()) {
+			this.tufts.add(find(root, tuft));
+		}
+	}
+
+	private static ModelPart find(ModelPart root, String[] path) {
+		ModelPart part = root;
+		for (String name : path) {
+			part = part.getChild(name);
+		}
+		return part;
+	}
+
+	@Override
+	public ModelPart getPart() {
+		return this.root;
+	}
+
+	@Override
+	public void setAngles(BirdEntity bird, float limbAngle, float limbDistance, float animationProgress, float headYaw, float headPitch) {
+		this.root.traverse().forEach(ModelPart::resetTransform);
+		this.head.yaw += headYaw * MathHelper.RADIANS_PER_DEGREE;
+		this.head.pitch += headPitch * MathHelper.RADIANS_PER_DEGREE;
+		float step = MathHelper.cos(limbAngle * 1.3F) * 1.2F * limbDistance;
+		this.leftLeg.pitch += step;
+		this.rightLeg.pitch -= step;
+		boolean tufts = bird.getShape().tufts();
+		this.tufts.forEach(tuft -> tuft.visible = tufts);
+	}
+}

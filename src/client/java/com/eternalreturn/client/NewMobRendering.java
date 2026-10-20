@@ -46,6 +46,10 @@ public final class NewMobRendering {
 		EntityRendererRegistry.register(NewMobs.BEHOLDER, BeholderRenderer::new);
 		EntityModelLayerRegistry.registerModelLayer(SoldierModel.LAYER, SoldierModel::getTexturedModelData);
 		EntityRendererRegistry.register(NewMobs.SOLDIER, SoldierRenderer::new);
+		for (String model : BirdModels.MODELS) {
+			EntityModelLayerRegistry.registerModelLayer(BirdRenderer.layer(model), () -> BirdModels.get(model));
+		}
+		EntityRendererRegistry.register(com.eternalreturn.birds.Birds.BIRD, BirdRenderer::new);
 		EntityRendererRegistry.register(com.eternalreturn.items.Firearms.BULLET_ENTITY, ctx -> new FlyingItemEntityRenderer<>(ctx, 0.9F, true));
 		EntityRendererRegistry.register(NewMobs.MOOBLOOM, ctx -> new FlowerCowRenderer(ctx, "moobloom"));
 		EntityRendererRegistry.register(NewMobs.MOOLIP, ctx -> new FlowerCowRenderer(ctx, "moolip"));

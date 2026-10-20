@@ -1,0 +1,517 @@
+{
+  "_comment": "The birds: read by the game (com.eternalreturn.birds.BirdTable) and by tools/birds (textures, model code, names, docs/birds.md). Palette, shapes and patterns are in id order; append, never reorder, or saved birds change. preset_share is how many spawned birds are presets; the rest are random.",
+  "preset_share": 0.9,
+  "palette": [
+    {
+      "id": "black",
+      "rgb": "#221f24"
+    },
+    {
+      "id": "pink",
+      "rgb": "#ee92a6"
+    },
+    {
+      "id": "slate_grey",
+      "rgb": "#707880"
+    },
+    {
+      "id": "pale_grey",
+      "rgb": "#b6babc"
+    },
+    {
+      "id": "white",
+      "rgb": "#eeece6"
+    },
+    {
+      "id": "cream",
+      "rgb": "#eadeba"
+    },
+    {
+      "id": "buff",
+      "rgb": "#d6b884"
+    },
+    {
+      "id": "tan",
+      "rgb": "#b08c60"
+    },
+    {
+      "id": "brown",
+      "rgb": "#78563a"
+    },
+    {
+      "id": "chestnut",
+      "rgb": "#8c4028"
+    },
+    {
+      "id": "rust",
+      "rgb": "#ba5e32"
+    },
+    {
+      "id": "scarlet",
+      "rgb": "#cc2826"
+    },
+    {
+      "id": "orange",
+      "rgb": "#e88428"
+    },
+    {
+      "id": "yellow",
+      "rgb": "#f2ca34"
+    },
+    {
+      "id": "olive",
+      "rgb": "#7a7e3e"
+    },
+    {
+      "id": "slate_blue",
+      "rgb": "#4e6eac"
+    }
+  ],
+  "shapes": [
+    {
+      "id": "songbird",
+      "model": "songbird",
+      "tufts": false,
+      "width": 0.3,
+      "height": 0.3
+    },
+    {
+      "id": "waterfowl",
+      "model": "waterfowl",
+      "tufts": false,
+      "width": 0.4,
+      "height": 0.45
+    },
+    {
+      "id": "owl",
+      "model": "owl",
+      "tufts": false,
+      "width": 0.35,
+      "height": 0.45
+    },
+    {
+      "id": "eared_owl",
+      "model": "owl",
+      "tufts": true,
+      "width": 0.35,
+      "height": 0.5
+    },
+    {
+      "id": "wader",
+      "model": "wader",
+      "tufts": false,
+      "width": 0.3,
+      "height": 0.5
+    },
+    {
+      "id": "corvid",
+      "model": "corvid",
+      "tufts": false,
+      "width": 0.35,
+      "height": 0.4
+    },
+    {
+      "id": "woodpecker",
+      "model": "woodpecker",
+      "tufts": true,
+      "width": 0.25,
+      "height": 0.55
+    },
+    {
+      "id": "seagull",
+      "model": "seagull",
+      "tufts": false,
+      "width": 0.35,
+      "height": 0.45
+    }
+  ],
+  "patterns": [
+    "cap",
+    "mask",
+    "breast",
+    "wings",
+    "tail",
+    "head"
+  ],
+  "presets": [
+    {
+      "id": "northern_cardinal",
+      "name": "Northern Cardinal",
+      "shape": "songbird",
+      "base": "scarlet",
+      "patterns": [
+        {
+          "pattern": "mask",
+          "colour": "black"
+        }
+      ]
+    },
+    {
+      "id": "blue_jay",
+      "name": "Blue Jay",
+      "shape": "songbird",
+      "base": "slate_blue",
+      "patterns": [
+        {
+          "pattern": "breast",
+          "colour": "white"
+        },
+        {
+          "pattern": "tail",
+          "colour": "black"
+        }
+      ]
+    },
+    {
+      "id": "american_robin",
+      "name": "American Robin",
+      "shape": "songbird",
+      "base": "brown",
+      "patterns": [
+        {
+          "pattern": "head",
+          "colour": "black"
+        },
+        {
+          "pattern": "breast",
+          "colour": "rust"
+        }
+      ]
+    },
+    {
+      "id": "american_goldfinch",
+      "name": "American Goldfinch",
+      "shape": "songbird",
+      "base": "yellow",
+      "patterns": [
+        {
+          "pattern": "wings",
+          "colour": "black"
+        },
+        {
+          "pattern": "cap",
+          "colour": "black"
+        }
+      ]
+    },
+    {
+      "id": "house_sparrow",
+      "name": "House Sparrow",
+      "shape": "songbird",
+      "base": "tan",
+      "patterns": [
+        {
+          "pattern": "wings",
+          "colour": "brown"
+        },
+        {
+          "pattern": "cap",
+          "colour": "slate_grey"
+        }
+      ]
+    },
+    {
+      "id": "eastern_bluebird",
+      "name": "Eastern Bluebird",
+      "shape": "songbird",
+      "base": "slate_blue",
+      "patterns": [
+        {
+          "pattern": "breast",
+          "colour": "rust"
+        }
+      ]
+    },
+    {
+      "id": "chickadee",
+      "name": "Chickadee",
+      "shape": "songbird",
+      "base": "pale_grey",
+      "patterns": [
+        {
+          "pattern": "wings",
+          "colour": "slate_grey"
+        },
+        {
+          "pattern": "cap",
+          "colour": "black"
+        }
+      ]
+    },
+    {
+      "id": "baltimore_oriole",
+      "name": "Baltimore Oriole",
+      "shape": "songbird",
+      "base": "orange",
+      "patterns": [
+        {
+          "pattern": "wings",
+          "colour": "black"
+        },
+        {
+          "pattern": "head",
+          "colour": "black"
+        }
+      ]
+    },
+    {
+      "id": "crow",
+      "name": "Crow",
+      "shape": "corvid",
+      "base": "black",
+      "patterns": []
+    },
+    {
+      "id": "magpie",
+      "name": "Magpie",
+      "shape": "corvid",
+      "base": "black",
+      "patterns": [
+        {
+          "pattern": "breast",
+          "colour": "white"
+        },
+        {
+          "pattern": "wings",
+          "colour": "slate_blue"
+        }
+      ]
+    },
+    {
+      "id": "jackdaw",
+      "name": "Jackdaw",
+      "shape": "corvid",
+      "base": "slate_grey",
+      "patterns": [
+        {
+          "pattern": "wings",
+          "colour": "black"
+        },
+        {
+          "pattern": "cap",
+          "colour": "black"
+        }
+      ]
+    },
+    {
+      "id": "mallard_drake",
+      "name": "Mallard",
+      "shape": "waterfowl",
+      "base": "pale_grey",
+      "patterns": [
+        {
+          "pattern": "breast",
+          "colour": "chestnut"
+        },
+        {
+          "pattern": "head",
+          "colour": "olive"
+        }
+      ]
+    },
+    {
+      "id": "mallard_hen",
+      "name": "Mallard",
+      "shape": "waterfowl",
+      "base": "tan",
+      "patterns": [
+        {
+          "pattern": "wings",
+          "colour": "brown"
+        },
+        {
+          "pattern": "cap",
+          "colour": "brown"
+        }
+      ]
+    },
+    {
+      "id": "ruddy_duck",
+      "name": "Ruddy Duck",
+      "shape": "waterfowl",
+      "base": "chestnut",
+      "patterns": [
+        {
+          "pattern": "mask",
+          "colour": "white"
+        },
+        {
+          "pattern": "cap",
+          "colour": "black"
+        }
+      ]
+    },
+    {
+      "id": "barn_owl",
+      "name": "Barn Owl",
+      "shape": "owl",
+      "base": "buff",
+      "patterns": [
+        {
+          "pattern": "breast",
+          "colour": "white"
+        },
+        {
+          "pattern": "mask",
+          "colour": "white"
+        }
+      ]
+    },
+    {
+      "id": "snowy_owl",
+      "name": "Snowy Owl",
+      "shape": "owl",
+      "base": "white",
+      "patterns": [
+        {
+          "pattern": "wings",
+          "colour": "pale_grey"
+        }
+      ]
+    },
+    {
+      "id": "great_horned_owl",
+      "name": "Great Horned Owl",
+      "shape": "eared_owl",
+      "base": "brown",
+      "patterns": [
+        {
+          "pattern": "breast",
+          "colour": "buff"
+        },
+        {
+          "pattern": "mask",
+          "colour": "tan"
+        }
+      ]
+    },
+    {
+      "id": "great_blue_heron",
+      "name": "Great Blue Heron",
+      "shape": "wader",
+      "base": "slate_grey",
+      "patterns": [
+        {
+          "pattern": "head",
+          "colour": "white"
+        },
+        {
+          "pattern": "cap",
+          "colour": "black"
+        }
+      ]
+    },
+    {
+      "id": "flamingo",
+      "name": "Flamingo",
+      "shape": "wader",
+      "base": "pink",
+      "patterns": [
+        {
+          "pattern": "wings",
+          "colour": "scarlet"
+        }
+      ]
+    },
+    {
+      "id": "scarlet_ibis",
+      "name": "Scarlet Ibis",
+      "shape": "wader",
+      "base": "scarlet",
+      "patterns": [
+        {
+          "pattern": "tail",
+          "colour": "black"
+        }
+      ]
+    },
+    {
+      "id": "red_headed_woodpecker",
+      "name": "Red-headed Woodpecker",
+      "shape": "woodpecker",
+      "base": "white",
+      "patterns": [
+        {
+          "pattern": "wings",
+          "colour": "slate_grey"
+        },
+        {
+          "pattern": "head",
+          "colour": "scarlet"
+        }
+      ]
+    },
+    {
+      "id": "downy_woodpecker",
+      "name": "Downy Woodpecker",
+      "shape": "woodpecker",
+      "base": "white",
+      "patterns": [
+        {
+          "pattern": "wings",
+          "colour": "slate_grey"
+        },
+        {
+          "pattern": "cap",
+          "colour": "scarlet"
+        }
+      ]
+    },
+    {
+      "id": "northern_flicker",
+      "name": "Northern Flicker",
+      "shape": "woodpecker",
+      "base": "tan",
+      "patterns": [
+        {
+          "pattern": "breast",
+          "colour": "cream"
+        },
+        {
+          "pattern": "cap",
+          "colour": "slate_grey"
+        }
+      ]
+    },
+    {
+      "id": "herring_gull",
+      "name": "Herring Gull",
+      "shape": "seagull",
+      "base": "white",
+      "patterns": [
+        {
+          "pattern": "wings",
+          "colour": "pale_grey"
+        }
+      ]
+    },
+    {
+      "id": "laughing_gull",
+      "name": "Laughing Gull",
+      "shape": "seagull",
+      "base": "white",
+      "patterns": [
+        {
+          "pattern": "wings",
+          "colour": "pale_grey"
+        },
+        {
+          "pattern": "head",
+          "colour": "black"
+        }
+      ]
+    },
+    {
+      "id": "black_backed_gull",
+      "name": "Black-backed Gull",
+      "shape": "seagull",
+      "base": "white",
+      "patterns": [
+        {
+          "pattern": "wings",
+          "colour": "slate_grey"
+        }
+      ]
+    }
+  ]
+}
