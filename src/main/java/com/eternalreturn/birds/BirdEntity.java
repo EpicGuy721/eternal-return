@@ -13,7 +13,6 @@ import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
-import net.minecraft.entity.ai.goal.EscapeDangerGoal;
 import net.minecraft.entity.ai.goal.LookAroundGoal;
 import net.minecraft.entity.ai.goal.LookAtEntityGoal;
 import net.minecraft.entity.ai.goal.SwimGoal;
@@ -23,7 +22,14 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
+import net.minecraft.entity.EntityStatuses;
+import net.minecraft.entity.ai.goal.FollowOwnerGoal;
+import net.minecraft.entity.ai.goal.SitGoal;
 import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.entity.passive.TameableEntity;
+import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
 import net.minecraft.entity.passive.PassiveEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -44,8 +50,11 @@ import org.jetbrains.annotations.Nullable;
  * It flies off from players who come too close (BirdGoals.FlyAway); perching shapes rest on leaves and logs, the
  * others wander low, and ducks swim. Each shape flies at its own speed. Flocking shapes take off together when one is
  * startled (or now and then on their own) and fly as a flock, steering by the boids rules (BirdGoals.FlockFlight).
+ * Songbirds and corvids (shapes marked tameable) can be tamed with seeds, one try in three: a pet follows its owner,
+ * sits or stands when its owner uses it with an empty hand, heals on seeds, and no longer flies off or flocks.
+ * Drops feathers (loot table eternalreturn:entities/bird).
  */
-public class BirdEntity extends AnimalEntity implements Flutterer {
+public class BirdEntity extends TameableEntity implements Flutterer {
 	private static final TrackedData<Integer> VARIANT = DataTracker.registerData(BirdEntity.class, TrackedDataHandlerRegistry.INTEGER);
 	/** The flying-speed attribute every bird has (as a parrot's); the shape's own speed scales the push it gives in the air. */
 	private static final double FLYING_SPEED = 0.4;
@@ -146,7 +155,9 @@ public class BirdEntity extends AnimalEntity implements Flutterer {
 	@Override
 	protected void initGoals() {
 		this.goalSelector.add(0, new SwimGoal(this));
-		this.goalSelector.add(1, new EscapeDangerGoal(this, 1.6));
+		this.goalSelector.add(1, new TameableEntity.TameableEscapeDangerGoal(1.6));
+		this.goalSelector.add(1, new SitGoal(this));
+		this.goalSelector.add(2, new FollowOwnerGoal(this, 1.0, 5.0F, 1.0F));
 		this.goalSelector.add(2, new BirdGoals.FlyAway(this));
 		this.goalSelector.add(3, new BirdGoals.FlockFlight(this));
 		this.goalSelector.add(5, new BirdGoals.FlockWander(this));
@@ -230,6 +241,41 @@ public class BirdEntity extends AnimalEntity implements Flutterer {
 	@Override
 	public boolean isBreedingItem(ItemStack stack) {
 		return false;
+	}
+
+	/** Seeds tame a tameable bird (one try in three) and heal a pet; its owner's empty hand sits it down or stands it up. */
+	@Override
+	public ActionResult interactMob(PlayerEntity player, Hand hand) {
+		ItemStack stack = player.getStackInHand(hand);
+		World world = this.getWorld();
+		if (stack.isIn(ItemTags.PARROT_FOOD) && this.getShape().tameable() && (!this.isTamed() || this.getHealth() < this.getMaxHealth())) {
+			stack.decrementUnlessCreative(1, player);
+			if (!this.isSilent()) {
+				world.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.ENTITY_PARROT_EAT, this.getSoundCategory(), 1.0F,
+						1.0F + (this.random.nextFloat() - this.random.nextFloat()) * 0.2F);
+			}
+			if (!world.isClient) {
+				if (this.isTamed()) {
+					this.heal(1.0F);
+				} else if (this.random.nextInt(3) == 0) {
+					this.setOwner(player);
+					this.endFlockFlight();
+					this.getNavigation().stop();
+					world.sendEntityStatus(this, EntityStatuses.ADD_POSITIVE_PLAYER_REACTION_PARTICLES);
+				} else {
+					world.sendEntityStatus(this, EntityStatuses.ADD_NEGATIVE_PLAYER_REACTION_PARTICLES);
+				}
+			}
+			return ActionResult.success(world.isClient);
+		}
+		if (stack.isEmpty() && this.isTamed() && this.isOwner(player) && !this.isInAir()) {
+			if (!world.isClient) {
+				this.setSitting(!this.isSitting());
+				this.getNavigation().stop();
+			}
+			return ActionResult.success(world.isClient);
+		}
+		return super.interactMob(player, hand);
 	}
 
 	@Nullable

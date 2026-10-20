@@ -184,9 +184,9 @@ def docs():
             'A shape that perches flies up to rest on leaves and logs; the others stay low (ducks swim). Flocking shapes take '
             'off together when one is startled (or now and then on their own) and fly as a flock by the boids rules; loose '
             'ones hold together less; solo ones fly alone.', '',
-            '| Shape | Model | Tufts or crest | Perches | Flocking | Flight speed (blocks/s) | Size (blocks) |', '|---|---|---|---|---|---|---|']
+            '| Shape | Model | Tufts or crest | Perches | Flocking | Tameable | Flight speed (blocks/s) | Size (blocks) |', '|---|---|---|---|---|---|---|---|']
     out += [f'| {s["id"].replace("_", " ")} | `bird_{s["model"]}` | {"yes" if s["tufts"] else "no"} | {"yes" if s["perches"] else "no"} | '
-            f'{s["flocking"]} | {round(s["flight_speed"] * 20)} | {s["width"]} x {s["height"]} |' for s in TABLE['shapes']]
+            f'{s["flocking"]} | {"yes" if s["tameable"] else "no"} | {round(s["flight_speed"] * 20)} | {s["width"]} x {s["height"]} |' for s in TABLE['shapes']]
     out += ['', '## Habitats', '', f'Birds spawn in these places (among creatures, weight {TABLE["spawn_weight"]}), on grass, dirt, sand, gravel, '
             'snow or mud in daylight: nine in ten as a preset of that place, the rest as a random bird of a shape that lives there. '
             'Flocking shapes come in groups of 3 to 6 alike, loose ones 2 to 3, solo ones alone. Moderner Beta biomes are marked MB.', '',

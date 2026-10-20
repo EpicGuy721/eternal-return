@@ -234,4 +234,62 @@ public class BirdTests implements FabricGameTest {
 		com.eternalreturn.EternalReturn.LOGGER.info("[birds] birds on 16 new chunks: {}", birds);
 		ctx.complete();
 	}
+
+	/** Seeds tame a songbird (sooner or later) but not an owl; the owner sits it down and stands it up; a pet doesn't fly off. */
+	@GameTest(templateName = ARENA, batchId = BATCH, skyAccess = true, tickLimit = 200)
+	public void tamingSongbirds(TestContext ctx) {
+		BirdEntity robin = ctx.spawnEntity(Birds.BIRD, new BlockPos(8, 1, 10));
+		robin.setVariant(preset("american_robin").variant());
+		robin.setAiDisabled(true);
+		BirdEntity owl = ctx.spawnEntity(Birds.BIRD, new BlockPos(8, 1, 20));
+		owl.setVariant(preset("barn_owl").variant());
+		owl.setAiDisabled(true);
+		net.minecraft.server.network.ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(8, 1, 13));
+		ctx.addInstantFinalTask(() -> {
+			FishingTests.disconnect(player);
+			ctx.killAllEntities();
+		});
+		// A second to land first: a bird in the air won't sit.
+		ctx.runAtTick(20, () -> {
+			for (int i = 0; i < 60 && !robin.isTamed(); i++) {
+				player.setStackInHand(net.minecraft.util.Hand.MAIN_HAND, new net.minecraft.item.ItemStack(net.minecraft.item.Items.WHEAT_SEEDS));
+				robin.interactMob(player, net.minecraft.util.Hand.MAIN_HAND);
+			}
+			ctx.assertTrue(robin.isTamed() && robin.isOwner(player), "seeds tamed the robin");
+			player.setStackInHand(net.minecraft.util.Hand.MAIN_HAND, new net.minecraft.item.ItemStack(net.minecraft.item.Items.WHEAT_SEEDS, 5));
+			owl.interactMob(player, net.minecraft.util.Hand.MAIN_HAND);
+			ctx.assertTrue(!owl.isTamed() && player.getMainHandStack().getCount() == 5, "an owl won't take seeds");
+			player.setStackInHand(net.minecraft.util.Hand.MAIN_HAND, net.minecraft.item.ItemStack.EMPTY);
+			robin.interactMob(player, net.minecraft.util.Hand.MAIN_HAND);
+			ctx.assertTrue(robin.isSitting(), "an empty hand sits it down");
+			robin.interactMob(player, net.minecraft.util.Hand.MAIN_HAND);
+			ctx.assertTrue(!robin.isSitting(), "and stands it up");
+			robin.setAiDisabled(false);
+		});
+		ctx.runAtTick(80, () -> {
+			ctx.assertTrue(!robin.isFlocking() && robin.distanceTo(player) < 8.0, "a pet stays near its owner instead of flying off: " + robin.distanceTo(player));
+			ctx.complete();
+		});
+	}
+
+	/** Birds drop 0 to 2 feathers. */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = BATCH)
+	public void feathers(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		BirdEntity bird = Birds.BIRD.create(world);
+		bird.refreshPositionAndAngles(ctx.getAbsolutePos(new BlockPos(2, 1, 2)), 0.0F, 0.0F);
+		var table = world.getServer().getReloadableRegistries().getLootTable(Birds.BIRD.getLootTableId());
+		var params = new net.minecraft.loot.context.LootContextParameterSet.Builder(world).add(net.minecraft.loot.context.LootContextParameters.THIS_ENTITY, bird)
+				.add(net.minecraft.loot.context.LootContextParameters.ORIGIN, bird.getPos())
+				.add(net.minecraft.loot.context.LootContextParameters.DAMAGE_SOURCE, world.getDamageSources().generic())
+				.build(net.minecraft.loot.context.LootContextTypes.ENTITY);
+		int most = 0;
+		for (int i = 0; i < 40; i++) {
+			int feathers = table.generateLoot(params).stream().filter(stack -> stack.isOf(net.minecraft.item.Items.FEATHER)).mapToInt(net.minecraft.item.ItemStack::getCount).sum();
+			ctx.assertTrue(feathers <= 2, "at most 2 feathers: " + feathers);
+			most = Math.max(most, feathers);
+		}
+		ctx.assertTrue(most >= 1, "feathers drop");
+		ctx.complete();
+	}
 }

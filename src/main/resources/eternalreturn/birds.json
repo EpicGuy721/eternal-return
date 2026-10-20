@@ -1,5 +1,5 @@
 {
-  "_comment": "The birds: read by the game (com.eternalreturn.birds.BirdTable) and by tools/birds (textures, model code, names, docs/birds.md). Palette, shapes and patterns are in id order; append, never reorder, or saved birds change. preset_share is how many spawned birds are presets; the rest are random. A shape that perches flies up to leaves and logs to rest; the others stay low (ducks swim). wary_distance: how close a player (half that if sneaking) can come before a bird flies off. flight_speed: blocks a tick in the air. flocking: flock (flies with its flockmates, steering by the boids rules, and takes off with them), loose (the same, held together less), solo. habitats: biome groups (vanilla, and Moderner Beta ones marked ? as optional), written as biome tags eternalreturn:birds/<habitat>; birds spawn in all of them (spawn_weight, among creatures), as a preset of that place (or, the rest of the time, a random bird of a shape that lives there), flocking shapes in groups of 3 to 6 alike, loose ones 2 to 3.",
+  "_comment": "The birds: read by the game (com.eternalreturn.birds.BirdTable) and by tools/birds (textures, model code, names, docs/birds.md). Palette, shapes and patterns are in id order; append, never reorder, or saved birds change. preset_share is how many spawned birds are presets; the rest are random. A shape that perches flies up to leaves and logs to rest; the others stay low (ducks swim). wary_distance: how close a player (half that if sneaking) can come before a bird flies off. flight_speed: blocks a tick in the air. flocking: flock (flies with its flockmates, steering by the boids rules, and takes off with them), loose (the same, held together less), solo. habitats: biome groups (vanilla, and Moderner Beta ones marked ? as optional), written as biome tags eternalreturn:birds/<habitat>; birds spawn in all of them (spawn_weight, among creatures), as a preset of that place (or, the rest of the time, a random bird of a shape that lives there), flocking shapes in groups of 3 to 6 alike, loose ones 2 to 3. tameable: fed seeds (one in three), it becomes a pet: follows its owner, sits when told, stops flying off.",
   "preset_share": 0.9,
   "palette": [
     {
@@ -76,7 +76,8 @@
       "height": 0.3,
       "perches": true,
       "flight_speed": 0.45,
-      "flocking": "flock"
+      "flocking": "flock",
+      "tameable": true
     },
     {
       "id": "waterfowl",
@@ -86,7 +87,8 @@
       "height": 0.45,
       "perches": false,
       "flight_speed": 0.55,
-      "flocking": "flock"
+      "flocking": "flock",
+      "tameable": false
     },
     {
       "id": "owl",
@@ -96,7 +98,8 @@
       "height": 0.45,
       "perches": true,
       "flight_speed": 0.4,
-      "flocking": "solo"
+      "flocking": "solo",
+      "tameable": false
     },
     {
       "id": "eared_owl",
@@ -106,7 +109,8 @@
       "height": 0.5,
       "perches": true,
       "flight_speed": 0.4,
-      "flocking": "solo"
+      "flocking": "solo",
+      "tameable": false
     },
     {
       "id": "wader",
@@ -116,7 +120,8 @@
       "height": 0.5,
       "perches": false,
       "flight_speed": 0.35,
-      "flocking": "loose"
+      "flocking": "loose",
+      "tameable": false
     },
     {
       "id": "corvid",
@@ -126,7 +131,8 @@
       "height": 0.4,
       "perches": true,
       "flight_speed": 0.5,
-      "flocking": "flock"
+      "flocking": "flock",
+      "tameable": true
     },
     {
       "id": "woodpecker",
@@ -136,7 +142,8 @@
       "height": 0.55,
       "perches": true,
       "flight_speed": 0.4,
-      "flocking": "solo"
+      "flocking": "solo",
+      "tameable": false
     },
     {
       "id": "seagull",
@@ -146,7 +153,8 @@
       "height": 0.45,
       "perches": false,
       "flight_speed": 0.5,
-      "flocking": "flock"
+      "flocking": "flock",
+      "tameable": false
     }
   ],
   "patterns": [

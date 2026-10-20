@@ -37,8 +37,9 @@ final class BirdGoals {
 	private BirdGoals() {
 	}
 
+	/** Flocking shapes flock; a pet doesn't. */
 	static boolean flocks(BirdEntity bird) {
-		return EternalReturnConfig.get().mobs.birdFlocks && bird.getShape().flocking() != BirdTable.Flocking.SOLO;
+		return EternalReturnConfig.get().mobs.birdFlocks && bird.getShape().flocking() != BirdTable.Flocking.SOLO && !bird.isTamed();
 	}
 
 	static Boids.Rules rules(BirdEntity bird) {
@@ -54,7 +55,7 @@ final class BirdGoals {
 	static void takeOff(BirdEntity bird, Vec3d target) {
 		int ticks = 80 + bird.getRandom().nextInt(60);
 		bird.startFlockFlight(target, ticks);
-		for (BirdEntity mate : Boids.neighbours(bird, BirdEntity.class, new Boids.Rules(10.0, 16, 0, 0, 0, 0), other -> mates(bird, other) && !other.isFlocking())) {
+		for (BirdEntity mate : Boids.neighbours(bird, BirdEntity.class, new Boids.Rules(10.0, 16, 0, 0, 0, 0), other -> mates(bird, other) && !other.isFlocking() && !other.isTamed())) {
 			Vec3d spread = new Vec3d(mate.getRandom().nextGaussian() * 2.0, 0.0, mate.getRandom().nextGaussian() * 2.0);
 			mate.startFlockFlight(target.add(spread), ticks + mate.getRandom().nextInt(20));
 		}
@@ -86,7 +87,7 @@ final class BirdGoals {
 
 		@Override
 		public boolean canStart() {
-			if (this.bird.isFlocking()) {
+			if (this.bird.isFlocking() || this.bird.isTamed()) {
 				return false;
 			}
 			PlayerEntity player = this.threat();
@@ -128,7 +129,7 @@ final class BirdGoals {
 
 		@Override
 		public boolean canStart() {
-			return this.bird.getShape().perches() && super.canStart();
+			return this.bird.getShape().perches() && !this.bird.isTamed() && super.canStart();
 		}
 
 		@Nullable
@@ -175,7 +176,7 @@ final class BirdGoals {
 
 		@Override
 		public boolean canStart() {
-			return !this.bird.getShape().perches() && super.canStart();
+			return !this.bird.getShape().perches() && !this.bird.isTamed() && super.canStart();
 		}
 	}
 
