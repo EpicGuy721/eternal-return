@@ -27,7 +27,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * <ul>
  * <li>first phase: it closes in more slowly, and within 10 blocks of its target it circles round it, about 8 blocks
  * out, instead of hovering in place;</li>
- * <li>at half health, once: an explosion, three wither skeletons, and the second phase. It is faster now, drops down
+ * <li>at half health, once: an explosion, three wither skeletons (which drop no skulls), and the second phase. It is faster now, drops down
  * to its target's level (no faster than a walking player), and passes through blocks while it has a target. It
  * can't heal back above half.</li>
  * </ul>
@@ -97,6 +97,8 @@ public abstract class WitherBossMixin extends HostileEntity {
 					skeleton.refreshPositionAndAngles(this.getX() + Math.cos(angle) * 2.0, this.getY(), this.getZ() + Math.sin(angle) * 2.0,
 							this.getYaw(), 0.0F);
 					skeleton.initialize(world, world.getLocalDifficulty(skeleton.getBlockPos()), SpawnReason.MOB_SUMMONED, null);
+					// Its skeletons drop no skull (the wither skeleton loot table skips this tag).
+					skeleton.addCommandTag("eternalreturn_wither_minion");
 					world.spawnEntity(skeleton);
 				}
 			}

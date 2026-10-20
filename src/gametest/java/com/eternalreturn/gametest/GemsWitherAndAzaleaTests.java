@@ -219,6 +219,18 @@ public class GemsWitherAndAzaleaTests implements FabricGameTest {
 		ctx.runAtTick(ctx.getTick() + 20, () -> {
 			List<WitherSkeletonEntity> skeletons = world.getEntitiesByClass(WitherSkeletonEntity.class, wither.getBoundingBox().expand(8.0), s -> true);
 			ctx.assertTrue(skeletons.size() == 3, "three wither skeletons: " + skeletons.size());
+			// They drop no skulls; an ordinary wither skeleton still does.
+			LootTable table = world.getServer().getReloadableRegistries().getLootTable(EntityType.WITHER_SKELETON.getLootTableId());
+			WitherSkeletonEntity ordinary = EntityType.WITHER_SKELETON.create(world);
+			ordinary.refreshPositionAndAngles(skeletons.get(0).getPos(), 0.0F, 0.0F);
+			for (WitherSkeletonEntity skeleton : List.of(skeletons.get(0), ordinary)) {
+				LootContextParameterSet params = new LootContextParameterSet.Builder(world).add(LootContextParameters.THIS_ENTITY, skeleton)
+						.add(LootContextParameters.ORIGIN, skeleton.getPos()).add(LootContextParameters.DAMAGE_SOURCE, world.getDamageSources().generic())
+						.build(LootContextTypes.ENTITY);
+				boolean skull = table.generateLoot(params).stream().anyMatch(stack -> stack.isOf(Items.WITHER_SKELETON_SKULL));
+				boolean summoned = skeleton.getCommandTags().contains("eternalreturn_wither_minion");
+				ctx.assertTrue(skull != summoned, (summoned ? "the Wither's skeletons drop no skull" : "an ordinary wither skeleton drops its skull"));
+			}
 			wither.setHealth(wither.getMaxHealth());
 		});
 		ctx.runAtTick(ctx.getTick() + 40, () -> {

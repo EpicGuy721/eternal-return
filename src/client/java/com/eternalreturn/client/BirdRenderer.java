@@ -4,7 +4,9 @@ import com.eternalreturn.EternalReturn;
 import com.eternalreturn.birds.BirdEntity;
 import com.eternalreturn.birds.BirdTable;
 import com.eternalreturn.birds.BirdVariant;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.MobEntityRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
@@ -74,10 +76,16 @@ public class BirdRenderer extends MobEntityRenderer<BirdEntity, BirdModel> {
 				int pattern = BirdVariant.pattern(variant, layer);
 				if (pattern > 0 && pattern <= BirdTable.PATTERNS.size()) {
 					int colour = 0xFF000000 | BirdTable.RGB.get(BirdVariant.colour(variant, layer));
-					renderModel(model, texture(folder, "pattern_" + BirdTable.PATTERNS.get(pattern - 1)), matrices, consumers, light, bird, colour);
+					draw(model, texture(folder, "pattern_" + BirdTable.PATTERNS.get(pattern - 1)), matrices, consumers, light, bird, colour);
 				}
 			}
-			renderModel(model, texture(folder, "details"), matrices, consumers, light, bird, -1);
+			draw(model, texture(folder, "details"), matrices, consumers, light, bird, -1);
+		}
+
+		/** As FeatureRenderer.renderModel, but with back faces culled, as the model itself is (BirdModel). */
+		private static void draw(BirdModel model, Identifier texture, MatrixStack matrices, VertexConsumerProvider consumers, int light, BirdEntity bird,
+				int colour) {
+			model.render(matrices, consumers.getBuffer(RenderLayer.getEntityCutout(texture)), light, LivingEntityRenderer.getOverlay(bird, 0.0F), colour);
 		}
 	}
 }

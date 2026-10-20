@@ -69,7 +69,19 @@
           "name": "minecraft:wither_skeleton_skull"
         }
       ],
-      "rolls": 1.0
+      "rolls": 1.0,
+      "conditions": [
+        {
+          "condition": "minecraft:inverted",
+          "term": {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "nbt": "{Tags:[\"eternalreturn_wither_minion\"]}"
+            }
+          }
+        }
+      ]
     }
   ],
   "random_sequence": "minecraft:entities/wither_skeleton"

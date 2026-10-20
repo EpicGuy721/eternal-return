@@ -515,7 +515,7 @@ Each second you spend in range adds a second of the effect, up to that limit, an
 
 **Mooblooms** (autumnal forests) and **moolips** (cherry groves) are cows with dandelions and pink tulips on their backs. A bucket milks them; a bowl gets suspicious stew (a moobloom's gives Saturation, a moolip's Fire Resistance or Weakness). They drop what a cow does, and a dandelion or a pink tulip.
 
-**The Wither** closes in more slowly and, within 10 blocks of its target, circles round it about 8 blocks out. At half health, once, it explodes, calls up three wither skeletons, and starts its second phase: a little faster, but never quicker than a walking player, it comes down to its target's level and passes through blocks to get there, and it can't heal back above half.
+**The Wither** closes in more slowly and, within 10 blocks of its target, circles round it about 8 blocks out. At half health, once, it explodes, calls up three wither skeletons (which drop no skulls), and starts its second phase: a little faster, but never quicker than a walking player, it comes down to its target's level and passes through blocks to get there, and it can't heal back above half.
 
 **Illagers** drop rubies instead of emeralds (vindicators and pillagers 0 to 1, evokers 1 to 3, as do vampires; illusioners 0 to 1 with their potion), when a player kills them. **Bone spiders** drop bones on top of a spider's drops.
 

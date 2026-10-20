@@ -40,6 +40,7 @@ public class BirdEntity extends AnimalEntity {
 
 	public BirdEntity(EntityType<? extends BirdEntity> type, World world) {
 		super(type, world);
+		this.calculateDimensions();
 	}
 
 	public static DefaultAttributeContainer.Builder createBirdAttributes() {
@@ -67,6 +68,8 @@ public class BirdEntity extends AnimalEntity {
 
 	public void setVariant(int variant) {
 		this.dataTracker.set(VARIANT, variant);
+		// Also when the look is unchanged: the tracker only reports changes, and a new bird starts at the type's size.
+		this.calculateDimensions();
 	}
 
 	public BirdTable.Shape getShape() {

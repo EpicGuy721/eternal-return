@@ -2,7 +2,11 @@ package com.eternalreturn.client;
 
 import com.eternalreturn.birds.BirdEntity;
 import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.render.entity.model.TintableCompositeModel;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.entity.model.SinglePartEntityModel;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.MathHelper;
 
 import java.util.ArrayList;
@@ -11,9 +15,11 @@ import java.util.List;
 /**
  * One bird shape's model (BirdModels, from its Blockbench model), tinted with the bird's base colour as a tropical fish's
  * is. The head follows the bird's look, the legs step as it walks, and the tufts (an owl's ear tufts, a woodpecker's
- * crest) show only on shapes that have them.
+ * crest) show only on shapes that have them. Drawn with back faces culled: a flat part (wing, tail, beak, leg) is a box
+ * with no thickness, whose two faces lie in one plane, and drawn from both sides they would flicker against each other.
  */
-public class BirdModel extends TintableCompositeModel<BirdEntity> {
+public class BirdModel extends SinglePartEntityModel<BirdEntity> {
+	private int colour = -1;
 	private final ModelPart root;
 	private final ModelPart head;
 	private final ModelPart leftLeg;
@@ -21,6 +27,7 @@ public class BirdModel extends TintableCompositeModel<BirdEntity> {
 	private final List<ModelPart> tufts = new ArrayList<>();
 
 	public BirdModel(ModelPart root, BirdModels.Parts parts) {
+		super(RenderLayer::getEntityCutout);
 		this.root = root;
 		this.head = find(root, parts.head());
 		this.leftLeg = find(root, parts.leftLeg());
@@ -36,6 +43,16 @@ public class BirdModel extends TintableCompositeModel<BirdEntity> {
 			part = part.getChild(name);
 		}
 		return part;
+	}
+
+	/** The colour the model is tinted with (0xAARRGGBB; -1 for none). */
+	public void setColorMultiplier(int colour) {
+		this.colour = colour;
+	}
+
+	@Override
+	public void render(MatrixStack matrices, VertexConsumer vertices, int light, int overlay, int color) {
+		super.render(matrices, vertices, light, overlay, ColorHelper.Argb.mixColor(color, this.colour));
 	}
 
 	@Override
