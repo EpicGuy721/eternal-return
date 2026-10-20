@@ -75,7 +75,7 @@ PREVIEWS = {
     'owl': {'barn_owl': ('buff', [('breast', 'white'), ('mask', 'white')]), 'snowy_owl': ('white', [('wings', 'pale_grey')]),
             'great_horned_owl': ('brown', [('breast', 'buff'), ('mask', 'tan')])},
     'wader': {'great_blue_heron': ('slate_grey', [('head', 'white'), ('cap', 'black')]),
-              'flamingo': ('pink', [('wings', 'black')]), 'scarlet_ibis': ('scarlet', [('tail', 'black')])},
+              'flamingo': ('pink', [('wings', 'scarlet')]), 'scarlet_ibis': ('scarlet', [('tail', 'black')])},
 }
 # Owls without ear tufts (in game the renderer hides the tufts; Blockbench can't, so their previews leave them blank).
 NO_TUFTS = {'barn_owl', 'snowy_owl'}
@@ -122,6 +122,23 @@ def feathered(outline, rect, face, x, y):
     row = outline[min(y - y1, len(outline) - 1)]
     along = (x2 - 1 - x) if face == 'east' else (x - x1)
     return along < len(row) and row[along] == '#'
+
+
+def plumage(part, face, rect, x, y):
+    """The texture every feathered surface has: shading from the top of a side to its bottom, and rows of feathers
+    (each row offset from the one above, a darker pixel at each feather's edge)."""
+    x1, y1, x2, y2 = rect
+    d = 0
+    if face in ('east', 'west', 'north', 'south') and part in ('body', 'head', 'neck') and y2 - y1 > 1:
+        d += round(10 - 22 * (y - y1) / (y2 - y1 - 1))  # lighter at the top, darker underneath
+    if part in ('body', 'neck', 'head', 'tuft'):
+        # The head's feathers are finer, so its rows are fainter.
+        edge, light = (-14, 6) if part in ('body', 'neck') else (-8, 4)
+        if (x - x1 + (y - y1) % 2 * 2) % 4 == 0:
+            d += edge  # a feather's edge
+        elif (x - x1 + (y - y1) % 2 * 2) % 4 == 1:
+            d += light  # and the light catching the next feather
+    return d
 
 
 def markings(shape, part, face, rect, x, y, rng):
@@ -181,8 +198,8 @@ def paint(shape):
             for x, y in cells(rect, face):
                 if part == 'wing' and not feathered(SHAPES[shape]['wing'], rect, face, x, y):
                     continue
-                g = (WING if part == 'wing' else TAIL if part == 'tail' else SHADE[face]) + rng.randint(-6, 6)
-                g += markings(shape, part, face, rect, x, y, rng)
+                g = (WING if part == 'wing' else TAIL if part == 'tail' else SHADE[face]) + rng.randint(-10, 10)
+                g += plumage(part, face, rect, x, y) + markings(shape, part, face, rect, x, y, rng)
                 g = max(0, min(255, g))
                 base.putpixel((x, y), (g, g, g, 255))
     layers = {'base': base}
