@@ -57,16 +57,20 @@ PALETTE = {
 }
 PREVIEWS = {
     'songbird': {'cardinal': ('scarlet', 'mask', 'black'), 'blue_jay': ('slate_blue', 'breast', 'white'),
-                 'goldfinch': ('yellow', 'cap', 'black'), 'robin': ('brown', 'breast', 'rust')},
+                 'robin': ('brown', 'breast', 'rust'), 'goldfinch': ('yellow', 'cap', 'black'),
+                 'house_sparrow': ('tan', 'cap', 'slate_grey'), 'bluebird': ('slate_blue', 'breast', 'rust'),
+                 'chickadee': ('pale_grey', 'cap', 'black'), 'oriole': ('orange', 'head', 'black')},
+    'corvid': {'crow': ('black', 'wings', 'black'), 'magpie': ('black', 'breast', 'white'),
+               'jackdaw': ('slate_grey', 'cap', 'black')},
     'waterfowl': {'mallard_drake': ('pale_grey', 'head', 'olive'), 'mallard_hen': ('tan', 'wings', 'brown'),
                   'ruddy_duck': ('chestnut', 'cap', 'black')},
-    'corvid': {'crow': ('black', 'wings', 'black'), 'magpie': ('black', 'breast', 'white'),
-               'jackdaw': ('slate_grey', 'head', 'black')},
-    'wader': {'flamingo': ('pink', 'wings', 'black'), 'great_blue_heron': ('slate_grey', 'head', 'white'), 'scarlet_ibis': ('scarlet', 'wings', 'black'),
-              'egret': ('white', 'tail', 'white')},
     'owl': {'barn_owl': ('buff', 'mask', 'white'), 'snowy_owl': ('white', 'wings', 'pale_grey'),
             'great_horned_owl': ('brown', 'mask', 'tan')},
+    'wader': {'great_blue_heron': ('slate_grey', 'head', 'white'), 'flamingo': ('pink', 'wings', 'black'),
+              'scarlet_ibis': ('scarlet', 'wings', 'black')},
 }
+# Owls without ear tufts (in game the renderer hides the tufts; Blockbench can't, so their previews leave them blank).
+NO_TUFTS = {'barn_owl', 'snowy_owl'}
 EYE = (18, 16, 20)
 
 
@@ -187,6 +191,13 @@ def main():
                 image = tint(layers['base'], PALETTE[base])
                 image.alpha_composite(tint(layers['pattern_' + pattern], PALETTE[colour]))
                 image.alpha_composite(layers['details'])
+                if bird in NO_TUFTS:
+                    model = json.load(open(os.path.join(MODELS, f'bird_{shape}.bbmodel'), encoding='utf-8'))
+                    for element in model['elements']:
+                        if role(element['name']) == 'tuft':
+                            for face, rect in faces(element).items():
+                                for x, y in cells(rect, face):
+                                    image.putpixel((x, y), (0, 0, 0, 0))
                 image.save(os.path.join(sys.argv[1], f'preview_{shape}_{bird}.png'))
         print(shape, 'layers written:', ', '.join(layers))
 
