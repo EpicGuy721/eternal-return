@@ -179,10 +179,12 @@ def docs():
            '## Palette', '', '| Colour | RGB |', '|---|---|']
     out += [f'| {c["id"].replace("_", " ")} | `{c["rgb"]}` |' for c in TABLE['palette']]
     out += ['', '## Shapes', '', f'Birds fly off from a player within {TABLE["wary_distance"]} blocks (half that if they sneak). '
-            'A shape that perches flies up to rest on leaves and logs; the others stay low (ducks swim).', '',
-            '| Shape | Model | Tufts or crest | Perches | Size (blocks) |', '|---|---|---|---|---|']
+            'A shape that perches flies up to rest on leaves and logs; the others stay low (ducks swim). Flocking shapes take '
+            'off together when one is startled (or now and then on their own) and fly as a flock by the boids rules; loose '
+            'ones hold together less; solo ones fly alone.', '',
+            '| Shape | Model | Tufts or crest | Perches | Flocking | Flight speed (blocks/s) | Size (blocks) |', '|---|---|---|---|---|---|---|']
     out += [f'| {s["id"].replace("_", " ")} | `bird_{s["model"]}` | {"yes" if s["tufts"] else "no"} | {"yes" if s["perches"] else "no"} | '
-            f'{s["width"]} x {s["height"]} |' for s in TABLE['shapes']]
+            f'{s["flocking"]} | {round(s["flight_speed"] * 20)} | {s["width"]} x {s["height"]} |' for s in TABLE['shapes']]
     out += ['', '## Patterns', '', ', '.join(TABLE['patterns']), '', '## Presets', '', '| Bird | Shape | Base | Patterns |', '|---|---|---|---|']
     for p in TABLE['presets']:
         layers = ', '.join(f'{l["pattern"]} {l["colour"].replace("_", " ")}' for l in p['patterns']) or 'none'

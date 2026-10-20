@@ -125,4 +125,52 @@ public class BirdTests implements FabricGameTest {
 			ctx.complete();
 		});
 	}
+
+	private static BirdTable.Preset preset(String id) {
+		return BirdTable.PRESETS.stream().filter(p -> p.id().equals(id)).findFirst().orElseThrow();
+	}
+
+	/**
+	 * A flock of songbirds startled by a player bursts up together (the alarm spreads), flies as a flock (close, never
+	 * on top of each other) at a songbird's speed, while an owl nearby (solo) stays put.
+	 */
+	@GameTest(templateName = ARENA, batchId = BATCH, skyAccess = true, tickLimit = 300)
+	public void flocksTakeOffTogether(TestContext ctx) {
+		java.util.List<BirdEntity> flock = new java.util.ArrayList<>();
+		for (int i = 0; i < 6; i++) {
+			BirdEntity bird = ctx.spawnEntity(Birds.BIRD, new BlockPos(6 + i % 3, 1, 20 + i / 3 * 2));
+			bird.setVariant(preset("house_sparrow").variant());
+			flock.add(bird);
+		}
+		BirdEntity owl = ctx.spawnEntity(Birds.BIRD, new BlockPos(11, 1, 21));
+		owl.setVariant(preset("barn_owl").variant());
+		net.minecraft.server.network.ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(7, 1, 16));
+		double[] fastest = {0.0};
+		ctx.addInstantFinalTask(() -> {
+			FishingTests.disconnect(player);
+			ctx.killAllEntities();
+		});
+		ctx.runAtEveryTick(() -> flock.forEach(bird -> fastest[0] = Math.max(fastest[0], bird.getVelocity().length())));
+		ctx.runAtTick(30, () -> {
+			long up = flock.stream().filter(bird -> bird.isFlocking() || !bird.isOnGround()).count();
+			ctx.assertTrue(up >= 5, "the flock took off together: " + up + " of 6");
+			ctx.assertTrue(!owl.isFlocking(), "the owl (solo) didn't join");
+		});
+		ctx.runAtTick(70, () -> {
+			net.minecraft.util.math.Vec3d centre = flock.stream().map(BirdEntity::getPos).reduce(net.minecraft.util.math.Vec3d.ZERO, net.minecraft.util.math.Vec3d::add)
+					.multiply(1.0 / flock.size());
+			double spread = flock.stream().mapToDouble(bird -> bird.getPos().distanceTo(centre)).max().orElse(0);
+			double closest = Double.MAX_VALUE;
+			for (int a = 0; a < flock.size(); a++) {
+				for (int b = a + 1; b < flock.size(); b++) {
+					closest = Math.min(closest, flock.get(a).distanceTo(flock.get(b)));
+				}
+			}
+			ctx.assertTrue(spread < 10.0, "the flock holds together: " + spread);
+			ctx.assertTrue(closest > 0.3, "no two birds on top of each other: " + closest);
+			double songbird = BirdTable.SHAPES.get(0).flightSpeed();
+			ctx.assertTrue(fastest[0] > 0.8 * songbird, "they fly at a songbird's speed (" + songbird + "): " + fastest[0]);
+			ctx.complete();
+		});
+	}
 }

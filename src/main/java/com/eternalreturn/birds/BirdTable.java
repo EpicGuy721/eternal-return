@@ -22,9 +22,15 @@ import java.util.Map;
 public final class BirdTable {
 	/**
 	 * A shape: its model (and texture folder), whether its tufts (an owl's ear tufts, a woodpecker's crest) show, its
-	 * hitbox, and whether it perches (flies up to leaves and logs to rest; the others stay low).
+	 * hitbox, whether it perches (flies up to leaves and logs to rest; the others stay low), its flying speed (blocks a
+	 * tick), and how it flocks.
 	 */
-	public record Shape(String id, String model, boolean tufts, float width, float height, boolean perches) {
+	public record Shape(String id, String model, boolean tufts, float width, float height, boolean perches, double flightSpeed, Flocking flocking) {
+	}
+
+	/** How a shape flocks: with its flockmates (taking off with them and flying together), the same but held together less, or alone. */
+	public enum Flocking {
+		FLOCK, LOOSE, SOLO
 	}
 
 	/** A real bird: its id (for its name) and the variant it is. */
@@ -57,7 +63,8 @@ public final class BirdTable {
 		for (JsonElement element : table.getAsJsonArray("shapes")) {
 			JsonObject shape = element.getAsJsonObject();
 			SHAPES.add(new Shape(shape.get("id").getAsString(), shape.get("model").getAsString(), shape.get("tufts").getAsBoolean(),
-					shape.get("width").getAsFloat(), shape.get("height").getAsFloat(), shape.get("perches").getAsBoolean()));
+					shape.get("width").getAsFloat(), shape.get("height").getAsFloat(), shape.get("perches").getAsBoolean(),
+					shape.get("flight_speed").getAsDouble(), Flocking.valueOf(shape.get("flocking").getAsString().toUpperCase(java.util.Locale.ROOT))));
 		}
 		table.getAsJsonArray("patterns").forEach(pattern -> PATTERNS.add(pattern.getAsString()));
 		if (SHAPES.size() > 8 || COLOURS.size() > 16 || PATTERNS.size() > 7) {

@@ -27,18 +27,18 @@ A bird is one mob with a shape, a base colour and up to two patterns, each in it
 
 ## Shapes
 
-Birds fly off from a player within 6 blocks (half that if they sneak). A shape that perches flies up to rest on leaves and logs; the others stay low (ducks swim).
+Birds fly off from a player within 6 blocks (half that if they sneak). A shape that perches flies up to rest on leaves and logs; the others stay low (ducks swim). Flocking shapes take off together when one is startled (or now and then on their own) and fly as a flock by the boids rules; loose ones hold together less; solo ones fly alone.
 
-| Shape | Model | Tufts or crest | Perches | Size (blocks) |
-|---|---|---|---|---|
-| songbird | `bird_songbird` | no | yes | 0.3 x 0.3 |
-| waterfowl | `bird_waterfowl` | no | no | 0.4 x 0.45 |
-| owl | `bird_owl` | no | yes | 0.35 x 0.45 |
-| eared owl | `bird_owl` | yes | yes | 0.35 x 0.5 |
-| wader | `bird_wader` | no | no | 0.3 x 0.5 |
-| corvid | `bird_corvid` | no | yes | 0.35 x 0.4 |
-| woodpecker | `bird_woodpecker` | yes | yes | 0.25 x 0.55 |
-| seagull | `bird_seagull` | no | no | 0.35 x 0.45 |
+| Shape | Model | Tufts or crest | Perches | Flocking | Flight speed (blocks/s) | Size (blocks) |
+|---|---|---|---|---|---|---|
+| songbird | `bird_songbird` | no | yes | flock | 9 | 0.3 x 0.3 |
+| waterfowl | `bird_waterfowl` | no | no | flock | 11 | 0.4 x 0.45 |
+| owl | `bird_owl` | no | yes | solo | 8 | 0.35 x 0.45 |
+| eared owl | `bird_owl` | yes | yes | solo | 8 | 0.35 x 0.5 |
+| wader | `bird_wader` | no | no | loose | 7 | 0.3 x 0.5 |
+| corvid | `bird_corvid` | no | yes | flock | 10 | 0.35 x 0.4 |
+| woodpecker | `bird_woodpecker` | yes | yes | solo | 8 | 0.25 x 0.55 |
+| seagull | `bird_seagull` | no | no | flock | 10 | 0.35 x 0.45 |
 
 ## Patterns
 

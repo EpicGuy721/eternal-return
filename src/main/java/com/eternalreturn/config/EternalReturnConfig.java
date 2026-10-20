@@ -201,6 +201,10 @@ public final class EternalReturnConfig {
 		public boolean witherSkeletonSkulls = true;
 		/** The Wither circles its target, and at half health explodes, calls three wither skeletons and comes down through blocks. */
 		public boolean witherRework = true;
+		/** Flocking birds (songbirds, ducks, gulls, corvids; waders loosely) take off together and fly as a flock (boids). */
+		public boolean birdFlocks = true;
+		/** Cod, salmon and tropical fish school by the boids rules instead of following a leader. */
+		public boolean fishSchools = true;
 		/** Phantoms come on one night in this many, whether or not anyone slept (0: vanilla's insomnia instead). */
 		public int phantomNightChance = 13;
 		/**

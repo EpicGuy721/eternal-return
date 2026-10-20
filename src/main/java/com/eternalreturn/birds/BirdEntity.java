@@ -42,15 +42,31 @@ import org.jetbrains.annotations.Nullable;
  * model and hitbox; it is named after its preset (a real bird) or, if it is a random one, its shape. It flies and walks
  * as a parrot does (flight control, a flying pathfinder), flutters down rather than falls, and takes no fall damage.
  * It flies off from players who come too close (BirdGoals.FlyAway); perching shapes rest on leaves and logs, the
- * others wander low, and ducks swim.
+ * others wander low, and ducks swim. Each shape flies at its own speed. Flocking shapes take off together when one is
+ * startled (or now and then on their own) and fly as a flock, steering by the boids rules (BirdGoals.FlockFlight).
  */
 public class BirdEntity extends AnimalEntity implements Flutterer {
 	private static final TrackedData<Integer> VARIANT = DataTracker.registerData(BirdEntity.class, TrackedDataHandlerRegistry.INTEGER);
+	/** The flying-speed attribute every bird has (as a parrot's); the shape's own speed scales the push it gives in the air. */
+	private static final double FLYING_SPEED = 0.4;
+	/** Server side: ticks left of a flock flight (0: not flying with the flock), and where it is headed. */
+	private int flockTicks;
+	private Vec3d flockTarget = Vec3d.ZERO;
 
 	public BirdEntity(EntityType<? extends BirdEntity> type, World world) {
 		super(type, world);
 		this.calculateDimensions();
-		this.moveControl = new FlightMoveControl(this, 10, false);
+		this.moveControl = new FlightMoveControl(this, 10, false) {
+			@Override
+			public void tick() {
+				// A flock flight steers the bird itself; the flight control stays out of the way, gravity off.
+				if (BirdEntity.this.isFlocking()) {
+					BirdEntity.this.setNoGravity(true);
+					return;
+				}
+				super.tick();
+			}
+		};
 		this.setPathfindingPenalty(PathNodeType.DANGER_FIRE, -1.0F);
 		this.setPathfindingPenalty(PathNodeType.DAMAGE_FIRE, -1.0F);
 		this.setPathfindingPenalty(PathNodeType.COCOA, -1.0F);
@@ -65,14 +81,52 @@ public class BirdEntity extends AnimalEntity implements Flutterer {
 		return navigation;
 	}
 
-	/** Flutters: falls slowly. */
+	/** Flutters: falls slowly (unless it is flying somewhere). */
 	@Override
 	public void tickMovement() {
 		super.tickMovement();
 		Vec3d velocity = this.getVelocity();
-		if (!this.isOnGround() && velocity.y < 0.0) {
+		if (!this.isOnGround() && velocity.y < 0.0 && !this.isFlocking() && this.getNavigation().isIdle()) {
 			this.setVelocity(velocity.multiply(1.0, 0.6, 1.0));
 		}
+	}
+
+	/**
+	 * The push it gives itself in the air: vanilla's is a flat 0.02 for every mob, whatever its speed (a parrot crawls
+	 * along at about 2 blocks a second). Scaled so the bird reaches its shape's flight speed.
+	 */
+	@Override
+	protected float getOffGroundSpeed() {
+		return (float) (this.getShape().flightSpeed() * 0.09 / FLYING_SPEED);
+	}
+
+	public boolean isFlocking() {
+		return this.flockTicks > 0;
+	}
+
+	public Vec3d getFlockTarget() {
+		return this.flockTarget;
+	}
+
+	/** Takes off with the flock toward target for a while (BirdGoals.FlockFlight steers). */
+	public void startFlockFlight(Vec3d target, int ticks) {
+		this.flockTarget = target;
+		this.flockTicks = ticks;
+		this.getNavigation().stop();
+		if (this.isOnGround()) {
+			this.setVelocity(this.getVelocity().add(0.0, 0.35, 0.0));
+		}
+	}
+
+	public void tickFlockFlight() {
+		if (--this.flockTicks <= 0) {
+			this.endFlockFlight();
+		}
+	}
+
+	public void endFlockFlight() {
+		this.flockTicks = 0;
+		this.setNoGravity(false);
 	}
 
 	@Override
@@ -94,6 +148,8 @@ public class BirdEntity extends AnimalEntity implements Flutterer {
 		this.goalSelector.add(0, new SwimGoal(this));
 		this.goalSelector.add(1, new EscapeDangerGoal(this, 1.6));
 		this.goalSelector.add(2, new BirdGoals.FlyAway(this));
+		this.goalSelector.add(3, new BirdGoals.FlockFlight(this));
+		this.goalSelector.add(5, new BirdGoals.FlockWander(this));
 		this.goalSelector.add(5, new BirdGoals.Perch(this));
 		this.goalSelector.add(5, new BirdGoals.WanderLow(this));
 		this.goalSelector.add(6, new LookAtEntityGoal(this, PlayerEntity.class, 6.0F));
