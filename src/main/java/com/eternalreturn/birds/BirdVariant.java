@@ -1,6 +1,10 @@
 package com.eternalreturn.birds;
 
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.math.random.Random;
+import net.minecraft.world.biome.Biome;
+
+import java.util.List;
 
 /**
  * A bird's look, packed in one number (as a tropical fish's is): its shape (3 bits), base colour (4 bits), and two
@@ -41,6 +45,27 @@ public final class BirdVariant {
 		if (random.nextDouble() < BirdTable.PRESET_SHARE) {
 			return BirdTable.PRESETS.get(random.nextInt(BirdTable.PRESETS.size())).variant();
 		}
+		return mixed(random, random.nextInt(BirdTable.SHAPES.size()));
+	}
+
+	/**
+	 * A wild bird of this biome: one of the presets that live there, BirdTable.PRESET_SHARE of the time; otherwise a random
+	 * bird of a shape one of them has. Anywhere no preset lives, any bird.
+	 */
+	public static int forBiome(RegistryEntry<Biome> biome, Random random) {
+		List<BirdTable.Preset> here = BirdTable.PRESETS.stream().filter(preset -> preset.habitats().stream().anyMatch(biome::isIn)).toList();
+		if (here.isEmpty()) {
+			return random(random);
+		}
+		BirdTable.Preset preset = here.get(random.nextInt(here.size()));
+		if (random.nextDouble() < BirdTable.PRESET_SHARE) {
+			return preset.variant();
+		}
+		return mixed(random, shape(preset.variant()));
+	}
+
+	/** A random bird of this shape: any base colour, up to two patterns in any colours. */
+	private static int mixed(Random random, int shape) {
 		int colours = BirdTable.COLOURS.size();
 		int patterns = BirdTable.PATTERNS.size();
 		int layers = random.nextInt(3);
@@ -49,7 +74,7 @@ public final class BirdVariant {
 		if (pattern2 == pattern1) {
 			pattern2 = 0;
 		}
-		return pack(random.nextInt(BirdTable.SHAPES.size()), random.nextInt(colours), pattern1, pattern1 > 0 ? random.nextInt(colours) : 0,
+		return pack(shape, random.nextInt(colours), pattern1, pattern1 > 0 ? random.nextInt(colours) : 0,
 				pattern2, pattern2 > 0 ? random.nextInt(colours) : 0);
 	}
 }

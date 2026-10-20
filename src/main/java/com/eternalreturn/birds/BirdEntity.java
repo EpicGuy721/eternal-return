@@ -192,7 +192,11 @@ public class BirdEntity extends AnimalEntity implements Flutterer {
 
 	@Override
 	public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason reason, @Nullable EntityData data) {
-		this.setVariant(BirdVariant.random(world.getRandom()));
+		boolean wild = reason == SpawnReason.NATURAL || reason == SpawnReason.CHUNK_GENERATION;
+		this.setVariant(wild ? BirdVariant.forBiome(world.getBiome(this.getBlockPos()), world.getRandom()) : BirdVariant.random(world.getRandom()));
+		if (wild) {
+			Birds.spawnFlockmates(world, this);
+		}
 		return super.initialize(world, difficulty, reason, data);
 	}
 

@@ -8,6 +8,8 @@ Writes:
   owl's ear tufts and a woodpecker's crest are parts of their own, so the renderer can hide them) and where its head,
   legs, wings and tufts are;
 - the language lines: the bird, each shape's name and each preset's name (other lines in en_us.json are kept);
+- the biome tags eternalreturn:birds/<habitat> (one per habitat; Moderner Beta biomes optional) and
+  eternalreturn:birds/any (where birds spawn), and the block tag eternalreturn:birds_spawnable_on;
 - docs/birds.md, the table of the palette, shapes and presets.
 Do not hand-edit the generated files.
 """
@@ -185,14 +187,36 @@ def docs():
             '| Shape | Model | Tufts or crest | Perches | Flocking | Flight speed (blocks/s) | Size (blocks) |', '|---|---|---|---|---|---|---|']
     out += [f'| {s["id"].replace("_", " ")} | `bird_{s["model"]}` | {"yes" if s["tufts"] else "no"} | {"yes" if s["perches"] else "no"} | '
             f'{s["flocking"]} | {round(s["flight_speed"] * 20)} | {s["width"]} x {s["height"]} |' for s in TABLE['shapes']]
-    out += ['', '## Patterns', '', ', '.join(TABLE['patterns']), '', '## Presets', '', '| Bird | Shape | Base | Patterns |', '|---|---|---|---|']
+    out += ['', '## Habitats', '', f'Birds spawn in these places (among creatures, weight {TABLE["spawn_weight"]}), on grass, dirt, sand, gravel, '
+            'snow or mud in daylight: nine in ten as a preset of that place, the rest as a random bird of a shape that lives there. '
+            'Flocking shapes come in groups of 3 to 6 alike, loose ones 2 to 3, solo ones alone. Moderner Beta biomes are marked MB.', '',
+            '| Habitat | Biomes |', '|---|---|']
+    out += [f'| {h.replace("_", " ")} | ' + ', '.join(b.replace('?moderner_beta:', 'MB ').replace('minecraft:', '').replace('eternalreturn:', '').replace('_', ' ')
+                                                        for b in biomes) + ' |' for h, biomes in TABLE['habitats'].items()]
+    out += ['', '## Patterns', '', ', '.join(TABLE['patterns']), '', '## Presets', '', '| Bird | Shape | Base | Patterns | Habitats |', '|---|---|---|---|---|']
     for p in TABLE['presets']:
         layers = ', '.join(f'{l["pattern"]} {l["colour"].replace("_", " ")}' for l in p['patterns']) or 'none'
-        out.append(f'| {p["name"]} (`{p["id"]}`) | {p["shape"].replace("_", " ")} | {p["base"].replace("_", " ")} | {layers} |')
+        homes = ', '.join(h.replace('_', ' ') for h in p['habitats'])
+        out.append(f'| {p["name"]} (`{p["id"]}`) | {p["shape"].replace("_", " ")} | {p["base"].replace("_", " ")} | {layers} | {homes} |')
     write(os.path.join(ROOT, 'docs', 'birds.md'), '\n'.join(out) + '\n')
+
+
+def tags():
+    folder = os.path.join(RES, 'data', NS, 'tags', 'worldgen', 'biome', 'birds')
+    os.makedirs(folder, exist_ok=True)
+    for name in os.listdir(folder):
+        os.remove(os.path.join(folder, name))
+    for habitat, biomes in TABLE['habitats'].items():
+        values = [{'id': b[1:], 'required': False} if b.startswith('?') else b for b in biomes]
+        write(os.path.join(folder, f'{habitat}.json'), json.dumps({'values': values}, indent=2) + '\n')
+    write(os.path.join(folder, 'any.json'), json.dumps({'values': [f'#{NS}:birds/{h}' for h in TABLE['habitats']]}, indent=2) + '\n')
+    ground = ['#minecraft:animals_spawnable_on', 'minecraft:dirt', 'minecraft:coarse_dirt', 'minecraft:podzol', 'minecraft:sand', 'minecraft:red_sand',
+              'minecraft:gravel', 'minecraft:snow_block', 'minecraft:snow', 'minecraft:mud', 'minecraft:moss_block', 'minecraft:stone']
+    write(os.path.join(RES, 'data', NS, 'tags', 'block', 'birds_spawnable_on.json'), json.dumps({'values': ground}, indent=2) + '\n')
 
 
 write(os.path.join(ROOT, 'src', 'client', 'java', 'com', 'eternalreturn', 'client', 'BirdModels.java'), java())
 lang()
+tags()
 docs()
 print(f'{len(MODELS)} bird models, {len(TABLE["shapes"])} shapes, {len(TABLE["presets"])} presets: BirdModels.java, language lines, docs/birds.md')

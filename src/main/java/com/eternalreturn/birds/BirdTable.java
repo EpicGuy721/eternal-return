@@ -1,8 +1,13 @@
 package com.eternalreturn.birds;
 
+import com.eternalreturn.EternalReturn;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.tag.TagKey;
+import net.minecraft.world.biome.Biome;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,9 +38,12 @@ public final class BirdTable {
 		FLOCK, LOOSE, SOLO
 	}
 
-	/** A real bird: its id (for its name) and the variant it is. */
-	public record Preset(String id, int variant) {
+	/** A real bird: its id (for its name), the variant it is, and where it lives (biome tags eternalreturn:birds/<habitat>). */
+	public record Preset(String id, int variant, List<TagKey<Biome>> habitats) {
 	}
+
+	/** Where birds spawn: every habitat. */
+	public static final TagKey<Biome> ANY_HABITAT = TagKey.of(RegistryKeys.BIOME, EternalReturn.id("birds/any"));
 
 	public static final List<String> COLOURS = new ArrayList<>();
 	/** Each palette colour as 0xRRGGBB, by id. */
@@ -47,6 +55,8 @@ public final class BirdTable {
 	public static final double PRESET_SHARE;
 	/** How close (blocks) a player can come before a bird flies off; half that if they sneak. */
 	public static final double WARY_DISTANCE;
+	/** Birds' spawn weight among creatures, in every habitat. */
+	public static final int SPAWN_WEIGHT;
 	private static final Map<Integer, Preset> BY_VARIANT = new HashMap<>();
 
 	private BirdTable() {
@@ -56,6 +66,7 @@ public final class BirdTable {
 		JsonObject table = read();
 		PRESET_SHARE = table.get("preset_share").getAsDouble();
 		WARY_DISTANCE = table.get("wary_distance").getAsDouble();
+		SPAWN_WEIGHT = table.get("spawn_weight").getAsInt();
 		for (JsonElement colour : table.getAsJsonArray("palette")) {
 			COLOURS.add(colour.getAsJsonObject().get("id").getAsString());
 			RGB.add(Integer.parseInt(colour.getAsJsonObject().get("rgb").getAsString().substring(1), 16));
@@ -85,7 +96,14 @@ public final class BirdTable {
 				throw new IllegalStateException("birds.json: " + preset.get("id") + " has an unknown shape");
 			}
 			int variant = BirdVariant.pack(shape, index(COLOURS, preset.get("base").getAsString(), preset), patterns[0], colours[0], patterns[1], colours[1]);
-			Preset entry = new Preset(preset.get("id").getAsString(), variant);
+			List<TagKey<Biome>> habitats = new ArrayList<>();
+			for (JsonElement habitat : preset.getAsJsonArray("habitats")) {
+				if (!table.getAsJsonObject("habitats").has(habitat.getAsString())) {
+					throw new IllegalStateException("birds.json: " + preset.get("id") + " lives in unknown habitat " + habitat.getAsString());
+				}
+				habitats.add(TagKey.of(RegistryKeys.BIOME, EternalReturn.id("birds/" + habitat.getAsString())));
+			}
+			Preset entry = new Preset(preset.get("id").getAsString(), variant, List.copyOf(habitats));
 			PRESETS.add(entry);
 			BY_VARIANT.putIfAbsent(variant, entry);
 		}

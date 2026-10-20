@@ -1,0 +1,39 @@
+{
+  "values": [
+    "minecraft:plains",
+    "minecraft:sunflower_plains",
+    "minecraft:meadow",
+    {
+      "id": "moderner_beta:beta_plains",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:beta_shrubland",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:pe_plains",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:pe_shrubland",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:late_beta_plains",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:alpha",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:indev_normal",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:indev_paradise",
+      "required": false
+    }
+  ]
+}

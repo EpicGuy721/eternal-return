@@ -1,0 +1,17 @@
+{
+  "values": [
+    "minecraft:savanna",
+    "minecraft:savanna_plateau",
+    "minecraft:windswept_savanna",
+    "minecraft:badlands",
+    "minecraft:wooded_badlands",
+    {
+      "id": "moderner_beta:beta_savanna",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:pe_savanna",
+      "required": false
+    }
+  ]
+}

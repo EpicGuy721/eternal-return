@@ -173,4 +173,65 @@ public class BirdTests implements FabricGameTest {
 			ctx.complete();
 		});
 	}
+
+	/** In a snowy biome, wild birds are cold-habitat presets (about 90 percent) or random birds of those presets' shapes. */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = BATCH)
+	public void wildBirdsFitTheirBiome(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		var snowy = world.getRegistryManager().get(net.minecraft.registry.RegistryKeys.BIOME).getEntry(net.minecraft.world.biome.BiomeKeys.SNOWY_PLAINS).orElseThrow();
+		java.util.Set<Integer> coldShapes = new java.util.HashSet<>();
+		java.util.Set<Integer> coldPresets = new java.util.HashSet<>();
+		for (BirdTable.Preset preset : BirdTable.PRESETS) {
+			if (preset.habitats().stream().anyMatch(snowy::isIn)) {
+				coldPresets.add(preset.variant());
+				coldShapes.add(BirdVariant.shape(preset.variant()));
+			}
+		}
+		ctx.assertTrue(coldPresets.contains(preset("snowy_owl").variant()) && !coldPresets.contains(preset("flamingo").variant()),
+				"snowy owls live in the snow, flamingos don't");
+		Random random = Random.create(7);
+		int presets = 0;
+		for (int i = 0; i < 2000; i++) {
+			int v = BirdVariant.forBiome(snowy, random);
+			BirdTable.Preset preset = BirdTable.preset(v);
+			if (preset != null && coldPresets.contains(v)) {
+				presets++;
+			} else {
+				ctx.assertTrue(coldShapes.contains(BirdVariant.shape(v)), "a random bird of a cold shape: " + BirdVariant.shapeOf(v).id());
+			}
+		}
+		ctx.assertTrue(presets > 1700 && presets < 1880, "about 90 percent cold presets: " + presets);
+		ctx.complete();
+	}
+
+	/** A wild sparrow brings flockmates of its kind (2 to 5); an owl comes alone. */
+	@GameTest(templateName = ARENA, batchId = BATCH, skyAccess = true)
+	public void wildFlocksComeTogether(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		BirdEntity sparrow = ctx.spawnEntity(Birds.BIRD, new BlockPos(8, 1, 8));
+		sparrow.setVariant(preset("house_sparrow").variant());
+		int mates = Birds.spawnFlockmates(world, sparrow);
+		long alike = world.getEntitiesByClass(BirdEntity.class, sparrow.getBoundingBox().expand(5.0), b -> b != sparrow && b.getVariant() == sparrow.getVariant()).size();
+		ctx.assertTrue(mates >= 1 && mates <= 5 && alike == mates, "a flock of its kind: " + mates + " spawned, " + alike + " nearby");
+		BirdEntity owl = ctx.spawnEntity(Birds.BIRD, new BlockPos(8, 1, 30));
+		owl.setVariant(preset("barn_owl").variant());
+		ctx.assertTrue(Birds.spawnFlockmates(world, owl) == 0, "an owl comes alone");
+		ctx.killAllEntities();
+		ctx.complete();
+	}
+
+	/** New land is generated with its birds (spawned while the chunks generate) without trouble. */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = BATCH, tickLimit = 400)
+	public void newLandGetsBirds(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		BlockPos origin = ctx.getAbsolutePos(BlockPos.ORIGIN).add(4000, 0, 4000);
+		for (int dx = 0; dx < 4; dx++) {
+			for (int dz = 0; dz < 4; dz++) {
+				world.getChunk((origin.getX() >> 4) + dx, (origin.getZ() >> 4) + dz, net.minecraft.world.chunk.ChunkStatus.FULL, true);
+			}
+		}
+		int birds = world.getEntitiesByClass(BirdEntity.class, new net.minecraft.util.math.Box(origin).expand(80, 400, 80), b -> true).size();
+		com.eternalreturn.EternalReturn.LOGGER.info("[birds] birds on 16 new chunks: {}", birds);
+		ctx.complete();
+	}
 }

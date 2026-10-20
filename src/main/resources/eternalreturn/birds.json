@@ -1,5 +1,5 @@
 {
-  "_comment": "The birds: read by the game (com.eternalreturn.birds.BirdTable) and by tools/birds (textures, model code, names, docs/birds.md). Palette, shapes and patterns are in id order; append, never reorder, or saved birds change. preset_share is how many spawned birds are presets; the rest are random. A shape that perches flies up to leaves and logs to rest; the others stay low (ducks swim). wary_distance: how close a player (half that if sneaking) can come before a bird flies off. flight_speed: blocks a tick in the air. flocking: flock (flies with its flockmates, steering by the boids rules, and takes off with them), loose (the same, held together less), solo.",
+  "_comment": "The birds: read by the game (com.eternalreturn.birds.BirdTable) and by tools/birds (textures, model code, names, docs/birds.md). Palette, shapes and patterns are in id order; append, never reorder, or saved birds change. preset_share is how many spawned birds are presets; the rest are random. A shape that perches flies up to leaves and logs to rest; the others stay low (ducks swim). wary_distance: how close a player (half that if sneaking) can come before a bird flies off. flight_speed: blocks a tick in the air. flocking: flock (flies with its flockmates, steering by the boids rules, and takes off with them), loose (the same, held together less), solo. habitats: biome groups (vanilla, and Moderner Beta ones marked ? as optional), written as biome tags eternalreturn:birds/<habitat>; birds spawn in all of them (spawn_weight, among creatures), as a preset of that place (or, the rest of the time, a random bird of a shape that lives there), flocking shapes in groups of 3 to 6 alike, loose ones 2 to 3.",
   "preset_share": 0.9,
   "palette": [
     {
@@ -168,6 +168,11 @@
           "pattern": "mask",
           "colour": "black"
         }
+      ],
+      "habitats": [
+        "woodland",
+        "open",
+        "swamps"
       ]
     },
     {
@@ -184,6 +189,10 @@
           "pattern": "tail",
           "colour": "black"
         }
+      ],
+      "habitats": [
+        "woodland",
+        "taiga"
       ]
     },
     {
@@ -200,6 +209,11 @@
           "pattern": "breast",
           "colour": "rust"
         }
+      ],
+      "habitats": [
+        "open",
+        "woodland",
+        "taiga"
       ]
     },
     {
@@ -216,6 +230,10 @@
           "pattern": "cap",
           "colour": "black"
         }
+      ],
+      "habitats": [
+        "open",
+        "mountains"
       ]
     },
     {
@@ -232,6 +250,10 @@
           "pattern": "cap",
           "colour": "slate_grey"
         }
+      ],
+      "habitats": [
+        "open",
+        "warm_dry"
       ]
     },
     {
@@ -244,6 +266,10 @@
           "pattern": "breast",
           "colour": "rust"
         }
+      ],
+      "habitats": [
+        "open",
+        "mountains"
       ]
     },
     {
@@ -260,6 +286,11 @@
           "pattern": "cap",
           "colour": "black"
         }
+      ],
+      "habitats": [
+        "woodland",
+        "taiga",
+        "cold"
       ]
     },
     {
@@ -276,6 +307,10 @@
           "pattern": "head",
           "colour": "black"
         }
+      ],
+      "habitats": [
+        "woodland",
+        "jungles"
       ]
     },
     {
@@ -283,7 +318,13 @@
       "name": "Crow",
       "shape": "corvid",
       "base": "black",
-      "patterns": []
+      "patterns": [],
+      "habitats": [
+        "open",
+        "woodland",
+        "warm_dry",
+        "taiga"
+      ]
     },
     {
       "id": "magpie",
@@ -299,6 +340,10 @@
           "pattern": "wings",
           "colour": "slate_blue"
         }
+      ],
+      "habitats": [
+        "open",
+        "mountains"
       ]
     },
     {
@@ -315,6 +360,10 @@
           "pattern": "cap",
           "colour": "black"
         }
+      ],
+      "habitats": [
+        "mountains",
+        "open"
       ]
     },
     {
@@ -331,6 +380,11 @@
           "pattern": "head",
           "colour": "olive"
         }
+      ],
+      "habitats": [
+        "rivers",
+        "swamps",
+        "open"
       ]
     },
     {
@@ -347,6 +401,11 @@
           "pattern": "cap",
           "colour": "brown"
         }
+      ],
+      "habitats": [
+        "rivers",
+        "swamps",
+        "open"
       ]
     },
     {
@@ -363,6 +422,10 @@
           "pattern": "cap",
           "colour": "black"
         }
+      ],
+      "habitats": [
+        "swamps",
+        "rivers"
       ]
     },
     {
@@ -379,6 +442,10 @@
           "pattern": "mask",
           "colour": "white"
         }
+      ],
+      "habitats": [
+        "open",
+        "warm_dry"
       ]
     },
     {
@@ -391,6 +458,9 @@
           "pattern": "wings",
           "colour": "pale_grey"
         }
+      ],
+      "habitats": [
+        "cold"
       ]
     },
     {
@@ -407,6 +477,10 @@
           "pattern": "mask",
           "colour": "tan"
         }
+      ],
+      "habitats": [
+        "woodland",
+        "taiga"
       ]
     },
     {
@@ -423,6 +497,10 @@
           "pattern": "cap",
           "colour": "black"
         }
+      ],
+      "habitats": [
+        "rivers",
+        "swamps"
       ]
     },
     {
@@ -435,6 +513,10 @@
           "pattern": "wings",
           "colour": "scarlet"
         }
+      ],
+      "habitats": [
+        "swamps",
+        "beaches"
       ]
     },
     {
@@ -447,6 +529,10 @@
           "pattern": "tail",
           "colour": "black"
         }
+      ],
+      "habitats": [
+        "jungles",
+        "swamps"
       ]
     },
     {
@@ -463,6 +549,9 @@
           "pattern": "head",
           "colour": "scarlet"
         }
+      ],
+      "habitats": [
+        "woodland"
       ]
     },
     {
@@ -479,6 +568,10 @@
           "pattern": "cap",
           "colour": "scarlet"
         }
+      ],
+      "habitats": [
+        "woodland",
+        "taiga"
       ]
     },
     {
@@ -495,6 +588,10 @@
           "pattern": "cap",
           "colour": "slate_grey"
         }
+      ],
+      "habitats": [
+        "woodland",
+        "open"
       ]
     },
     {
@@ -507,6 +604,10 @@
           "pattern": "wings",
           "colour": "pale_grey"
         }
+      ],
+      "habitats": [
+        "beaches",
+        "rivers"
       ]
     },
     {
@@ -523,6 +624,9 @@
           "pattern": "head",
           "colour": "black"
         }
+      ],
+      "habitats": [
+        "beaches"
       ]
     },
     {
@@ -535,8 +639,106 @@
           "pattern": "wings",
           "colour": "slate_grey"
         }
+      ],
+      "habitats": [
+        "beaches",
+        "cold"
       ]
     }
   ],
-  "wary_distance": 6
+  "wary_distance": 6,
+  "habitats": {
+    "woodland": [
+      "minecraft:forest",
+      "minecraft:flower_forest",
+      "minecraft:birch_forest",
+      "minecraft:old_growth_birch_forest",
+      "minecraft:dark_forest",
+      "eternalreturn:autumnal_forest",
+      "?moderner_beta:beta_forest",
+      "?moderner_beta:beta_oak_forest",
+      "?moderner_beta:beta_seasonal_forest",
+      "?moderner_beta:pe_forest",
+      "?moderner_beta:pe_seasonal_forest",
+      "?moderner_beta:indev_woods"
+    ],
+    "open": [
+      "minecraft:plains",
+      "minecraft:sunflower_plains",
+      "minecraft:meadow",
+      "?moderner_beta:beta_plains",
+      "?moderner_beta:beta_shrubland",
+      "?moderner_beta:pe_plains",
+      "?moderner_beta:pe_shrubland",
+      "?moderner_beta:late_beta_plains",
+      "?moderner_beta:alpha",
+      "?moderner_beta:indev_normal",
+      "?moderner_beta:indev_paradise"
+    ],
+    "swamps": [
+      "minecraft:swamp",
+      "minecraft:mangrove_swamp",
+      "?moderner_beta:early_release_swampland",
+      "?moderner_beta:late_beta_swampland",
+      "?moderner_beta:beta_swampland",
+      "?moderner_beta:pe_swampland"
+    ],
+    "jungles": [
+      "minecraft:jungle",
+      "minecraft:sparse_jungle",
+      "minecraft:bamboo_jungle",
+      "?moderner_beta:beta_rainforest",
+      "?moderner_beta:pe_rainforest"
+    ],
+    "warm_dry": [
+      "minecraft:savanna",
+      "minecraft:savanna_plateau",
+      "minecraft:windswept_savanna",
+      "minecraft:badlands",
+      "minecraft:wooded_badlands",
+      "?moderner_beta:beta_savanna",
+      "?moderner_beta:pe_savanna"
+    ],
+    "cold": [
+      "minecraft:snowy_plains",
+      "minecraft:ice_spikes",
+      "minecraft:snowy_taiga",
+      "minecraft:grove",
+      "minecraft:snowy_beach",
+      "?moderner_beta:early_release_ice_plains",
+      "?moderner_beta:late_beta_ice_plains",
+      "?moderner_beta:beta_tundra",
+      "?moderner_beta:pe_tundra",
+      "?moderner_beta:alpha_winter"
+    ],
+    "taiga": [
+      "minecraft:taiga",
+      "minecraft:old_growth_pine_taiga",
+      "minecraft:old_growth_spruce_taiga",
+      "minecraft:snowy_taiga",
+      "?moderner_beta:early_release_taiga",
+      "?moderner_beta:late_beta_taiga",
+      "?moderner_beta:beta_taiga",
+      "?moderner_beta:beta_oak_taiga",
+      "?moderner_beta:pe_taiga"
+    ],
+    "mountains": [
+      "minecraft:windswept_hills",
+      "minecraft:windswept_gravelly_hills",
+      "minecraft:windswept_forest",
+      "minecraft:meadow",
+      "minecraft:cherry_grove",
+      "?moderner_beta:early_release_extreme_hills",
+      "?moderner_beta:late_beta_extreme_hills"
+    ],
+    "rivers": [
+      "minecraft:river"
+    ],
+    "beaches": [
+      "minecraft:beach",
+      "minecraft:stony_shore",
+      "minecraft:snowy_beach"
+    ]
+  },
+  "spawn_weight": 10
 }

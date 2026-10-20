@@ -40,37 +40,54 @@ Birds fly off from a player within 6 blocks (half that if they sneak). A shape t
 | woodpecker | `bird_woodpecker` | yes | yes | solo | 8 | 0.25 x 0.55 |
 | seagull | `bird_seagull` | no | no | flock | 10 | 0.35 x 0.45 |
 
+## Habitats
+
+Birds spawn in these places (among creatures, weight 10), on grass, dirt, sand, gravel, snow or mud in daylight: nine in ten as a preset of that place, the rest as a random bird of a shape that lives there. Flocking shapes come in groups of 3 to 6 alike, loose ones 2 to 3, solo ones alone. Moderner Beta biomes are marked MB.
+
+| Habitat | Biomes |
+|---|---|
+| woodland | forest, flower forest, birch forest, old growth birch forest, dark forest, autumnal forest, MB beta forest, MB beta oak forest, MB beta seasonal forest, MB pe forest, MB pe seasonal forest, MB indev woods |
+| open | plains, sunflower plains, meadow, MB beta plains, MB beta shrubland, MB pe plains, MB pe shrubland, MB late beta plains, MB alpha, MB indev normal, MB indev paradise |
+| swamps | swamp, mangrove swamp, MB early release swampland, MB late beta swampland, MB beta swampland, MB pe swampland |
+| jungles | jungle, sparse jungle, bamboo jungle, MB beta rainforest, MB pe rainforest |
+| warm dry | savanna, savanna plateau, windswept savanna, badlands, wooded badlands, MB beta savanna, MB pe savanna |
+| cold | snowy plains, ice spikes, snowy taiga, grove, snowy beach, MB early release ice plains, MB late beta ice plains, MB beta tundra, MB pe tundra, MB alpha winter |
+| taiga | taiga, old growth pine taiga, old growth spruce taiga, snowy taiga, MB early release taiga, MB late beta taiga, MB beta taiga, MB beta oak taiga, MB pe taiga |
+| mountains | windswept hills, windswept gravelly hills, windswept forest, meadow, cherry grove, MB early release extreme hills, MB late beta extreme hills |
+| rivers | river |
+| beaches | beach, stony shore, snowy beach |
+
 ## Patterns
 
 cap, mask, breast, wings, tail, head
 
 ## Presets
 
-| Bird | Shape | Base | Patterns |
-|---|---|---|---|
-| Northern Cardinal (`northern_cardinal`) | songbird | scarlet | mask black |
-| Blue Jay (`blue_jay`) | songbird | slate blue | breast white, tail black |
-| American Robin (`american_robin`) | songbird | brown | head black, breast rust |
-| American Goldfinch (`american_goldfinch`) | songbird | yellow | wings black, cap black |
-| House Sparrow (`house_sparrow`) | songbird | tan | wings brown, cap slate grey |
-| Eastern Bluebird (`eastern_bluebird`) | songbird | slate blue | breast rust |
-| Chickadee (`chickadee`) | songbird | pale grey | wings slate grey, cap black |
-| Baltimore Oriole (`baltimore_oriole`) | songbird | orange | wings black, head black |
-| Crow (`crow`) | corvid | black | none |
-| Magpie (`magpie`) | corvid | black | breast white, wings slate blue |
-| Jackdaw (`jackdaw`) | corvid | slate grey | wings black, cap black |
-| Mallard (`mallard_drake`) | waterfowl | pale grey | breast chestnut, head olive |
-| Mallard (`mallard_hen`) | waterfowl | tan | wings brown, cap brown |
-| Ruddy Duck (`ruddy_duck`) | waterfowl | chestnut | mask white, cap black |
-| Barn Owl (`barn_owl`) | owl | buff | breast white, mask white |
-| Snowy Owl (`snowy_owl`) | owl | white | wings pale grey |
-| Great Horned Owl (`great_horned_owl`) | eared owl | brown | breast buff, mask tan |
-| Great Blue Heron (`great_blue_heron`) | wader | slate grey | head white, cap black |
-| Flamingo (`flamingo`) | wader | pink | wings scarlet |
-| Scarlet Ibis (`scarlet_ibis`) | wader | scarlet | tail black |
-| Red-headed Woodpecker (`red_headed_woodpecker`) | woodpecker | white | wings slate grey, head scarlet |
-| Downy Woodpecker (`downy_woodpecker`) | woodpecker | white | wings slate grey, cap scarlet |
-| Northern Flicker (`northern_flicker`) | woodpecker | tan | breast cream, cap slate grey |
-| Herring Gull (`herring_gull`) | seagull | white | wings pale grey |
-| Laughing Gull (`laughing_gull`) | seagull | white | wings pale grey, head black |
-| Black-backed Gull (`black_backed_gull`) | seagull | white | wings slate grey |
+| Bird | Shape | Base | Patterns | Habitats |
+|---|---|---|---|---|
+| Northern Cardinal (`northern_cardinal`) | songbird | scarlet | mask black | woodland, open, swamps |
+| Blue Jay (`blue_jay`) | songbird | slate blue | breast white, tail black | woodland, taiga |
+| American Robin (`american_robin`) | songbird | brown | head black, breast rust | open, woodland, taiga |
+| American Goldfinch (`american_goldfinch`) | songbird | yellow | wings black, cap black | open, mountains |
+| House Sparrow (`house_sparrow`) | songbird | tan | wings brown, cap slate grey | open, warm dry |
+| Eastern Bluebird (`eastern_bluebird`) | songbird | slate blue | breast rust | open, mountains |
+| Chickadee (`chickadee`) | songbird | pale grey | wings slate grey, cap black | woodland, taiga, cold |
+| Baltimore Oriole (`baltimore_oriole`) | songbird | orange | wings black, head black | woodland, jungles |
+| Crow (`crow`) | corvid | black | none | open, woodland, warm dry, taiga |
+| Magpie (`magpie`) | corvid | black | breast white, wings slate blue | open, mountains |
+| Jackdaw (`jackdaw`) | corvid | slate grey | wings black, cap black | mountains, open |
+| Mallard (`mallard_drake`) | waterfowl | pale grey | breast chestnut, head olive | rivers, swamps, open |
+| Mallard (`mallard_hen`) | waterfowl | tan | wings brown, cap brown | rivers, swamps, open |
+| Ruddy Duck (`ruddy_duck`) | waterfowl | chestnut | mask white, cap black | swamps, rivers |
+| Barn Owl (`barn_owl`) | owl | buff | breast white, mask white | open, warm dry |
+| Snowy Owl (`snowy_owl`) | owl | white | wings pale grey | cold |
+| Great Horned Owl (`great_horned_owl`) | eared owl | brown | breast buff, mask tan | woodland, taiga |
+| Great Blue Heron (`great_blue_heron`) | wader | slate grey | head white, cap black | rivers, swamps |
+| Flamingo (`flamingo`) | wader | pink | wings scarlet | swamps, beaches |
+| Scarlet Ibis (`scarlet_ibis`) | wader | scarlet | tail black | jungles, swamps |
+| Red-headed Woodpecker (`red_headed_woodpecker`) | woodpecker | white | wings slate grey, head scarlet | woodland |
+| Downy Woodpecker (`downy_woodpecker`) | woodpecker | white | wings slate grey, cap scarlet | woodland, taiga |
+| Northern Flicker (`northern_flicker`) | woodpecker | tan | breast cream, cap slate grey | woodland, open |
+| Herring Gull (`herring_gull`) | seagull | white | wings pale grey | beaches, rivers |
+| Laughing Gull (`laughing_gull`) | seagull | white | wings pale grey, head black | beaches |
+| Black-backed Gull (`black_backed_gull`) | seagull | white | wings slate grey | beaches, cold |
