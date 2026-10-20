@@ -20,8 +20,11 @@ import java.util.Map;
  * docs/birds.md. Palette, shapes and patterns are in id order, which saved birds rely on: append, never reorder.
  */
 public final class BirdTable {
-	/** A shape: its model (and texture folder), whether its tufts (an owl's ear tufts, a woodpecker's crest) show, its hitbox. */
-	public record Shape(String id, String model, boolean tufts, float width, float height) {
+	/**
+	 * A shape: its model (and texture folder), whether its tufts (an owl's ear tufts, a woodpecker's crest) show, its
+	 * hitbox, and whether it perches (flies up to leaves and logs to rest; the others stay low).
+	 */
+	public record Shape(String id, String model, boolean tufts, float width, float height, boolean perches) {
 	}
 
 	/** A real bird: its id (for its name) and the variant it is. */
@@ -36,6 +39,8 @@ public final class BirdTable {
 	public static final List<String> PATTERNS = new ArrayList<>();
 	public static final List<Preset> PRESETS = new ArrayList<>();
 	public static final double PRESET_SHARE;
+	/** How close (blocks) a player can come before a bird flies off; half that if they sneak. */
+	public static final double WARY_DISTANCE;
 	private static final Map<Integer, Preset> BY_VARIANT = new HashMap<>();
 
 	private BirdTable() {
@@ -44,6 +49,7 @@ public final class BirdTable {
 	static {
 		JsonObject table = read();
 		PRESET_SHARE = table.get("preset_share").getAsDouble();
+		WARY_DISTANCE = table.get("wary_distance").getAsDouble();
 		for (JsonElement colour : table.getAsJsonArray("palette")) {
 			COLOURS.add(colour.getAsJsonObject().get("id").getAsString());
 			RGB.add(Integer.parseInt(colour.getAsJsonObject().get("rgb").getAsString().substring(1), 16));
@@ -51,7 +57,7 @@ public final class BirdTable {
 		for (JsonElement element : table.getAsJsonArray("shapes")) {
 			JsonObject shape = element.getAsJsonObject();
 			SHAPES.add(new Shape(shape.get("id").getAsString(), shape.get("model").getAsString(), shape.get("tufts").getAsBoolean(),
-					shape.get("width").getAsFloat(), shape.get("height").getAsFloat()));
+					shape.get("width").getAsFloat(), shape.get("height").getAsFloat(), shape.get("perches").getAsBoolean()));
 		}
 		table.getAsJsonArray("patterns").forEach(pattern -> PATTERNS.add(pattern.getAsString()));
 		if (SHAPES.size() > 8 || COLOURS.size() > 16 || PATTERNS.size() > 7) {

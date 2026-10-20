@@ -1,5 +1,5 @@
 {
-  "_comment": "The birds: read by the game (com.eternalreturn.birds.BirdTable) and by tools/birds (textures, model code, names, docs/birds.md). Palette, shapes and patterns are in id order; append, never reorder, or saved birds change. preset_share is how many spawned birds are presets; the rest are random.",
+  "_comment": "The birds: read by the game (com.eternalreturn.birds.BirdTable) and by tools/birds (textures, model code, names, docs/birds.md). Palette, shapes and patterns are in id order; append, never reorder, or saved birds change. preset_share is how many spawned birds are presets; the rest are random. A shape that perches flies up to leaves and logs to rest; the others stay low (ducks swim). wary_distance: how close a player (half that if sneaking) can come before a bird flies off.",
   "preset_share": 0.9,
   "palette": [
     {
@@ -73,56 +73,64 @@
       "model": "songbird",
       "tufts": false,
       "width": 0.3,
-      "height": 0.3
+      "height": 0.3,
+      "perches": true
     },
     {
       "id": "waterfowl",
       "model": "waterfowl",
       "tufts": false,
       "width": 0.4,
-      "height": 0.45
+      "height": 0.45,
+      "perches": false
     },
     {
       "id": "owl",
       "model": "owl",
       "tufts": false,
       "width": 0.35,
-      "height": 0.45
+      "height": 0.45,
+      "perches": true
     },
     {
       "id": "eared_owl",
       "model": "owl",
       "tufts": true,
       "width": 0.35,
-      "height": 0.5
+      "height": 0.5,
+      "perches": true
     },
     {
       "id": "wader",
       "model": "wader",
       "tufts": false,
       "width": 0.3,
-      "height": 0.5
+      "height": 0.5,
+      "perches": false
     },
     {
       "id": "corvid",
       "model": "corvid",
       "tufts": false,
       "width": 0.35,
-      "height": 0.4
+      "height": 0.4,
+      "perches": true
     },
     {
       "id": "woodpecker",
       "model": "woodpecker",
       "tufts": true,
       "width": 0.25,
-      "height": 0.55
+      "height": 0.55,
+      "perches": true
     },
     {
       "id": "seagull",
       "model": "seagull",
       "tufts": false,
       "width": 0.35,
-      "height": 0.45
+      "height": 0.45,
+      "perches": false
     }
   ],
   "patterns": [
@@ -513,5 +521,6 @@
         }
       ]
     }
-  ]
+  ],
+  "wary_distance": 6
 }

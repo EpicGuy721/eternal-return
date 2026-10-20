@@ -1,6 +1,14 @@
 package com.eternalreturn.birds;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.EntityData;
+import net.minecraft.entity.Flutterer;
+import net.minecraft.entity.ai.control.FlightMoveControl;
+import net.minecraft.entity.ai.pathing.BirdNavigation;
+import net.minecraft.entity.ai.pathing.EntityNavigation;
+import net.minecraft.entity.ai.pathing.PathNodeType;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.EntityType;
@@ -9,7 +17,6 @@ import net.minecraft.entity.ai.goal.EscapeDangerGoal;
 import net.minecraft.entity.ai.goal.LookAroundGoal;
 import net.minecraft.entity.ai.goal.LookAtEntityGoal;
 import net.minecraft.entity.ai.goal.SwimGoal;
-import net.minecraft.entity.ai.goal.WanderAroundFarGoal;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
@@ -32,26 +39,63 @@ import org.jetbrains.annotations.Nullable;
 
 /**
  * A bird: one mob with many looks, as the tropical fish is (BirdVariant, the table in BirdTable). Its shape sets its
- * model and hitbox; it is named after its preset (a real bird) or, if it is a random one, its shape. For now (stage 1)
- * it walks and looks about, and runs when hurt; it takes no fall damage.
+ * model and hitbox; it is named after its preset (a real bird) or, if it is a random one, its shape. It flies and walks
+ * as a parrot does (flight control, a flying pathfinder), flutters down rather than falls, and takes no fall damage.
+ * It flies off from players who come too close (BirdGoals.FlyAway); perching shapes rest on leaves and logs, the
+ * others wander low, and ducks swim.
  */
-public class BirdEntity extends AnimalEntity {
+public class BirdEntity extends AnimalEntity implements Flutterer {
 	private static final TrackedData<Integer> VARIANT = DataTracker.registerData(BirdEntity.class, TrackedDataHandlerRegistry.INTEGER);
 
 	public BirdEntity(EntityType<? extends BirdEntity> type, World world) {
 		super(type, world);
 		this.calculateDimensions();
+		this.moveControl = new FlightMoveControl(this, 10, false);
+		this.setPathfindingPenalty(PathNodeType.DANGER_FIRE, -1.0F);
+		this.setPathfindingPenalty(PathNodeType.DAMAGE_FIRE, -1.0F);
+		this.setPathfindingPenalty(PathNodeType.COCOA, -1.0F);
+	}
+
+	@Override
+	protected EntityNavigation createNavigation(World world) {
+		BirdNavigation navigation = new BirdNavigation(this, world);
+		navigation.setCanPathThroughDoors(false);
+		navigation.setCanSwim(true);
+		navigation.setCanEnterOpenDoors(true);
+		return navigation;
+	}
+
+	/** Flutters: falls slowly. */
+	@Override
+	public void tickMovement() {
+		super.tickMovement();
+		Vec3d velocity = this.getVelocity();
+		if (!this.isOnGround() && velocity.y < 0.0) {
+			this.setVelocity(velocity.multiply(1.0, 0.6, 1.0));
+		}
+	}
+
+	@Override
+	public boolean isInAir() {
+		return !this.isOnGround();
+	}
+
+	@Override
+	protected void fall(double heightDifference, boolean onGround, BlockState state, BlockPos landedPosition) {
 	}
 
 	public static DefaultAttributeContainer.Builder createBirdAttributes() {
-		return AnimalEntity.createMobAttributes().add(EntityAttributes.GENERIC_MAX_HEALTH, 4.0).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.25);
+		return AnimalEntity.createMobAttributes().add(EntityAttributes.GENERIC_MAX_HEALTH, 4.0).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.2)
+				.add(EntityAttributes.GENERIC_FLYING_SPEED, 0.4);
 	}
 
 	@Override
 	protected void initGoals() {
 		this.goalSelector.add(0, new SwimGoal(this));
-		this.goalSelector.add(1, new EscapeDangerGoal(this, 1.5));
-		this.goalSelector.add(5, new WanderAroundFarGoal(this, 1.0));
+		this.goalSelector.add(1, new EscapeDangerGoal(this, 1.6));
+		this.goalSelector.add(2, new BirdGoals.FlyAway(this));
+		this.goalSelector.add(5, new BirdGoals.Perch(this));
+		this.goalSelector.add(5, new BirdGoals.WanderLow(this));
 		this.goalSelector.add(6, new LookAtEntityGoal(this, PlayerEntity.class, 6.0F));
 		this.goalSelector.add(7, new LookAroundGoal(this));
 	}

@@ -27,16 +27,18 @@ A bird is one mob with a shape, a base colour and up to two patterns, each in it
 
 ## Shapes
 
-| Shape | Model | Tufts or crest | Size (blocks) |
-|---|---|---|---|
-| songbird | `bird_songbird` | no | 0.3 x 0.3 |
-| waterfowl | `bird_waterfowl` | no | 0.4 x 0.45 |
-| owl | `bird_owl` | no | 0.35 x 0.45 |
-| eared owl | `bird_owl` | yes | 0.35 x 0.5 |
-| wader | `bird_wader` | no | 0.3 x 0.5 |
-| corvid | `bird_corvid` | no | 0.35 x 0.4 |
-| woodpecker | `bird_woodpecker` | yes | 0.25 x 0.55 |
-| seagull | `bird_seagull` | no | 0.35 x 0.45 |
+Birds fly off from a player within 6 blocks (half that if they sneak). A shape that perches flies up to rest on leaves and logs; the others stay low (ducks swim).
+
+| Shape | Model | Tufts or crest | Perches | Size (blocks) |
+|---|---|---|---|---|
+| songbird | `bird_songbird` | no | yes | 0.3 x 0.3 |
+| waterfowl | `bird_waterfowl` | no | no | 0.4 x 0.45 |
+| owl | `bird_owl` | no | yes | 0.35 x 0.45 |
+| eared owl | `bird_owl` | yes | yes | 0.35 x 0.5 |
+| wader | `bird_wader` | no | no | 0.3 x 0.5 |
+| corvid | `bird_corvid` | no | yes | 0.35 x 0.4 |
+| woodpecker | `bird_woodpecker` | yes | yes | 0.25 x 0.55 |
+| seagull | `bird_seagull` | no | no | 0.35 x 0.45 |
 
 ## Patterns
 

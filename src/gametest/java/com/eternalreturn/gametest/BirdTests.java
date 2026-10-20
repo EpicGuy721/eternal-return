@@ -81,4 +81,48 @@ public class BirdTests implements FabricGameTest {
 		ctx.killAllEntities();
 		ctx.complete();
 	}
+
+	private static final String ARENA = "eternalreturn_test:arena";
+
+	/** A survival player 4 blocks off: the bird flies off, ending further away; one in creative it lets come close. */
+	@GameTest(templateName = ARENA, batchId = BATCH, skyAccess = true, tickLimit = 300)
+	public void fliesOffFromPlayers(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		BirdEntity wary = ctx.spawnEntity(Birds.BIRD, new BlockPos(4, 1, 20));
+		wary.setVariant(BirdTable.PRESETS.get(0).variant());
+		BirdEntity calm = ctx.spawnEntity(Birds.BIRD, new BlockPos(12, 1, 20));
+		calm.setVariant(BirdTable.PRESETS.get(0).variant());
+		net.minecraft.server.network.ServerPlayerEntity survival = FishingTests.survivalPlayer(ctx, new BlockPos(4, 1, 16));
+		net.minecraft.server.network.ServerPlayerEntity creative = FishingTests.survivalPlayer(ctx, new BlockPos(12, 1, 16));
+		creative.changeGameMode(net.minecraft.world.GameMode.CREATIVE);
+		double wary0 = wary.distanceTo(survival);
+		double calm0 = calm.distanceTo(creative);
+		ctx.addInstantFinalTask(() -> {
+			FishingTests.disconnect(survival);
+			FishingTests.disconnect(creative);
+			ctx.killAllEntities();
+		});
+		ctx.runAtTick(120, () -> {
+			ctx.assertTrue(wary.distanceTo(survival) > wary0 + 3.0, "it flew off: " + wary0 + " -> " + wary.distanceTo(survival));
+			ctx.assertTrue(calm.distanceTo(creative) < calm0 + 6.0, "it lets a creative player near: " + calm0 + " -> " + calm.distanceTo(creative));
+			ctx.complete();
+		});
+	}
+
+	/** Dropped from 10 blocks up, it flutters down (slower than a fall) and lands unhurt. */
+	@GameTest(templateName = ARENA, batchId = BATCH, skyAccess = true, tickLimit = 300)
+	public void fluttersDown(TestContext ctx) {
+		BirdEntity bird = ctx.spawnEntity(Birds.BIRD, new BlockPos(8, 11, 20));
+		bird.setVariant(BirdTable.PRESETS.get(0).variant());
+		bird.setAiDisabled(true);
+		double top = bird.getY();
+		float health = bird.getHealth();
+		ctx.addInstantFinalTask(ctx::killAllEntities);
+		ctx.runAtTick(10, () -> ctx.assertTrue(top - bird.getY() < 2.5, "it flutters (a fall would drop about 3 blocks in 10 ticks): " + (top - bird.getY())));
+		ctx.runAtTick(200, () -> {
+			ctx.assertTrue(bird.isOnGround(), "it landed");
+			ctx.assertTrue(bird.getHealth() == health, "unhurt: " + bird.getHealth());
+			ctx.complete();
+		});
+	}
 }
