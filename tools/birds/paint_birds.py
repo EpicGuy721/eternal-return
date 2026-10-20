@@ -35,6 +35,7 @@ SHAPES = {
     'waterfowl': {'beak': (196, 170, 70), 'legs': (214, 120, 46), 'eyes': 'side', 'wing': ['####', '###.']},
     'owl': {'beak': (70, 64, 58), 'legs': (120, 112, 100), 'eyes': 'front', 'wing': ['###', '##.', '###']},
     'wader': {'beak': (190, 160, 70), 'legs': (100, 94, 78), 'eyes': 'side', 'wing': ['####', '##..']},
+    'corvid': {'beak': (54, 50, 50), 'legs': (64, 60, 60), 'eyes': 'side', 'wing': ['###.', '####']},
 }
 
 # Patterns by part role; ("head", "top") is the head's top row on its sides, ("head", "front") their front column.
@@ -49,7 +50,7 @@ PATTERNS = {
 
 # The natural palette (birds.json will hold it; here for the previews).
 PALETTE = {
-    'black': (70, 66, 70), 'charcoal': (96, 94, 96), 'slate_grey': (112, 120, 128), 'pale_grey': (182, 186, 188),
+    'black': (70, 66, 70), 'pink': (238, 146, 166), 'slate_grey': (112, 120, 128), 'pale_grey': (182, 186, 188),
     'white': (238, 236, 230), 'cream': (234, 222, 186), 'buff': (214, 184, 132), 'tan': (176, 140, 96),
     'brown': (120, 86, 58), 'chestnut': (140, 64, 40), 'rust': (186, 94, 50), 'scarlet': (204, 40, 38),
     'orange': (232, 132, 40), 'yellow': (242, 202, 52), 'olive': (122, 126, 62), 'slate_blue': (78, 110, 172),
@@ -59,7 +60,9 @@ PREVIEWS = {
                  'goldfinch': ('yellow', 'cap', 'black'), 'robin': ('brown', 'breast', 'rust')},
     'waterfowl': {'mallard_drake': ('pale_grey', 'head', 'olive'), 'mallard_hen': ('tan', 'wings', 'brown'),
                   'ruddy_duck': ('chestnut', 'cap', 'black')},
-    'wader': {'great_blue_heron': ('slate_grey', 'head', 'white'), 'scarlet_ibis': ('scarlet', 'wings', 'black'),
+    'corvid': {'crow': ('black', 'wings', 'black'), 'magpie': ('black', 'breast', 'white'),
+               'jackdaw': ('slate_grey', 'head', 'black')},
+    'wader': {'flamingo': ('pink', 'wings', 'black'), 'great_blue_heron': ('slate_grey', 'head', 'white'), 'scarlet_ibis': ('scarlet', 'wings', 'black'),
               'egret': ('white', 'tail', 'white')},
     'owl': {'barn_owl': ('buff', 'mask', 'white'), 'snowy_owl': ('white', 'wings', 'pale_grey'),
             'great_horned_owl': ('brown', 'mask', 'tan')},
