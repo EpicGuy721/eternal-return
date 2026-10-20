@@ -38,6 +38,7 @@ SHAPES = {
     'owl': {'beak': (70, 64, 58), 'legs': (120, 112, 100), 'eyes': 'front', 'wing': ['###', '##.', '###']},
     'wader': {'beak': (190, 160, 70), 'legs': (100, 94, 78), 'eyes': 'side', 'wing': ['####', '##..']},
     'corvid': {'beak': (54, 50, 50), 'legs': (64, 60, 60), 'eyes': 'side', 'wing': ['###.', '####']},
+    'woodpecker': {'beak': (62, 58, 56), 'legs': (84, 80, 76), 'eyes': 'side', 'wing': ['#####', '###..']},
 }
 
 # Patterns by part role; ("head", "top") is the head's top row on its sides, ("head", "front") their front column.
@@ -74,6 +75,9 @@ PREVIEWS = {
                   'ruddy_duck': ('chestnut', [('mask', 'white'), ('cap', 'black')])},
     'owl': {'barn_owl': ('buff', [('breast', 'white'), ('mask', 'white')]), 'snowy_owl': ('white', [('wings', 'pale_grey')]),
             'great_horned_owl': ('brown', [('breast', 'buff'), ('mask', 'tan')])},
+    'woodpecker': {'red_headed_woodpecker': ('white', [('wings', 'black'), ('head', 'scarlet')]),
+                   'downy_woodpecker': ('white', [('wings', 'black'), ('cap', 'scarlet')]),
+                   'northern_flicker': ('tan', [('breast', 'cream'), ('cap', 'slate_grey')])},
     'wader': {'great_blue_heron': ('slate_grey', [('head', 'white'), ('cap', 'black')]),
               'flamingo': ('pink', [('wings', 'scarlet')]), 'scarlet_ibis': ('scarlet', [('tail', 'black')])},
 }
