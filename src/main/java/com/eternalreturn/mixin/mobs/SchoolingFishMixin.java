@@ -13,7 +13,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * Schooling fish school by the boids rules (FishSchoolGoal) rather than following a leader. The boids goal is checked
- * ahead of random swimming; with mobs.fishSchools off it never starts, and the fish swim alone as vanilla's do.
+ * ahead of vanilla's flee from players and random swimming (only escaping when hurt comes first); with mobs.fishSchools
+ * off it never starts, and the fish swim alone as vanilla's do.
  */
 @Mixin(SchoolingFishEntity.class)
 public abstract class SchoolingFishMixin extends FishEntity {
@@ -24,6 +25,7 @@ public abstract class SchoolingFishMixin extends FishEntity {
 	@Inject(method = "initGoals", at = @At("TAIL"))
 	private void eternalreturn$boids(CallbackInfo ci) {
 		this.goalSelector.clear(goal -> goal instanceof FollowGroupLeaderGoal);
-		this.goalSelector.add(3, new FishSchoolGoal((SchoolingFishEntity) (Object) this));
+		// Ahead of vanilla's flee from players (2): a schooling fish flees with its school instead (FishSchoolGoal).
+		this.goalSelector.add(1, new FishSchoolGoal((SchoolingFishEntity) (Object) this));
 	}
 }
