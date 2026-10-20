@@ -4,11 +4,13 @@ the faces are found from the model's box-UV layout, and each part is painted by 
 Run from anywhere: python tools/birds/paint_birds.py [preview_dir]
 
 Writes src/main/resources/assets/eternalreturn/textures/entity/bird/<shape>/:
-- base.png: the bird's body, neck, head, wings and tail in light grays (shaded by face), tinted with its base colour;
+- base.png: the bird's body, neck, head, wings and tail in light grays (shaded by face, with feather markings: wing
+  bars and dark flight feathers, barred tails, and per shape a duck's barred flanks, an owl's speckles and streaked
+  breast, a corvid's sheen), tinted with its base colour;
 - pattern_<name>.png for cap, mask, breast, wings, tail and head: the same grays where the pattern lies, transparent
-  elsewhere, tinted with its pattern colour and drawn over the base;
-- details.png: what is never tinted: the eyes (near black), the beak or bill, legs and feet. The palette's darkest
-  colours stay a little lighter than the eyes, so a black-headed bird's eyes still show.
+  elsewhere, tinted with its pattern colour and drawn over the base (a bird wears up to two patterns, each in its
+  own colour);
+- details.png: what is never tinted: the eyes, the beak or bill, legs and feet.
 With a preview_dir, also writes preview_<shape>_<bird>.png there: birds with colours applied, for checking in Blockbench.
 Hand edits to these textures are lost when this is rerun.
 """
@@ -50,24 +52,30 @@ PATTERNS = {
 
 # The natural palette (birds.json will hold it; here for the previews).
 PALETTE = {
-    'black': (70, 66, 70), 'pink': (238, 146, 166), 'slate_grey': (112, 120, 128), 'pale_grey': (182, 186, 188),
+    'black': (34, 31, 36), 'pink': (238, 146, 166), 'slate_grey': (112, 120, 128), 'pale_grey': (182, 186, 188),
     'white': (238, 236, 230), 'cream': (234, 222, 186), 'buff': (214, 184, 132), 'tan': (176, 140, 96),
     'brown': (120, 86, 58), 'chestnut': (140, 64, 40), 'rust': (186, 94, 50), 'scarlet': (204, 40, 38),
     'orange': (232, 132, 40), 'yellow': (242, 202, 52), 'olive': (122, 126, 62), 'slate_blue': (78, 110, 172),
 }
+# Each preset: its base colour, then up to two patterns with their colours (the second drawn over the first).
 PREVIEWS = {
-    'songbird': {'cardinal': ('scarlet', 'mask', 'black'), 'blue_jay': ('slate_blue', 'breast', 'white'),
-                 'robin': ('brown', 'breast', 'rust'), 'goldfinch': ('yellow', 'cap', 'black'),
-                 'house_sparrow': ('tan', 'cap', 'slate_grey'), 'bluebird': ('slate_blue', 'breast', 'rust'),
-                 'chickadee': ('pale_grey', 'cap', 'black'), 'oriole': ('orange', 'head', 'black')},
-    'corvid': {'crow': ('black', 'wings', 'black'), 'magpie': ('black', 'breast', 'white'),
-               'jackdaw': ('slate_grey', 'cap', 'black')},
-    'waterfowl': {'mallard_drake': ('pale_grey', 'head', 'olive'), 'mallard_hen': ('tan', 'wings', 'brown'),
-                  'ruddy_duck': ('chestnut', 'cap', 'black')},
-    'owl': {'barn_owl': ('buff', 'mask', 'white'), 'snowy_owl': ('white', 'wings', 'pale_grey'),
-            'great_horned_owl': ('brown', 'mask', 'tan')},
-    'wader': {'great_blue_heron': ('slate_grey', 'head', 'white'), 'flamingo': ('pink', 'wings', 'black'),
-              'scarlet_ibis': ('scarlet', 'wings', 'black')},
+    'songbird': {'cardinal': ('scarlet', [('mask', 'black')]),
+                 'blue_jay': ('slate_blue', [('breast', 'white'), ('tail', 'black')]),
+                 'robin': ('brown', [('head', 'black'), ('breast', 'rust')]),
+                 'goldfinch': ('yellow', [('wings', 'black'), ('cap', 'black')]),
+                 'house_sparrow': ('tan', [('wings', 'brown'), ('cap', 'slate_grey')]),
+                 'bluebird': ('slate_blue', [('breast', 'rust')]),
+                 'chickadee': ('pale_grey', [('wings', 'slate_grey'), ('cap', 'black')]),
+                 'oriole': ('orange', [('wings', 'black'), ('head', 'black')])},
+    'corvid': {'crow': ('black', []), 'magpie': ('black', [('breast', 'white'), ('wings', 'slate_blue')]),
+               'jackdaw': ('slate_grey', [('wings', 'black'), ('cap', 'black')])},
+    'waterfowl': {'mallard_drake': ('pale_grey', [('breast', 'chestnut'), ('head', 'olive')]),
+                  'mallard_hen': ('tan', [('wings', 'brown'), ('cap', 'brown')]),
+                  'ruddy_duck': ('chestnut', [('mask', 'white'), ('cap', 'black')])},
+    'owl': {'barn_owl': ('buff', [('breast', 'white'), ('mask', 'white')]), 'snowy_owl': ('white', [('wings', 'pale_grey')]),
+            'great_horned_owl': ('brown', [('breast', 'buff'), ('mask', 'tan')])},
+    'wader': {'great_blue_heron': ('slate_grey', [('head', 'white'), ('cap', 'black')]),
+              'flamingo': ('pink', [('wings', 'black')]), 'scarlet_ibis': ('scarlet', [('tail', 'black')])},
 }
 # Owls without ear tufts (in game the renderer hides the tufts; Blockbench can't, so their previews leave them blank).
 NO_TUFTS = {'barn_owl', 'snowy_owl'}
@@ -116,6 +124,49 @@ def feathered(outline, rect, face, x, y):
     return along < len(row) and row[along] == '#'
 
 
+def markings(shape, part, face, rect, x, y, rng):
+    """How much lighter (or darker) feather markings make this pixel of the gray base."""
+    x1, y1, x2, y2 = rect
+    side = face in ('east', 'west')
+    if part == 'wing' and side:
+        rows = y2 - y1
+        along = (x2 - 1 - x) if face == 'east' else (x - x1)
+        d = 0
+        if y == y1:
+            d += 14  # the coverts: a pale bar along the top
+        elif y == y2 - 1 and rows > 1:
+            d -= 16  # the flight feathers below, darker
+            d += 6 if along % 2 == 0 else 0  # and their pale edges, feather by feather
+        if along >= (x2 - x1) - 1:
+            d -= 14  # the long feathers at the tip
+        if shape == 'owl' and rng.random() < 0.25:
+            d -= 26
+        if shape == 'corvid' and y == y1:
+            d += 10  # a glossy sheen
+        return d
+    if part == 'tail' and face in ('up', 'down'):
+        return -12 if (y - y1) % 2 else 4  # barred
+    if part == 'body':
+        if shape == 'waterfowl' and side:
+            return -9 if (y - y1) % 2 else 3  # finely barred flanks
+        if shape == 'owl':
+            if face == 'north':
+                return -18 if (x - x1) % 2 == 0 and (y - y1) % 2 == 1 else 0  # a streaked breast
+            if face in ('east', 'west', 'south', 'up') and rng.random() < 0.22:
+                return -26  # speckles
+        if shape == 'corvid' and face == 'up':
+            return 12 if (x - x1) % 2 == 0 else 0  # a glossy sheen on the back
+        if shape == 'songbird' and face == 'up':
+            return -12 if rng.random() < 0.3 else 0  # a streaked back
+        if shape == 'wader' and face == 'up':
+            return 8 if (y - y1) % 2 == 0 else -6  # plumes along the back
+    if part == 'neck' and shape == 'wader' and face == 'north':
+        return 12  # a pale throat
+    if part == 'head' and shape == 'owl' and face == 'north':
+        return 8  # the facial disc catches the light
+    return 0
+
+
 def paint(shape):
     model = json.load(open(os.path.join(MODELS, f'bird_{shape}.bbmodel'), encoding='utf-8'))
     size = (model['resolution']['width'], model['resolution']['height'])
@@ -131,10 +182,7 @@ def paint(shape):
                 if part == 'wing' and not feathered(SHAPES[shape]['wing'], rect, face, x, y):
                     continue
                 g = (WING if part == 'wing' else TAIL if part == 'tail' else SHADE[face]) + rng.randint(-6, 6)
-                if part == 'wing' and face in ('east', 'west') and y == y1:
-                    g += 12  # the wing's top edge (its shoulder) catches the light
-                if part == 'wing' and face in ('east', 'west') and x in (x1, x2 - 1):
-                    g -= 18  # its tip and its join to the body
+                g += markings(shape, part, face, rect, x, y, rng)
                 g = max(0, min(255, g))
                 base.putpixel((x, y), (g, g, g, 255))
     layers = {'base': base}
@@ -187,9 +235,10 @@ def main():
         for name, image in layers.items():
             image.save(os.path.join(folder, name + '.png'))
         if len(sys.argv) > 1:
-            for bird, (base, pattern, colour) in PREVIEWS[shape].items():
+            for bird, (base, patterns) in PREVIEWS[shape].items():
                 image = tint(layers['base'], PALETTE[base])
-                image.alpha_composite(tint(layers['pattern_' + pattern], PALETTE[colour]))
+                for pattern, colour in patterns:
+                    image.alpha_composite(tint(layers['pattern_' + pattern], PALETTE[colour]))
                 image.alpha_composite(layers['details'])
                 if bird in NO_TUFTS:
                     model = json.load(open(os.path.join(MODELS, f'bird_{shape}.bbmodel'), encoding='utf-8'))
