@@ -22,8 +22,8 @@ import org.joml.Vector3f;
  * The gimp: a man's torso, arms and hooded head (player-sized) rising from a spider's body, with a big abdomen behind
  * and eight jointed legs whose knees rise above the body. Made in tools/models/gimp.bbmodel (parts written from it).
  * The spider's legs walk as a spider's do; the man hunches a little, holds his fists up while he fights and punches
- * with his right. His pupils (each its own part in an eye hole) slide toward the nearest player. Climbing a wall
- * (GimpRenderer lays the body flat against it), he bends upright at the waist and turns his face out from the wall.
+ * with his right. His pupils (each its own part in an eye hole) slide toward the nearest player. On a wall (the body
+ * turned flat against it: ClimberRendering), he bends up at the waist and turns his face out from the wall.
  */
 public class GimpModel extends SinglePartEntityModel<GimpEntity> {
 	public static final EntityModelLayer LAYER = new EntityModelLayer(EternalReturn.id("gimp"), "main");
@@ -194,7 +194,7 @@ public class GimpModel extends SinglePartEntityModel<GimpEntity> {
 	public void setAngles(GimpEntity gimp, float limbAngle, float limbDistance, float animationProgress, float headYaw, float headPitch) {
 		this.root.traverse().forEach(ModelPart::resetTransform);
 		float tickDelta = animationProgress - gimp.age;
-		float climb = gimp.getClimb(tickDelta);
+		float climb = ClimberRendering.wallness(gimp, tickDelta);
 		// The man: hunched a little; on a wall bent up from the spider's back, his face turned out from it.
 		this.torso.pitch += HUNCH + climb * CLIMB_BEND;
 		this.head.yaw += headYaw * MathHelper.RADIANS_PER_DEGREE * (1.0F - climb);
@@ -231,7 +231,7 @@ public class GimpModel extends SinglePartEntityModel<GimpEntity> {
 			this.torso.yaw += MathHelper.sin(swing * MathHelper.TAU) * 0.15F;
 		}
 		// Pupils: toward the nearest player, all the way at 45 degrees aside or 30 up or down.
-		Vector3f look = lookDirection(gimp, tickDelta, climb);
+		Vector3f look = lookDirection(gimp, tickDelta);
 		if (look != null) {
 			Vector3f inHead = toLocal(toLocal(look, this.torso), this.head);
 			float aside = MathHelper.clamp((float) Math.atan2(inHead.x, -inHead.z) * MathHelper.DEGREES_PER_RADIAN / 45.0F, -1.0F, 1.0F);
@@ -246,9 +246,9 @@ public class GimpModel extends SinglePartEntityModel<GimpEntity> {
 
 	/**
 	 * Toward the nearest player within 32 blocks, in model space (the model faces -z, y points down), undoing the
-	 * renderer's turn, its tilt onto a wall and its flip; null if there's none.
+	 * renderer's turn (onto a wall or ceiling too) and its flip; null if there's none.
 	 */
-	private static Vector3f lookDirection(GimpEntity gimp, float tickDelta, float climb) {
+	private static Vector3f lookDirection(GimpEntity gimp, float tickDelta) {
 		PlayerEntity player = gimp.getWorld().getClosestPlayer(gimp, 32.0);
 		if (player == null) {
 			return null;
@@ -258,9 +258,7 @@ public class GimpModel extends SinglePartEntityModel<GimpEntity> {
 		if (world.lengthSquared() < 1.0E-4) {
 			return null;
 		}
-		float bodyYaw = MathHelper.lerpAngleDegrees(tickDelta, gimp.prevBodyYaw, gimp.bodyYaw);
-		Vector3f turned = new Quaternionf().rotationY((180.0F - bodyYaw) * MathHelper.RADIANS_PER_DEGREE)
-				.rotateX(climb * GimpRenderer.CLIMB_TILT * MathHelper.RADIANS_PER_DEGREE).conjugate()
+		Vector3f turned = ClimberRendering.rotation(gimp, tickDelta).conjugate()
 				.transform(new Vector3f((float) world.x, (float) world.y, (float) world.z));
 		return new Vector3f(-turned.x, -turned.y, turned.z).normalize();
 	}

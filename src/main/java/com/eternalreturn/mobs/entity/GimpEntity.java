@@ -1,6 +1,9 @@
 package com.eternalreturn.mobs.entity;
 
 import com.eternalreturn.mobs.NewMobs;
+import com.eternalreturn.mobs.climbing.Climber;
+import com.eternalreturn.mobs.climbing.SurfaceWalker;
+import com.eternalreturn.mobs.climbing.SurfaceWanderGoal;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -31,7 +34,6 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.LocalDifficulty;
@@ -43,13 +45,14 @@ import java.util.UUID;
 
 /**
  * The gimp: a man in a black latex suit from the waist up, a spider below. Rare, deep in the caves (below y 0), and
- * never alone: each spawns with its atropal (AtropalEntity), which floats about it. It climbs walls as a spider does
- * (and its model turns to lie against the wall), and fights with its fists: 20 health, a zombie's damage. While its
+ * never alone: each spawns with its atropal (AtropalEntity), which floats about it. It walks on walls and ceilings
+ * as spiders do (Climber), and fights with its fists: 20 health, a zombie's damage. While its
  * atropal lives it hunts players; once the atropal is dead it is neutral, fighting only what attacks it. Drops: loot
  * table eternalreturn:entities/gimp (leather and chains).
  */
-public class GimpEntity extends HostileEntity {
-	private static final TrackedData<Boolean> CLIMBING = DataTracker.registerData(GimpEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+public class GimpEntity extends HostileEntity implements SurfaceWalker {
+	/** The side it clings to (Climber). */
+	private static final TrackedData<Byte> CLINGS = DataTracker.registerData(GimpEntity.class, TrackedDataHandlerRegistry.BYTE);
 	/** Seconds its atropal may be missing (its spot loaded, the atropal not there) before the gimp counts it as gone. */
 	private static final int MISSING_LIMIT = 10;
 	@Nullable
@@ -59,9 +62,9 @@ public class GimpEntity extends HostileEntity {
 	private BlockPos atropalSeen;
 	private int atropalMissing;
 	private boolean freed;
-	/** Client side: how far its model has turned to lie against a wall, 0 to 1, now and the tick before. */
-	private float climb;
-	private float prevClimb;
+	/** Made on first use: goals are set up (in the constructor) before the fields. */
+	@Nullable
+	private Climber climber;
 
 	public GimpEntity(EntityType<? extends GimpEntity> type, World world) {
 		super(type, world);
@@ -85,6 +88,7 @@ public class GimpEntity extends HostileEntity {
 	protected void initGoals() {
 		this.goalSelector.add(1, new SwimGoal(this));
 		this.goalSelector.add(4, new MeleeAttackGoal(this, 1.0, true));
+		this.goalSelector.add(4, new SurfaceWanderGoal(this));
 		this.goalSelector.add(5, new WanderAroundFarGoal(this, 0.8));
 		this.goalSelector.add(6, new LookAtEntityGoal(this, PlayerEntity.class, 8.0F));
 		this.goalSelector.add(6, new LookAroundGoal(this));
@@ -96,7 +100,7 @@ public class GimpEntity extends HostileEntity {
 	@Override
 	protected void initDataTracker(DataTracker.Builder builder) {
 		super.initDataTracker(builder);
-		builder.add(CLIMBING, false);
+		builder.add(CLINGS, (byte) 0);
 	}
 
 	@Override
@@ -107,25 +111,15 @@ public class GimpEntity extends HostileEntity {
 	@Override
 	public void tick() {
 		super.tick();
-		World world = this.getWorld();
-		if (!world.isClient) {
-			this.dataTracker.set(CLIMBING, this.horizontalCollision);
-		} else {
-			this.prevClimb = this.climb;
-			float goal = this.isClimbing() && !this.isOnGround() ? 1.0F : 0.0F;
-			this.climb += MathHelper.clamp(goal - this.climb, -0.2F, 0.2F);
-		}
+		this.eternalreturn$climber().tick();
 	}
 
-	/** Climbing a wall, as a spider does. */
 	@Override
-	public boolean isClimbing() {
-		return this.dataTracker.get(CLIMBING);
-	}
-
-	/** Client side: how far its model has turned to lie against a wall (0 upright, 1 flat on it). */
-	public float getClimb(float tickDelta) {
-		return MathHelper.lerp(tickDelta, this.prevClimb, this.climb);
+	public Climber eternalreturn$climber() {
+		if (this.climber == null) {
+			this.climber = new Climber(this, () -> this.dataTracker.get(CLINGS), side -> this.dataTracker.set(CLINGS, side));
+		}
+		return this.climber;
 	}
 
 	/** As a spider: cobwebs don't slow it. */
@@ -232,6 +226,7 @@ public class GimpEntity extends HostileEntity {
 			nbt.putUuid("Atropal", this.atropal);
 		}
 		nbt.putBoolean("Freed", this.freed);
+		this.eternalreturn$climber().writeNbt(nbt);
 	}
 
 	@Override
@@ -239,6 +234,7 @@ public class GimpEntity extends HostileEntity {
 		super.readCustomDataFromNbt(nbt);
 		this.atropal = nbt.containsUuid("Atropal") ? nbt.getUuid("Atropal") : null;
 		this.freed = nbt.getBoolean("Freed");
+		this.eternalreturn$climber().readNbt(nbt);
 	}
 
 	@Override

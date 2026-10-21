@@ -33,7 +33,7 @@ import java.util.List;
  */
 public class GimpTests implements FabricGameTest {
 	private static final String BATCH = "gimp";
-	/** 16 by 40 blocks of stone floor, 14 high. */
+	/** 16 by 40 blocks of stone floor (at y 1 here: stand on y 2), 14 high. */
 	private static final String ARENA = "eternalreturn_test:arena";
 
 	/** A gimp spawned as by its egg, with its atropal. */
@@ -52,7 +52,7 @@ public class GimpTests implements FabricGameTest {
 
 	@GameTest(templateName = ARENA, batchId = BATCH)
 	public void spawnsWithItsAtropal(TestContext ctx) {
-		GimpEntity gimp = pair(ctx, new BlockPos(8, 1, 8));
+		GimpEntity gimp = pair(ctx, new BlockPos(8, 2, 8));
 		AtropalEntity atropal = gimp.getAtropal();
 		ctx.assertTrue(atropal != null, "an atropal came with it");
 		ctx.assertTrue(atropal.getGimp() == gimp, "bound to it");
@@ -68,7 +68,7 @@ public class GimpTests implements FabricGameTest {
 
 	@GameTest(templateName = ARENA, batchId = BATCH)
 	public void freedWhenItsAtropalDies(TestContext ctx) {
-		GimpEntity gimp = pair(ctx, new BlockPos(8, 1, 8));
+		GimpEntity gimp = pair(ctx, new BlockPos(8, 2, 8));
 		gimp.getAtropal().kill();
 		ctx.assertTrue(gimp.isFreed(), "freed the moment its atropal died");
 		ctx.killAllEntities();
@@ -79,17 +79,17 @@ public class GimpTests implements FabricGameTest {
 	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 100)
 	public void turnsProjectilesAside(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
-		AtropalEntity atropal = ctx.spawnEntity(NewMobs.ATROPAL, new BlockPos(8, 2, 12));
+		AtropalEntity atropal = ctx.spawnEntity(NewMobs.ATROPAL, new BlockPos(8, 3, 12));
 		atropal.setAiDisabled(true);
-		Vec3d from = Vec3d.ofCenter(ctx.getAbsolutePos(new BlockPos(8, 2, 6)));
+		Vec3d from = Vec3d.ofCenter(ctx.getAbsolutePos(new BlockPos(8, 3, 6)));
 		ArrowEntity arrow = new ArrowEntity(world, from.x, from.y, from.z, new ItemStack(Items.ARROW), null);
 		Vec3d at = atropal.getPos().add(0.0, atropal.getHeight() * 0.5, 0.0).subtract(from);
 		arrow.setVelocity(at.x, at.y, at.z, 1.5F, 0.0F);
 		world.spawnEntity(arrow);
-		ctx.addInstantFinalTask(ctx::killAllEntities);
 		ctx.runAtTick(40, () -> {
 			ctx.assertTrue(atropal.getHealth() == atropal.getMaxHealth(), "unhurt: " + atropal.getHealth());
 			ctx.assertTrue(arrow.isRemoved() || arrow.getZ() < atropal.getZ(), "the arrow turned back");
+			ctx.killAllEntities();
 			ctx.complete();
 		});
 	}
@@ -97,11 +97,10 @@ public class GimpTests implements FabricGameTest {
 	/** A target in sight 10 blocks off: the beam locks on and hits it. */
 	@GameTest(templateName = ARENA, batchId = BATCH, skyAccess = true, tickLimit = 300)
 	public void beamsItsTarget(TestContext ctx) {
-		AtropalEntity atropal = ctx.spawnEntity(NewMobs.ATROPAL, new BlockPos(8, 2, 6));
-		ZombieEntity husk = husk(ctx, new BlockPos(8, 1, 16));
+		AtropalEntity atropal = ctx.spawnEntity(NewMobs.ATROPAL, new BlockPos(8, 3, 6));
+		ZombieEntity husk = husk(ctx, new BlockPos(8, 2, 16));
 		float health = husk.getHealth();
 		boolean[] locked = {false};
-		ctx.addInstantFinalTask(ctx::killAllEntities);
 		ctx.runAtEveryTick(() -> {
 			atropal.setTarget(husk);
 			locked[0] |= atropal.hasBeamTarget();
@@ -109,6 +108,7 @@ public class GimpTests implements FabricGameTest {
 		ctx.runAtTick(AtropalEntity.BEAM_WARMUP + 60, () -> {
 			ctx.assertTrue(locked[0], "the beam locked on");
 			ctx.assertTrue(husk.getHealth() < health, "and hit: " + husk.getHealth() + " of " + health);
+			ctx.killAllEntities();
 			ctx.complete();
 		});
 	}
@@ -116,13 +116,13 @@ public class GimpTests implements FabricGameTest {
 	/** Its target close by: it flies off from it. */
 	@GameTest(templateName = ARENA, batchId = BATCH, skyAccess = true, tickLimit = 200)
 	public void keepsAway(TestContext ctx) {
-		AtropalEntity atropal = ctx.spawnEntity(NewMobs.ATROPAL, new BlockPos(8, 2, 20));
-		ZombieEntity husk = husk(ctx, new BlockPos(8, 1, 22));
+		AtropalEntity atropal = ctx.spawnEntity(NewMobs.ATROPAL, new BlockPos(8, 3, 20));
+		ZombieEntity husk = husk(ctx, new BlockPos(8, 2, 22));
 		double start = atropal.distanceTo(husk);
-		ctx.addInstantFinalTask(ctx::killAllEntities);
 		ctx.runAtEveryTick(() -> atropal.setTarget(husk));
 		ctx.runAtTick(100, () -> {
 			ctx.assertTrue(atropal.distanceTo(husk) > AtropalEntity.FLEE_DISTANCE - 1.0, "it got away: " + start + " to " + atropal.distanceTo(husk));
+			ctx.killAllEntities();
 			ctx.complete();
 		});
 	}
@@ -131,22 +131,22 @@ public class GimpTests implements FabricGameTest {
 	@GameTest(templateName = ARENA, batchId = BATCH, skyAccess = true, tickLimit = 400)
 	public void climbsWalls(TestContext ctx) {
 		for (int x = 0; x < 16; x++) {
-			for (int y = 1; y <= 5; y++) {
+			for (int y = 2; y <= 6; y++) {
 				ctx.setBlockState(new BlockPos(x, y, 20), Blocks.STONE.getDefaultState());
 			}
 		}
-		ZombieEntity husk = husk(ctx, new BlockPos(8, 6, 20));
-		GimpEntity gimp = ctx.spawnEntity(NewMobs.GIMP, new BlockPos(8, 1, 16));
+		ZombieEntity husk = husk(ctx, new BlockPos(8, 7, 20));
+		GimpEntity gimp = ctx.spawnEntity(NewMobs.GIMP, new BlockPos(8, 2, 16));
 		double floor = gimp.getY();
 		boolean[] climbed = {false};
-		ctx.addInstantFinalTask(ctx::killAllEntities);
 		ctx.runAtEveryTick(() -> {
 			gimp.setTarget(husk);
-			climbed[0] |= gimp.isClimbing();
+			climbed[0] |= gimp.eternalreturn$climber().offFloor();
 		});
-		ctx.waitAndRun(300, () -> {
+		ctx.runAtTick(300, () -> {
 			ctx.assertTrue(climbed[0], "it climbed");
 			ctx.assertTrue(gimp.getY() >= floor + 4.0 || husk.getHealth() < husk.getMaxHealth(), "up the wall to its target: rose " + (gimp.getY() - floor));
+			ctx.killAllEntities();
 			ctx.complete();
 		});
 	}
@@ -168,7 +168,7 @@ public class GimpTests implements FabricGameTest {
 	private static List<ItemStack> loot(TestContext ctx, EntityType<?> type, int kills) {
 		ServerWorld world = ctx.getWorld();
 		var entity = type.create(world);
-		entity.refreshPositionAndAngles(ctx.getAbsolutePos(new BlockPos(2, 1, 2)), 0.0F, 0.0F);
+		entity.refreshPositionAndAngles(ctx.getAbsolutePos(new BlockPos(2, 2, 2)), 0.0F, 0.0F);
 		LootTable table = world.getServer().getReloadableRegistries().getLootTable(type.getLootTableId());
 		LootContextParameterSet params = new LootContextParameterSet.Builder(world).add(LootContextParameters.THIS_ENTITY, entity)
 				.add(LootContextParameters.ORIGIN, entity.getPos()).add(LootContextParameters.DAMAGE_SOURCE, world.getDamageSources().generic())
@@ -183,17 +183,15 @@ public class GimpTests implements FabricGameTest {
 	/** A player nearby: the gimp whose atropal lives goes for them, the one whose atropal is dead leaves them be. */
 	@GameTest(templateName = ARENA, batchId = "gimp_neutral", tickLimit = 200)
 	public void neutralOnceFreed(TestContext ctx) {
-		GimpEntity bound = pair(ctx, new BlockPos(4, 1, 12));
-		GimpEntity freed = pair(ctx, new BlockPos(12, 1, 12));
+		GimpEntity bound = pair(ctx, new BlockPos(4, 2, 12));
+		GimpEntity freed = pair(ctx, new BlockPos(12, 2, 12));
 		freed.getAtropal().kill();
-		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(8, 1, 16));
-		ctx.addInstantFinalTask(() -> {
-			FishingTests.disconnect(player);
-			ctx.killAllEntities();
-		});
+		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(8, 2, 16));
 		ctx.runAtTick(100, () -> {
 			ctx.assertTrue(bound.getTarget() == player, "the bound gimp hunts the player");
 			ctx.assertTrue(freed.getTarget() == null, "the freed one doesn't: " + freed.getTarget());
+			FishingTests.disconnect(player);
+			ctx.killAllEntities();
 			ctx.complete();
 		});
 	}

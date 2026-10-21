@@ -205,6 +205,8 @@ public final class EternalReturnConfig {
 		public boolean birdFlocks = true;
 		/** Cod, salmon and tropical fish school by the boids rules instead of following a leader. */
 		public boolean fishSchools = true;
+		/** Spiders, cave spiders, bone spiders and gimps walk on walls and ceilings, turning to fit each surface (else vanilla climbing). */
+		public boolean surfaceWalkingSpiders = true;
 		/** Phantoms come on one night in this many, whether or not anyone slept (0: vanilla's insomnia instead). */
 		public int phantomNightChance = 13;
 		/**
