@@ -88,23 +88,30 @@ public class BirdTests implements FabricGameTest {
 	@GameTest(templateName = ARENA, batchId = BATCH, skyAccess = true, tickLimit = 300)
 	public void fliesOffFromPlayers(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
-		BirdEntity wary = ctx.spawnEntity(Birds.BIRD, new BlockPos(4, 1, 20));
+		// Far apart: a startled bird's flockmates within 10 blocks take off with it.
+		BirdEntity wary = ctx.spawnEntity(Birds.BIRD, new BlockPos(4, 2, 34));
 		wary.setVariant(BirdTable.PRESETS.get(0).variant());
-		BirdEntity calm = ctx.spawnEntity(Birds.BIRD, new BlockPos(12, 1, 20));
+		BirdEntity calm = ctx.spawnEntity(Birds.BIRD, new BlockPos(12, 2, 6));
 		calm.setVariant(BirdTable.PRESETS.get(0).variant());
-		net.minecraft.server.network.ServerPlayerEntity survival = FishingTests.survivalPlayer(ctx, new BlockPos(4, 1, 16));
-		net.minecraft.server.network.ServerPlayerEntity creative = FishingTests.survivalPlayer(ctx, new BlockPos(12, 1, 16));
+		net.minecraft.server.network.ServerPlayerEntity survival = FishingTests.survivalPlayer(ctx, new BlockPos(4, 2, 37));
+		net.minecraft.server.network.ServerPlayerEntity creative = FishingTests.survivalPlayer(ctx, new BlockPos(12, 2, 3));
 		creative.changeGameMode(net.minecraft.world.GameMode.CREATIVE);
 		double wary0 = wary.distanceTo(survival);
-		double calm0 = calm.distanceTo(creative);
-		ctx.addInstantFinalTask(() -> {
+		// A startled bird of a flocking kind takes off with its flock at once; one at ease only does so now and then,
+		// by chance (about once in two minutes), so in the first second and a half it shouldn't.
+		boolean[] calmStartled = {false};
+		ctx.runAtEveryTick(() -> {
+			if (ctx.getTick() <= 30) {
+				calmStartled[0] |= calm.isFlocking();
+			}
+		});
+		ctx.runAtTick(30, () -> ctx.assertTrue(wary.isFlocking(), "the bird near the survival player took off"));
+		ctx.runAtTick(120, () -> {
+			ctx.assertTrue(wary.distanceTo(survival) > wary0 + 3.0, "it flew off: " + wary0 + " -> " + wary.distanceTo(survival));
+			ctx.assertTrue(!calmStartled[0], "the bird near the creative player didn't");
 			FishingTests.disconnect(survival);
 			FishingTests.disconnect(creative);
 			ctx.killAllEntities();
-		});
-		ctx.runAtTick(120, () -> {
-			ctx.assertTrue(wary.distanceTo(survival) > wary0 + 3.0, "it flew off: " + wary0 + " -> " + wary.distanceTo(survival));
-			ctx.assertTrue(calm.distanceTo(creative) < calm0 + 6.0, "it lets a creative player near: " + calm0 + " -> " + calm.distanceTo(creative));
 			ctx.complete();
 		});
 	}
@@ -112,16 +119,17 @@ public class BirdTests implements FabricGameTest {
 	/** Dropped from 10 blocks up, it flutters down (slower than a fall) and lands unhurt. */
 	@GameTest(templateName = ARENA, batchId = BATCH, skyAccess = true, tickLimit = 300)
 	public void fluttersDown(TestContext ctx) {
-		BirdEntity bird = ctx.spawnEntity(Birds.BIRD, new BlockPos(8, 11, 20));
+		BirdEntity bird = ctx.spawnEntity(Birds.BIRD, new BlockPos(8, 12, 20));
 		bird.setVariant(BirdTable.PRESETS.get(0).variant());
-		bird.setAiDisabled(true);
+		// No goals (it would fly about), but its AI on: a mob with its AI off doesn't move at all.
+		((com.eternalreturn.mixin.mobs.MobEntityAccessor) bird).eternalreturn$goalSelector().clear(goal -> true);
 		double top = bird.getY();
 		float health = bird.getHealth();
-		ctx.addInstantFinalTask(ctx::killAllEntities);
 		ctx.runAtTick(10, () -> ctx.assertTrue(top - bird.getY() < 2.5, "it flutters (a fall would drop about 3 blocks in 10 ticks): " + (top - bird.getY())));
 		ctx.runAtTick(200, () -> {
 			ctx.assertTrue(bird.isOnGround(), "it landed");
 			ctx.assertTrue(bird.getHealth() == health, "unhurt: " + bird.getHealth());
+			ctx.killAllEntities();
 			ctx.complete();
 		});
 	}
@@ -138,18 +146,14 @@ public class BirdTests implements FabricGameTest {
 	public void flocksTakeOffTogether(TestContext ctx) {
 		java.util.List<BirdEntity> flock = new java.util.ArrayList<>();
 		for (int i = 0; i < 6; i++) {
-			BirdEntity bird = ctx.spawnEntity(Birds.BIRD, new BlockPos(6 + i % 3, 1, 20 + i / 3 * 2));
+			BirdEntity bird = ctx.spawnEntity(Birds.BIRD, new BlockPos(6 + i % 3, 2, 20 + i / 3 * 2));
 			bird.setVariant(preset("house_sparrow").variant());
 			flock.add(bird);
 		}
-		BirdEntity owl = ctx.spawnEntity(Birds.BIRD, new BlockPos(11, 1, 21));
+		BirdEntity owl = ctx.spawnEntity(Birds.BIRD, new BlockPos(11, 2, 21));
 		owl.setVariant(preset("barn_owl").variant());
-		net.minecraft.server.network.ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(7, 1, 16));
+		net.minecraft.server.network.ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(7, 2, 16));
 		double[] fastest = {0.0};
-		ctx.addInstantFinalTask(() -> {
-			FishingTests.disconnect(player);
-			ctx.killAllEntities();
-		});
 		ctx.runAtEveryTick(() -> flock.forEach(bird -> fastest[0] = Math.max(fastest[0], bird.getVelocity().length())));
 		ctx.runAtTick(30, () -> {
 			long up = flock.stream().filter(bird -> bird.isFlocking() || !bird.isOnGround()).count();
@@ -170,6 +174,8 @@ public class BirdTests implements FabricGameTest {
 			ctx.assertTrue(closest > 0.3, "no two birds on top of each other: " + closest);
 			double songbird = BirdTable.SHAPES.get(0).flightSpeed();
 			ctx.assertTrue(fastest[0] > 0.8 * songbird, "they fly at a songbird's speed (" + songbird + "): " + fastest[0]);
+			FishingTests.disconnect(player);
+			ctx.killAllEntities();
 			ctx.complete();
 		});
 	}
@@ -208,12 +214,12 @@ public class BirdTests implements FabricGameTest {
 	@GameTest(templateName = ARENA, batchId = BATCH, skyAccess = true)
 	public void wildFlocksComeTogether(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
-		BirdEntity sparrow = ctx.spawnEntity(Birds.BIRD, new BlockPos(8, 1, 8));
+		BirdEntity sparrow = ctx.spawnEntity(Birds.BIRD, new BlockPos(8, 2, 8));
 		sparrow.setVariant(preset("house_sparrow").variant());
 		int mates = Birds.spawnFlockmates(world, sparrow);
 		long alike = world.getEntitiesByClass(BirdEntity.class, sparrow.getBoundingBox().expand(5.0), b -> b != sparrow && b.getVariant() == sparrow.getVariant()).size();
 		ctx.assertTrue(mates >= 1 && mates <= 5 && alike == mates, "a flock of its kind: " + mates + " spawned, " + alike + " nearby");
-		BirdEntity owl = ctx.spawnEntity(Birds.BIRD, new BlockPos(8, 1, 30));
+		BirdEntity owl = ctx.spawnEntity(Birds.BIRD, new BlockPos(8, 2, 30));
 		owl.setVariant(preset("barn_owl").variant());
 		ctx.assertTrue(Birds.spawnFlockmates(world, owl) == 0, "an owl comes alone");
 		ctx.killAllEntities();
@@ -238,19 +244,17 @@ public class BirdTests implements FabricGameTest {
 	/** Seeds tame a songbird (sooner or later) but not an owl; the owner sits it down and stands it up; a pet doesn't fly off. */
 	@GameTest(templateName = ARENA, batchId = BATCH, skyAccess = true, tickLimit = 200)
 	public void tamingSongbirds(TestContext ctx) {
-		BirdEntity robin = ctx.spawnEntity(Birds.BIRD, new BlockPos(8, 1, 10));
+		BirdEntity robin = ctx.spawnEntity(Birds.BIRD, new BlockPos(8, 2, 10));
 		robin.setVariant(preset("american_robin").variant());
 		robin.setAiDisabled(true);
-		BirdEntity owl = ctx.spawnEntity(Birds.BIRD, new BlockPos(8, 1, 20));
+		BirdEntity owl = ctx.spawnEntity(Birds.BIRD, new BlockPos(8, 2, 20));
 		owl.setVariant(preset("barn_owl").variant());
 		owl.setAiDisabled(true);
-		net.minecraft.server.network.ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(8, 1, 13));
-		ctx.addInstantFinalTask(() -> {
-			FishingTests.disconnect(player);
-			ctx.killAllEntities();
-		});
+		net.minecraft.server.network.ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(8, 2, 13));
 		// A second to land first: a bird in the air won't sit.
 		ctx.runAtTick(20, () -> {
+			// With its AI off it never notes that it stands on the ground.
+			robin.setOnGround(true);
 			for (int i = 0; i < 60 && !robin.isTamed(); i++) {
 				player.setStackInHand(net.minecraft.util.Hand.MAIN_HAND, new net.minecraft.item.ItemStack(net.minecraft.item.Items.WHEAT_SEEDS));
 				robin.interactMob(player, net.minecraft.util.Hand.MAIN_HAND);
@@ -268,6 +272,8 @@ public class BirdTests implements FabricGameTest {
 		});
 		ctx.runAtTick(80, () -> {
 			ctx.assertTrue(!robin.isFlocking() && robin.distanceTo(player) < 8.0, "a pet stays near its owner instead of flying off: " + robin.distanceTo(player));
+			FishingTests.disconnect(player);
+			ctx.killAllEntities();
 			ctx.complete();
 		});
 	}

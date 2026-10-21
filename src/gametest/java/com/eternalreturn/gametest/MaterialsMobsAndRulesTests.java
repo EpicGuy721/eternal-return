@@ -359,17 +359,17 @@ public class MaterialsMobsAndRulesTests implements FabricGameTest {
 	}
 
 	/** Wither skeletons have 80 health and shoot wither skulls at a target 8 or more blocks off. */
-	@GameTest(templateName = EMPTY_STRUCTURE, tickLimit = 200)
+	/** In the arena (floor at y 1): the target far enough off (8 to 32 blocks) for a skull before the skeleton closes in. */
+	@GameTest(templateName = "eternalreturn_test:arena", tickLimit = 200)
 	public void witherSkeletons(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
-		floor(ctx, Blocks.STONE);
-		WitherSkeletonEntity skeleton = ctx.spawnEntity(EntityType.WITHER_SKELETON, new BlockPos(0, 1, 0));
+		WitherSkeletonEntity skeleton = ctx.spawnEntity(EntityType.WITHER_SKELETON, new BlockPos(8, 2, 2));
 		ctx.assertTrue(skeleton.getMaxHealth() == 80.0F && skeleton.getHealth() == 80.0F, "80 health: " + skeleton.getMaxHealth());
-		VillagerEntity target = still(ctx, EntityType.VILLAGER, new BlockPos(7, 1, 7));
-		ctx.addInstantFinalTask(() -> ctx.killAllEntities());
+		VillagerEntity target = still(ctx, EntityType.VILLAGER, new BlockPos(8, 2, 30));
 		ctx.runAtEveryTick(() -> {
 			skeleton.setTarget(target);
 			if (!world.getEntitiesByClass(WitherSkullEntity.class, new Box(skeleton.getBlockPos()).expand(16.0), skull -> skull.getOwner() == skeleton).isEmpty()) {
+				ctx.killAllEntities();
 				ctx.complete();
 			}
 		});

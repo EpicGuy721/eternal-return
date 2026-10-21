@@ -244,9 +244,9 @@ public class ForestTests implements FabricGameTest {
 		floor(ctx, Blocks.STONE);
 		VampireEntity vampire = ctx.spawnEntity(ModEntities.VAMPIRE, new BlockPos(3, 1, 3));
 		vampire.setAiDisabled(true);
-		ctx.addInstantFinalTask(() -> ctx.killAllEntities());
 		ctx.runAtEveryTick(() -> {
 			if (vampire.isOnFire()) {
+				ctx.killAllEntities();
 				ctx.complete();
 			}
 		});
@@ -272,10 +272,6 @@ public class ForestTests implements FabricGameTest {
 		ctx.assertTrue(!Vampires.infect(villager), "a second bite changes nothing");
 		((Vampires.Bitten) villager).eternalreturn$setTurnTicks(20);
 		boolean[] bats = {false};
-		ctx.addInstantFinalTask(() -> {
-			FishingTests.disconnect(player);
-			ctx.killAllEntities();
-		});
 		ctx.runAtEveryTick(() -> {
 			if (vampire.getTarget() != player && vampire.isAlive()) {
 				vampire.setTarget(player);
@@ -285,6 +281,8 @@ public class ForestTests implements FabricGameTest {
 			boolean turned = villager.isRemoved() && !world.getEntitiesByClass(VampireEntity.class, new Box(ctx.getAbsolutePos(new BlockPos(1, 1, 6))).expand(3.0),
 					v -> v != vampire).isEmpty();
 			if (bats[0] && turned && player.hasStatusEffect(StatusEffects.POISON)) {
+				FishingTests.disconnect(player);
+				ctx.killAllEntities();
 				ctx.complete();
 			}
 		});
@@ -302,7 +300,6 @@ public class ForestTests implements FabricGameTest {
 		vampire.setCustomName(net.minecraft.text.Text.literal("Vlad"));
 		Box area = new Box(ctx.getAbsolutePos(BlockPos.ORIGIN)).expand(24.0);
 		boolean[] fled = {false};
-		ctx.addInstantFinalTask(() -> ctx.killAllEntities());
 		ctx.runAtEveryTick(() -> {
 			if (!fled[0]) {
 				if (vampire.isRemoved() && world.getEntitiesByClass(VampireBatEntity.class, area, VampireBatEntity::isForm).size() == 1) {
@@ -316,6 +313,7 @@ public class ForestTests implements FabricGameTest {
 			if (!back.isEmpty()) {
 				ctx.assertTrue(back.get(0).getHealth() == 5.0F, "it came back with the health it had: " + back.get(0).getHealth());
 				ctx.assertTrue(world.getEntitiesByClass(VampireBatEntity.class, area, VampireBatEntity::isForm).isEmpty(), "and the bat is gone");
+				ctx.killAllEntities();
 				ctx.complete();
 			}
 		});

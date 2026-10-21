@@ -20,7 +20,7 @@ public class FishSchoolTests implements FabricGameTest {
 	@GameTest(templateName = ARENA, batchId = "fish_schools", skyAccess = true, tickLimit = 300)
 	public void codSchool(TestContext ctx) {
 		for (int x = 0; x < 16; x++) {
-			for (int y = 1; y <= 12; y++) {
+			for (int y = 2; y <= 13; y++) {
 				for (int z = 0; z < 40; z++) {
 					ctx.setBlockState(x, y, z, Blocks.WATER.getDefaultState());
 				}
@@ -32,7 +32,6 @@ public class FishSchoolTests implements FabricGameTest {
 		}
 		float[] sharpest = {0.0F};
 		float[] last = new float[school.size()];
-		ctx.addInstantFinalTask(ctx::killAllEntities);
 		ctx.runAtEveryTick(() -> {
 			for (int i = 0; i < school.size(); i++) {
 				float yaw = school.get(i).bodyYaw;
@@ -58,6 +57,7 @@ public class FishSchoolTests implements FabricGameTest {
 			ctx.assertTrue(spread < 7.0, "the school holds together: " + spread);
 			ctx.assertTrue(heading.length() > 0.4, "it swims the same way: " + heading.length());
 			ctx.assertTrue(closest > 0.15, "no two fish on top of each other: " + closest);
+			ctx.killAllEntities();
 			ctx.complete();
 		});
 	}
@@ -66,7 +66,7 @@ public class FishSchoolTests implements FabricGameTest {
 	@GameTest(templateName = ARENA, batchId = "fish_schools", skyAccess = true, tickLimit = 300)
 	public void schoolAvoidsPlayers(TestContext ctx) {
 		for (int x = 0; x < 16; x++) {
-			for (int y = 1; y <= 12; y++) {
+			for (int y = 2; y <= 13; y++) {
 				for (int z = 0; z < 40; z++) {
 					ctx.setBlockState(x, y, z, Blocks.WATER.getDefaultState());
 				}
@@ -76,17 +76,15 @@ public class FishSchoolTests implements FabricGameTest {
 		for (int i = 0; i < 8; i++) {
 			school.add(ctx.spawnEntity(EntityType.COD, new BlockPos(6 + i % 4, 5 + i / 4, 18 + i % 3)));
 		}
-		net.minecraft.server.network.ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(7, 5, 15));
-		ctx.addInstantFinalTask(() -> {
-			FishingTests.disconnect(player);
-			ctx.killAllEntities();
-		});
+		net.minecraft.server.network.ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(7, 6, 15));
 		Vec3d[] start = new Vec3d[1];
 		ctx.runAtTick(25, () -> start[0] = school.stream().map(CodEntity::getPos).reduce(Vec3d.ZERO, Vec3d::add).multiply(1.0 / school.size()));
 		ctx.runAtTick(120, () -> {
 			Vec3d centre = school.stream().map(CodEntity::getPos).reduce(Vec3d.ZERO, Vec3d::add).multiply(1.0 / school.size());
 			ctx.assertTrue(centre.distanceTo(player.getPos()) > start[0].distanceTo(player.getPos()) + 2.0,
 					"the school moved off: " + start[0].distanceTo(player.getPos()) + " -> " + centre.distanceTo(player.getPos()));
+			FishingTests.disconnect(player);
+			ctx.killAllEntities();
 			ctx.complete();
 		});
 	}

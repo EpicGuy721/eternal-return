@@ -91,10 +91,10 @@ public class BeholderTests implements FabricGameTest {
 	/** It lasers a target it can see within 24 blocks; one behind a wall, or further off, it doesn't. */
 	@GameTest(templateName = ARENA, batchId = BATCH, skyAccess = true)
 	public void choosesLaserOrFireball(TestContext ctx) {
-		BeholderEntity beholder = ctx.spawnEntity(NewMobs.BEHOLDER, new BlockPos(8, 1, 4));
+		BeholderEntity beholder = ctx.spawnEntity(NewMobs.BEHOLDER, new BlockPos(8, 2, 4));
 		beholder.setAiDisabled(true);
-		ZombieEntity near = target(ctx, new BlockPos(8, 1, 12));
-		ZombieEntity far = target(ctx, new BlockPos(8, 1, 37));
+		ZombieEntity near = target(ctx, new BlockPos(8, 2, 12));
+		ZombieEntity far = target(ctx, new BlockPos(8, 2, 37));
 		ctx.assertTrue(beholder.lasers(near), "lasers a target it sees 8 blocks off");
 		ctx.assertTrue(!beholder.lasers(far), "not one 33 blocks off");
 		wall(ctx, 10);
@@ -106,17 +106,17 @@ public class BeholderTests implements FabricGameTest {
 	/** In sight and in range: the beam locks on and, after its charge, hurts. */
 	@GameTest(templateName = ARENA, batchId = BATCH, skyAccess = true, tickLimit = 400)
 	public void laserHurts(TestContext ctx) {
-		BeholderEntity beholder = ctx.spawnEntity(NewMobs.BEHOLDER, new BlockPos(8, 1, 4));
-		ZombieEntity zombie = target(ctx, new BlockPos(8, 1, 14));
+		BeholderEntity beholder = ctx.spawnEntity(NewMobs.BEHOLDER, new BlockPos(8, 2, 4));
+		ZombieEntity zombie = target(ctx, new BlockPos(8, 2, 14));
 		beholder.setTarget(zombie);
 		float health = zombie.getHealth();
 		boolean[] locked = {false};
-		ctx.addInstantFinalTask(ctx::killAllEntities);
 		ctx.runAtEveryTick(() -> locked[0] |= beholder.hasBeamTarget());
 		ctx.runAtTick(BeholderEntity.WARMUP + 40, () -> {
 			ctx.assertTrue(locked[0], "the beam locked on");
 			ctx.assertTrue(zombie.getHealth() < health, "and hurt: " + zombie.getHealth() + " of " + health);
 			ctx.assertTrue(fireballs(ctx, beholder).isEmpty(), "no fireballs at a target in sight");
+			ctx.killAllEntities();
 			ctx.complete();
 		});
 	}
@@ -124,13 +124,12 @@ public class BeholderTests implements FabricGameTest {
 	/** Behind a wall: no beam, a fireball from its mouth instead. */
 	@GameTest(templateName = ARENA, batchId = BATCH, skyAccess = true, tickLimit = 400)
 	public void fireballAtHiddenTarget(TestContext ctx) {
-		BeholderEntity beholder = ctx.spawnEntity(NewMobs.BEHOLDER, new BlockPos(8, 1, 4));
-		ZombieEntity zombie = target(ctx, new BlockPos(8, 1, 14));
+		BeholderEntity beholder = ctx.spawnEntity(NewMobs.BEHOLDER, new BlockPos(8, 2, 4));
+		ZombieEntity zombie = target(ctx, new BlockPos(8, 2, 14));
 		wall(ctx, 11);
 		beholder.setTarget(zombie);
 		boolean[] beam = {false};
 		boolean[] fireball = {false};
-		ctx.addInstantFinalTask(ctx::killAllEntities);
 		ctx.runAtEveryTick(() -> {
 			beam[0] |= beholder.hasBeamTarget();
 			fireball[0] |= !fireballs(ctx, beholder).isEmpty();
@@ -138,6 +137,7 @@ public class BeholderTests implements FabricGameTest {
 		ctx.runAtTick(80, () -> {
 			ctx.assertTrue(fireball[0], "a fireball at the hidden target");
 			ctx.assertTrue(!beam[0], "and no beam");
+			ctx.killAllEntities();
 			ctx.complete();
 		});
 	}

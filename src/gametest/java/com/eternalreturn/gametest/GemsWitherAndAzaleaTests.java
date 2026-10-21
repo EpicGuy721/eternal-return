@@ -215,7 +215,6 @@ public class GemsWitherAndAzaleaTests implements FabricGameTest {
 		wither.setInvulTimer(0);
 		wither.setAiDisabled(false);
 		wither.setHealth(wither.getMaxHealth() / 2.0F - 1.0F);
-		ctx.addInstantFinalTask(() -> ctx.killAllEntities());
 		ctx.runAtTick(ctx.getTick() + 20, () -> {
 			List<WitherSkeletonEntity> skeletons = world.getEntitiesByClass(WitherSkeletonEntity.class, wither.getBoundingBox().expand(8.0), s -> true);
 			ctx.assertTrue(skeletons.size() == 3, "three wither skeletons: " + skeletons.size());
@@ -235,6 +234,7 @@ public class GemsWitherAndAzaleaTests implements FabricGameTest {
 		});
 		ctx.runAtTick(ctx.getTick() + 40, () -> {
 			ctx.assertTrue(wither.getHealth() <= wither.getMaxHealth() / 2.0F, "it can't heal back above half: " + wither.getHealth());
+			ctx.killAllEntities();
 			ctx.complete();
 		});
 	}

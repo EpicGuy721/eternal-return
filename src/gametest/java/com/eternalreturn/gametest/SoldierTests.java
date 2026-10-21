@@ -83,17 +83,17 @@ public class SoldierTests implements FabricGameTest {
 	/** In the open, at a target 12 blocks off: he shoots it, and it's hurt. */
 	@GameTest(templateName = ARENA, batchId = BATCH, skyAccess = true, tickLimit = 400)
 	public void shootsTarget(TestContext ctx) {
-		SoldierEntity soldier = ctx.spawnEntity(NewMobs.SOLDIER, new BlockPos(8, 1, 4));
+		SoldierEntity soldier = ctx.spawnEntity(NewMobs.SOLDIER, new BlockPos(8, 2, 4));
 		soldier.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Firearms.RIFLE));
-		ZombieEntity husk = target(ctx, new BlockPos(8, 1, 16));
+		ZombieEntity husk = target(ctx, new BlockPos(8, 2, 16));
 		soldier.setTarget(husk);
 		float health = husk.getHealth();
 		boolean[] aimed = {false};
-		ctx.addInstantFinalTask(ctx::killAllEntities);
 		ctx.runAtEveryTick(() -> aimed[0] |= soldier.isAiming());
 		ctx.runAtTick(SoldierEntity.RELOAD + 80, () -> {
 			ctx.assertTrue(aimed[0], "he raised his rifle");
 			ctx.assertTrue(husk.getHealth() < health, "and shot the target: " + husk.getHealth() + " of " + health);
+			ctx.killAllEntities();
 			ctx.complete();
 		});
 	}

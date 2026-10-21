@@ -62,7 +62,9 @@ public class SpiderClimbingTests implements FabricGameTest {
 	public void hangsFromACeiling(TestContext ctx) {
 		fill(ctx, 2, 6, 2, 13, 6, 13);
 		SpiderEntity spider = ctx.spawnEntity(EntityType.SPIDER, new BlockPos(8, 5, 8));
-		spider.setAiDisabled(true);
+		// No goals (it would wander off), but its AI on: a mob with its AI off doesn't move at all.
+		((com.eternalreturn.mixin.mobs.MobEntityAccessor) spider).eternalreturn$goalSelector().clear(goal -> true);
+		((com.eternalreturn.mixin.mobs.MobEntityAccessor) spider).eternalreturn$targetSelector().clear(goal -> true);
 		climber(spider).setAttach(Direction.UP);
 		double ceiling = ctx.getAbsolutePos(new BlockPos(8, 6, 8)).getY();
 		ctx.runAtTick(60, () -> {

@@ -146,10 +146,10 @@ public class MobVillagerCartTests implements FabricGameTest {
 		ZombieVillagerEntity fletcher = zombieVillager(ctx, VillagerProfession.FLETCHER, new BlockPos(1, 1, 1));
 		VillagerEntity target = still(ctx, EntityType.VILLAGER, new BlockPos(6, 1, 6));
 		fletcher.setTarget(target);
-		ctx.addInstantFinalTask(() -> ctx.killAllEntities());
 		ctx.runAtEveryTick(() -> {
 			if (!ctx.getWorld().getEntitiesByClass(PersistentProjectileEntity.class, new Box(fletcher.getBlockPos()).expand(12.0),
 					arrow -> arrow.getOwner() == fletcher).isEmpty()) {
+				ctx.killAllEntities();
 				ctx.complete();
 			}
 		});
@@ -163,11 +163,11 @@ public class MobVillagerCartTests implements FabricGameTest {
 		ZombieVillagerEntity cleric = zombieVillager(ctx, VillagerProfession.CLERIC, new BlockPos(1, 1, 1));
 		ZombieEntity hurt = still(ctx, EntityType.ZOMBIE, new BlockPos(5, 1, 5));
 		hurt.setHealth(8.0F);
-		ctx.addInstantFinalTask(() -> ctx.killAllEntities());
 		ctx.runAtEveryTick(() -> {
 			boolean thrown = !ctx.getWorld().getEntitiesByClass(PotionEntity.class, new Box(cleric.getBlockPos()).expand(12.0),
 					potion -> potion.getOwner() == cleric).isEmpty();
 			if (thrown || hurt.getHealth() > 8.0F) {
+				ctx.killAllEntities();
 				ctx.complete();
 			}
 		});
@@ -183,12 +183,12 @@ public class MobVillagerCartTests implements FabricGameTest {
 		golem.setInvulnerable(false);
 		pillager.setTarget(golem);
 		double start = pillager.distanceTo(golem);
-		ctx.addInstantFinalTask(() -> ctx.killAllEntities());
 		ctx.runAtEveryTick(() -> {
 			if (pillager.getTarget() != golem) {
 				pillager.setTarget(golem);
 			}
 			if (pillager.distanceTo(golem) > start + 1.0) {
+				ctx.killAllEntities();
 				ctx.complete();
 			}
 		});
@@ -245,9 +245,9 @@ public class MobVillagerCartTests implements FabricGameTest {
 		villager(ctx, VillagerProfession.ARMORER, new BlockPos(1, 1, 1));
 		IronGolemEntity golem = still(ctx, EntityType.IRON_GOLEM, new BlockPos(4, 1, 1));
 		golem.setHealth(50.0F);
-		ctx.addInstantFinalTask(() -> ctx.killAllEntities());
 		ctx.runAtEveryTick(() -> {
 			if (golem.getHealth() >= 75.0F) {
+				ctx.killAllEntities();
 				ctx.complete();
 			}
 		});
@@ -261,9 +261,9 @@ public class MobVillagerCartTests implements FabricGameTest {
 		villager(ctx, VillagerProfession.CLERIC, new BlockPos(1, 1, 1));
 		VillagerEntity hurt = still(ctx, EntityType.VILLAGER, new BlockPos(5, 1, 5));
 		hurt.setHealth(8.0F);
-		ctx.addInstantFinalTask(() -> ctx.killAllEntities());
 		ctx.runAtEveryTick(() -> {
 			if (hurt.getHealth() > 8.0F) {
+				ctx.killAllEntities();
 				ctx.complete();
 			}
 		});
@@ -278,9 +278,9 @@ public class MobVillagerCartTests implements FabricGameTest {
 		farmer.getInventory().addStack(new ItemStack(Items.WHEAT, 4));
 		CowEntity calf = still(ctx, EntityType.COW, new BlockPos(3, 1, 1));
 		calf.setBreedingAge(-24000);
-		ctx.addInstantFinalTask(() -> ctx.killAllEntities());
 		ctx.runAtEveryTick(() -> {
 			if (calf.getBreedingAge() > -22000) {
+				ctx.killAllEntities();
 				ctx.complete();
 			}
 		});
@@ -293,9 +293,9 @@ public class MobVillagerCartTests implements FabricGameTest {
 		floor(ctx);
 		villager(ctx, VillagerProfession.SHEPHERD, new BlockPos(1, 1, 1));
 		SheepEntity sheep = still(ctx, EntityType.SHEEP, new BlockPos(3, 1, 1));
-		ctx.addInstantFinalTask(() -> ctx.killAllEntities());
 		ctx.runAtEveryTick(() -> {
 			if (sheep.isSheared()) {
+				ctx.killAllEntities();
 				ctx.complete();
 			}
 		});
@@ -309,9 +309,9 @@ public class MobVillagerCartTests implements FabricGameTest {
 		ctx.setBlockState(6, 0, 6, Blocks.WATER);
 		ctx.setBlockState(5, 0, 6, Blocks.WATER);
 		VillagerEntity fisherman = villager(ctx, VillagerProfession.FISHERMAN, new BlockPos(1, 1, 1));
-		ctx.addInstantFinalTask(() -> ctx.killAllEntities());
 		ctx.runAtEveryTick(() -> {
 			if (fisherman.getMainHandStack().isOf(Items.FISHING_ROD)) {
+				ctx.killAllEntities();
 				ctx.complete();
 			}
 		});
@@ -450,7 +450,6 @@ public class MobVillagerCartTests implements FabricGameTest {
 		int[] offRail = {0};
 		Vec3d[] last = {cart.getPos()};
 		long start = ctx.getTick();
-		ctx.addInstantFinalTask(() -> ctx.killAllEntities());
 		ctx.runAtEveryTick(() -> {
 			if (ctx.getTick() <= start) {
 				return;
@@ -465,6 +464,7 @@ public class MobVillagerCartTests implements FabricGameTest {
 				ctx.assertTrue(offRail[0] == 0, "the cart left the rails " + offRail[0] + " times");
 				ctx.assertTrue(cart.hasPassenger(pig), "the pig is still aboard");
 				ctx.assertTrue(covered[0] > 60.0, "the cart covered " + covered[0] + " blocks in 5 seconds (vanilla at most 40)");
+				ctx.killAllEntities();
 				ctx.complete();
 			}
 		});
