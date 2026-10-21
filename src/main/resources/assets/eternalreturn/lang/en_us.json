@@ -425,5 +425,9 @@
 	"entity.eternalreturn.bird.northern_flicker": "Northern Flicker",
 	"entity.eternalreturn.bird.herring_gull": "Herring Gull",
 	"entity.eternalreturn.bird.laughing_gull": "Laughing Gull",
-	"entity.eternalreturn.bird.black_backed_gull": "Black-backed Gull"
+	"entity.eternalreturn.bird.black_backed_gull": "Black-backed Gull",
+	"entity.eternalreturn.gimp": "Gimp",
+	"entity.eternalreturn.atropal": "Atropal",
+	"item.eternalreturn.gimp_spawn_egg": "Gimp Spawn Egg",
+	"item.eternalreturn.atropal_spawn_egg": "Atropal Spawn Egg"
 }

@@ -46,6 +46,10 @@ public final class NewMobRendering {
 		EntityRendererRegistry.register(NewMobs.BEHOLDER, BeholderRenderer::new);
 		EntityModelLayerRegistry.registerModelLayer(SoldierModel.LAYER, SoldierModel::getTexturedModelData);
 		EntityRendererRegistry.register(NewMobs.SOLDIER, SoldierRenderer::new);
+		EntityModelLayerRegistry.registerModelLayer(GimpModel.LAYER, GimpModel::getTexturedModelData);
+		EntityRendererRegistry.register(NewMobs.GIMP, GimpRenderer::new);
+		EntityModelLayerRegistry.registerModelLayer(AtropalModel.LAYER, AtropalModel::getTexturedModelData);
+		EntityRendererRegistry.register(NewMobs.ATROPAL, AtropalRenderer::new);
 		for (String model : BirdModels.MODELS) {
 			EntityModelLayerRegistry.registerModelLayer(BirdRenderer.layer(model), () -> BirdModels.get(model));
 		}
