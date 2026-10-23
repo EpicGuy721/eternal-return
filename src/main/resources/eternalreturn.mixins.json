@@ -43,6 +43,7 @@
 		"mobs.AbstractSkeletonEntityMixin",
 		"mobs.ActiveTargetGoalMixin",
 		"mobs.BoatEntityPillagerMixin",
+		"mobs.BrainAccessor",
 		"mobs.CaveSpiderEntityMixin",
 		"mobs.ClimberSteerMixin",
 		"mobs.ClimberTravelMixin",

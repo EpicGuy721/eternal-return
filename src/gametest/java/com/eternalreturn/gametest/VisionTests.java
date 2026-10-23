@@ -15,7 +15,8 @@ import net.minecraft.util.math.BlockPos;
  * Monsters see players only in a half circle in front of them (VisionCone): one facing away doesn't spot a player 8
  * blocks behind it, one facing the player does, and so does one with the player beside it; hit from behind, it strikes
  * back; a player close behind is smelled (a zombie from 6 blocks, a skeleton hardly at all).
- * And a fighter whose target is in reach but out of walking reach keeps fighting (MeleeAttackGoalMixin).
+ * And a fighter whose target is in reach but out of walking reach keeps fighting (MeleeAttackGoalMixin); Haste and
+ * Mining Fatigue speed up and slow down its swings (AttackSpeed).
  */
 public class VisionTests implements FabricGameTest {
 	private static final String BATCH = "vision";
@@ -162,6 +163,39 @@ public class VisionTests implements FabricGameTest {
 		ctx.runAtTick(90, () -> {
 			ctx.assertTrue(attacking[0] && flips[0] == 1, "it kept its stance: switched " + flips[0] + " times");
 			FishingTests.disconnect(player);
+			ctx.killAllEntities();
+			ctx.complete();
+		});
+	}
+
+	/** Three husks hitting sturdy targets for 10 seconds: one with Haste V hits most often, one with Mining Fatigue V least. */
+	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 300)
+	public void hasteAndFatigueSetTheirPace(TestContext ctx) {
+		net.minecraft.registry.entry.RegistryEntry<net.minecraft.entity.effect.StatusEffect>[] effects = new net.minecraft.registry.entry.RegistryEntry[] {
+				net.minecraft.entity.effect.StatusEffects.HASTE, null, net.minecraft.entity.effect.StatusEffects.MINING_FATIGUE};
+		int[] hits = new int[3];
+		for (int i = 0; i < 3; i++) {
+			int x = 3 + i * 5;
+			ZombieEntity target = ctx.spawnEntity(EntityType.HUSK, new BlockPos(x, 2, 16));
+			target.setAiDisabled(true);
+			target.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(1000.0);
+			target.setHealth(1000.0F);
+			ZombieEntity fighter = ctx.spawnEntity(EntityType.HUSK, new BlockPos(x, 2, 14));
+			if (effects[i] != null) {
+				fighter.addStatusEffect(new net.minecraft.entity.effect.StatusEffectInstance(effects[i], 400, 4));
+			}
+			float[] health = {1000.0F};
+			int lane = i;
+			ctx.runAtEveryTick(() -> {
+				fighter.setTarget(target);
+				if (target.getHealth() < health[0]) {
+					hits[lane]++;
+					health[0] = target.getHealth();
+				}
+			});
+		}
+		ctx.runAtTick(220, () -> {
+			ctx.assertTrue(hits[0] > hits[1] + 2 && hits[1] > hits[2] + 2, "hits with Haste V, nothing, Mining Fatigue V: " + hits[0] + ", " + hits[1] + ", " + hits[2]);
 			ctx.killAllEntities();
 			ctx.complete();
 		});
