@@ -212,6 +212,14 @@ public final class EternalReturnConfig {
 		/** ...or within smelling range, whichever way they face: blocks, by entity id (smellRange), else defaultSmellRange. */
 		public double defaultSmellRange = 3.0;
 		public Map<String, Double> smellRange = defaultSmellRange();
+		/** Idle bipedal monsters (tag eternalreturn:loungers) now and then sit down, AI off, until a noise or a hurt wakes them. */
+		public boolean lounging = true;
+		/** One idle tick in this many, a lounger sits down (0: never). */
+		public int loungeChance = 1500;
+		public int loungeMinTicks = 600;
+		public int loungeMaxTicks = 2400;
+		/** A sitting lounger hears a noise within this many blocks (an explosion twice as far). */
+		public double loungeHearing = 8.0;
 		/** Phantoms come on one night in this many, whether or not anyone slept (0: vanilla's insomnia instead). */
 		public int phantomNightChance = 13;
 		/**

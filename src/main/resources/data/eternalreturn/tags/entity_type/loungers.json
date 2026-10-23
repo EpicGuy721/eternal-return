@@ -1,0 +1,20 @@
+{
+  "values": [
+    "minecraft:zombie",
+    "minecraft:husk",
+    "minecraft:drowned",
+    "minecraft:zombie_villager",
+    "minecraft:zombified_piglin",
+    "minecraft:skeleton",
+    "minecraft:stray",
+    "minecraft:bogged",
+    "minecraft:wither_skeleton",
+    "minecraft:piglin",
+    "minecraft:piglin_brute",
+    "minecraft:witch",
+    "eternalreturn:frostbite",
+    "eternalreturn:parched",
+    "eternalreturn:vampire",
+    "eternalreturn:soldier"
+  ]
+}
