@@ -112,4 +112,35 @@ public class VisionTests implements FabricGameTest {
 			ctx.complete();
 		});
 	}
+
+
+	/**
+	 * A player under a roof too low for a wither skeleton (2.4 blocks tall), the roof's edge hiding them from it: it
+	 * keeps its fighting stance at the edge until it gives up the hunt (vanilla flickered it on and off every second).
+	 */
+	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 300)
+	public void staysInStanceOutOfSight(TestContext ctx) {
+		for (int x = 5; x <= 11; x++) {
+			for (int z = 14; z <= 20; z++) {
+				ctx.setBlockState(new BlockPos(x, 4, z), Blocks.STONE.getDefaultState());
+			}
+		}
+		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(8, 2, 16));
+		WitherSkeletonEntity skeleton = ctx.spawnEntity(EntityType.WITHER_SKELETON, new BlockPos(8, 2, 10));
+		skeleton.setTarget(player);
+		int[] flips = {0};
+		boolean[] attacking = {false};
+		ctx.runAtEveryTick(() -> {
+			if (skeleton.getTarget() != null && skeleton.isAttacking() != attacking[0]) {
+				flips[0]++;
+				attacking[0] = skeleton.isAttacking();
+			}
+		});
+		ctx.runAtTick(90, () -> {
+			ctx.assertTrue(attacking[0] && flips[0] == 1, "it kept its stance: switched " + flips[0] + " times");
+			FishingTests.disconnect(player);
+			ctx.killAllEntities();
+			ctx.complete();
+		});
+	}
 }

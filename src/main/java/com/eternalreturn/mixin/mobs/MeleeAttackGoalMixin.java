@@ -13,10 +13,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * A melee fighter stays in the fight while its target is alive, in sight and within STAY blocks. Vanilla's goal (for
+ * A melee fighter stays in the fight while its target is alive and within STAY blocks (it gives up a target it can't
+ * see for a while anyway: TrackTargetGoal). Vanilla's goal (for
  * zombies, skeletons with a sword, wither skeletons...) let go whenever the mob ran out of path: right beside a target
- * that stands still, or one it can't walk any closer to. It then waited a second to start again, so its attack pose
- * flickered off and on and, out of walking reach, it never swung. Kept going, it re-paths and swings whenever in reach.
+ * that stands still, or one it can't walk any closer to (a player under a roof too low for a wither skeleton). It then
+ * waited a second to start again, so its attack pose flickered off and on and, out of walking reach, it never swung.
+ * Kept going, it re-paths and swings whenever in reach.
  */
 @Mixin(MeleeAttackGoal.class)
 public abstract class MeleeAttackGoalMixin {
@@ -38,7 +40,7 @@ public abstract class MeleeAttackGoalMixin {
 		}
 		LivingEntity target = this.mob.getTarget();
 		if (target != null && target.isAlive() && EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR.test(target)
-				&& this.mob.squaredDistanceTo(target) <= STAY * STAY && this.mob.getVisibilityCache().canSee(target)) {
+				&& this.mob.squaredDistanceTo(target) <= STAY * STAY) {
 			cir.setReturnValue(true);
 		}
 	}
