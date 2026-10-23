@@ -12,8 +12,9 @@ import net.minecraft.test.TestContext;
 import net.minecraft.util.math.BlockPos;
 
 /**
- * Monsters see players only in a cone in front of them (VisionCone): one facing away doesn't spot a player 6 blocks
- * behind it, one facing the player does; hit from behind, it strikes back; a player close behind is noticed anyway.
+ * Monsters see players only in a half circle in front of them (VisionCone): one facing away doesn't spot a player 8
+ * blocks behind it, one facing the player does, and so does one with the player beside it; hit from behind, it strikes
+ * back; a player close behind is smelled (a zombie from 6 blocks, a skeleton hardly at all).
  * And a fighter whose target is in reach but out of walking reach keeps fighting (MeleeAttackGoalMixin).
  */
 public class VisionTests implements FabricGameTest {
@@ -33,16 +34,38 @@ public class VisionTests implements FabricGameTest {
 
 	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 200)
 	public void seesOnlyInFront(TestContext ctx) {
-		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(10, 2, 4));
+		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(10, 2, 2));
 		ZombieEntity away = facing(ctx, new BlockPos(8, 2, 10), 0.0F);
 		ZombieEntity toward = facing(ctx, new BlockPos(12, 2, 10), 180.0F);
+		// Facing +z, the player 8 blocks off to its side (and a little ahead).
+		ZombieEntity beside = facing(ctx, new BlockPos(2, 2, 1), 0.0F);
 		ctx.runAtTick(60, () -> {
 			ctx.assertTrue(toward.getTarget() == player, "the husk facing the player spotted them");
 			ctx.assertTrue(away.getTarget() == null, "the one facing away didn't: " + away.getTarget());
+			ctx.assertTrue(beside.getTarget() == player, "the one with the player beside it did");
 			away.damage(ctx.getWorld().getDamageSources().playerAttack(player), 1.0F);
 		});
 		ctx.runAtTick(90, () -> {
 			ctx.assertTrue(away.getTarget() == player, "hit from behind, it turned on the player");
+			FishingTests.disconnect(player);
+			ctx.killAllEntities();
+			ctx.complete();
+		});
+	}
+
+	/** 3 blocks behind: a zombie (smell 6) smells the player, a skeleton (1.5) doesn't. */
+	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 200)
+	public void smellsByKind(TestContext ctx) {
+		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(8, 2, 17));
+		ZombieEntity zombie = facing(ctx, new BlockPos(6, 2, 20), 0.0F);
+		net.minecraft.entity.mob.SkeletonEntity skeleton = ctx.spawnEntity(EntityType.SKELETON, new BlockPos(10, 2, 20));
+		((MobEntityAccessor) skeleton).eternalreturn$goalSelector().clear(goal -> true);
+		skeleton.refreshPositionAndAngles(skeleton.getX(), skeleton.getY(), skeleton.getZ(), 0.0F, 0.0F);
+		skeleton.setBodyYaw(0.0F);
+		skeleton.setHeadYaw(0.0F);
+		ctx.runAtTick(60, () -> {
+			ctx.assertTrue(zombie.getTarget() == player, "the zombie smelled the player behind it");
+			ctx.assertTrue(skeleton.getTarget() == null, "the skeleton didn't: " + skeleton.getTarget());
 			FishingTests.disconnect(player);
 			ctx.killAllEntities();
 			ctx.complete();

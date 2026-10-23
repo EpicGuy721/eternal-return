@@ -8,14 +8,16 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.Monster;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
 /**
- * Monsters see players only in a cone in front of their head (mobs.visionCone degrees across), or close by
- * (mobs.visionSenseRadius blocks, as if they heard them): spotting a player to target, or to turn and look at. A
+ * Monsters see players only in a cone in front of their head (mobs.sightConeDegrees across), or smell them close by
+ * whichever way they face (mobs.smellRange by entity id, else mobs.defaultSmellRange: zombies far, skeletons hardly):
+ * spotting a player to target, or to turn and look at (vanilla still wants a line of sight either way). A
  * player it already hunts, or one who hurt it, it keeps track of all round. Some see all round (entity tag
  * eternalreturn:all_seeing), and so does a spider or gimp on a wall or ceiling. Checked where vanilla checks a mob
  * can see a player it might target (TargetPredicate, by VisionConeMixin).
@@ -32,7 +34,7 @@ public final class VisionCone {
 			return true;
 		}
 		EternalReturnConfig.MobTweaks config = EternalReturnConfig.get().mobs;
-		if (config.visionCone <= 0 || config.visionCone >= 360 || base.getType().isIn(ALL_SEEING)) {
+		if (config.sightConeDegrees <= 0 || config.sightConeDegrees >= 360 || base.getType().isIn(ALL_SEEING)) {
 			return true;
 		}
 		if (mob.getTarget() == target || mob.getAttacker() == target) {
@@ -43,12 +45,18 @@ public final class VisionCone {
 		}
 		Vec3d to = target.getEyePos().subtract(base.getEyePos());
 		double distance = to.length();
-		if (distance <= config.visionSenseRadius || distance < 1.0E-4) {
+		if (distance <= smellRange(base.getType()) || distance < 1.0E-4) {
 			return true;
 		}
 		float yaw = base.getHeadYaw() * MathHelper.RADIANS_PER_DEGREE;
 		float pitch = base.getPitch() * MathHelper.RADIANS_PER_DEGREE;
 		Vec3d look = new Vec3d(-MathHelper.sin(yaw) * MathHelper.cos(pitch), -MathHelper.sin(pitch), MathHelper.cos(yaw) * MathHelper.cos(pitch));
-		return look.dotProduct(to) / distance >= Math.cos(config.visionCone * 0.5 * MathHelper.RADIANS_PER_DEGREE);
+		return look.dotProduct(to) / distance >= Math.cos(config.sightConeDegrees * 0.5 * MathHelper.RADIANS_PER_DEGREE);
+	}
+
+	/** How far (blocks) this kind of monster smells a player. */
+	public static double smellRange(EntityType<?> type) {
+		EternalReturnConfig.MobTweaks config = EternalReturnConfig.get().mobs;
+		return config.smellRange.getOrDefault(Registries.ENTITY_TYPE.getId(type).toString(), config.defaultSmellRange);
 	}
 }
