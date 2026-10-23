@@ -16,7 +16,8 @@ import net.minecraft.util.math.BlockPos;
  * blocks behind it, one facing the player does, and so does one with the player beside it; hit from behind, it strikes
  * back; a player close behind is smelled (a zombie from 6 blocks, a skeleton hardly at all).
  * And a fighter whose target is in reach but out of walking reach keeps fighting (MeleeAttackGoalMixin); Haste and
- * Mining Fatigue speed up and slow down its swings (AttackSpeed).
+ * Mining Fatigue speed up and slow down its swings (AttackSpeed); it leaps at a target on a pillar 2 blocks up and
+ * knocks it off (LeapAttack).
  */
 public class VisionTests implements FabricGameTest {
 	private static final String BATCH = "vision";
@@ -196,6 +197,28 @@ public class VisionTests implements FabricGameTest {
 		}
 		ctx.runAtTick(220, () -> {
 			ctx.assertTrue(hits[0] > hits[1] + 2 && hits[1] > hits[2] + 2, "hits with Haste V, nothing, Mining Fatigue V: " + hits[0] + ", " + hits[1] + ", " + hits[2]);
+			ctx.killAllEntities();
+			ctx.complete();
+		});
+	}
+
+	/** A target on a pillar 2 blocks up: the fighter below leaps, hits it in the air and knocks it off. */
+	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 300)
+	public void leapsToKnockTargetsOff(TestContext ctx) {
+		ctx.setBlockState(new BlockPos(8, 2, 12), Blocks.STONE.getDefaultState());
+		ctx.setBlockState(new BlockPos(8, 3, 12), Blocks.STONE.getDefaultState());
+		ZombieEntity target = facing(ctx, new BlockPos(8, 4, 12), 0.0F);
+		((MobEntityAccessor) target).eternalreturn$targetSelector().clear(goal -> true);
+		double top = target.getY();
+		ZombieEntity fighter = ctx.spawnEntity(EntityType.HUSK, new BlockPos(8, 2, 9));
+		boolean[] leapt = {false};
+		ctx.runAtEveryTick(() -> {
+			fighter.setTarget(target);
+			leapt[0] |= fighter.getVelocity().y > 0.45;
+		});
+		ctx.runAtTick(250, () -> {
+			ctx.assertTrue(leapt[0], "the fighter leapt");
+			ctx.assertTrue(target.getY() < top - 1.0, "and knocked its target off the pillar: " + (target.getY() - top));
 			ctx.killAllEntities();
 			ctx.complete();
 		});
