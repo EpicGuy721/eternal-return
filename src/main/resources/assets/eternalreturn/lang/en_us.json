@@ -429,5 +429,7 @@
 	"entity.eternalreturn.gimp": "Gimp",
 	"entity.eternalreturn.atropal": "Atropal",
 	"item.eternalreturn.gimp_spawn_egg": "Gimp Spawn Egg",
-	"item.eternalreturn.atropal_spawn_egg": "Atropal Spawn Egg"
+	"item.eternalreturn.atropal_spawn_egg": "Atropal Spawn Egg",
+	"entity.eternalreturn.grimlock": "Grimlock",
+	"item.eternalreturn.grimlock_spawn_egg": "Grimlock Spawn Egg"
 }

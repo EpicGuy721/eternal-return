@@ -24,6 +24,8 @@ import net.minecraft.util.math.Vec3d;
  */
 public final class VisionCone {
 	public static final TagKey<EntityType<?>> ALL_SEEING = TagKey.of(RegistryKeys.ENTITY_TYPE, EternalReturn.id("all_seeing"));
+	/** Blind: they notice players only by smell (and, the grimlock, by hearing: GrimlockEntity). */
+	public static final TagKey<EntityType<?>> BLIND = TagKey.of(RegistryKeys.ENTITY_TYPE, EternalReturn.id("blind"));
 
 	private VisionCone() {
 	}
@@ -34,6 +36,9 @@ public final class VisionCone {
 			return true;
 		}
 		EternalReturnConfig.MobTweaks config = EternalReturnConfig.get().mobs;
+		if (base.getType().isIn(BLIND)) {
+			return mob.getTarget() == target || mob.getAttacker() == target || base.squaredDistanceTo(target) <= MathHelper.square(smellRange(base.getType()));
+		}
 		if (config.sightConeDegrees <= 0 || config.sightConeDegrees >= 360 || base.getType().isIn(ALL_SEEING)) {
 			return true;
 		}
@@ -57,6 +62,8 @@ public final class VisionCone {
 	/** How far (blocks) this kind of monster smells a player. */
 	public static double smellRange(EntityType<?> type) {
 		EternalReturnConfig.MobTweaks config = EternalReturnConfig.get().mobs;
-		return config.smellRange.getOrDefault(Registries.ENTITY_TYPE.getId(type).toString(), config.defaultSmellRange);
+		String id = Registries.ENTITY_TYPE.getId(type).toString();
+		Double range = config.smellRange.get(id);
+		return range != null ? range : EternalReturnConfig.defaultSmellRange().getOrDefault(id, config.defaultSmellRange);
 	}
 }

@@ -108,17 +108,25 @@ public final class Lounging {
 		return SITTING.computeIfAbsent(world, w -> Collections.newSetFromMap(new WeakHashMap<>()));
 	}
 
-	/** A noise in the world (a game event): loungers in earshot get up and turn to it. */
-	public static void hear(ServerWorld world, RegistryEntry<GameEvent> event, Vec3d at, GameEvent.Emitter emitter) {
-		Set<MobEntity> sitting = SITTING.get(world);
-		if (sitting == null || sitting.isEmpty() || !event.isIn(GameEventTags.VIBRATIONS)) {
-			return;
+	/**
+	 * Whether a game event is a noise monsters hear: anything a sculk sensor hears, except a sneaking player's quiet
+	 * steps and other mobs' doings (Lounging, GrimlockEntity).
+	 */
+	public static boolean isNoise(RegistryEntry<GameEvent> event, GameEvent.Emitter emitter) {
+		if (!event.isIn(GameEventTags.VIBRATIONS)) {
+			return false;
 		}
 		Entity source = emitter.sourceEntity();
 		if (source instanceof LivingEntity && !(source instanceof PlayerEntity)) {
-			return;
+			return false;
 		}
-		if (source != null && event.isIn(GameEventTags.IGNORE_VIBRATIONS_SNEAKING) && source.bypassesSteppingEffects()) {
+		return source == null || !event.isIn(GameEventTags.IGNORE_VIBRATIONS_SNEAKING) || !source.bypassesSteppingEffects();
+	}
+
+	/** A noise in the world (a game event): loungers in earshot get up and turn to it. */
+	public static void hear(ServerWorld world, RegistryEntry<GameEvent> event, Vec3d at, GameEvent.Emitter emitter) {
+		Set<MobEntity> sitting = SITTING.get(world);
+		if (sitting == null || sitting.isEmpty() || !isNoise(event, emitter)) {
 			return;
 		}
 		double hearing = EternalReturnConfig.get().mobs.loungeHearing * (event.matchesKey(GameEvent.EXPLODE.registryKey()) ? 2.0 : 1.0);

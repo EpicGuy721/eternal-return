@@ -459,13 +459,14 @@ public final class EternalReturnConfig {
 	}
 
 	/** How far monsters smell a player: the undead hungry for flesh and the beasts far, the noseless skeletons hardly at all. */
-	private static Map<String, Double> defaultSmellRange() {
+	public static Map<String, Double> defaultSmellRange() {
 		Map<String, Double> m = new LinkedHashMap<>();
 		for (String zombie : List.of("zombie", "husk", "drowned", "zombie_villager", "zombified_piglin")) {
 			m.put("minecraft:" + zombie, 6.0);
 		}
 		m.put("eternalreturn:frostbite", 6.0);
 		m.put("eternalreturn:vampire", 10.0);
+		m.put("eternalreturn:grimlock", 10.0);
 		for (String skeleton : List.of("skeleton", "stray", "bogged", "wither_skeleton")) {
 			m.put("minecraft:" + skeleton, 1.5);
 		}

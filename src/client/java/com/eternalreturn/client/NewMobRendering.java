@@ -41,6 +41,7 @@ public final class NewMobRendering {
 	public static void register() {
 		EntityRendererRegistry.register(NewMobs.FROSTBITE, FrostbiteRenderer::new);
 		EntityRendererRegistry.register(NewMobs.PARCHED, ParchedRenderer::new);
+		EntityRendererRegistry.register(NewMobs.GRIMLOCK, GrimlockRenderer::new);
 		EntityRendererRegistry.register(NewMobs.BONE_SPIDER, BoneSpiderRenderer::new);
 		EntityModelLayerRegistry.registerModelLayer(BeholderModel.LAYER, BeholderModel::getTexturedModelData);
 		EntityRendererRegistry.register(NewMobs.BEHOLDER, BeholderRenderer::new);
@@ -78,6 +79,22 @@ public final class NewMobRendering {
 							headPitch, tickDelta, -1);
 				}
 			});
+		}
+
+		@Override
+		public Identifier getTexture(net.minecraft.entity.mob.ZombieEntity entity) {
+			return TEXTURE;
+		}
+	}
+
+	/** The grimlock: a zombie's body, grey and eyeless, in tattered trousers. */
+	static class GrimlockRenderer extends ZombieBaseEntityRenderer<net.minecraft.entity.mob.ZombieEntity, net.minecraft.client.render.entity.model.ZombieEntityModel<net.minecraft.entity.mob.ZombieEntity>> {
+		private static final Identifier TEXTURE = EternalReturn.id("textures/entity/zombie/grimlock.png");
+
+		GrimlockRenderer(EntityRendererFactory.Context ctx) {
+			super(ctx, new net.minecraft.client.render.entity.model.ZombieEntityModel<>(ctx.getPart(EntityModelLayers.ZOMBIE)),
+					new net.minecraft.client.render.entity.model.ZombieEntityModel<>(ctx.getPart(EntityModelLayers.ZOMBIE_INNER_ARMOR)),
+					new net.minecraft.client.render.entity.model.ZombieEntityModel<>(ctx.getPart(EntityModelLayers.ZOMBIE_OUTER_ARMOR)));
 		}
 
 		@Override
