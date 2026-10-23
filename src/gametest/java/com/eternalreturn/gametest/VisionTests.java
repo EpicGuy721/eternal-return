@@ -214,7 +214,7 @@ public class VisionTests implements FabricGameTest {
 		boolean[] leapt = {false};
 		ctx.runAtEveryTick(() -> {
 			fighter.setTarget(target);
-			leapt[0] |= fighter.getVelocity().y > 0.45;
+			leapt[0] |= fighter.getVelocity().y > 0.38; // a leap (0.5, a tick of gravity on: 0.41), not a jump (0.33)
 		});
 		ctx.runAtTick(250, () -> {
 			ctx.assertTrue(leapt[0], "the fighter leapt");
