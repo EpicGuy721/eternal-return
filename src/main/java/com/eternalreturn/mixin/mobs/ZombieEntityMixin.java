@@ -55,7 +55,9 @@ public abstract class ZombieEntityMixin extends HostileEntity {
 	private void eternalreturn$animalJockey(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason reason, EntityData data,
 			CallbackInfoReturnable<EntityData> cir) {
 		ZombieHabits.tryAnimalJockey((ZombieEntity) (Object) this, world, difficulty, reason);
-		com.eternalreturn.mobs.HeadGear.roll((ZombieEntity) (Object) this, world.getRandom());
+		if (!((Object) this instanceof com.eternalreturn.mobs.entity.GrimlockEntity)) {
+			com.eternalreturn.mobs.HeadGear.roll((ZombieEntity) (Object) this, world.getRandom());
+		}
 		com.eternalreturn.mobs.LargeMobs.roll((ZombieEntity) (Object) this, world.getRandom());
 		com.eternalreturn.mobs.ZombieVillagerJobs.onSpawn((ZombieEntity) (Object) this, world, difficulty, reason);
 	}

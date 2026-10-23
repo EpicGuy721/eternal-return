@@ -209,9 +209,12 @@ public final class EternalReturnConfig {
 		public boolean surfaceWalkingSpiders = true;
 		/** Monsters spot players only within this cone in front of their head, in degrees across (360 or 0: all round, as vanilla). */
 		public int sightConeDegrees = 180;
-		/** ...or within smelling range, whichever way they face: blocks, by entity id (smellRange), else defaultSmellRange. */
-		public double defaultSmellRange = 3.0;
-		public Map<String, Double> smellRange = defaultSmellRange();
+		/**
+		 * ...or within smelling range, whichever way they face: blocks, built in by kind (EternalReturnConfig.SMELL: zombies 4,
+		 * skeletons 1...), changed here by entity id; other monsters fallbackSmellRange.
+		 */
+		public double fallbackSmellRange = 2.0;
+		public Map<String, Double> smellRangeOverrides = new LinkedHashMap<>();
 		/** Idle bipedal monsters (tag eternalreturn:loungers) now and then sit down, AI off, until a noise or a hurt wakes them. */
 		public boolean lounging = true;
 		/** One idle tick in this many, a lounger sits down (0: never). */
@@ -458,32 +461,34 @@ public final class EternalReturnConfig {
 		public boolean glowingSeenThroughWalls = true;
 	}
 
-	/** How far monsters smell a player: the undead hungry for flesh and the beasts far, the noseless skeletons hardly at all. */
-	public static Map<String, Double> defaultSmellRange() {
+	/** How far monsters smell a player, by kind: the undead hungry for flesh and the beasts far, the noseless skeletons hardly at all. */
+	public static final Map<String, Double> SMELL = defaultSmellRange();
+
+	private static Map<String, Double> defaultSmellRange() {
 		Map<String, Double> m = new LinkedHashMap<>();
 		for (String zombie : List.of("zombie", "husk", "drowned", "zombie_villager", "zombified_piglin")) {
-			m.put("minecraft:" + zombie, 6.0);
+			m.put("minecraft:" + zombie, 4.0);
 		}
-		m.put("eternalreturn:frostbite", 6.0);
-		m.put("eternalreturn:vampire", 10.0);
-		m.put("eternalreturn:grimlock", 10.0);
+		m.put("eternalreturn:frostbite", 4.0);
+		m.put("eternalreturn:vampire", 7.0);
+		m.put("eternalreturn:grimlock", 7.0);
 		for (String skeleton : List.of("skeleton", "stray", "bogged", "wither_skeleton")) {
-			m.put("minecraft:" + skeleton, 1.5);
+			m.put("minecraft:" + skeleton, 1.0);
 		}
-		m.put("eternalreturn:parched", 1.5);
-		m.put("minecraft:spider", 4.0);
-		m.put("minecraft:cave_spider", 4.0);
-		m.put("eternalreturn:bone_spider", 4.0);
-		m.put("eternalreturn:gimp", 2.0);
-		m.put("minecraft:hoglin", 10.0);
-		m.put("minecraft:zoglin", 8.0);
-		m.put("minecraft:ravager", 8.0);
-		m.put("minecraft:piglin", 4.0);
-		m.put("minecraft:piglin_brute", 4.0);
-		m.put("minecraft:silverfish", 5.0);
-		m.put("minecraft:endermite", 5.0);
-		m.put("minecraft:blaze", 1.0);
-		return m;
+		m.put("eternalreturn:parched", 1.0);
+		m.put("minecraft:spider", 3.0);
+		m.put("minecraft:cave_spider", 3.0);
+		m.put("eternalreturn:bone_spider", 3.0);
+		m.put("eternalreturn:gimp", 1.5);
+		m.put("minecraft:hoglin", 7.0);
+		m.put("minecraft:zoglin", 5.5);
+		m.put("minecraft:ravager", 5.5);
+		m.put("minecraft:piglin", 3.0);
+		m.put("minecraft:piglin_brute", 3.0);
+		m.put("minecraft:silverfish", 3.5);
+		m.put("minecraft:endermite", 3.5);
+		m.put("minecraft:blaze", 0.75);
+		return Map.copyOf(m);
 	}
 
 	private static Map<String, Double> defaultArmorWeight() {

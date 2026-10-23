@@ -50,11 +50,11 @@ public final class Lounging {
 		return entity.isInPose(EntityPose.SITTING) && entity.getType().isIn(LOUNGERS);
 	}
 
-	/** Whether it may sit down now: a lounger, idle, settled on dry ground, untouched. */
+	/** Whether it may sit down now: a lounger, idle (no target, not walking anywhere), settled on dry ground, untouched. */
 	public static boolean canLounge(MobEntity mob) {
 		return EternalReturnConfig.get().mobs.lounging && mob.getType().isIn(LOUNGERS) && mob.isAlive() && mob.isOnGround() && !mob.isTouchingWater()
 				&& !mob.isInLava() && !mob.isOnFire() && !mob.hasVehicle() && !mob.hasPassengers() && !mob.isLeashed() && mob.getTarget() == null
-				&& !mob.isAttacking() && mob.hurtTime == 0 && mob.isInPose(EntityPose.STANDING);
+				&& !mob.isAttacking() && mob.hurtTime == 0 && mob.isInPose(EntityPose.STANDING) && mob.getNavigation().isIdle();
 	}
 
 	/** Each tick, before its AI (server). Returns true if it's sitting (so its AI is skipped). */

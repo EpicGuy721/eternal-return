@@ -16,7 +16,7 @@ import net.minecraft.util.math.Vec3d;
 
 /**
  * Monsters see players only in a cone in front of their head (mobs.sightConeDegrees across), or smell them close by
- * whichever way they face (mobs.smellRange by entity id, else mobs.defaultSmellRange: zombies far, skeletons hardly):
+ * whichever way they face (EternalReturnConfig.SMELL by kind, mobs.smellRangeOverrides, else mobs.fallbackSmellRange):
  * spotting a player to target, or to turn and look at (vanilla still wants a line of sight either way). A
  * player it already hunts, or one who hurt it, it keeps track of all round. Some see all round (entity tag
  * eternalreturn:all_seeing), and so does a spider or gimp on a wall or ceiling. Checked where vanilla checks a mob
@@ -63,7 +63,7 @@ public final class VisionCone {
 	public static double smellRange(EntityType<?> type) {
 		EternalReturnConfig.MobTweaks config = EternalReturnConfig.get().mobs;
 		String id = Registries.ENTITY_TYPE.getId(type).toString();
-		Double range = config.smellRange.get(id);
-		return range != null ? range : EternalReturnConfig.defaultSmellRange().getOrDefault(id, config.defaultSmellRange);
+		Double range = config.smellRangeOverrides.get(id);
+		return range != null ? range : EternalReturnConfig.SMELL.getOrDefault(id, config.fallbackSmellRange);
 	}
 }

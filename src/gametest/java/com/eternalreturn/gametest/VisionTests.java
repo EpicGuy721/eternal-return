@@ -31,6 +31,8 @@ public class VisionTests implements FabricGameTest {
 		husk.refreshPositionAndAngles(husk.getX(), husk.getY(), husk.getZ(), yaw, 0.0F);
 		husk.setBodyYaw(yaw);
 		husk.setHeadYaw(yaw);
+		// Idle, it might sit down for a rest (Lounging), and see nothing: not in these tests.
+		ctx.runAtEveryTick(() -> com.eternalreturn.mobs.ai.Lounging.stand(husk));
 		return husk;
 	}
 

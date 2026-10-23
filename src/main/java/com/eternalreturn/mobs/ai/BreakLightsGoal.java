@@ -22,7 +22,7 @@ import java.util.EnumSet;
  * within 8 blocks (block tag eternalreturn:zombie_torches), walks up to it and knocks it off. A zombie with
  * a pickaxe or shovel also goes for other lights and beds (eternalreturn:zombie_tool_targets: lanterns,
  * glowstone, sea lanterns, jack o'lanterns, froglights, lamps, end rods, beds...), digging them out as fast
- * as a player with that tool would. Needs mobGriefing.
+ * as a player with that tool would. Needs mobGriefing. Not grimlocks: they shun light, and keep away from it.
  */
 public class BreakLightsGoal extends Goal {
 	public static final TagKey<Block> TORCHES = TagKey.of(RegistryKeys.BLOCK, EternalReturn.id("zombie_torches"));
@@ -49,6 +49,7 @@ public class BreakLightsGoal extends Goal {
 	@Override
 	public boolean canStart() {
 		if (--this.searchCooldown > 0 || this.zombie.getTarget() != null || !EternalReturnConfig.get().mobs.zombiesBreakLights
+				|| this.zombie instanceof com.eternalreturn.mobs.entity.GrimlockEntity
 				|| com.eternalreturn.mobs.LargeMobs.isLarge(this.zombie) || com.eternalreturn.mobs.Servants.isServant(this.zombie)
 				|| this.zombie.getCommandTags().contains(com.eternalreturn.mobs.ZombieVillagerJobs.UNDERGROUND)
 				|| !this.zombie.getWorld().getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING)) {

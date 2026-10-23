@@ -7,10 +7,8 @@ import net.minecraft.entity.EntityData;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SpawnReason;
-import net.minecraft.entity.ai.NoPenaltyTargeting;
 import net.minecraft.entity.ai.goal.ActiveTargetGoal;
 import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.ai.goal.RevengeGoal;
 import net.minecraft.entity.ai.goal.WanderAroundFarGoal;
 import net.minecraft.entity.ai.goal.ZombieAttackGoal;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
@@ -48,7 +46,10 @@ import java.util.WeakHashMap;
  * The grimlock: a grey, eyeless zombie of the deep caves (below y 0, in the dark), shirtless in tattered trousers.
  * Blind (entity tag eternalreturn:blind), it finds players as the warden does: it smells one close by (its smell
  * range, keener than a zombie's) and hears noises within HEARING blocks (what a sculk sensor hears, not a sneaking
- * player's steps), and walks to where it heard one. It burns in the sun like any zombie, and shuns light: it backs out
+ * player's steps), and walks to where it heard one. It hunts a target only while it can smell it: out of its smell
+ * (for more than LOST ticks) it loses it and goes to where it last smelled it. A noise elsewhere draws it off a target
+ * (unless the target is within CLOSE blocks), and a hit from afar sends it to where the hit came from rather than
+ * straight to the attacker. It burns in the sun like any zombie, and shuns light: it backs out
  * of anywhere lit (block light LIGHT or more, or daylight), won't chase a player standing in the light, and wanders
  * toward the dark. A zombie's drops; no gear, no turning into a drowned.
  */
@@ -57,13 +58,25 @@ public class GrimlockEntity extends ZombieEntity {
 	public static final double HEARING = 16.0;
 	/** Block light at which a place is too bright for it. */
 	public static final int LIGHT = 7;
-	/** Ticks it remembers a noise (where to go), and its target's noise (to keep after it out of smelling range). */
+	/** Ticks a noise stays worth going to see. */
 	public static final int MEMORY = 100;
+	/** Ticks out of smell before it loses a target. */
+	public static final int LOST = 20;
+	/** Ticks a noise elsewhere keeps its nose off a target. */
+	public static final int DISTRACTED = 60;
+	/** A target this close (blocks) it won't be drawn off. */
+	public static final double CLOSE = 3.0;
 	private static final Map<ServerWorld, Set<GrimlockEntity>> LISTENING = new WeakHashMap<>();
 	@Nullable
 	private Vec3d noise;
 	private int heardAt = -1000;
-	private int heardTargetAt = -1000;
+	/** Where, and when, it last smelled its target. */
+	@Nullable
+	private Vec3d scent;
+	private int smelledAt = -1000;
+	private int distractedUntil = -1000;
+	/** It had a target last tick (to notice a hunt ending, however it ended). */
+	private boolean hunting;
 
 	public GrimlockEntity(EntityType<? extends ZombieEntity> type, World world) {
 		super(type, world);
@@ -88,8 +101,7 @@ public class GrimlockEntity extends ZombieEntity {
 		this.goalSelector.add(1, new ShunLightGoal(this));
 		this.goalSelector.add(2, new DarkAttackGoal(this));
 		this.goalSelector.add(5, new InvestigateNoiseGoal(this));
-		this.goalSelector.add(7, new WanderAroundFarGoal(this, 1.0));
-		this.targetSelector.add(1, new RevengeGoal(this));
+		this.goalSelector.add(7, new DarkWanderGoal(this));
 		this.targetSelector.add(2, new SmellTargetGoal<>(this, PlayerEntity.class));
 		this.targetSelector.add(3, new SmellTargetGoal<>(this, IronGolemEntity.class));
 	}
@@ -108,7 +120,53 @@ public class GrimlockEntity extends ZombieEntity {
 		}
 	}
 
-	/** A noise in the world (a game event): grimlocks in earshot note where, and whether it was their target. */
+	/** It hunts a target only while it can smell it; out of its smell for long, it goes to where it last did. */
+	@Override
+	protected void mobTick() {
+		super.mobTick();
+		LivingEntity target = this.getTarget();
+		if (target != null) {
+			if (this.smells(target) && this.age >= this.distractedUntil) {
+				this.scent = target.getPos();
+				this.smelledAt = this.age;
+			} else if (this.age - this.smelledAt > LOST) {
+				this.setTarget(null);
+				target = null;
+			}
+		}
+		if (target == null && this.hunting && this.scent != null && this.age >= this.distractedUntil) {
+			// The hunt is over (out of its smell, or too far off to keep after): it goes to look where it last smelled them.
+			this.noise = this.scent;
+			this.heardAt = this.age;
+		}
+		this.hunting = target != null;
+	}
+
+	/** Hit: an attacker it can smell it turns on; one further off (an arrow) only tells it where to go and look. */
+	@Override
+	public boolean damage(DamageSource source, float amount) {
+		boolean hurt = super.damage(source, amount);
+		if (hurt && !this.getWorld().isClient && source.getAttacker() instanceof LivingEntity attacker && attacker != this) {
+			if (this.smells(attacker)) {
+				this.setTarget(attacker);
+				this.scent = attacker.getPos();
+				this.smelledAt = this.age;
+			} else if (this.getTarget() == attacker) {
+				this.setTarget(null);
+				this.noise = attacker.getPos();
+				this.heardAt = this.age;
+			} else if (this.getTarget() == null) {
+				this.noise = attacker.getPos();
+				this.heardAt = this.age;
+			}
+		}
+		return hurt;
+	}
+
+	/**
+	 * A noise in the world (a game event): grimlocks in earshot note where. One on the hunt is drawn off its target by a
+	 * noise somewhere else, unless the target is right by it.
+	 */
 	public static void hear(ServerWorld world, RegistryEntry<GameEvent> event, Vec3d at, GameEvent.Emitter emitter) {
 		Set<GrimlockEntity> listening = LISTENING.get(world);
 		if (listening == null || listening.isEmpty() || !Lounging.isNoise(event, emitter)) {
@@ -119,13 +177,20 @@ public class GrimlockEntity extends ZombieEntity {
 				listening.remove(grimlock);
 				continue;
 			}
-			if (grimlock.squaredDistanceTo(at) <= HEARING * HEARING) {
-				grimlock.noise = at;
-				grimlock.heardAt = grimlock.age;
-				if (emitter.sourceEntity() != null && emitter.sourceEntity() == grimlock.getTarget()) {
-					grimlock.heardTargetAt = grimlock.age;
-				}
+			if (grimlock.squaredDistanceTo(at) > HEARING * HEARING) {
+				continue;
 			}
+			LivingEntity target = grimlock.getTarget();
+			if (target != null) {
+				if (emitter.sourceEntity() == target || grimlock.squaredDistanceTo(target) <= CLOSE * CLOSE) {
+					continue;
+				}
+				grimlock.setTarget(null);
+				grimlock.hunting = false;
+				grimlock.distractedUntil = grimlock.age + DISTRACTED;
+			}
+			grimlock.noise = at;
+			grimlock.heardAt = grimlock.age;
 		}
 	}
 
@@ -178,7 +243,7 @@ public class GrimlockEntity extends ZombieEntity {
 		return super.getSoundPitch() * 0.75F;
 	}
 
-	/** Spots a target by smell only; keeps after it while it can smell it, or hears it lately. */
+	/** Spots a target by smell only (not while a noise has drawn it off); mobTick lets it go once out of smell. */
 	static class SmellTargetGoal<T extends LivingEntity> extends ActiveTargetGoal<T> {
 		private final GrimlockEntity grimlock;
 
@@ -188,10 +253,14 @@ public class GrimlockEntity extends ZombieEntity {
 		}
 
 		@Override
-		public boolean shouldContinue() {
-			LivingEntity target = this.grimlock.getTarget();
-			return super.shouldContinue() && target != null
-					&& (this.grimlock.smells(target) || this.grimlock.age - this.grimlock.heardTargetAt < MEMORY || target == this.grimlock.getAttacker());
+		public boolean canStart() {
+			return this.grimlock.age >= this.grimlock.distractedUntil && super.canStart();
+		}
+
+		@Override
+		public void start() {
+			super.start();
+			this.grimlock.smelledAt = this.grimlock.age;
 		}
 	}
 
@@ -220,9 +289,11 @@ public class GrimlockEntity extends ZombieEntity {
 		}
 	}
 
-	/** Standing in the light: it backs off to somewhere dark nearby. */
+	/** Standing in the light: it backs off to the nearest dark place it can stand (searching out to SHUN_RANGE blocks). */
 	static class ShunLightGoal extends Goal {
+		private static final int SHUN_RANGE = 16;
 		private final GrimlockEntity grimlock;
+		private int nextSearch;
 
 		ShunLightGoal(GrimlockEntity grimlock) {
 			this.grimlock = grimlock;
@@ -231,13 +302,27 @@ public class GrimlockEntity extends ZombieEntity {
 
 		@Override
 		public boolean canStart() {
-			if (!lit(this.grimlock.getWorld(), this.grimlock.getBlockPos())) {
+			World world = this.grimlock.getWorld();
+			BlockPos at = this.grimlock.getBlockPos();
+			if (!lit(world, at) || this.grimlock.age < this.nextSearch) {
 				return false;
 			}
-			for (int i = 0; i < 12; i++) {
-				Vec3d spot = NoPenaltyTargeting.find(this.grimlock, 10, 4);
-				if (spot != null && !lit(this.grimlock.getWorld(), BlockPos.ofFloored(spot))) {
-					return this.grimlock.getNavigation().startMovingTo(spot.x, spot.y, spot.z, 1.3);
+			this.nextSearch = this.grimlock.age + 20;
+			// Ring by ring outward: the first dark spot it can stand on and get to.
+			for (int r = 1; r <= SHUN_RANGE; r++) {
+				for (int dx = -r; dx <= r; dx++) {
+					for (int dz = -r; dz <= r; dz++) {
+						if (Math.max(Math.abs(dx), Math.abs(dz)) != r) {
+							continue;
+						}
+						for (int dy = -3; dy <= 3; dy++) {
+							BlockPos spot = at.add(dx, dy, dz);
+							if (world.getBlockState(spot.down()).isSolidBlock(world, spot.down()) && world.isAir(spot) && world.isAir(spot.up())
+									&& !lit(world, spot) && this.grimlock.getNavigation().startMovingTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, 1.3)) {
+								return true;
+							}
+						}
+					}
 				}
 			}
 			return false;
@@ -246,6 +331,33 @@ public class GrimlockEntity extends ZombieEntity {
 		@Override
 		public boolean shouldContinue() {
 			return !this.grimlock.getNavigation().isIdle();
+		}
+	}
+
+	/** Wandering: only when it has nothing to hunt (lurking by a target in the light, it waits), and only to dark spots. */
+	static class DarkWanderGoal extends WanderAroundFarGoal {
+		private final GrimlockEntity grimlock;
+
+		DarkWanderGoal(GrimlockEntity grimlock) {
+			super(grimlock, 1.0);
+			this.grimlock = grimlock;
+		}
+
+		@Override
+		public boolean canStart() {
+			return this.grimlock.getTarget() == null && super.canStart();
+		}
+
+		@Nullable
+		@Override
+		protected Vec3d getWanderTarget() {
+			for (int i = 0; i < 5; i++) {
+				Vec3d spot = super.getWanderTarget();
+				if (spot != null && !lit(this.grimlock.getWorld(), BlockPos.ofFloored(spot))) {
+					return spot;
+				}
+			}
+			return null;
 		}
 	}
 
