@@ -1,0 +1,11 @@
+{
+  "values": [
+    "minecraft:warden",
+    "minecraft:enderman",
+    "minecraft:shulker",
+    "minecraft:wither",
+    "minecraft:ender_dragon",
+    "eternalreturn:beholder",
+    "eternalreturn:atropal"
+  ]
+}

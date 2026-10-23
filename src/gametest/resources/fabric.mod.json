@@ -47,6 +47,7 @@
 			"com.eternalreturn.gametest.SoldierTests",
 			"com.eternalreturn.gametest.GimpTests",
 			"com.eternalreturn.gametest.SpiderClimbingTests",
+			"com.eternalreturn.gametest.VisionTests",
 			"com.eternalreturn.gametest.BirdTests",
 			"com.eternalreturn.gametest.FishSchoolTests"
 		]

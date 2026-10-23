@@ -207,6 +207,10 @@ public final class EternalReturnConfig {
 		public boolean fishSchools = true;
 		/** Spiders, cave spiders, bone spiders and gimps walk on walls and ceilings, turning to fit each surface (else vanilla climbing). */
 		public boolean surfaceWalkingSpiders = true;
+		/** Monsters spot players only within this cone in front of their head, in degrees across (360 or 0: all round, as vanilla). */
+		public int visionCone = 120;
+		/** ...or within this many blocks, whichever way they face (as if they heard them). */
+		public double visionSenseRadius = 3.0;
 		/** Phantoms come on one night in this many, whether or not anyone slept (0: vanilla's insomnia instead). */
 		public int phantomNightChance = 13;
 		/**

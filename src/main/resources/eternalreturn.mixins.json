@@ -62,6 +62,7 @@
 		"mobs.SpiderClimbingMixin",
 		"mobs.SpiderEntityMixin",
 		"mobs.SpiderGoalsMixin",
+		"mobs.VisionConeMixin",
 		"mobs.WaterCreatureEntityMixin",
 		"mobs.WitherBossMixin",
 		"mobs.SchoolingFishMixin",
