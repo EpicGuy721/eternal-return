@@ -49,6 +49,7 @@
 		"mobs.CreeperEntityAccessor",
 		"mobs.CreeperEntityMixin",
 		"mobs.DrownedEntityMixin",
+		"mobs.MeleeAttackGoalMixin",
 		"mobs.MobEntityAccessor",
 		"mobs.MobEntityServantMixin",
 		"mobs.MobEntitySpawnMixin",

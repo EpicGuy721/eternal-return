@@ -2,7 +2,9 @@ package com.eternalreturn.gametest;
 
 import com.eternalreturn.mixin.mobs.MobEntityAccessor;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.mob.WitherSkeletonEntity;
 import net.minecraft.entity.mob.ZombieEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.test.GameTest;
@@ -12,6 +14,7 @@ import net.minecraft.util.math.BlockPos;
 /**
  * Monsters see players only in a cone in front of them (VisionCone): one facing away doesn't spot a player 6 blocks
  * behind it, one facing the player does; hit from behind, it strikes back; a player close behind is noticed anyway.
+ * And a fighter whose target is in reach but out of walking reach keeps fighting (MeleeAttackGoalMixin).
  */
 public class VisionTests implements FabricGameTest {
 	private static final String BATCH = "vision";
@@ -53,6 +56,58 @@ public class VisionTests implements FabricGameTest {
 		ctx.runAtTick(60, () -> {
 			ctx.assertTrue(away.getTarget() == player, "a player two blocks behind is noticed");
 			FishingTests.disconnect(player);
+			ctx.killAllEntities();
+			ctx.complete();
+		});
+	}
+
+	/** Its target on a pillar 2 high right beside it: it can't walk closer, but it can reach, so it keeps swinging. */
+	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 200)
+	public void fightsATargetItCantWalkTo(TestContext ctx) {
+		ctx.setBlockState(new BlockPos(8, 2, 11), Blocks.STONE.getDefaultState());
+		ctx.setBlockState(new BlockPos(8, 3, 11), Blocks.STONE.getDefaultState());
+		ZombieEntity husk = ctx.spawnEntity(EntityType.HUSK, new BlockPos(8, 4, 11));
+		husk.setAiDisabled(true);
+		WitherSkeletonEntity skeleton = ctx.spawnEntity(EntityType.WITHER_SKELETON, new BlockPos(8, 2, 10));
+		float health = husk.getHealth();
+		ctx.runAtEveryTick(() -> skeleton.setTarget(husk));
+		ctx.runAtTick(120, () -> {
+			ctx.assertTrue(husk.getHealth() < health, "it hit the target on the pillar: " + husk.getHealth() + " of " + health);
+			ctx.killAllEntities();
+			ctx.complete();
+		});
+	}
+
+
+	/**
+	 * Toe to toe with a target that stands still: it stays in its fighting stance (vanilla's melee goal let go each
+	 * time the mob ran out of path, so its attack pose flickered off and on about every half second) and keeps hitting.
+	 */
+	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 300)
+	public void staysInTheFight(TestContext ctx) {
+		ZombieEntity husk = ctx.spawnEntity(EntityType.HUSK, new BlockPos(8, 2, 16));
+		husk.setAiDisabled(true);
+		husk.getAttributeInstance(net.minecraft.entity.attribute.EntityAttributes.GENERIC_MAX_HEALTH).setBaseValue(1000.0);
+		husk.setHealth(1000.0F);
+		WitherSkeletonEntity skeleton = ctx.spawnEntity(EntityType.WITHER_SKELETON, new BlockPos(8, 2, 10));
+		int[] flips = {0};
+		int[] hits = {0};
+		boolean[] attacking = {false};
+		float[] health = {husk.getHealth()};
+		ctx.runAtEveryTick(() -> {
+			skeleton.setTarget(husk);
+			if (skeleton.isAttacking() != attacking[0]) {
+				flips[0]++;
+				attacking[0] = skeleton.isAttacking();
+			}
+			if (husk.getHealth() < health[0]) {
+				hits[0]++;
+				health[0] = husk.getHealth();
+			}
+		});
+		ctx.runAtTick(250, () -> {
+			ctx.assertTrue(flips[0] == 1, "it took up its fighting stance once and kept it: switched " + flips[0] + " times");
+			ctx.assertTrue(hits[0] >= 8, "and kept hitting: " + hits[0] + " hits");
 			ctx.killAllEntities();
 			ctx.complete();
 		});
