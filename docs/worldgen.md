@@ -312,7 +312,7 @@ As before 1.18, brown and red mushrooms grow on cave floors: up to six tries a c
 
 ### Snow on trees at chunk borders
 
-Every world (`worldgen.snowOnBorderTrees`): MC-119599, as the Simple Snowy Fix mod fixes it. A chunk is snowed on (vanilla's `freeze_top_layer`, the last step of its decoration) before the trees of the chunks around it grow, so a tree reaching over from a neighbour stood on snowy ground with bare leaves. Now, after each tree grows during generation (not from a sapling), every column it may cover that was already snowed on gets what vanilla gives a tree within one chunk: snow on its top leaves, and no snow (nor snowy grass) on the ground under them (`SnowyTrees`, `TreeSnowMixin`). Columns not yet snowed on are left to vanilla, which does the same in its turn. This changes snowy forests in every world, so the vanilla world's decoration fingerprint changes where such trees fall in its chunks.
+Every world (`worldgen.snowOnBorderTrees`): MC-119599, as the Simple Snowy Fix mod fixes it. A chunk is snowed on (vanilla's `freeze_top_layer`, the last step of its decoration) before the trees of the chunks around it grow, so a tree reaching over from a neighbour stood on snowy ground with bare leaves. Now, after each tree grows during generation (not from a sapling), every column it may cover that was already snowed on gets what vanilla gives a tree within one chunk: snow on its top leaves, and no snow (nor snowy grass) on the ground under them (`SnowyTrees`, `TreeSnowMixin`). Columns not yet snowed on are left to vanilla, which does the same in its turn. This changes snowy forests in every world; the vanilla world's fingerprinted chunks hold no such tree, so its decoration baseline still matches.
 
 ### Old growth taigas
 

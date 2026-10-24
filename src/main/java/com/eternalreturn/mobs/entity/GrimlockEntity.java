@@ -140,6 +140,13 @@ public class GrimlockEntity extends ZombieEntity {
 			this.heardAt = this.age;
 		}
 		this.hunting = target != null;
+		// Never into the light, wherever it is heading (a noise beyond a lit stretch, say): in the dark, it gives up a
+		// path whose next step is lit. (Out of the light it goes by ShunLightGoal.)
+		net.minecraft.entity.ai.pathing.Path path = this.getNavigation().getCurrentPath();
+		if (path != null && !path.isFinished() && !lit(this.getWorld(), this.getBlockPos()) && lit(this.getWorld(), path.getCurrentNodePos())) {
+			this.getNavigation().stop();
+			this.getMoveControl().moveTo(this.getX(), this.getY(), this.getZ(), 0.0);
+		}
 	}
 
 	/** Hit: an attacker it can smell it turns on; one further off (an arrow) only tells it where to go and look. */
