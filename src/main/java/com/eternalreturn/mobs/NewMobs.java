@@ -40,10 +40,9 @@ import net.minecraft.world.biome.SpawnSettings;
 
 /**
  * Frostbites (cold biomes), the parched (deserts), bone spiders (the Nether), skeleton wolves (a wolf variant of the
- * Nether, data/eternalreturn/wolf_variant/skeleton.json), beholders (rare, the Nether), soldiers (deep caves, below y 0),
- * gimps and their atropals (rare, deep caves, below y 0; each gimp spawns with its atropal), grimlocks (deep caves,
- * below y 0, in small groups), mooblooms (autumnal
- * forests) and moolips (cherry groves).
+ * Nether, data/eternalreturn/wolf_variant/skeleton.json), beholders (rare, the Nether), grimlocks (deep caves, below
+ * y 0, in small groups), mooblooms (autumnal forests) and moolips (cherry groves). Soldiers, gimps and atropals are
+ * kept (spawn eggs, commands) but no longer spawn naturally (a gimp from an egg still brings its atropal).
  * Frostbites and the parched take most of the zombies' and skeletons' place where they live, as strays do in the
  * snow: biome tags eternalreturn:frostbite_biomes and eternalreturn:parched_biomes.
  */
@@ -125,13 +124,7 @@ public final class NewMobs {
 		BiomeModifications.create(EternalReturn.id("nether_beholders")).add(ModificationPhase.ADDITIONS, BiomeSelectors.foundInTheNether(),
 				context -> context.getSpawnSettings().addSpawn(SpawnGroup.MONSTER, new SpawnSettings.SpawnEntry(BEHOLDER, 3, 1, 1)));
 		FullEnchant.register();
-		// Deep caves only (SoldierEntity.canSpawn: below y 0), alone or in pairs.
-		BiomeModifications.create(EternalReturn.id("soldiers")).add(ModificationPhase.ADDITIONS, BiomeSelectors.foundInOverworld(),
-				context -> context.getSpawnSettings().addSpawn(SpawnGroup.MONSTER, new SpawnSettings.SpawnEntry(SOLDIER, 15, 1, 2)));
-		// Deep caves only (GimpEntity.canSpawn: below y 0), alone (its atropal comes with it), and rarely: a fifth of the soldier's weight.
-		BiomeModifications.create(EternalReturn.id("gimps")).add(ModificationPhase.ADDITIONS, BiomeSelectors.foundInOverworld(),
-				context -> context.getSpawnSettings().addSpawn(SpawnGroup.MONSTER, new SpawnSettings.SpawnEntry(GIMP, 3, 1, 1)));
-		// Deep caves only (GrimlockEntity.canSpawn: below y 0), in small groups: about as common there as the soldier, twice over.
+		// Deep caves only (GrimlockEntity.canSpawn: below y 0), in small groups.
 		BiomeModifications.create(EternalReturn.id("grimlocks")).add(ModificationPhase.ADDITIONS, BiomeSelectors.foundInOverworld(),
 				context -> context.getSpawnSettings().addSpawn(SpawnGroup.MONSTER, new SpawnSettings.SpawnEntry(GRIMLOCK, 30, 2, 3)));
 		BiomeModifications.create(EternalReturn.id("nether_wolves")).add(ModificationPhase.ADDITIONS, BiomeSelectors.foundInTheNether(),

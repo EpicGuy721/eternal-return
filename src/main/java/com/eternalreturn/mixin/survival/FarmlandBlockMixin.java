@@ -17,7 +17,7 @@ public abstract class FarmlandBlockMixin {
 	@WrapOperation(method = "onLandedUpon", at = @At(value = "INVOKE",
 			target = "Lnet/minecraft/block/FarmlandBlock;setToDirt(Lnet/minecraft/entity/Entity;Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V"))
 	private void eternalreturn$softBoots(Entity entity, BlockState state, World world, BlockPos pos, Operation<Void> original) {
-		if (!Growing.keepsFarmland(entity)) {
+		if (!Growing.treadsLightly(entity)) {
 			original.call(entity, state, world, pos);
 		}
 	}

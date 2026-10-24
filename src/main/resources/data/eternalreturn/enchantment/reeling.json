@@ -2,7 +2,7 @@
   "description": {
     "translate": "enchantment.eternalreturn.reeling"
   },
-  "supported_items": "#eternalreturn:enchantable/ranged",
+  "supported_items": "#eternalreturn:enchantable/reeling",
   "weight": 2,
   "max_level": 5,
   "min_cost": {

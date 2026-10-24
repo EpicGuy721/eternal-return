@@ -92,8 +92,10 @@ public class LoungingTests implements FabricGameTest {
 	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 100)
 	public void whoMaySit(TestContext ctx) {
 		ZombieEntity husk = ctx.spawnEntity(EntityType.HUSK, new BlockPos(4, 2, 10));
-		// Idle means not walking anywhere either: no goals to send it off wandering.
+		// Idle means not walking anywhere either: no goals to send it off wandering, nor after the pillager (the undead and
+		// illagers fight).
 		((com.eternalreturn.mixin.mobs.MobEntityAccessor) husk).eternalreturn$goalSelector().clear(goal -> true);
+		((com.eternalreturn.mixin.mobs.MobEntityAccessor) husk).eternalreturn$targetSelector().clear(goal -> true);
 		PillagerEntity pillager = ctx.spawnEntity(EntityType.PILLAGER, new BlockPos(12, 2, 10));
 		ZombieEntity hunter = ctx.spawnEntity(EntityType.HUSK, new BlockPos(8, 2, 30));
 		ctx.runAtTick(20, () -> {

@@ -64,7 +64,11 @@ public final class Growing {
 		}
 	}
 
-	public static boolean keepsFarmland(Entity entity) {
+	/**
+	 * Feather Falling boots tread lightly: they don't trample farmland, sink in powder snow (as leather boots) or crack
+	 * turtle eggs (FarmlandBlockMixin, PowderSnowLightFeetMixin, TurtleEggLightFeetMixin).
+	 */
+	public static boolean treadsLightly(Entity entity) {
 		return entity instanceof LivingEntity living && NewEnchantments.level(living.getEquippedStack(EquipmentSlot.FEET), FEATHER_FALLING) > 0;
 	}
 

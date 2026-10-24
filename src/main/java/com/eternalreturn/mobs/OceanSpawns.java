@@ -16,7 +16,8 @@ import net.minecraft.world.biome.SpawnSettings;
  * Guardians and elder guardians spawn in every ocean biome (eternalreturn:ocean_waters: vanilla's
  * oceans and Moderner Beta's own) as monsters, rarely and
  * very rarely (weights in mobs.guardianSpawnWeight and mobs.elderGuardianSpawnWeight, read when the world
- * loads). Vanilla's own rule still applies: under open sky only one try in 20 passes. Natural elder
+ * loads), and only in deep water (mobs.guardianMinDepth blocks of it or more overhead: SpawnRestrictionMixin).
+ * Vanilla's own rule still applies: under open sky only one try in 20 passes. Natural elder
  * guardians have further limits (SpawnRestrictionMixin) and despawn like other monsters (MobEntitySpawnMixin).
  */
 public final class OceanSpawns {

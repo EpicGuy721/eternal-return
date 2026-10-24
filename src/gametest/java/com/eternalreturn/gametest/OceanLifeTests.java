@@ -52,19 +52,24 @@ public class OceanLifeTests implements FabricGameTest {
 
 	/** A 7 x 7 pool of water 5 deep (test-relative x and z 0 to 6, y 1 to 5) in stone, optionally roofed, in the given biome. */
 	private static void pool(TestContext ctx, String biome, boolean roof) {
+		pool(ctx, biome, roof, 5);
+	}
+
+	/** The same, the given depth of water (y 1 to depth). */
+	static void pool(TestContext ctx, String biome, boolean roof, int depth) {
 		for (int x = -1; x <= 7; x++) {
 			for (int z = -1; z <= 7; z++) {
 				boolean inside = x >= 0 && x <= 6 && z >= 0 && z <= 6;
 				ctx.setBlockState(x, 0, z, Blocks.STONE);
-				for (int y = 1; y <= 5; y++) {
+				for (int y = 1; y <= depth; y++) {
 					ctx.setBlockState(x, y, z, inside ? Blocks.WATER : Blocks.STONE);
 				}
-				ctx.setBlockState(x, 6, z, roof ? Blocks.STONE : Blocks.AIR);
+				ctx.setBlockState(x, depth + 1, z, roof ? Blocks.STONE : Blocks.AIR);
 			}
 		}
 		MinecraftServer server = ctx.getWorld().getServer();
 		BlockPos a = ctx.getAbsolutePos(new BlockPos(-2, -1, -2));
-		BlockPos b = ctx.getAbsolutePos(new BlockPos(8, 12, 8));
+		BlockPos b = ctx.getAbsolutePos(new BlockPos(8, depth + 7, 8));
 		server.getCommandManager().executeWithPrefix(server.getCommandSource().withSilent(),
 				"fillbiome " + a.getX() + " " + a.getY() + " " + a.getZ() + " " + b.getX() + " " + b.getY() + " " + b.getZ() + " " + biome);
 	}
@@ -140,7 +145,7 @@ public class OceanLifeTests implements FabricGameTest {
 	}
 
 	/**
-	 * Natural elder guardians: in a roofed ocean pool (so vanilla's open-sky rule doesn't get in the way),
+	 * Natural elder guardians: in a deep (mobs.guardianMinDepth), roofed ocean pool (so vanilla's open-sky rule doesn't get in the way),
 	 * about one try in four passes; none with another elder guardian nearby. They aren't persistent, unlike
 	 * the ones a monument would place.
 	 */
@@ -148,7 +153,7 @@ public class OceanLifeTests implements FabricGameTest {
 	public void naturalElderGuardiansAreRareAndApart(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
 		ctx.assertTrue(world.getDifficulty() != Difficulty.PEACEFUL, "the test world is on Peaceful");
-		pool(ctx, "minecraft:ocean", true);
+		pool(ctx, "minecraft:ocean", true, 24);
 		BlockPos at = ctx.getAbsolutePos(new BlockPos(3, 2, 3));
 		Random random = Random.create(42);
 		// The test framework marks finished tests with beacons, which keep monsters from spawning around them.

@@ -136,6 +136,8 @@ public final class EternalReturnConfig {
 		 */
 		public int guardianSpawnWeight = 4;
 		public int elderGuardianSpawnWeight = 1;
+		/** Natural guardians and elder guardians spawn only in deep water: this many blocks of it or more, up from the spot. */
+		public int guardianMinDepth = 20;
 		/** On top of its weight, a natural elder guardian spawn goes ahead only this often... */
 		public double elderGuardianSpawnChance = 0.25;
 		/** ...and only with no other elder guardian within this many blocks. */

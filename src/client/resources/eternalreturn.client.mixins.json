@@ -12,6 +12,7 @@
 		"MinecartEntityRendererMixin",
 		"PistonBlockEntityRendererMixin",
 		"SignRendererMixin",
+		"WeatherAboveCloudsMixin",
 		"mobs.CreeperEntityRendererMixin",
 		"mobs.LivingEntityRendererMixin"
 	],
