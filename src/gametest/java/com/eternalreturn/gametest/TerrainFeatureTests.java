@@ -342,4 +342,18 @@ public class TerrainFeatureTests implements FabricGameTest {
 		ctx.assertTrue(brown > 0, "no brown mushrooms in caves (" + red + " red)");
 		ctx.complete();
 	}
+
+	/** /eternalreturn locate finds a monolith, a sinkhole and a floating island from spawn (logged, for visiting). */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "er_locate")
+	public void locateFindsTheFeatures(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		net.minecraft.server.command.ServerCommandSource source = world.getServer().getCommandSource().withWorld(world)
+				.withPosition(net.minecraft.util.math.Vec3d.ZERO);
+		BlockPos monolith = com.eternalreturn.worldgen.LocateCommand.monolith(source);
+		BlockPos sinkhole = com.eternalreturn.worldgen.LocateCommand.sinkhole(source);
+		BlockPos island = com.eternalreturn.worldgen.LocateCommand.island(source);
+		EternalReturn.LOGGER.info("[terrain] seed {}: nearest spawn, monolith {}, sinkhole {}, floating island {}", world.getSeed(), monolith, sinkhole, island);
+		ctx.assertTrue(monolith != null && sinkhole != null && island != null, "monolith " + monolith + ", sinkhole " + sinkhole + ", island " + island);
+		ctx.complete();
+	}
 }

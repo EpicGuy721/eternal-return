@@ -59,7 +59,7 @@ public final class NewMobRendering {
 		EntityRendererRegistry.register(NewMobs.MOOBLOOM, ctx -> new FlowerCowRenderer(ctx, "moobloom"));
 		EntityRendererRegistry.register(NewMobs.MOOLIP, ctx -> new FlowerCowRenderer(ctx, "moolip"));
 		EntityRendererRegistry.register(IceBall.ENTITY, FlyingItemEntityRenderer::new);
-		EntityRendererRegistry.register(com.eternalreturn.items.Shuriken.ENTITY, FlyingItemEntityRenderer::new);
+		EntityRendererRegistry.register(com.eternalreturn.items.Shuriken.ENTITY, ShurikenRenderer::new);
 		ItemTooltipCallback.EVENT.register((stack, context, type, lines) -> lines.addAll(Necromancy.tooltip(stack)));
 	}
 

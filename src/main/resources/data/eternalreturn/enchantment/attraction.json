@@ -2,7 +2,7 @@
   "description": {
     "translate": "enchantment.eternalreturn.attraction"
   },
-  "supported_items": "#minecraft:enchantable/armor",
+  "supported_items": "#eternalreturn:enchantable/attraction",
   "weight": 2,
   "max_level": 5,
   "min_cost": {

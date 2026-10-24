@@ -73,7 +73,8 @@ public class NewEnchantmentTests implements FabricGameTest {
 				&& backstabber.isSupportedItem(new ItemStack(Items.TRIDENT)) && !backstabber.isSupportedItem(new ItemStack(Items.IRON_PICKAXE)),
 				"Backstabber on melee weapons");
 		ctx.assertTrue(attraction.isSupportedItem(new ItemStack(Items.IRON_HELMET)) && attraction.isSupportedItem(new ItemStack(Items.IRON_BOOTS))
-				&& !attraction.isSupportedItem(new ItemStack(Items.IRON_HORSE_ARMOR)), "Attraction on armor");
+				&& attraction.isSupportedItem(new ItemStack(Items.ELYTRA)) && !attraction.isSupportedItem(new ItemStack(Items.IRON_HORSE_ARMOR)),
+				"Attraction on armor and elytra");
 		ctx.assertTrue(galeStep.isSupportedItem(new ItemStack(Items.IRON_BOOTS)) && !galeStep.isSupportedItem(new ItemStack(Items.IRON_HELMET)),
 				"Gale Step on boots");
 		ctx.assertTrue(telekinesis.getMaxLevel() == 1 && backstabber.getMaxLevel() == 5 && attraction.getMaxLevel() == 5 && galeStep.getMaxLevel() == 1,

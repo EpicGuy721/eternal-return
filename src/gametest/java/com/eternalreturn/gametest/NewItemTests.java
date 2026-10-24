@@ -158,6 +158,17 @@ public class NewItemTests implements FabricGameTest {
 			world.setBlockState(wheat.down(), Blocks.FARMLAND.getDefaultState());
 			world.setBlockState(wheat, Blocks.WHEAT.getDefaultState());
 			ctx.assertTrue(!useOn(player, hammer, wheat).isAccepted() && world.getBlockState(wheat).get(Properties.AGE_7) == 0, "a crop can't be grown");
+			// A lone wall: east, north, south, then up chosen; taking its post away would leave nothing to see or touch.
+			BlockPos wall = ctx.getAbsolutePos(new BlockPos(12, 2, 10));
+			world.setBlockState(wall, Blocks.COBBLESTONE_WALL.getDefaultState());
+			ItemStack wallHammer = new ItemStack(BlockTools.HAMMER);
+			player.setSneaking(true);
+			for (int i = 0; i < 3; i++) {
+				useOn(player, wallHammer, wall);
+			}
+			player.setSneaking(false);
+			ctx.assertTrue(!useOn(player, wallHammer, wall).isAccepted(), "a wall can't lose its post with no sides");
+			ctx.assertTrue(world.getBlockState(wall).get(Properties.UP), "it keeps its post: " + world.getBlockState(wall));
 		} finally {
 			FishingTests.disconnect(player);
 		}

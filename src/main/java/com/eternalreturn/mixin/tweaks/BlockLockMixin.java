@@ -28,6 +28,10 @@ public abstract class BlockLockMixin {
 			CallbackInfoReturnable<BlockState> cir) {
 		if (cir.getReturnValue() != this.asBlockState() && BlockLocks.isLocked(world, pos)) {
 			cir.setReturnValue(this.asBlockState());
+			// A player's game may have guessed the change itself (breaking the block beside it): set it right.
+			if (world instanceof ServerWorld server) {
+				server.getChunkManager().markForUpdate(pos);
+			}
 		}
 	}
 

@@ -8,8 +8,8 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Box;
 
 /**
- * Attraction (armor, I to V): the player picks up items a block further away (sideways) per level, the levels of all
- * the pieces they wear added up (AttractionMixin). Only items: not arrows or experience.
+ * Attraction (armor and elytra, I to V): the player picks up items a block further away (sideways) per level, the
+ * levels of all the pieces they wear added up (AttractionMixin). Only items: not arrows or experience.
  */
 public final class Attraction {
 	public static final Identifier ID = EternalReturn.id("attraction");

@@ -8,9 +8,10 @@ import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.util.Identifier;
 
 /**
- * Spears on the client (Spears): a spear is drawn from its in-hand model (vanilla's later spear_in_hand) when held,
- * and from its flat icon in inventories, on the ground and in frames (SpearItemModelMixin). Jabs, charging at a run
- * and the lowered spear: SpearAttackMixin, SpearMovementMixin, SpearArmPoseMixin.
+ * Spears on the client (Spears): a spear is drawn from its in-hand model (models/item/spear_in_hand.json: pointing
+ * ahead in first person, a spear's size in third) when held, and from its flat icon in inventories, on the ground and
+ * in frames (SpearItemModelMixin). Jabs, charging at a run and the levelled spear: SpearAttackMixin,
+ * SpearMovementMixin, SpearArmPoseMixin, SpearFirstPersonMixin.
  */
 public final class SpearClient {
 	private SpearClient() {

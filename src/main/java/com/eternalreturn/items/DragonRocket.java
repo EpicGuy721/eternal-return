@@ -21,7 +21,8 @@ import java.util.List;
 
 /**
  * The dragon rocket (8 firework rockets around a phantom membrane make 8): the one rocket that boosts a gliding
- * elytra, now that firework rockets don't (OldCombat). Used while not gliding, it does nothing.
+ * elytra, now that firework rockets don't (OldCombat). Used while not gliding, it does nothing. As a firework's boost
+ * does in 1.21.6, it snaps the leads of what the player holds (Leads).
  */
 public final class DragonRocket extends Item {
 	public static final Item ITEM = Registry.register(Registries.ITEM, EternalReturn.id("dragon_rocket"), new DragonRocket(new Item.Settings()));
@@ -40,6 +41,9 @@ public final class DragonRocket extends Item {
 			ItemStack boost = new ItemStack(Items.FIREWORK_ROCKET);
 			boost.set(DataComponentTypes.FIREWORKS, new FireworksComponent(1, List.of()));
 			world.spawnEntity(new FireworkRocketEntity(world, boost, user));
+			for (net.minecraft.entity.Entity held : com.eternalreturn.logic.Leads.held(user)) {
+				com.eternalreturn.logic.Leads.snap(held, (net.minecraft.entity.Leashable) held);
+			}
 			stack.decrementUnlessCreative(1, user);
 			user.incrementStat(Stats.USED.getOrCreateStat(this));
 		}

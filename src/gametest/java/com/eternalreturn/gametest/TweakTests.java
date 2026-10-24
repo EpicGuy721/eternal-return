@@ -115,6 +115,9 @@ public class TweakTests implements FabricGameTest {
 		player.setStackInHand(net.minecraft.util.Hand.MAIN_HAND, new ItemStack(Items.FEATHER));
 		player.attack(husk);
 		ctx.assertTrue(husk.getHealth() == health, "a feather does no damage: " + husk.getHealth());
+		ctx.assertTrue(husk.hurtTime > 0, "but it still looks like a hit");
+		husk.hurtTime = 0;
+		husk.timeUntilRegen = 0;
 		player.setStackInHand(net.minecraft.util.Hand.MAIN_HAND, ItemStack.EMPTY);
 		player.resetLastAttackedTicks();
 		player.attack(husk);

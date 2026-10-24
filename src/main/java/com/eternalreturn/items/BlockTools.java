@@ -44,7 +44,8 @@ import java.util.Set;
  * <li>the hammer (5 iron ingots, 2 sticks) is a survival debug stick: right-click sets the chosen property of a block
  * to its next value, sneak and right-click chooses the next property (both shown above the hotbar). Properties that
  * would make or destroy something (a crop's age, water, cake slices, books, the eyes of an end portal frame, ...)
- * can't be hammered.</li>
+ * can't be hammered, and it skips values that would leave nothing to see or touch (a wall with neither post nor
+ * sides).</li>
  * </ul>
  * Neither works on two-block things (doors, beds, tall plants, double chests, extended pistons) or unbreakable blocks. A
  * block set with either keeps its state (BlockLocks).
@@ -181,7 +182,17 @@ public final class BlockTools {
 				player.sendMessage(Text.translatable("item.minecraft.debug_stick.select", property.getName(), value(state, property)), true);
 				return ActionResult.SUCCESS;
 			}
-			BlockState next = cycle(state, property, false);
+			// The next value that leaves the block something to see and touch (a wall with neither post nor sides is invisible).
+			BlockState next = state;
+			for (int i = 1; i < property.getValues().size(); i++) {
+				next = cycle(next, property, false);
+				if (!next.getOutlineShape(world, pos).isEmpty() || state.getOutlineShape(world, pos).isEmpty()) {
+					break;
+				}
+			}
+			if (next == state || (next.getOutlineShape(world, pos).isEmpty() && !state.getOutlineShape(world, pos).isEmpty())) {
+				return ActionResult.FAIL;
+			}
 			BlockLocks.lock(world, pos);
 			world.setBlockState(pos, next, Block.NOTIFY_LISTENERS | Block.FORCE_STATE);
 			player.sendMessage(Text.translatable("item.minecraft.debug_stick.update", property.getName(), value(next, property)), true);

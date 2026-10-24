@@ -25,7 +25,8 @@ import java.util.List;
  * <li>shears cut a mob's lead (the lead drops);</li>
  * <li>a lead used on a mob tied to something else snaps that lead (it drops) and ties the mob to the player;</li>
  * <li>a lead stretches to 12 blocks before it snaps (10 before), with a snap you can hear (LeashTickMixin);</li>
- * <li>leads are drawn twice as thick (client LeashThicknessMixin) and made of 5 string (two of them).</li>
+ * <li>leads are drawn twice as thick (client LeashThicknessMixin) and made of 5 string (two of them);</li>
+ * <li>boosting a glide with a dragon rocket snaps the leads of what the player holds (DragonRocket).</li>
  * </ul>
  */
 public final class Leads {

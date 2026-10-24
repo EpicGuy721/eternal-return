@@ -16,6 +16,7 @@
 		"SignRendererMixin",
 		"SpearArmPoseMixin",
 		"SpearAttackMixin",
+		"SpearFirstPersonMixin",
 		"SpearItemModelMixin",
 		"SpearMovementMixin",
 		"WeatherAboveCloudsMixin",

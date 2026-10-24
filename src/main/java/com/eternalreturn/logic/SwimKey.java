@@ -14,9 +14,10 @@ import net.minecraft.registry.tag.FluidTags;
 
 /**
  * Swimming is on a key of its own (survival.swimKey; Left Alt to begin with, client SwimKeyClient): held in water, the
- * player swims (from under the surface, and on while in the water), and held on land they crawl. Sprinting under water
- * no longer swims. A player who swims in lava (LavaSwimming) swims there the same way. The client tells the server
- * whether the key is held (SwimKeyMixin decides).
+ * player swims (from under the surface, or from standing in shallow water, and on while in the water), and held on land
+ * they crawl. Sprinting under water no longer swims. A player who swims in lava (LavaSwimming) swims there the same
+ * way; anyone else can't swim or crawl in lava. The client tells the server whether the key is held (SwimKeyMixin
+ * decides).
  */
 public final class SwimKey {
 	private SwimKey() {
@@ -53,10 +54,13 @@ public final class SwimKey {
 		if (!((Holder) player).eternalreturn$swimKey() || player.hasVehicle() || player.isFallFlying() || player.getAbilities().flying || player.isSpectator()) {
 			return false;
 		}
-		boolean lava = player.isInLava() && LavaSwimming.swims(player);
+		if (player.isInLava() && !LavaSwimming.swims(player)) {
+			return false;
+		}
+		boolean lava = player.isInLava();
 		if (player.isTouchingWater() || lava) {
-			// As vanilla: from under the surface, then on while in it.
-			if (player.isSwimming()) {
+			// From under the surface, or standing in shallow water; then on while in it.
+			if (player.isSwimming() || player.isOnGround()) {
 				return true;
 			}
 			FluidState fluid = player.getWorld().getFluidState(player.getBlockPos());

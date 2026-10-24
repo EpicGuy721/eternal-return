@@ -198,4 +198,74 @@ public class SystemTests implements FabricGameTest {
 		ctx.killAllEntities();
 		ctx.complete();
 	}
+
+	/** In water a block deep the swim key swims from standing; in lava, without the armor for it, it does nothing. */
+	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 60)
+	public void theSwimKeyInShallowWaterAndLava(TestContext ctx) {
+		for (int x = 2; x <= 5; x++) {
+			for (int z = 6; z <= 9; z++) {
+				ctx.setBlockState(new BlockPos(x, 2, z), Blocks.WATER.getDefaultState());
+				ctx.setBlockState(new BlockPos(x + 7, 2, z), Blocks.LAVA.getDefaultState());
+			}
+		}
+		ServerPlayerEntity wader = FishingTests.survivalPlayer(ctx, new BlockPos(3, 2, 7));
+		ServerPlayerEntity burner = FishingTests.survivalPlayer(ctx, new BlockPos(10, 2, 7));
+		try {
+			for (int i = 0; i < 2; i++) {
+				wader.baseTick();
+				burner.baseTick();
+			}
+			wader.setOnGround(true);
+			burner.setOnGround(true);
+			ctx.assertTrue(wader.isTouchingWater() && !wader.isSubmergedInWater() && burner.isInLava(), "one wading, one in lava");
+			((SwimKey.Holder) wader).eternalreturn$setSwimKey(true);
+			((SwimKey.Holder) burner).eternalreturn$setSwimKey(true);
+			wader.updateSwimming();
+			burner.updateSwimming();
+			ctx.assertTrue(wader.isSwimming(), "the key swims in shallow water");
+			ctx.assertTrue(!burner.isSwimming(), "but not in lava without Fire Protection at its highest");
+		} finally {
+			FishingTests.disconnect(wader);
+			FishingTests.disconnect(burner);
+		}
+		ctx.killAllEntities();
+		ctx.complete();
+	}
+
+	/** A dragon rocket's boost snaps the leads of what the gliding player holds. */
+	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 60)
+	public void dragonRocketsSnapLeads(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(8, 6, 6));
+		try {
+			ChickenEntity chicken = ctx.spawnEntity(EntityType.CHICKEN, new BlockPos(8, 2, 9));
+			chicken.setAiDisabled(true);
+			chicken.attachLeash(player, true);
+			player.equipStack(net.minecraft.entity.EquipmentSlot.CHEST, new ItemStack(Items.ELYTRA));
+			player.setOnGround(false);
+			player.startFallFlying();
+			ctx.assertTrue(player.isFallFlying(), "gliding");
+			player.setStackInHand(Hand.MAIN_HAND, new ItemStack(com.eternalreturn.items.DragonRocket.ITEM));
+			player.getMainHandStack().use(world, player, Hand.MAIN_HAND);
+			ctx.assertTrue(!chicken.isLeashed(), "the boost snapped the lead");
+		} finally {
+			FishingTests.disconnect(player);
+		}
+		ctx.killAllEntities();
+		ctx.complete();
+	}
+
+	/** Vexes die with the evoker that summoned them. */
+	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 60)
+	public void vexesDieWithTheirEvoker(TestContext ctx) {
+		net.minecraft.entity.mob.EvokerEntity evoker = ctx.spawnEntity(EntityType.EVOKER, new BlockPos(8, 2, 8));
+		net.minecraft.entity.mob.VexEntity vex = ctx.spawnEntity(EntityType.VEX, new BlockPos(8, 5, 12));
+		vex.setOwner(evoker);
+		ctx.runAtTick(3, evoker::kill);
+		ctx.runAtTick(10, () -> {
+			ctx.assertTrue(!vex.isAlive(), "the vex died with its evoker");
+			ctx.killAllEntities();
+			ctx.complete();
+		});
+	}
 }
