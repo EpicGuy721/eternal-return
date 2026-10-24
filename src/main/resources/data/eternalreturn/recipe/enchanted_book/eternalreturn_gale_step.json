@@ -1,0 +1,41 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "eternalreturn_enchanted_book",
+  "key": {
+    "B": {
+      "item": "minecraft:book"
+    },
+    "D": {
+      "item": "minecraft:diamond"
+    },
+    "A": {
+      "item": "minecraft:amethyst_shard"
+    },
+    "X": {
+      "item": "minecraft:wind_charge"
+    },
+    "Y": {
+      "item": "minecraft:feather"
+    },
+    "Z": {
+      "item": "minecraft:breeze_rod"
+    }
+  },
+  "pattern": [
+    "DXD",
+    "YBZ",
+    "DAD"
+  ],
+  "result": {
+    "count": 1,
+    "id": "minecraft:enchanted_book",
+    "components": {
+      "minecraft:stored_enchantments": {
+        "levels": {
+          "eternalreturn:gale_step": 1
+        }
+      }
+    }
+  }
+}

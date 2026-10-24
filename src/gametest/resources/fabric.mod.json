@@ -51,6 +51,7 @@
 			"com.eternalreturn.gametest.LoungingTests",
 			"com.eternalreturn.gametest.GrimlockTests",
 			"com.eternalreturn.gametest.TweakTests",
+			"com.eternalreturn.gametest.NewEnchantmentTests",
 			"com.eternalreturn.gametest.BirdTests",
 			"com.eternalreturn.gametest.FishSchoolTests"
 		]

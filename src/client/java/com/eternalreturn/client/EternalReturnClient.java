@@ -29,6 +29,7 @@ public class EternalReturnClient implements ClientModInitializer {
 		HardenedBlockModels.register();
 		OreVariantRendering.register();
 		FrameModels.register();
+		GaleStepClient.register();
 		net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap.INSTANCE.putBlock(com.eternalreturn.blocks.CopperRail.BLOCK,
 				net.minecraft.client.render.RenderLayer.getCutout());
 

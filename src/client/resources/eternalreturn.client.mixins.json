@@ -9,6 +9,7 @@
 		"EnchantmentScreenMixin",
 		"HungerBarMixin",
 		"ItemFrameEntityRendererMixin",
+		"LavaFogMixin",
 		"MinecartEntityRendererMixin",
 		"PistonBlockEntityRendererMixin",
 		"SignRendererMixin",

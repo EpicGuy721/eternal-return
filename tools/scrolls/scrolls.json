@@ -225,5 +225,22 @@
     "minecraft:bone",
     "minecraft:rotten_flesh",
     "minecraft:soul_sand"
+  ],
+  "eternalreturn:telekinesis": [
+    "minecraft:ender_eye",
+    "minecraft:hopper"
+  ],
+  "eternalreturn:backstabber": [
+    "minecraft:iron_sword",
+    "minecraft:ink_sac"
+  ],
+  "eternalreturn:attraction": [
+    "minecraft:lodestone",
+    "minecraft:iron_ingot"
+  ],
+  "eternalreturn:gale_step": [
+    "minecraft:wind_charge",
+    "minecraft:feather",
+    "minecraft:breeze_rod"
   ]
 }
