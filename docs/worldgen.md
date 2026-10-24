@@ -57,7 +57,7 @@ The preset is all data. Without Moderner Beta installed, the world type and its 
 - Phase 3, part 2: done. Spiral and toroidal-room caves; maze, combination and circular-room caves dropped.
 - Phase 4, part 1 (biome stone): done. Each biome's stone from under the topsoil to bedrock, and two hardened blocks.
 - Phase 4, part 2 (ore variants): done. Every ore in every host stone, with old-style textures.
-- Terrain features: done. Deep oceans that fall in steps, rare sinkholes (mostly in the sea, about 100 blocks across), rare floating islands, old growth taigas (see Terrain features).
+- Terrain features: done. Deep oceans that fall in steps, rare sinkholes (mostly in the sea, about 100 blocks across), rare floating islands, old growth taigas, extremely rare monoliths, mushrooms in caves (see Terrain features).
 - Phase 4, part 3 (biomes and mineshafts): done. Cherry groves, every modern ocean, and mineshafts built from their biome's wood. Ocean monuments and Moderner Beta's ocean shrines were later removed from Eternal Return worlds; guardians spawn in the open sea instead (README, Mobs and Fishing).
 
 ## The Eternal Return preset
@@ -268,7 +268,7 @@ Options: `-PworldmapOut=<dir>` writes to `<dir>/<preset>/` instead; `-PworldmapC
 
 ## Terrain features
 
-Four additions on top of the terrain passes, in Eternal Return worlds only (other worlds never change; the control runs check it). Each of the first three has a setting under `worldgen` (`deepOceans`, `sinkholes`, `floatingIslands`, all on by default); turning one off affects newly generated chunks only.
+Six additions on top of the terrain passes, in Eternal Return worlds only (other worlds never change; the control runs check it). All but the old growth taigas have a setting under `worldgen` (`deepOceans`, `sinkholes`, `floatingIslands`, `monoliths`, `caveMushrooms`, all on by default); turning one off affects newly generated chunks only. One fix applies in every world: snow on trees at chunk borders (below).
 
 ### Deep oceans in steps
 
@@ -299,6 +299,20 @@ Each island is made of the ground straight below it: the top six blocks of that 
 How: `FloatingIslands` builds them when the cave carver first sees a chunk, right after the overhang rounder (which would otherwise trim them as floating rock); caves start far below them. On the test seed: a forest island at x 1295, y 230, z -427 (52 blocks across), badlands at 1318 234 -886, a swamp island at 1757 254 -591, a jungle island at -669 237 1823, a birch forest island at 87 233 1761, an ice plains island at -705 244 -428 (pictured, side view and from above), and a sandy island over the ocean at -156 241 245.
 
 ![A floating island: side view and from above](worldgen-maps/eternal_return/island.png)
+
+### Monoliths
+
+Alpha now and then threw up monoliths: sheer-sided blocks of land standing from the ground into the sky. Here they are a planned, extreme rarity: the world is split into squares of 10,000 blocks, each holding one monolith, placed from the world seed alone. A monolith is a box with rounded corners and slightly ragged walls, 20 to 50 blocks wide and up to two and a half times as long, lying north-south or east-west, standing from the ground (or the sea floor, through the water) to a flat top between y 190 and y 250 that steps down a block or two at its rim. Like a floating island it is made of the ground it stands on: the top five blocks of topsoil and the biome's stone under them (sand over the sea), so the biome's trees, grass and snow grow on top with the chunk's decoration.
+
+How: `Monoliths` (`com.eternalreturn.worldgen.terrain`) builds each chunk's part when the cave carver first sees the chunk, right after the floating islands. The test `monolithsRiseToTheSky` takes the nearest of the four squares around spawn, generates its middle and checks rock for 60 blocks under its top (y 188 or higher), nothing solid above and open air beside it.
+
+### Mushrooms in caves
+
+As before 1.18, brown and red mushrooms grow on cave floors: up to six tries a chunk for a brown patch and three for a red one, each at a random height between 8 blocks above the bottom and y 56, taken only where it lands in a cave (air) and dropped to the floor below; a patch is up to two dozen tries around that spot. Two placed features (`data/eternalreturn/worldgen/placed_feature/cave_brown_mushroom.json`, `cave_red_mushroom.json`), added last to every overworld biome's plants and carrying `eternalreturn:eternal_return_only`, so nothing else in the decoration order moves and other worlds don't change. The test `mushroomsGrowInCaves` counts them in the 8 x 8 chunks around spawn.
+
+### Snow on trees at chunk borders
+
+Every world (`worldgen.snowOnBorderTrees`): MC-119599, as the Simple Snowy Fix mod fixes it. A chunk is snowed on (vanilla's `freeze_top_layer`, the last step of its decoration) before the trees of the chunks around it grow, so a tree reaching over from a neighbour stood on snowy ground with bare leaves. Now, after each tree grows during generation (not from a sapling), every column it may cover that was already snowed on gets what vanilla gives a tree within one chunk: snow on its top leaves, and no snow (nor snowy grass) on the ground under them (`SnowyTrees`, `TreeSnowMixin`). Columns not yet snowed on are left to vanilla, which does the same in its turn. This changes snowy forests in every world, so the vanilla world's decoration fingerprint changes where such trees fall in its chunks.
 
 ### Old growth taigas
 

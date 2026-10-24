@@ -557,6 +557,22 @@ public final class EternalReturnConfig {
 		 */
 		public boolean floatingIslands = true;
 		/**
+		 * Monoliths: in Eternal Return worlds, about one in every 10,000 x 10,000 blocks, a sheer-sided block of land
+		 * as Alpha made, rising from the ground to between y 190 and 250, flat-topped and 20 to 125 blocks long.
+		 * Newly generated chunks only. Other worlds never change.
+		 */
+		public boolean monoliths = true;
+		/**
+		 * Mushrooms grow in caves again, as before 1.18: brown ones in about one cave floor patch every two chunks,
+		 * red ones every four. Eternal Return worlds only.
+		 */
+		public boolean caveMushrooms = true;
+		/**
+		 * Snow on trees at chunk borders (MC-119599), as Simple Snowy Fix: a tree placed after its neighbour chunk was
+		 * snowed on gets snow on its top leaves, and the snow under it goes, as for any other tree. Every world.
+		 */
+		public boolean snowOnBorderTrees = true;
+		/**
 		 * In Eternal Return worlds only strongholds, mineshafts, nether fossils and end cities are placed, in
 		 * every dimension (structure-like features such as geodes and dungeons stay). Blazes spawn in soul
 		 * sand valleys and basalt deltas there instead of fortresses. Other worlds never change.

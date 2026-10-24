@@ -168,6 +168,7 @@
 		"villager.VillagerVampireMixin",
 		"villager.WanderingTraderEntityMixin",
 		"villager.WanderingTraderManagerMixin",
+		"worldgen.TreeSnowMixin",
 		"worldgen.CarverContextMixin",
 		"worldgen.ChunkGeneratorExtraMixin",
 		"worldgen.ConfiguredCarverMixin",

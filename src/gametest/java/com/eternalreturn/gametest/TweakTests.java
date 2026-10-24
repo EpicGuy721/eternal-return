@@ -309,4 +309,35 @@ public class TweakTests implements FabricGameTest {
 		ctx.assertTrue(!above, "none above them");
 		ctx.complete();
 	}
+
+	/**
+	 * A snowy taiga floor already snowed on, then leaves come over it, as a tree from the next chunk does: after the
+	 * tree, its top leaves have snow and the ground under them none, as under any tree; open ground keeps its snow.
+	 */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "snowy_trees", skyAccess = true)
+	public void borderTreesGetSnow(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		BlockPos a = ctx.getAbsolutePos(new BlockPos(-1, -1, -1));
+		BlockPos b = ctx.getAbsolutePos(new BlockPos(8, 12, 8));
+		world.getServer().getCommandManager().executeWithPrefix(world.getServer().getCommandSource().withSilent(),
+				"fillbiome " + a.getX() + " " + a.getY() + " " + a.getZ() + " " + b.getX() + " " + b.getY() + " " + b.getZ() + " minecraft:snowy_taiga");
+		for (int x = 0; x < 7; x++) {
+			for (int z = 0; z < 7; z++) {
+				ctx.setBlockState(new BlockPos(x, 0, z), Blocks.GRASS_BLOCK.getDefaultState().with(net.minecraft.state.property.Properties.SNOWY, true));
+				ctx.setBlockState(new BlockPos(x, 1, z), Blocks.SNOW.getDefaultState());
+			}
+		}
+		for (int x = 1; x <= 3; x++) {
+			for (int z = 1; z <= 3; z++) {
+				ctx.setBlockState(new BlockPos(x, 5, z), Blocks.SPRUCE_LEAVES.getDefaultState().with(net.minecraft.block.LeavesBlock.PERSISTENT, true));
+			}
+		}
+		com.eternalreturn.worldgen.SnowyTrees.afterTree(world, ctx.getAbsolutePos(new BlockPos(2, 1, 2)));
+		ctx.expectBlock(Blocks.SNOW, new BlockPos(2, 6, 2));
+		ctx.expectBlock(Blocks.AIR, new BlockPos(2, 1, 2));
+		ctx.assertTrue(!world.getBlockState(ctx.getAbsolutePos(new BlockPos(2, 0, 2))).get(net.minecraft.state.property.Properties.SNOWY),
+				"the grass under the tree isn't snowy");
+		ctx.expectBlock(Blocks.SNOW, new BlockPos(5, 1, 5));
+		ctx.complete();
+	}
 }

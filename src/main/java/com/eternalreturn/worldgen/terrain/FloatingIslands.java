@@ -130,10 +130,11 @@ public final class FloatingIslands {
 	}
 
 	/**
-	 * The ground straight below: its top BAND blocks of topsoil (skipping nothing, so badlands keep their
-	 * bands) into band, and returns the stone under it. Over water: sand, then sandstone, over stone.
+	 * The ground straight below: its top blocks of topsoil, as many as band holds (skipping nothing, so badlands
+	 * keep their bands) into band, and returns the stone under it. Over water: sand, then sandstone, over stone.
+	 * (Monoliths too.)
 	 */
-	private static BlockState groundBelow(Chunk chunk, BlockPos.Mutable pos, int localX, int localZ, int seaLevel, BlockState[] band) {
+	static BlockState groundBelow(Chunk chunk, BlockPos.Mutable pos, int localX, int localZ, int seaLevel, BlockState[] band) {
 		int x = chunk.getPos().getStartX() + localX;
 		int z = chunk.getPos().getStartZ() + localZ;
 		// From below where any island could hang (no ground reaches that high).
@@ -143,7 +144,7 @@ public final class FloatingIslands {
 		}
 		BlockState surface = chunk.getBlockState(pos.set(x, top, z));
 		if (!surface.getFluidState().isEmpty()) {
-			for (int i = 0; i < BAND; i++) {
+			for (int i = 0; i < band.length; i++) {
 				band[i] = i < 3 ? Blocks.SAND.getDefaultState() : Blocks.SANDSTONE.getDefaultState();
 			}
 			return Blocks.STONE.getDefaultState();
@@ -152,7 +153,7 @@ public final class FloatingIslands {
 		if (stone.isAir() || !stone.getFluidState().isEmpty() || stone.getBlock() instanceof FallingBlock) {
 			stone = Blocks.STONE.getDefaultState();
 		}
-		for (int i = 0; i < BAND; i++) {
+		for (int i = 0; i < band.length; i++) {
 			BlockState below = chunk.getBlockState(pos.set(x, top - i, z));
 			band[i] = below.isAir() || !below.getFluidState().isEmpty() ? stone : below;
 		}

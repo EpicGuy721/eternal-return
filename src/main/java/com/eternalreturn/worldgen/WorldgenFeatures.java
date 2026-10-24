@@ -48,6 +48,12 @@ public final class WorldgenFeatures {
 				GenerationStep.Carver.AIR,
 				DEBUG_TUNNEL);
 		BiomeModifications.addCarver(overworld(), GenerationStep.Carver.AIR, CAVES);
+		// Mushrooms in caves (Eternal Return worlds only: they carry eternalreturn:eternal_return_only), last of the
+		// plants in every biome, so no other feature's place in the decoration order moves.
+		for (String mushroom : java.util.List.of("cave_brown_mushroom", "cave_red_mushroom")) {
+			BiomeModifications.addFeature(overworld().and(context -> EternalReturnConfig.get().worldgen.caveMushrooms),
+					GenerationStep.Feature.VEGETAL_DECORATION, RegistryKey.of(RegistryKeys.PLACED_FEATURE, EternalReturn.id(mushroom)));
+		}
 	}
 
 	/**

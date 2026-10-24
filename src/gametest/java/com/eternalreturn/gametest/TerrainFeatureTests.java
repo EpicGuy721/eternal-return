@@ -3,9 +3,11 @@ package com.eternalreturn.gametest;
 import com.eternalreturn.EternalReturn;
 import com.eternalreturn.compat.ModernerBetaHooks;
 import com.eternalreturn.worldgen.terrain.FloatingIslands;
+import com.eternalreturn.worldgen.terrain.Monoliths;
 import com.eternalreturn.worldgen.terrain.TerrainShape;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.test.GameTest;
@@ -41,7 +43,7 @@ public class TerrainFeatureTests implements FabricGameTest {
 	 * Over 8,000 x 8,000 blocks, the floor of every ocean column (sampled every 32 blocks): the deepest
 	 * is around y -30 and none lies below y -40; most of the open sea is far below the old floors (y 33
 	 * to 47); and the floor gathers on the three steps (y 30, 0 and -30) rather than spreading evenly,
-	 * with steep drops between them.
+	 * with steep drops between them. Sinkholes are left out.
 	 */
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = TERRAIN_BATCH, tickLimit = 2_000_000)
 	public void oceansFallInSteps(TestContext ctx) {
@@ -58,8 +60,23 @@ public class TerrainFeatureTests implements FabricGameTest {
 		// For the checklist: the column nearest spawn on each step.
 		int[][] examples = new int[3][];
 		int[] steps = {(int) TerrainShape.SHELF_Y, (int) TerrainShape.MIDDLE_Y, (int) TerrainShape.DEEP_Y};
+		// The sinkholes, mostly in the sea, drop far below the floor; they have a test of their own.
+		List<TerrainShape.Sinkhole> holes = new ArrayList<>();
+		for (int cx = Math.floorDiv(-4000, TerrainShape.SINKHOLE_CELL) - 1; cx <= Math.floorDiv(4000, TerrainShape.SINKHOLE_CELL) + 1; cx++) {
+			for (int cz = Math.floorDiv(-4000, TerrainShape.SINKHOLE_CELL) - 1; cz <= Math.floorDiv(4000, TerrainShape.SINKHOLE_CELL) + 1; cz++) {
+				TerrainShape.Sinkhole hole = TerrainShape.plannedSinkhole(world.getSeed(), cx, cz);
+				if (hole != null) {
+					holes.add(hole);
+				}
+			}
+		}
 		for (int x = -4000; x < 4000; x += 32) {
 			for (int z = -4000; z < 4000; z += 32) {
+				int columnX = x;
+				int columnZ = z;
+				if (holes.stream().anyMatch(hole -> Math.pow(columnX - hole.x(), 2) + Math.pow(columnZ - hole.z(), 2) < Math.pow(hole.radius() + 16, 2))) {
+					continue;
+				}
 				int floor = generator.getHeight(x, z, Heightmap.Type.OCEAN_FLOOR_WG, world, noise) - 1;
 				if (floor >= sea - 2 || !biome(world, generator, noise, x, sea, z).contains("ocean")) {
 					continue;
@@ -252,6 +269,77 @@ public class TerrainFeatureTests implements FabricGameTest {
 			}
 		}
 		EternalReturn.LOGGER.info("[terrain] floating islands within 2,048 blocks: {} | the nearest four: {}", islands.size(), checked);
+		ctx.complete();
+	}
+
+	/**
+	 * The monolith nearest spawn (one in each 10,000-block square): generated and checked in its middle: rock all the
+	 * way from 60 blocks under its top to the top, which is y 188 or higher, nothing solid above it, and air beside it.
+	 */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = TERRAIN_BATCH, tickLimit = 2_000_000)
+	public void monolithsRiseToTheSky(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		NoiseConfig noise = world.getChunkManager().getNoiseConfig();
+		List<Monoliths.Monolith> monoliths = new ArrayList<>();
+		for (int cx = -1; cx <= 0; cx++) {
+			for (int cz = -1; cz <= 0; cz++) {
+				monoliths.add(Monoliths.inCell(noise, cx, cz));
+			}
+		}
+		monoliths.sort(Comparator.comparingInt(monolith -> Math.abs(monolith.x()) + Math.abs(monolith.z())));
+		EternalReturn.LOGGER.info("[terrain] the monoliths of the four squares around spawn, nearest first: {}", monoliths);
+		Monoliths.Monolith monolith = monoliths.get(0);
+		int x = monolith.x();
+		int z = monolith.z();
+		for (int chunkX = (x >> 4) - 1; chunkX <= (x >> 4) + 1; chunkX++) {
+			for (int chunkZ = (z >> 4) - 1; chunkZ <= (z >> 4) + 1; chunkZ++) {
+				world.getChunk(chunkX, chunkZ, ChunkStatus.FULL, true);
+			}
+		}
+		int top = Monoliths.top(monolith, new SimplexNoiseSampler(Random.create(monolith.seed())), x, z);
+		ctx.assertTrue(top >= Monoliths.MIN_TOP - 2, monolith + " tops out at y " + top);
+		BlockPos.Mutable pos = new BlockPos.Mutable();
+		for (int y = top - 60; y <= top; y++) {
+			BlockState state = world.getBlockState(pos.set(x, y, z));
+			ctx.assertTrue(!state.isAir() && state.getFluidState().isEmpty(), monolith + ": no rock at y " + y + " in the middle: " + state);
+		}
+		BlockState above = world.getBlockState(pos.set(x, top + 1, z));
+		ctx.assertTrue(above.isAir() || above.isReplaceable() || above.isIn(BlockTags.LOGS) || above.isIn(BlockTags.LEAVES) || above.isOf(Blocks.SNOW),
+				monolith + ": rock above its top: " + above);
+		int besideX = x + monolith.halfX() + 30;
+		world.getChunk(besideX >> 4, z >> 4, ChunkStatus.FULL, true);
+		ctx.assertTrue(world.getBlockState(pos.set(besideX, top - 10, z)).isAir(), monolith + ": not standing alone");
+		ctx.complete();
+	}
+
+	/** Mushrooms on cave floors: in the 8 x 8 chunks around spawn, brown ones below y 50 with rock overhead. */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = TERRAIN_BATCH, tickLimit = 2_000_000)
+	public void mushroomsGrowInCaves(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		int brown = 0;
+		int red = 0;
+		BlockPos.Mutable pos = new BlockPos.Mutable();
+		for (int chunkX = -4; chunkX < 4; chunkX++) {
+			for (int chunkZ = -4; chunkZ < 4; chunkZ++) {
+				world.getChunk(chunkX, chunkZ, ChunkStatus.FULL, true);
+				for (int x = chunkX * 16; x < chunkX * 16 + 16; x++) {
+					for (int z = chunkZ * 16; z < chunkZ * 16 + 16; z++) {
+						for (int y = world.getBottomY() + 1; y < 50; y++) {
+							BlockState state = world.getBlockState(pos.set(x, y, z));
+							if ((state.isOf(Blocks.BROWN_MUSHROOM) || state.isOf(Blocks.RED_MUSHROOM)) && !world.isSkyVisible(pos)) {
+								if (state.isOf(Blocks.BROWN_MUSHROOM)) {
+									brown++;
+								} else {
+									red++;
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		EternalReturn.LOGGER.info("[terrain] cave mushrooms in the 8 x 8 chunks around spawn: {} brown, {} red", brown, red);
+		ctx.assertTrue(brown > 0, "no brown mushrooms in caves (" + red + " red)");
 		ctx.complete();
 	}
 }

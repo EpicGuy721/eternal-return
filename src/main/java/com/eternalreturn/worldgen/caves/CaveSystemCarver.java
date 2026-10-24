@@ -3,6 +3,7 @@ package com.eternalreturn.worldgen.caves;
 import com.eternalreturn.config.EternalReturnConfig;
 import com.eternalreturn.config.EternalReturnConfig.CaveTypeSettings;
 import com.eternalreturn.worldgen.terrain.FloatingIslands;
+import com.eternalreturn.worldgen.terrain.Monoliths;
 import com.eternalreturn.worldgen.terrain.OverhangRounder;
 import com.mojang.serialization.Codec;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -123,6 +124,9 @@ public class CaveSystemCarver extends Carver<CarverConfig> {
 		}
 		if (EternalReturnConfig.get().worldgen.floatingIslands) {
 			FloatingIslands.build(chunk, context.getNoiseConfig(), seaLevel);
+		}
+		if (EternalReturnConfig.get().worldgen.monoliths) {
+			Monoliths.build(chunk, context.getNoiseConfig(), seaLevel);
 		}
 		current = new ChunkCarver(chunk, mask, state -> state.isIn(config.replaceable), minY, maxY, config.lavaLevel.getY(context), seaLevel, water);
 		CURRENT.set(current);
