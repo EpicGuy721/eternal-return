@@ -53,6 +53,7 @@
 			"com.eternalreturn.gametest.TweakTests",
 			"com.eternalreturn.gametest.NewEnchantmentTests",
 			"com.eternalreturn.gametest.NewItemTests",
+			"com.eternalreturn.gametest.SpearTests",
 			"com.eternalreturn.gametest.BirdTests",
 			"com.eternalreturn.gametest.FishSchoolTests"
 		]

@@ -1,0 +1,6 @@
+{
+  "parent": "eternalreturn:item/spear_in_hand",
+  "textures": {
+    "layer0": "eternalreturn:item/netherite_spear_in_hand"
+  }
+}
