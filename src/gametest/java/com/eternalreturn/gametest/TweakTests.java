@@ -311,13 +311,11 @@ public class TweakTests implements FabricGameTest {
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "rain_clouds", skyAccess = true)
 	public void noRainAboveTheClouds(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
-		world.setWeather(0, 6000, true, false);
-		world.setRainGradient(1.0F);
 		BlockPos base = ctx.getAbsolutePos(BlockPos.ORIGIN);
+		com.eternalreturn.weather.Storm storm = Weathers.rain(world, net.minecraft.util.math.Vec3d.ofCenter(base), false);
 		boolean below = world.hasRain(new BlockPos(base.getX(), 150, base.getZ()));
 		boolean above = world.hasRain(new BlockPos(base.getX(), 200, base.getZ()));
-		world.setWeather(6000, 0, false, false);
-		world.setRainGradient(0.0F);
+		Weathers.dry(world, storm);
 		ctx.assertTrue(below, "rain below the clouds");
 		ctx.assertTrue(!above, "none above them");
 		ctx.complete();

@@ -76,6 +76,7 @@ public class EternalReturn implements ModInitializer {
 		com.eternalreturn.logic.Leads.register();
 		com.eternalreturn.logic.SwimKey.register();
 		com.eternalreturn.worldgen.LocateCommand.register();
+		com.eternalreturn.weather.LocalWeather.register();
 		com.eternalreturn.logic.BlockLocks.register();
 		com.eternalreturn.items.Firearms.register();
 		com.eternalreturn.mobs.NewMobs.register();

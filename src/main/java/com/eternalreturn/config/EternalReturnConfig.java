@@ -68,6 +68,7 @@ public final class EternalReturnConfig {
 	public VillagerTweaks villagers = new VillagerTweaks();
 	public WorldgenTweaks worldgen = new WorldgenTweaks();
 	public SurvivalTweaks survival = new SurvivalTweaks();
+	public WeatherTweaks weather = new WeatherTweaks();
 	public RedstoneTweaks redstone = new RedstoneTweaks();
 	public ExtraEnchantmentTweaks enchantmentsExtra = new ExtraEnchantmentTweaks();
 
@@ -382,6 +383,23 @@ public final class EternalReturnConfig {
 	}
 
 	/** Beds, beacons, animals and a few mob rules (com.eternalreturn.survival). */
+	public static final class WeatherTweaks {
+		/**
+		 * Local weather (LocalWeather): rain and thunder come as storms a few hundred blocks across that form near
+		 * players, drift with the wind and break up, more over wet country than dry, instead of the same weather
+		 * everywhere at once. Off: vanilla's weather.
+		 */
+		public boolean localWeather = true;
+		/** About how many storms are kept within 1,600 blocks of each player over the wettest country (fewer over drier). */
+		public double stormsNearPlayers = 3.0;
+		/** The share of storms that are thunderstorms (more over wet country, fewer over dry). */
+		public double thunderstormChance = 0.25;
+		/** Thunderstorms over snow are blizzards: thick driving snow, fog, and snow building up faster. */
+		public boolean blizzards = true;
+		/** The wind slants the rain and snow and drifts the clouds its way. */
+		public boolean windyRain = true;
+	}
+
 	public static final class SurvivalTweaks {
 		/**
 		 * No hunger: the food bar stays full and hidden, health never regenerates by itself (except on Peaceful), and
@@ -740,6 +758,9 @@ public final class EternalReturnConfig {
 		}
 		if (loaded.worldgen == null) {
 			loaded.worldgen = new WorldgenTweaks();
+		}
+		if (loaded.weather == null) {
+			loaded.weather = new WeatherTweaks();
 		}
 		if (loaded.worldgen.caves == null) {
 			loaded.worldgen.caves = new CaveTweaks();

@@ -123,13 +123,16 @@ public class FishTableTests implements FabricGameTest {
 		world.setTimeOfDay(time);
 	}
 
-	private static void setWeather(ServerWorld world, String weather) {
-		boolean rain = !weather.equals("clear");
-		boolean thunder = weather.equals("thunder");
-		world.setWeather(rain ? 0 : 6000, rain ? 6000 : 0, rain, thunder);
-		// The weather fades in over seconds; the loot checks read the faded level, so set it outright.
-		world.setRainGradient(rain ? 1.0F : 0.0F);
-		world.setThunderGradient(thunder ? 1.0F : 0.0F);
+	/** The storm a setting's weather put over its hook, taken away when the weather changes. */
+	private static com.eternalreturn.weather.Storm storm;
+
+	/** The weather at the hook (and, without local weather, everywhere), at full strength at once. */
+	private static void setWeather(ServerWorld world, String weather, Vec3d hook) {
+		Weathers.dry(world, storm);
+		storm = null;
+		if (!weather.equals("clear")) {
+			storm = Weathers.rain(world, hook, weather.equals("thunder"));
+		}
 	}
 
 	/** Around the hook only: /fillbiome refuses more than 32,768 blocks at once. */
@@ -152,7 +155,7 @@ public class FishTableTests implements FabricGameTest {
 			throw new IllegalStateException("the biome at the hook is " + found + ", not " + setting.biome());
 		}
 		setTime(world, setting.time());
-		setWeather(world, setting.weather());
+		setWeather(world, setting.weather(), setting.hook());
 		PlayerEntity angler = ctx.createMockPlayer(GameMode.SURVIVAL);
 		FishingBobberEntity hook = new FishingBobberEntity(angler, world, 0, 0);
 		hook.setPosition(setting.hook());
@@ -252,7 +255,7 @@ public class FishTableTests implements FabricGameTest {
 		}
 		System.out.println("[gametest] fish bites in " + ROLLS + " rolls in their own setting (glistering melon or magma cream): " + report);
 		setTime(world, 6000L);
-		setWeather(world, "clear");
+		setWeather(world, "clear", Vec3d.ZERO);
 		ctx.assertTrue(failures.isEmpty(), String.join("; ", failures));
 	}
 

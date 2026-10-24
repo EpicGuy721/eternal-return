@@ -40,11 +40,11 @@ public final class Growing {
 
 	/** After a growing block's random tick: in the rain, maybe another. */
 	public static void rainTick(BlockState before, ServerWorld world, BlockPos pos, Random random) {
-		if (EXTRA.get() || !world.isRaining()) {
+		if (EXTRA.get() || !com.eternalreturn.weather.LocalWeather.mayRain(world)) {
 			return;
 		}
 		boolean wet = before.getBlock() instanceof CocoaBlock
-				? world.getBiome(pos).value().getPrecipitation(pos) == Biome.Precipitation.RAIN
+				? com.eternalreturn.weather.LocalWeather.rainingAt(world, pos) && world.getBiome(pos).value().getPrecipitation(pos) == Biome.Precipitation.RAIN
 				: world.hasRain(pos) || world.hasRain(pos.up());
 		double extra = EternalReturnConfig.get().survival.rainGrowthMultiplier - 1.0;
 		if (!wet || extra <= 0.0) {

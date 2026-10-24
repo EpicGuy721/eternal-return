@@ -33,6 +33,7 @@ public class EternalReturnClient implements ClientModInitializer {
 		SpearClient.register();
 		SwimKeyClient.register();
 		DamageNumbers.register();
+		com.eternalreturn.client.weather.ClientWeather.register();
 		net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap.INSTANCE.putBlock(com.eternalreturn.blocks.CopperRail.BLOCK,
 				net.minecraft.client.render.RenderLayer.getCutout());
 

@@ -453,25 +453,21 @@ public class CombatPotionFarmTests implements FabricGameTest {
 		ctx.setBlockState(3, 0, 3, Blocks.FARMLAND.getDefaultState().with(FarmlandBlock.MOISTURE, 7));
 		BlockPos wheat = ctx.getAbsolutePos(new BlockPos(3, 1, 3));
 		Random random = Random.create(7);
+		com.eternalreturn.weather.Storm storm = null;
 		try {
-			world.setWeather(0, 0, false, false);
-			world.setRainGradient(0.0F);
 			world.setBlockState(wheat, Blocks.WHEAT.getDefaultState());
 			for (int i = 0; i < 200; i++) {
 				Growing.rainTick(world.getBlockState(wheat), world, wheat, random);
 			}
 			ctx.assertTrue(world.getBlockState(wheat).get(CropBlock.AGE) == 0, "no extra growth in dry weather");
-			world.setWeather(0, 6000, true, false);
-			// Rain fades in over a few seconds; start it at full.
-			world.setRainGradient(1.0F);
+			storm = Weathers.rain(world, Vec3d.ofCenter(wheat), false);
 			ctx.assertTrue(world.hasRain(wheat), "it rains on the wheat");
 			for (int i = 0; i < 200; i++) {
 				Growing.rainTick(world.getBlockState(wheat), world, wheat, random);
 			}
 			ctx.assertTrue(world.getBlockState(wheat).get(CropBlock.AGE) > 0, "the rain made it grow: " + world.getBlockState(wheat));
 		} finally {
-			world.setWeather(0, 0, false, false);
-			world.setRainGradient(0.0F);
+			Weathers.dry(world, storm);
 		}
 		ctx.complete();
 	}

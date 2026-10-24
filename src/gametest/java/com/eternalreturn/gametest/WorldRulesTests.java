@@ -197,12 +197,12 @@ public class WorldRulesTests implements FabricGameTest {
 		BlockPos at = ctx.getAbsolutePos(new BlockPos(2, 1, 2));
 		Random random = Random.create(7);
 		world.setTimeOfDay(18000);
-		world.setWeather(0, 6000, true, false);
-		// Rain fades in over a few seconds; it counts once it's falling.
+		com.eternalreturn.weather.Storm storm = Weathers.rain(world, net.minecraft.util.math.Vec3d.ofCenter(at), false);
 		ctx.runAtTick(ctx.getTick() + 60, () -> {
 			com.eternalreturn.survival.BeaconZones.clear(world);
-			boolean rainy = world.isRaining() && SpawnRestriction.canSpawn(EntityType.SLIME, world, SpawnReason.NATURAL, at, random);
-			world.setWeather(6000, 0, false, false);
+			boolean rainy = com.eternalreturn.weather.LocalWeather.rainingAt(world, at)
+					&& SpawnRestriction.canSpawn(EntityType.SLIME, world, SpawnReason.NATURAL, at, random);
+			Weathers.dry(world, storm);
 			ctx.runAtTick(ctx.getTick() + 60, () -> {
 				com.eternalreturn.survival.BeaconZones.clear(world);
 				boolean dry = SpawnRestriction.canSpawn(EntityType.SLIME, world, SpawnReason.NATURAL, at, random);

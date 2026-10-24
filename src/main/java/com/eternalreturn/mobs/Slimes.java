@@ -47,9 +47,10 @@ public final class Slimes {
 		}
 	}
 
-	/** A natural slime spawn on the surface while it rains at night (any biome). */
+	/** A natural slime spawn on the surface while it rains there at night (any biome; with storms, under one). */
 	public static boolean rainSpawn(ServerWorld world, BlockPos pos) {
-		if (!EternalReturnConfig.get().mobs.slimesInNightRain || world.getDifficulty() == Difficulty.PEACEFUL || !world.isRaining()) {
+		if (!EternalReturnConfig.get().mobs.slimesInNightRain || world.getDifficulty() == Difficulty.PEACEFUL
+				|| !com.eternalreturn.weather.LocalWeather.rainingAt(world, pos)) {
 			return false;
 		}
 		long time = Math.floorMod(world.getTimeOfDay(), 24000L);

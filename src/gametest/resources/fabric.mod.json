@@ -55,6 +55,7 @@
 			"com.eternalreturn.gametest.NewItemTests",
 			"com.eternalreturn.gametest.SpearTests",
 			"com.eternalreturn.gametest.SystemTests",
+			"com.eternalreturn.gametest.WeatherTests",
 			"com.eternalreturn.gametest.BirdTests",
 			"com.eternalreturn.gametest.FishSchoolTests"
 		]
