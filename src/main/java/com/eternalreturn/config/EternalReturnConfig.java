@@ -461,6 +461,13 @@ public final class EternalReturnConfig {
 		public double poisonousPotatoStuntChance = 0.5;
 		/** Mobs see a glowing creature through blocks. */
 		public boolean glowingSeenThroughWalls = true;
+		/**
+		 * Swimming is on a key of its own (Left Alt to begin with) instead of sprinting under water, and the same key
+		 * crawls on land (SwimKey).
+		 */
+		public boolean swimKey = true;
+		/** Damage done to creatures shows as numbers rising from them (client DamageNumbers). */
+		public boolean damageNumbers = true;
 	}
 
 	/** How far monsters smell a player, by kind: the undead hungry for flesh and the beasts far, the noseless skeletons hardly at all. */

@@ -7,8 +7,8 @@ import net.minecraft.item.ItemStack;
 
 /**
  * Fire Protection at its highest level, on any one piece of armor: the player swims in lava as in water (moving,
- * sprint-swimming and seeing as well as there, LavaSwimmingMixin, LavaTravelMixin, client LavaFogMixin), and lava
- * neither hurts nor sets them alight.
+ * swimming and seeing as well as there: LavaTravelMixin, SwimKeyMixin, client LavaFogMixin), and lava neither hurts
+ * nor sets them alight (LavaSwimmingMixin).
  */
 public final class LavaSwimming {
 	private LavaSwimming() {

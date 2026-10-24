@@ -210,9 +210,9 @@ public class NewEnchantmentTests implements FabricGameTest {
 			ctx.assertTrue(swimmer.isInLava() && burner.isInLava(), "both in the lava");
 			ctx.assertTrue(burner.isOnFire(), "one level less burns");
 			ctx.assertTrue(!swimmer.isOnFire() && swimmer.getHealth() == health, "the swimmer neither burns nor is hurt");
-			swimmer.setSprinting(true);
+			((com.eternalreturn.logic.SwimKey.Holder) swimmer).eternalreturn$setSwimKey(true);
 			swimmer.updateSwimming();
-			ctx.assertTrue(swimmer.isSwimming(), "sprinting under lava swims");
+			ctx.assertTrue(swimmer.isSwimming(), "the swim key under lava swims");
 		} finally {
 			FishingTests.disconnect(swimmer);
 			FishingTests.disconnect(burner);

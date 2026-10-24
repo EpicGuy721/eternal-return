@@ -38,7 +38,8 @@ import java.util.UUID;
 /**
  * Minecarts.
  * <ul>
- * <li>Faster without derailing (redstone.minecartSpeedMultiplier, 3): each tick a cart on rails takes that many of
+ * <li>Faster without derailing (redstone.minecartSpeedMultiplier, 3), except on copper rails (CopperRail), which keep
+ * to vanilla's speed: each tick a cart on other rails takes that many of
  * vanilla's steps, none longer than vanilla's, so it keeps to curves and slopes and still trips detector and activator
  * rails, at 3 times the speed (MinecartMixin). Off the rails it moves as in vanilla. Players get a cart's position
  * every tick, smoothed over less time, so a fast cart doesn't stutter.</li>

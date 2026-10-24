@@ -13,7 +13,10 @@ import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 
-/** Copper rails: an ordinary rail (it curves, carts run on it as on any rail) made from copper (6 ingots and a stick: 16). */
+/**
+ * Copper rails: an ordinary rail (it curves) made from copper (6 ingots and a stick: 16), on which carts keep to vanilla's
+ * speed, a third of what they reach on the other rails (Minecarts).
+ */
 public final class CopperRail extends RailBlock {
 	public static final Block BLOCK = Registry.register(Registries.BLOCK, EternalReturn.id("copper_rail"),
 			new CopperRail(AbstractBlock.Settings.copy(Blocks.RAIL)));
