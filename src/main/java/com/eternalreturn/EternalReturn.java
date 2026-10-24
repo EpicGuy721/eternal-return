@@ -70,6 +70,9 @@ public class EternalReturn implements ModInitializer {
 		com.eternalreturn.items.DragonRocket.register();
 		com.eternalreturn.logic.Necromancy.register();
 		com.eternalreturn.items.IceBall.register();
+		com.eternalreturn.items.Shuriken.register();
+		com.eternalreturn.items.BlockTools.register();
+		com.eternalreturn.logic.BlockLocks.register();
 		com.eternalreturn.items.Firearms.register();
 		com.eternalreturn.mobs.NewMobs.register();
 		com.eternalreturn.birds.Birds.register();

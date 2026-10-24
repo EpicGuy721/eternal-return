@@ -96,6 +96,8 @@
 		"enchantments.TelekinesisBlockMixin",
 		"enchantments.TelekinesisDropMixin",
 		"enchantments.TelekinesisMobMixin",
+		"tweaks.BlockLockClearMixin",
+		"tweaks.BlockLockMixin",
 		"tweaks.DrownedLoyalTridentMixin",
 		"tweaks.FallingLanternMixin",
 		"tweaks.FeatherPunchMixin",
