@@ -65,6 +65,12 @@ public class SpearTests implements FabricGameTest {
 		ItemStack spear = world.getRecipeManager().getFirstMatch(RecipeType.CRAFTING, slant, world)
 				.map(recipe -> recipe.value().craft(slant, world.getRegistryManager())).orElse(ItemStack.EMPTY);
 		ctx.assertTrue(spear.isOf(Spears.IRON), "an iron ingot over two sticks on a slant: " + spear);
+		CraftingRecipeInput roseSlant = CraftingRecipeInput.create(3, 3, List.of(ItemStack.EMPTY, ItemStack.EMPTY,
+				new ItemStack(net.minecraft.registry.Registries.ITEM.get(EternalReturn.id("rosegold_ingot"))), ItemStack.EMPTY, stick, ItemStack.EMPTY, stick,
+				ItemStack.EMPTY, ItemStack.EMPTY));
+		ItemStack rose = world.getRecipeManager().getFirstMatch(RecipeType.CRAFTING, roseSlant, world)
+				.map(recipe -> recipe.value().craft(roseSlant, world.getRegistryManager())).orElse(ItemStack.EMPTY);
+		ctx.assertTrue(rose.isOf(Spears.ROSEGOLD) && rose.getMaxDamage() == 190, "a rose gold spear: " + rose);
 		SmithingRecipeInput upgrade = new SmithingRecipeInput(new ItemStack(Items.NETHERITE_UPGRADE_SMITHING_TEMPLATE), new ItemStack(Spears.DIAMOND),
 				new ItemStack(Items.NETHERITE_INGOT));
 		ItemStack netherite = world.getRecipeManager().getFirstMatch(RecipeType.SMITHING, upgrade, world)

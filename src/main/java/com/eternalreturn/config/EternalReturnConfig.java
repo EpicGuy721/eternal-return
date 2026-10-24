@@ -462,8 +462,8 @@ public final class EternalReturnConfig {
 		/** Mobs see a glowing creature through blocks. */
 		public boolean glowingSeenThroughWalls = true;
 		/**
-		 * Swimming is on a key of its own (Left Alt to begin with) instead of sprinting under water, and the same key
-		 * crawls on land (SwimKey).
+		 * Swimming is on a key of its own (Left Alt to begin with, a toggle) instead of sprinting under water, and the
+		 * same key crawls on land (SwimKey).
 		 */
 		public boolean swimKey = true;
 		/** Damage done to creatures shows as numbers rising from them (client DamageNumbers). */

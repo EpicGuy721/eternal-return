@@ -16,8 +16,8 @@ import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.world.World;
 
 /**
- * Copying a music disc in a crafting table: a disc (anything a jukebox plays) and an echo shard make a copy of the
- * disc, and the disc stays in the grid.
+ * Copying a music disc in a crafting table: a disc (anything a jukebox plays) in the middle with eight echo shards
+ * around it makes a copy of the disc, and the disc stays in the grid.
  */
 public class DiscCopyRecipe extends SpecialCraftingRecipe {
 	public static final RecipeSerializer<DiscCopyRecipe> SERIALIZER = Registry.register(Registries.RECIPE_SERIALIZER, EternalReturn.id("music_disc_copy"),
@@ -30,24 +30,18 @@ public class DiscCopyRecipe extends SpecialCraftingRecipe {
 	public static void register() {
 	}
 
-	/** The slot of the disc, or -1 if the grid holds anything but one disc and one echo shard. */
+	/** The slot of the disc (the middle), or -1 unless the grid is a disc ringed by eight echo shards. */
 	private static int disc(CraftingRecipeInput input) {
-		int disc = -1;
-		int shards = 0;
-		for (int i = 0; i < input.getSize(); i++) {
+		if (input.getWidth() != 3 || input.getHeight() != 3) {
+			return -1;
+		}
+		for (int i = 0; i < 9; i++) {
 			ItemStack stack = input.getStackInSlot(i);
-			if (stack.isEmpty()) {
-				continue;
-			}
-			if (stack.isOf(Items.ECHO_SHARD)) {
-				shards++;
-			} else if (stack.contains(DataComponentTypes.JUKEBOX_PLAYABLE) && disc == -1) {
-				disc = i;
-			} else {
+			if (i == 4 ? !stack.contains(DataComponentTypes.JUKEBOX_PLAYABLE) : !stack.isOf(Items.ECHO_SHARD)) {
 				return -1;
 			}
 		}
-		return shards == 1 ? disc : -1;
+		return 4;
 	}
 
 	@Override
@@ -74,7 +68,7 @@ public class DiscCopyRecipe extends SpecialCraftingRecipe {
 
 	@Override
 	public boolean fits(int width, int height) {
-		return width * height >= 2;
+		return width >= 3 && height >= 3;
 	}
 
 	@Override

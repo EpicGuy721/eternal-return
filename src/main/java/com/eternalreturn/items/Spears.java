@@ -31,8 +31,8 @@ import net.minecraft.world.World;
 import java.util.List;
 
 /**
- * Spears, as in later versions: wooden, stone, copper, iron, golden and diamond (the material over two sticks on a
- * slant), and netherite (a diamond spear upgraded at a smithing table). They fight two ways (SpearCombat):
+ * Spears, as in later versions: wooden, stone, copper, iron, golden, rose gold and diamond (the material over two
+ * sticks on a slant), and netherite (a diamond spear upgraded at a smithing table). They fight two ways (SpearCombat):
  * <ul>
  * <li>a jab (attack), once the attack is fully charged: a stab along the line of sight at everything between 2 and
  * 4.5 blocks off (6.5 in creative), through grass and other blocks one can walk through. No critical hits, no
@@ -42,9 +42,10 @@ import java.util.List;
  * more) and, freshest, throws riders off their mounts (at a speed by tier); then it tires and ends by itself. The
  * player can sprint while charging.</li>
  * </ul>
- * The numbers per tier are the later versions' (Tier). They take the sword enchantments but Sweeping Edge
- * (tools/enchantments/build_enchantments.py) and their material's enchant capacity. Zombies, husks and zombie villagers
- * may carry an iron spear, piglins and zombified piglins a golden one; those charge with it now and then (SpearMobs).
+ * The numbers per tier are the later versions' (Tier); rose gold's are halfway between gold's and copper's. They take
+ * the sword enchantments but Sweeping Edge (tools/enchantments/build_enchantments.py) and their material's enchant
+ * capacity. Zombies, husks and zombie villagers may carry an iron spear, piglins and zombified piglins a golden one;
+ * those charge with it now and then (SpearMobs).
  */
 public final class Spears {
 	public static final TagKey<Item> TAG = TagKey.of(RegistryKeys.ITEM, EternalReturn.id("spears"));
@@ -63,11 +64,14 @@ public final class Spears {
 	public static final Spear COPPER = register(new Tier("copper", Materials.Tool.COPPER, 1.0, -2.8235, 13, 0.82F, 80, 12.0F, 165, 250), new Item.Settings());
 	public static final Spear IRON = register(new Tier("iron", ToolMaterials.IRON, 2.0, -2.9474, 12, 0.95F, 50, 11.0F, 135, 225), new Item.Settings());
 	public static final Spear GOLDEN = register(new Tier("golden", ToolMaterials.GOLD, 0.0, -2.9474, 14, 0.7F, 70, 13.0F, 170, 275), new Item.Settings());
+	/** Rose gold, gold and copper together: halfway between the two. */
+	public static final Spear ROSEGOLD = register(new Tier("rosegold", Materials.Tool.ROSEGOLD, 0.0, -2.885, 13, 0.76F, 75, 12.5F, 168, 263),
+			new Item.Settings());
 	public static final Spear DIAMOND = register(new Tier("diamond", ToolMaterials.DIAMOND, 3.0, -3.0476, 10, 1.075F, 60, 10.0F, 130, 200),
 			new Item.Settings());
 	public static final Spear NETHERITE = register(new Tier("netherite", ToolMaterials.NETHERITE, 4.0, -3.1304, 8, 1.2F, 50, 9.0F, 110, 175),
 			new Item.Settings().fireproof());
-	public static final List<Spear> ALL = List.of(WOODEN, STONE, COPPER, IRON, GOLDEN, DIAMOND, NETHERITE);
+	public static final List<Spear> ALL = List.of(WOODEN, STONE, COPPER, IRON, GOLDEN, ROSEGOLD, DIAMOND, NETHERITE);
 
 	private Spears() {
 	}

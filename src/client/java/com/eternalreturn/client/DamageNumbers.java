@@ -3,6 +3,8 @@ package com.eternalreturn.client;
 import com.eternalreturn.config.EternalReturnConfig;
 import it.unimi.dsi.fastutil.ints.Int2FloatMap;
 import it.unimi.dsi.fastutil.ints.Int2FloatOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
@@ -24,13 +26,18 @@ import java.util.List;
 
 /**
  * Damage numbers (survival.damageNumbers): when a creature within 32 blocks loses health, the amount rises from it
- * as a number and fades over a second and a half: white for a little, yellow for more, red for a lot. Read from the
- * health the game already sends, so it shows all damage, whoever dealt it, but not the player's own.
+ * as a number and fades over a second and a half: white for a little, yellow for more, red for a lot; a hit that does
+ * no harm (a feather, say) shows 0. Read from the health and hurt flashes the game already sends, so it shows all
+ * damage, whoever dealt it, but not the player's own.
  */
 public final class DamageNumbers {
 	private static final int LIFE = 30;
 	private static final double RANGE = 32.0;
 	private static final Int2FloatMap HEALTH = new Int2FloatOpenHashMap();
+	/** Each creature's hurt flash last tick: one that starts again is a new hit. */
+	private static final Int2IntMap HURT = new Int2IntOpenHashMap();
+	/** Hits that took no health, waiting a couple of ticks in case the health comes a little after the flash. */
+	private static final Int2IntOpenHashMap HARMLESS = new Int2IntOpenHashMap();
 	private static final List<Popup> POPUPS = new ArrayList<>();
 	private static final Random RANDOM = Random.create();
 
@@ -49,10 +56,13 @@ public final class DamageNumbers {
 		POPUPS.removeIf(popup -> ++popup.age()[0] >= LIFE);
 		if (client.world == null || client.player == null || !EternalReturnConfig.get().survival.damageNumbers) {
 			HEALTH.clear();
+			HURT.clear();
+			HARMLESS.clear();
 			POPUPS.clear();
 			return;
 		}
 		Int2FloatMap seen = new Int2FloatOpenHashMap();
+		Int2IntMap hurt = new Int2IntOpenHashMap();
 		for (Entity entity : client.world.getEntities()) {
 			if (!(entity instanceof LivingEntity living) || entity == client.player || entity.squaredDistanceTo(client.player) > RANGE * RANGE) {
 				continue;
@@ -60,16 +70,31 @@ public final class DamageNumbers {
 			float health = living.getHealth();
 			if (HEALTH.containsKey(entity.getId())) {
 				float lost = HEALTH.get(entity.getId()) - health;
+				if (living.hurtTime > HURT.getOrDefault(entity.getId(), 0) && lost <= 0.05F) {
+					HARMLESS.put(entity.getId(), 2);
+				}
 				if (lost > 0.05F) {
-					Vec3d at = new Vec3d(entity.getX() + (RANDOM.nextDouble() - 0.5) * entity.getWidth(), entity.getY() + entity.getHeight() + 0.2,
-							entity.getZ() + (RANDOM.nextDouble() - 0.5) * entity.getWidth());
-					POPUPS.add(new Popup(at, lost, new int[]{0}));
+					HARMLESS.remove(entity.getId());
+					popup(entity, lost);
+				} else if (HARMLESS.containsKey(entity.getId()) && HARMLESS.addTo(entity.getId(), -1) <= 1) {
+					HARMLESS.remove(entity.getId());
+					popup(entity, 0.0F);
 				}
 			}
 			seen.put(entity.getId(), health);
+			hurt.put(entity.getId(), living.hurtTime);
 		}
 		HEALTH.clear();
 		HEALTH.putAll(seen);
+		HURT.clear();
+		HURT.putAll(hurt);
+		HARMLESS.keySet().removeIf(id -> !seen.containsKey(id));
+	}
+
+	private static void popup(Entity entity, float amount) {
+		Vec3d at = new Vec3d(entity.getX() + (RANDOM.nextDouble() - 0.5) * entity.getWidth(), entity.getY() + entity.getHeight() + 0.2,
+				entity.getZ() + (RANDOM.nextDouble() - 0.5) * entity.getWidth());
+		POPUPS.add(new Popup(at, amount, new int[]{0}));
 	}
 
 	private static String text(float amount) {

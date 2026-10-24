@@ -13,11 +13,11 @@ import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.registry.tag.FluidTags;
 
 /**
- * Swimming is on a key of its own (survival.swimKey; Left Alt to begin with, client SwimKeyClient): held in water, the
- * player swims (from under the surface, or from standing in shallow water, and on while in the water), and held on land
- * they crawl. Sprinting under water no longer swims. A player who swims in lava (LavaSwimming) swims there the same
- * way; anyone else can't swim or crawl in lava. The client tells the server whether the key is held (SwimKeyMixin
- * decides).
+ * Swimming is on a key of its own (survival.swimKey; Left Alt to begin with, a toggle, client SwimKeyClient): while it
+ * is on, the player swims in water (from under the surface, or from standing in shallow water, and on while in the
+ * water) and crawls on land. Sprinting under water no longer swims. A player who swims in lava (LavaSwimming) swims
+ * there the same way; anyone else can't swim or crawl in lava. The client tells the server whether it is on
+ * (SwimKeyMixin decides).
  */
 public final class SwimKey {
 	private SwimKey() {

@@ -47,9 +47,9 @@ import net.minecraft.world.biome.BiomeKeys;
 import java.util.List;
 
 /**
- * Small tweaks: deep-water guardians; no natural soldiers or gimps; bone blocks smelt to calcite; an echo shard copies
- * a music disc (and keeps it); a pickaxe keeps a spawner; a feather punch does nothing; Reeling goes on fishing rods; slimes bounce;
- * squid ink blinds; Feather Falling boots tread lightly; vexes can't pass crying obsidian; the undead and illagers
+ * Small tweaks: deep-water guardians; no natural soldiers or gimps; bone blocks smelt to calcite; eight echo shards
+ * around a music disc copy it (and keep it); a pickaxe keeps a spawner; a feather punch does no damage; Reeling goes on
+ * fishing rods; slimes bounce; squid ink blinds; Feather Falling boots tread lightly; vexes can't pass crying obsidian; the undead and illagers
  * fight; a drowned's trident comes back to it; a lantern that loses its hold falls and bursts into fire; beacons offer
  * Night Vision. And (own batch, it changes the weather) no rain above the clouds.
  */
@@ -85,10 +85,14 @@ public class TweakTests implements FabricGameTest {
 		ServerWorld world = ctx.getWorld();
 		var calcite = world.getRecipeManager().getFirstMatch(RecipeType.SMELTING, new SingleStackRecipeInput(new ItemStack(Items.BONE_BLOCK)), world);
 		ctx.assertTrue(calcite.isPresent() && calcite.get().value().getResult(world.getRegistryManager()).isOf(Items.CALCITE), "bone block smelts to calcite");
-		CraftingRecipeInput input = CraftingRecipeInput.create(2, 1, List.of(new ItemStack(Items.MUSIC_DISC_CAT), new ItemStack(Items.ECHO_SHARD)));
+		ItemStack shard = new ItemStack(Items.ECHO_SHARD);
+		CraftingRecipeInput input = CraftingRecipeInput.create(3, 3,
+				List.of(shard, shard, shard, shard, new ItemStack(Items.MUSIC_DISC_CAT), shard, shard, shard, shard));
 		var copy = world.getRecipeManager().getFirstMatch(RecipeType.CRAFTING, input, world);
 		ItemStack result = copy.map(recipe -> recipe.value().craft(input, world.getRegistryManager())).orElse(ItemStack.EMPTY);
-		ctx.assertTrue(result.isOf(Items.MUSIC_DISC_CAT), "a disc and an echo shard make a copy of the disc: " + result);
+		ctx.assertTrue(result.isOf(Items.MUSIC_DISC_CAT), "a disc ringed by eight echo shards makes a copy of the disc: " + result);
+		CraftingRecipeInput one = CraftingRecipeInput.create(2, 1, List.of(new ItemStack(Items.MUSIC_DISC_CAT), shard));
+		ctx.assertTrue(world.getRecipeManager().getFirstMatch(RecipeType.CRAFTING, one, world).isEmpty(), "one shard isn't enough");
 		var left = copy.get().value().getRemainder(input);
 		ctx.assertTrue(left.stream().filter(stack -> stack.isOf(Items.MUSIC_DISC_CAT)).count() == 1, "and the disc stays: " + left);
 		ctx.complete();
@@ -248,21 +252,27 @@ public class TweakTests implements FabricGameTest {
 		});
 	}
 
-	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 300)
+	/** A drowned throws its trident, gets it back, and throws it again (not taking to its fists instead). */
+	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 800)
 	public void drownedTridentsComeBack(TestContext ctx) {
 		DrownedEntity drowned = ctx.spawnEntity(EntityType.DROWNED, new BlockPos(8, 2, 6));
 		drowned.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.TRIDENT));
 		ZombieEntity husk = ctx.spawnEntity(EntityType.HUSK, new BlockPos(8, 2, 16));
 		husk.setAiDisabled(true);
-		boolean[] thrown = {false};
+		husk.setInvulnerable(true);
+		boolean[] out = {false};
+		int[] throwsBack = {0};
 		ctx.runAtEveryTick(() -> {
 			Lounging.stand(drowned);
 			drowned.setTarget(husk);
 			if (drowned.getMainHandStack().isEmpty()) {
-				thrown[0] = true;
-			} else if (thrown[0] && drowned.getMainHandStack().isOf(Items.TRIDENT)) {
-				ctx.killAllEntities();
-				ctx.complete();
+				out[0] = true;
+			} else if (out[0] && drowned.getMainHandStack().isOf(Items.TRIDENT)) {
+				out[0] = false;
+				if (++throwsBack[0] == 2) {
+					ctx.killAllEntities();
+					ctx.complete();
+				}
 			}
 		});
 	}

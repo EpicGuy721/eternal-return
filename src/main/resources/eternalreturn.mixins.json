@@ -103,6 +103,7 @@
 		"tweaks.BlockLockClearMixin",
 		"tweaks.BlockLockMixin",
 		"tweaks.DrownedLoyalTridentMixin",
+		"tweaks.DrownedMeleeMixin",
 		"tweaks.DrownedTridentGoalMixin",
 		"tweaks.FallingLanternMixin",
 		"tweaks.FeatherPunchMixin",
