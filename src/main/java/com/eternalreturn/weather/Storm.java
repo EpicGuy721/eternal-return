@@ -51,8 +51,8 @@ public final class Storm {
 	}
 
 	/**
-	 * How much of this storm covers a spot: its intensity inside its edge, fading to nothing over the band blocks
-	 * beyond it.
+	 * How much of this storm covers a spot: its full intensity in its core (the inner six tenths), then easing off
+	 * gradually through its edge to nothing band blocks beyond it, so rain thins out rather than stopping at a line.
 	 */
 	public float cover(double px, double pz, double band) {
 		double dx = px - this.x;
@@ -64,10 +64,16 @@ public final class Storm {
 		}
 		double distance = Math.sqrt(distanceSq);
 		double edge = this.edge(Math.atan2(dz, dx));
-		if (distance <= edge) {
+		double core = edge * 0.6;
+		if (distance <= core) {
 			return this.intensity;
 		}
-		return distance >= edge + band ? 0.0F : (float) (this.intensity * (1.0 - (distance - edge) / band));
+		double outside = edge + band;
+		if (distance >= outside) {
+			return 0.0F;
+		}
+		double t = (distance - core) / (outside - core);
+		return (float) (this.intensity * (1.0 - t * t * (3.0 - 2.0 * t)));
 	}
 
 	/** Where its strength is in its life (building, holding, dying away), times how much the country lets it rain. */

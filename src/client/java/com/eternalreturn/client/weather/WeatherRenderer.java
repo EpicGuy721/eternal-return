@@ -138,8 +138,8 @@ public final class WeatherRenderer {
 					float alpha = (0.5F + 0.5F * fade) * cover * (close ? 1.0F : 0.8F);
 					// Rain falls about 9 blocks a second: it leans by the wind's speed over that.
 					double lean = 2.5;
-					quad(buffer, baseX, baseZ, sx, sz, bottom - cameraY, top - cameraY, windX * lean, windZ * lean, 0.0F, bottom * 0.25F + v,
-							top * 0.25F + v, alpha, light);
+					quad(buffer, baseX, baseZ, sx, sz, bottom - cameraY, top - cameraY, ground - cameraY, windX * lean, windZ * lean, 0.0F,
+							bottom * 0.25F + v, top * 0.25F + v, alpha, light);
 				} else {
 					if (texture != 1) {
 						if (texture >= 0) {
@@ -158,9 +158,10 @@ public final class WeatherRenderer {
 					int sky = light >> 16 & 65535;
 					int block = light & 65535;
 					int snowLight = ((block * 3 + 240) / 4) | ((sky * 3 + 240) / 4) << 16;
-					// Snow falls slowly, so it leans far more; a blizzard drives it nearly sideways.
+					// Snow falls slowly, so it leans far more; a blizzard drives it hard.
 					double lean = 6.0 * (1.0 + 1.5 * blizzard);
-					quad(buffer, baseX, baseZ, sx, sz, bottom - cameraY, top - cameraY, windX * lean, windZ * lean, u, bottom * 0.25F + v + jitter,
+					quad(buffer, baseX, baseZ, sx, sz, bottom - cameraY, top - cameraY, ground - cameraY, windX * lean, windZ * lean, u,
+							bottom * 0.25F + v + jitter,
 							top * 0.25F + v + jitter, alpha, snowLight);
 				}
 			}
@@ -173,13 +174,22 @@ public final class WeatherRenderer {
 		manager.disable();
 	}
 
-	/** One falling sheet from y0 to y1 (camera-relative), leaning with the wind (the lean per block of height). */
-	private static void quad(BufferBuilder buffer, double x, double z, double sx, double sz, double y0, double y1, double leanX, double leanZ, float u,
-			float v0, float v1, float alpha, int light) {
-		double topX = leanX * y1;
-		double topZ = leanZ * y1;
-		double bottomX = leanX * y0;
-		double bottomZ = leanZ * y0;
+	/**
+	 * One falling sheet from y0 to y1 (camera-relative) over a column whose ground is at floor, leaning with the wind
+	 * (lean is how far it is carried per block it falls, at most one block): where it lands is the column, so higher
+	 * up it is that much further upwind. Fixed to the ground, it stays put however the camera moves.
+	 */
+	private static void quad(BufferBuilder buffer, double x, double z, double sx, double sz, double y0, double y1, double floor, double leanX,
+			double leanZ, float u, float v0, float v1, float alpha, int light) {
+		double carried = Math.sqrt(leanX * leanX + leanZ * leanZ);
+		if (carried > 1.0) {
+			leanX /= carried;
+			leanZ /= carried;
+		}
+		double topX = -leanX * (y1 - floor);
+		double topZ = -leanZ * (y1 - floor);
+		double bottomX = -leanX * (y0 - floor);
+		double bottomZ = -leanZ * (y0 - floor);
 		buffer.vertex((float) (x - sx + topX), (float) y1, (float) (z - sz + topZ)).texture(u, v0).color(1.0F, 1.0F, 1.0F, alpha).light(light);
 		buffer.vertex((float) (x + sx + topX), (float) y1, (float) (z + sz + topZ)).texture(1.0F + u, v0).color(1.0F, 1.0F, 1.0F, alpha).light(light);
 		buffer.vertex((float) (x + sx + bottomX), (float) y0, (float) (z + sz + bottomZ)).texture(1.0F + u, v1).color(1.0F, 1.0F, 1.0F, alpha).light(light);

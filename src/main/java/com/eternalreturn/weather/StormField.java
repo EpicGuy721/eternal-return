@@ -10,8 +10,8 @@ import java.util.List;
  * player's game is told of them, so both agree where it rains.
  */
 public class StormField {
-	/** Rain fades out over this many blocks beyond a storm's edge. */
-	public static final double RAIN_EDGE = 16.0;
+	/** Rain thins out from a storm's core to nothing this many blocks beyond its edge. */
+	public static final double RAIN_EDGE = 40.0;
 	/** The sky darkens from this far beyond a storm's edge, so it can be seen coming. */
 	public static final double DARK_EDGE = 160.0;
 	/** It rains where a storm covers more than this. */

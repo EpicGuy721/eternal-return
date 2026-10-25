@@ -187,4 +187,92 @@ public class WeatherTests implements FabricGameTest {
 		}
 		ctx.complete();
 	}
+
+	/** Rain thins out from a storm's core through its edge, rather than stopping at a line. */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = BATCH)
+	public void stormsThinOutAtTheEdge(TestContext ctx) {
+		Storm storm = new Storm(1, 0.0, 0.0, 200.0F, false, 0L, Storm.GROW, 99999, 1.0F, 1.0F);
+		float last = 2.0F;
+		StringBuilder seen = new StringBuilder();
+		for (int distance = 0; distance <= 400; distance += 20) {
+			float cover = storm.cover(distance, 0.0, StormField.RAIN_EDGE);
+			seen.append(' ').append(distance).append(':').append(String.format("%.2f", cover));
+			ctx.assertTrue(cover <= last, "never heavier further out:" + seen);
+			last = cover;
+		}
+		ctx.assertTrue(storm.cover(0.0, 0.0, StormField.RAIN_EDGE) == 1.0F && storm.cover(400.0, 0.0, StormField.RAIN_EDGE) == 0.0F,
+				"full in the middle, none far off");
+		int thinning = 0;
+		for (int distance = 0; distance <= 400; distance += 20) {
+			float cover = storm.cover(distance, 0.0, StormField.RAIN_EDGE);
+			thinning += cover > 0.05F && cover < 0.95F ? 1 : 0;
+		}
+		ctx.assertTrue(thinning >= 5, "thins out over 100 blocks or more:" + seen);
+		ctx.complete();
+	}
+
+	/** /eternalreturn weather lists the storms near the player, in words (every one of them in the language file). */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = BATCH, skyAccess = true)
+	public void weatherCommandListsStorms(TestContext ctx) throws Exception {
+		ServerWorld world = ctx.getWorld();
+		BlockPos here = ctx.getAbsolutePos(new BlockPos(1, 1, 1));
+		Storm storm = Weathers.rain(world, Vec3d.ofCenter(here), true);
+		List<net.minecraft.text.Text> said = new java.util.ArrayList<>();
+		net.minecraft.server.command.CommandOutput output = new net.minecraft.server.command.CommandOutput() {
+			@Override
+			public void sendMessage(net.minecraft.text.Text message) {
+				said.add(message);
+			}
+
+			@Override
+			public boolean shouldReceiveFeedback() {
+				return true;
+			}
+
+			@Override
+			public boolean shouldTrackOutput() {
+				return true;
+			}
+
+			@Override
+			public boolean shouldBroadcastConsoleToOps() {
+				return false;
+			}
+		};
+		try {
+			net.minecraft.server.command.ServerCommandSource source = new net.minecraft.server.command.ServerCommandSource(output, Vec3d.ofCenter(here),
+					net.minecraft.util.math.Vec2f.ZERO, world, 4, "test", net.minecraft.text.Text.literal("test"), world.getServer(), null);
+			int found = world.getServer().getCommandManager().getDispatcher().execute("eternalreturn weather", source);
+			ctx.assertTrue(found >= 1, "found the storm overhead: " + found);
+			java.util.Set<String> keys = new java.util.HashSet<>();
+			for (net.minecraft.text.Text text : said) {
+				collectKeys(text, keys);
+			}
+			ctx.assertTrue(keys.contains("commands.eternalreturn.weather.thunderstorm") && keys.contains("commands.eternalreturn.weather.here"),
+					"told of the thunderstorm over the player: " + keys);
+			com.google.gson.JsonObject lang;
+			try (var in = WeatherTests.class.getResourceAsStream("/assets/eternalreturn/lang/en_us.json")) {
+				lang = com.google.gson.JsonParser.parseReader(new java.io.InputStreamReader(in, java.nio.charset.StandardCharsets.UTF_8)).getAsJsonObject();
+			}
+			List<String> missing = keys.stream().filter(key -> key.startsWith("commands.eternalreturn.") && !lang.has(key)).toList();
+			ctx.assertTrue(missing.isEmpty(), "words missing from the language file: " + missing);
+		} finally {
+			Weathers.dry(world, storm);
+		}
+		ctx.complete();
+	}
+
+	private static void collectKeys(net.minecraft.text.Text text, java.util.Set<String> keys) {
+		if (text.getContent() instanceof net.minecraft.text.TranslatableTextContent translatable) {
+			keys.add(translatable.getKey());
+			for (Object arg : translatable.getArgs()) {
+				if (arg instanceof net.minecraft.text.Text inner) {
+					collectKeys(inner, keys);
+				}
+			}
+		}
+		for (net.minecraft.text.Text sibling : text.getSiblings()) {
+			collectKeys(sibling, keys);
+		}
+	}
 }

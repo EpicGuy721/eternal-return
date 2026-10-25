@@ -4,14 +4,14 @@ In the overworld, weather is local: rain and thunder come as storms that form, d
 
 ## Storms
 
-- A storm is a patch of rain (snow where the biome is cold) about 220 to 740 blocks across, round but with a ragged edge. It builds up over its first minute, holds, and dies away over its last; it lasts 5 to 15 minutes.
+- A storm is a patch of rain (snow where the biome is cold) about 220 to 740 blocks across, round but with a ragged edge. It rains hardest in its middle six tenths and thins out gradually from there to nothing 40 blocks past its edge, so walking out of one the rain eases off over a hundred blocks or more. It builds up over its first minute, holds, and dies away over its last; it lasts 5 to 15 minutes.
 - Storms form upwind of players, 500 to 1,400 blocks off, so they come over. Each player has about `stormsNearPlayers` (3) storms within 1,600 blocks over the wettest country (jungles, swamps, the sea, rivers, taigas), fewer over ordinary country, and very few over deserts, savannas and badlands, where storms also weaken and wear out twice as fast. Storms far from every player (4,000 blocks) go.
 - About a quarter are thunderstorms (`thunderstormChance` 0.25), more over wet country. Lightning strikes only inside thunderstorms, two and a half times as often there as vanilla's thunder does everywhere.
 - A thunderstorm over snow is a blizzard (`blizzards`): no lightning, snow piling up four times as fast, and thick snow driven sideways with fog closing in to about 24 blocks.
 
 ## Wind
 
-The wind blows from one direction across the world, turning slowly and changing strength every couple of minutes, between 1 and 3 blocks a second. Storms move with it, and so do the clouds; it slants the rain a little and the snow a lot (`windyRain`).
+The wind blows from one direction across the world, turning slowly and changing strength every couple of minutes, between 1 and 3 blocks a second. Storms move with it, and so do the clouds; it slants the rain a little and the snow a lot, a blizzard's most (at most 45 degrees), each sheet leaning upwind from where it lands (`windyRain`).
 
 ## What rain does
 
