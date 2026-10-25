@@ -37,12 +37,14 @@ import net.minecraft.world.biome.Biome;
  * Rain and snow with storms (ClientWeather), in place of vanilla's (LocalWeatherRenderMixin): drawn column by column
  * where a storm covers, as strong as it covers, out to 32 blocks (16 on fast graphics) so the rain of a storm a short
  * way off can be seen falling; never above the clouds. The wind slants it (weather.windyRain), snow most; in a blizzard
- * the snow is thick, falls fast and drives sideways. Splashes and the sound of rain come only from where it rains.
+ * the snow is thick, falls fast and drives sideways. Slanting, it stops where the ground upwind is in the way, so none
+ * comes through blocks into a hole. Splashes and the sound of rain come only from where it rains.
  */
 public final class WeatherRenderer {
 	private static final Identifier RAIN = Identifier.ofVanilla("textures/environment/rain.png");
 	private static final Identifier SNOW = Identifier.ofVanilla("textures/environment/snow.png");
 	private static int rainSoundCounter;
+	private static final Heights HEIGHTS = new Heights();
 
 	private WeatherRenderer() {
 	}
@@ -76,6 +78,7 @@ public final class WeatherRenderer {
 		int texture = -1;
 		float time = ticks + tickDelta;
 		BlockPos.Mutable pos = new BlockPos.Mutable();
+		Heights heights = HEIGHTS.around(world, ci, ck, far + 48);
 		for (int z = ck - far; z <= ck + far; z++) {
 			for (int x = ci - far; x <= ci + far; x++) {
 				int dx = x - ci;
@@ -113,6 +116,21 @@ public final class WeatherRenderer {
 				if (precipitation == Biome.Precipitation.NONE) {
 					continue;
 				}
+				// How far it is carried per block it falls: rain (about 9 blocks a second) a little, snow far more, a blizzard's
+				// most; at most a block.
+				double lean = precipitation == Biome.Precipitation.RAIN ? 2.5 : 6.0 * (1.0 + 1.5 * blizzard);
+				double leanX = windX * lean;
+				double leanZ = windZ * lean;
+				double carried = Math.sqrt(leanX * leanX + leanZ * leanZ);
+				if (carried > 1.0) {
+					leanX /= carried;
+					leanZ /= carried;
+				}
+				// Slanting in, it can't come through the ground upwind (into a hole, say): it starts above where that stands.
+				bottom = heights.clear(x, z, ground, bottom, top, leanX, leanZ);
+				if (bottom >= top) {
+					continue;
+				}
 				// A sheet across the line of sight.
 				double length = Math.sqrt(distanceSq);
 				double sx = length < 0.5 ? 0.5 : -dz / length * 0.5;
@@ -136,10 +154,8 @@ public final class WeatherRenderer {
 					float speed = 3.0F + random.nextFloat();
 					float v = -(scroll + offset + tickDelta) / 32.0F * speed % 32.0F;
 					float alpha = (0.5F + 0.5F * fade) * cover * (close ? 1.0F : 0.8F);
-					// Rain falls about 9 blocks a second: it leans by the wind's speed over that.
-					double lean = 2.5;
-					quad(buffer, baseX, baseZ, sx, sz, bottom - cameraY, top - cameraY, ground - cameraY, windX * lean, windZ * lean, 0.0F,
-							bottom * 0.25F + v, top * 0.25F + v, alpha, light);
+					quad(buffer, baseX, baseZ, sx, sz, bottom - cameraY, top - cameraY, ground - cameraY, leanX, leanZ, 0.0F, bottom * 0.25F + v,
+							top * 0.25F + v, alpha, light);
 				} else {
 					if (texture != 1) {
 						if (texture >= 0) {
@@ -158,10 +174,7 @@ public final class WeatherRenderer {
 					int sky = light >> 16 & 65535;
 					int block = light & 65535;
 					int snowLight = ((block * 3 + 240) / 4) | ((sky * 3 + 240) / 4) << 16;
-					// Snow falls slowly, so it leans far more; a blizzard drives it hard.
-					double lean = 6.0 * (1.0 + 1.5 * blizzard);
-					quad(buffer, baseX, baseZ, sx, sz, bottom - cameraY, top - cameraY, ground - cameraY, windX * lean, windZ * lean, u,
-							bottom * 0.25F + v + jitter,
+					quad(buffer, baseX, baseZ, sx, sz, bottom - cameraY, top - cameraY, ground - cameraY, leanX, leanZ, u, bottom * 0.25F + v + jitter,
 							top * 0.25F + v + jitter, alpha, snowLight);
 				}
 			}
@@ -176,16 +189,11 @@ public final class WeatherRenderer {
 
 	/**
 	 * One falling sheet from y0 to y1 (camera-relative) over a column whose ground is at floor, leaning with the wind
-	 * (lean is how far it is carried per block it falls, at most one block): where it lands is the column, so higher
-	 * up it is that much further upwind. Fixed to the ground, it stays put however the camera moves.
+	 * (lean is how far it is carried per block it falls): where it lands is the column, so higher up it is that much
+	 * further upwind. Fixed to the ground, it stays put however the camera moves.
 	 */
 	private static void quad(BufferBuilder buffer, double x, double z, double sx, double sz, double y0, double y1, double floor, double leanX,
 			double leanZ, float u, float v0, float v1, float alpha, int light) {
-		double carried = Math.sqrt(leanX * leanX + leanZ * leanZ);
-		if (carried > 1.0) {
-			leanX /= carried;
-			leanZ /= carried;
-		}
 		double topX = -leanX * (y1 - floor);
 		double topZ = -leanZ * (y1 - floor);
 		double bottomX = -leanX * (y0 - floor);
@@ -194,6 +202,60 @@ public final class WeatherRenderer {
 		buffer.vertex((float) (x + sx + topX), (float) y1, (float) (z + sz + topZ)).texture(1.0F + u, v0).color(1.0F, 1.0F, 1.0F, alpha).light(light);
 		buffer.vertex((float) (x + sx + bottomX), (float) y0, (float) (z + sz + bottomZ)).texture(1.0F + u, v1).color(1.0F, 1.0F, 1.0F, alpha).light(light);
 		buffer.vertex((float) (x - sx + bottomX), (float) y0, (float) (z - sz + bottomZ)).texture(u, v1).color(1.0F, 1.0F, 1.0F, alpha).light(light);
+	}
+
+	/** The height of the ground around the camera, looked up once a frame as the slanting rain needs it. */
+	private static final class Heights {
+		private ClientWorld world;
+		private int x0;
+		private int z0;
+		private int size;
+		private int[] tops = new int[0];
+
+		/** Ready for this frame: centred on the camera, nothing looked up yet. */
+		Heights around(ClientWorld world, int cx, int cz, int reach) {
+			this.world = world;
+			this.x0 = cx - reach;
+			this.z0 = cz - reach;
+			this.size = 2 * reach + 1;
+			if (this.tops.length != this.size * this.size) {
+				this.tops = new int[this.size * this.size];
+			}
+			java.util.Arrays.fill(this.tops, Integer.MIN_VALUE);
+			return this;
+		}
+
+		/** The first open block above the ground here. */
+		int top(int x, int z) {
+			int i = x - this.x0;
+			int k = z - this.z0;
+			if (i < 0 || k < 0 || i >= this.size || k >= this.size) {
+				return this.world.getTopY(Heightmap.Type.MOTION_BLOCKING, x, z);
+			}
+			int index = k * this.size + i;
+			if (this.tops[index] == Integer.MIN_VALUE) {
+				this.tops[index] = this.world.getTopY(Heightmap.Type.MOTION_BLOCKING, x, z);
+			}
+			return this.tops[index];
+		}
+
+		/**
+		 * The bottom of a slanting sheet that lands on the column at x, z (its ground at floor): above the highest place
+		 * its line up and upwind passes through the ground, so it never comes through blocks; top or more if it is
+		 * blocked all the way up. Rain falling nearly straight is left alone.
+		 */
+		int clear(int x, int z, int floor, int bottom, int top, double leanX, double leanZ) {
+			if (leanX * leanX + leanZ * leanZ < 0.0025) {
+				return bottom;
+			}
+			for (int y = top; y > bottom; y--) {
+				double above = y - floor;
+				if (this.top(MathHelper.floor(x + 0.5 - leanX * above), MathHelper.floor(z + 0.5 - leanZ * above)) > y) {
+					return y + 1;
+				}
+			}
+			return bottom;
+		}
 	}
 
 	/** Splashes and the sound of rain, as vanilla's but only where a storm rains. */

@@ -11,7 +11,7 @@ In the overworld, weather is local: rain and thunder come as storms that form, d
 
 ## Wind
 
-The wind blows from one direction across the world, turning slowly and changing strength every couple of minutes, between 1 and 3 blocks a second. Storms move with it, and so do the clouds; it slants the rain a little and the snow a lot, a blizzard's most (at most 45 degrees), each sheet leaning upwind from where it lands (`windyRain`).
+The wind blows from one direction across the world, turning slowly and changing strength every couple of minutes, between 1 and 3 blocks a second. Storms move with it, and so do the clouds; it slants the rain a little and the snow a lot, a blizzard's most (at most 45 degrees), each sheet leaning upwind from where it lands, and stopping where the ground upwind is in the way, so none slants through blocks into a hole (`windyRain`).
 
 ## What rain does
 
