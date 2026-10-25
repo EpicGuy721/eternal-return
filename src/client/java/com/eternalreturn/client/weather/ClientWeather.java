@@ -32,6 +32,11 @@ public final class ClientWeather {
 	private static double cloudZ;
 	private static double prevCloudX;
 	private static double prevCloudZ;
+	/** How far the snow texture has fallen (wrapping every 512) and been driven sideways (wrapping every 1). */
+	private static double snowFall;
+	private static double prevSnowFall;
+	private static double snowDrive;
+	private static double prevSnowDrive;
 
 	private ClientWeather() {
 	}
@@ -91,6 +96,29 @@ public final class ClientWeather {
 		float target = snowing && EternalReturnConfig.get().weather.blizzards ? FIELD.thunder(at.x, at.z) : 0.0F;
 		prevBlizzard = blizzard;
 		blizzard += MathHelper.clamp(target - blizzard, -0.02F, 0.02F);
+		// Snow falls faster in a blizzard, and is driven sideways by the wind.
+		prevSnowFall = snowFall;
+		snowFall += 1.0 + 4.0 * blizzard;
+		if (snowFall >= 512.0) {
+			snowFall -= 512.0;
+			prevSnowFall -= 512.0;
+		}
+		prevSnowDrive = snowDrive;
+		snowDrive += FIELD.windSpeed * 0.2 * blizzard;
+		if (snowDrive >= 1.0) {
+			snowDrive -= 1.0;
+			prevSnowDrive -= 1.0;
+		}
+	}
+
+	/** How far the snow has fallen, in texture rows (of 512 a texture). */
+	public static float snowFall(float tickDelta) {
+		return (float) MathHelper.lerp(tickDelta, prevSnowFall, snowFall);
+	}
+
+	/** How far the snow has been driven sideways, in textures. */
+	public static float snowDrive(float tickDelta) {
+		return (float) MathHelper.lerp(tickDelta, prevSnowDrive, snowDrive);
 	}
 
 	/** How much of a blizzard blows at the camera, 0 to 1. */

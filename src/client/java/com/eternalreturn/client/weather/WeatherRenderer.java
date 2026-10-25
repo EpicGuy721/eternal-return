@@ -149,10 +149,10 @@ public final class WeatherRenderer {
 						RenderSystem.setShaderTexture(0, SNOW);
 						buffer = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR_LIGHT);
 					}
-					float fall = 1.0F + 4.0F * blizzard;
-					float v = -(((ticks * fall) % 512.0F) + tickDelta * fall) / 512.0F;
-					float drive = (float) (field.windSpeed * time * 0.2 * blizzard);
-					float u = (float) (random.nextDouble() + time * 0.01 * random.nextGaussian()) + drive;
+					// How far the snow has fallen and been driven sideways: added up tick by tick (ClientWeather), so a change in the
+					// wind or the blizzard changes the pace from then on rather than jumping the snow.
+					float v = -ClientWeather.snowFall(tickDelta) / 512.0F;
+					float u = (float) (random.nextDouble() + time * 0.01 * random.nextGaussian()) + ClientWeather.snowDrive(tickDelta);
 					float jitter = (float) (random.nextDouble() + time * random.nextGaussian() * 0.001);
 					float alpha = Math.min(1.0F, (0.5F + 0.3F * fade) * cover * (close ? 1.0F : 0.8F) * (1.0F + 1.5F * blizzard));
 					int sky = light >> 16 & 65535;
