@@ -6,6 +6,7 @@ In the overworld, weather is local: rain and thunder come as storms that form, d
 
 - A storm is a patch of rain (snow where the biome is cold) about 220 to 740 blocks across, round but with a ragged edge. It rains hardest in its middle six tenths and thins out gradually from there to nothing 40 blocks past its edge, so walking out of one the rain eases off over a hundred blocks or more. It builds up over its first minute, holds, and dies away over its last; it lasts 5 to 15 minutes.
 - Storms form upwind of players, 500 to 1,400 blocks off, so they come over. Each player has about `stormsNearPlayers` (3) storms within 1,600 blocks over the wettest country (jungles, swamps, the sea, rivers, taigas), fewer over ordinary country, and very few over deserts, savannas and badlands, where storms also weaken and wear out twice as fast. Storms far from every player (4,000 blocks) go.
+- A storm drifting into wetter or drier country strengthens or weakens over several seconds.
 - About a quarter are thunderstorms (`thunderstormChance` 0.25), more over wet country. Lightning strikes only inside thunderstorms, two and a half times as often there as vanilla's thunder does everywhere.
 - A thunderstorm over snow is a blizzard (`blizzards`): no lightning, snow piling up four times as fast, and thick snow driven sideways with fog closing in to about 24 blocks.
 
@@ -19,7 +20,9 @@ Everything that asks whether it rains at a spot asks the storms there: undead an
 
 ## What players see
 
-Each player's game is told of the storms near them every second. The sky and clouds darken as a storm comes near (from 160 blocks beyond its edge), rain falls on them only inside one, and the rain of a storm a short way off can be seen falling, out to 32 blocks (16 on fast graphics).
+Each player's game is told of the storms near them every second, and eases each storm's strength and the wind toward what it is told, so neither jumps; a storm it is no longer told of fades out over a few seconds. The sky and clouds darken as a storm comes near (from 160 blocks beyond its edge), rain falls on them only inside one, and the rain of a storm a short way off can be seen falling, out to 32 blocks (16 on fast graphics).
+
+Rain is fainter where a storm is weaker. Snow is not: a weaker or fading snowstorm has fewer sheets of flakes, each as bright, and a blizzard has up to three in each column. Each sheet of snow falls at its own pace, slants a little more or less, has bigger or smaller flakes and flutters sideways (less in a blizzard). The flakes are fixed to the world's heights and each sheet turns smoothly to face the camera, so walking and jumping don't jolt them, and sheets fade out at their ends rather than stopping at a line.
 
 ## Commands
 

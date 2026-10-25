@@ -26,8 +26,10 @@ public final class Storm {
 	public float intensity;
 	/** How strong it can get, 0 to 1. */
 	public final float peak;
-	/** How rainy the country under it is (0 dry to 1 wet), as last looked at. */
+	/** How rainy the country it is over is (0 dry to 1 wet), easing toward country so its strength never jumps. */
 	public float climate = 1.0F;
+	/** How rainy the country under it is, as last looked at (LocalWeather.step). */
+	public float country = 1.0F;
 
 	public Storm(int id, double x, double z, float radius, boolean thunder, long seed, int age, int life, float intensity, float peak) {
 		this.id = id;
@@ -109,6 +111,7 @@ public final class Storm {
 		Storm storm = new Storm(nbt.getInt("id"), nbt.getDouble("x"), nbt.getDouble("z"), nbt.getFloat("radius"), nbt.getBoolean("thunder"),
 				nbt.getLong("seed"), nbt.getInt("age"), nbt.getInt("life"), nbt.getFloat("intensity"), nbt.getFloat("peak"));
 		storm.climate = nbt.contains("climate") ? nbt.getFloat("climate") : 1.0F;
+		storm.country = storm.climate;
 		return storm;
 	}
 

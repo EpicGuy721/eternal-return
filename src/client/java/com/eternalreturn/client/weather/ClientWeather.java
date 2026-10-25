@@ -2,8 +2,10 @@ package com.eternalreturn.client.weather;
 
 import com.eternalreturn.config.EternalReturnConfig;
 import com.eternalreturn.weather.LocalWeather;
+import com.eternalreturn.weather.Storm;
 import com.eternalreturn.weather.StormField;
 import com.eternalreturn.weather.WeatherPayload;
+import it.unimi.dsi.fastutil.ints.Int2FloatOpenHashMap;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -18,8 +20,9 @@ import net.minecraft.world.biome.Biome;
 /**
  * The storms a player's game knows of (LocalWeather, sent each second, drifted with the wind between), and what they
  * make of the sky where the camera is: the rain and thunder darkness vanilla's sky, fog and clouds use (eased in and
- * out), how much of a blizzard blows, and how far the clouds have drifted. Inactive (vanilla's weather) until the server
- * says otherwise.
+ * out), how much of a blizzard blows, and how far the clouds have drifted. Each storm's strength and the wind the rain
+ * and clouds show ease toward what each second's news says, so nothing jumps when it comes; a storm the server no
+ * longer sends fades out. Inactive (vanilla's weather) until the server says otherwise.
  */
 public final class ClientWeather {
 	private static final StormField FIELD = new StormField();
@@ -32,11 +35,16 @@ public final class ClientWeather {
 	private static double cloudZ;
 	private static double prevCloudX;
 	private static double prevCloudZ;
-	/** How far the snow texture has fallen (wrapping every 512) and been driven sideways (wrapping every 1). */
+	/** How strong each storm is to be (by id), as the server last said; its strength eases there. */
+	private static final Int2FloatOpenHashMap STRENGTHS = new Int2FloatOpenHashMap();
+	/** The wind the rain, snow and clouds show, in blocks a tick: eased toward the server's. */
+	private static double windX;
+	private static double windZ;
+	private static double prevWindX;
+	private static double prevWindZ;
+	/** How far the snow has fallen, in steps of a 512th of its texture (a tick's fall out of a blizzard). */
 	private static double snowFall;
 	private static double prevSnowFall;
-	private static double snowDrive;
-	private static double prevSnowDrive;
 
 	private ClientWeather() {
 	}
@@ -47,12 +55,24 @@ public final class ClientWeather {
 			active = payload.active();
 			FIELD.windAngle = payload.windAngle();
 			FIELD.windSpeed = payload.windSpeed();
-			FIELD.storms.clear();
+			// A storm already known keeps the strength it has here and eases to the new one; one no longer sent fades out.
+			STRENGTHS.clear();
+			for (Storm storm : payload.storms()) {
+				STRENGTHS.put(storm.id, storm.intensity);
+				for (Storm known : FIELD.storms) {
+					if (known.id == storm.id) {
+						storm.intensity = known.intensity;
+						break;
+					}
+				}
+			}
+			FIELD.storms.removeIf(known -> STRENGTHS.containsKey(known.id));
 			FIELD.storms.addAll(payload.storms());
 		});
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
 			active = false;
 			FIELD.storms.clear();
+			STRENGTHS.clear();
 			blizzard = 0.0F;
 		});
 		ClientTickEvents.END_CLIENT_TICK.register(ClientWeather::tick);
@@ -73,10 +93,19 @@ public final class ClientWeather {
 			return;
 		}
 		FIELD.drift(1);
+		for (Storm storm : FIELD.storms) {
+			float strength = STRENGTHS.getOrDefault(storm.id, 0.0F);
+			storm.intensity += MathHelper.clamp(strength - storm.intensity, -0.01F, 0.01F);
+		}
+		FIELD.storms.removeIf(storm -> storm.intensity <= 0.0F && !STRENGTHS.containsKey(storm.id));
+		prevWindX = windX;
+		prevWindZ = windZ;
+		windX += (FIELD.windX() - windX) * 0.05;
+		windZ += (FIELD.windZ() - windZ) * 0.05;
 		prevCloudX = cloudX;
 		prevCloudZ = cloudZ;
-		cloudX += FIELD.windX();
-		cloudZ += FIELD.windZ();
+		cloudX += windX;
+		cloudZ += windZ;
 		if (Math.abs(cloudX) > CLOUD_LOOP || Math.abs(cloudZ) > CLOUD_LOOP) {
 			double shiftX = Math.floor(cloudX / CLOUD_LOOP) * CLOUD_LOOP;
 			double shiftZ = Math.floor(cloudZ / CLOUD_LOOP) * CLOUD_LOOP;
@@ -96,29 +125,23 @@ public final class ClientWeather {
 		float target = snowing && EternalReturnConfig.get().weather.blizzards ? FIELD.thunder(at.x, at.z) : 0.0F;
 		prevBlizzard = blizzard;
 		blizzard += MathHelper.clamp(target - blizzard, -0.02F, 0.02F);
-		// Snow falls faster in a blizzard, and is driven sideways by the wind.
+		// Snow falls faster in a blizzard (added up tick by tick, so a change of pace never jumps it).
 		prevSnowFall = snowFall;
 		snowFall += 1.0 + 4.0 * blizzard;
-		if (snowFall >= 512.0) {
-			snowFall -= 512.0;
-			prevSnowFall -= 512.0;
-		}
-		prevSnowDrive = snowDrive;
-		snowDrive += FIELD.windSpeed * 0.2 * blizzard;
-		if (snowDrive >= 1.0) {
-			snowDrive -= 1.0;
-			prevSnowDrive -= 1.0;
-		}
 	}
 
-	/** How far the snow has fallen, in texture rows (of 512 a texture). */
-	public static float snowFall(float tickDelta) {
-		return (float) MathHelper.lerp(tickDelta, prevSnowFall, snowFall);
+	/** How far the snow has fallen, in 512ths of its texture. */
+	public static double snowFall(float tickDelta) {
+		return MathHelper.lerp(tickDelta, prevSnowFall, snowFall);
 	}
 
-	/** How far the snow has been driven sideways, in textures. */
-	public static float snowDrive(float tickDelta) {
-		return (float) MathHelper.lerp(tickDelta, prevSnowDrive, snowDrive);
+	/** The wind the rain and snow show, east and south, in blocks a tick. */
+	public static double windX(float tickDelta) {
+		return MathHelper.lerp(tickDelta, prevWindX, windX);
+	}
+
+	public static double windZ(float tickDelta) {
+		return MathHelper.lerp(tickDelta, prevWindZ, windZ);
 	}
 
 	/** How much of a blizzard blows at the camera, 0 to 1. */

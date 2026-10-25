@@ -183,8 +183,10 @@ public final class LocalWeather extends PersistentState {
 		long time = world.getTime();
 		for (Storm storm : this.field.storms) {
 			if ((time + storm.id) % 20 == 0) {
-				storm.climate = MathHelper.lerp(0.5F, storm.climate, climate(world, storm.x, storm.z));
+				storm.country = climate(world, storm.x, storm.z);
 			}
+			// Crossing into other country, a storm strengthens or weakens over several seconds rather than by jumps.
+			storm.climate += MathHelper.clamp(storm.country - storm.climate, -0.005F * ticks, 0.005F * ticks);
 			// Over dry country a storm wears out at twice the pace.
 			storm.age(storm.climate < 0.35F ? 2 * ticks : ticks);
 		}
@@ -229,7 +231,9 @@ public final class LocalWeather extends PersistentState {
 			}
 			float radius = 110.0F + 260.0F * (float) Math.pow(random.nextDouble(), 1.6);
 			boolean thunder = random.nextDouble() < cfg.thunderstormChance * (0.5 + here);
-			this.add(x, z, radius, thunder, 0, 6000 + random.nextInt(12000), 0.7F + 0.3F * random.nextFloat(), random).climate = here;
+			Storm storm = this.add(x, z, radius, thunder, 0, 6000 + random.nextInt(12000), 0.7F + 0.3F * random.nextFloat(), random);
+			storm.climate = here;
+			storm.country = here;
 		}
 	}
 
