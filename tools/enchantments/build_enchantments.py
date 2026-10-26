@@ -6,8 +6,9 @@ Run from anywhere: python tools/enchantments/build_enchantments.py (after a Grad
 For each enchantment in ENCHANTMENTS, reads vanilla's definition from the Minecraft jar in the Loom cache and writes
 data/minecraft/enchantment/<enchantment>.json with its item lists (supported_items, what it can go on; primary_items,
 what the enchanting table offers it for) moved to eternalreturn:enchantable/* tags holding vanilla's items and more;
-those in BODY_SLOT also work in the body slot, where a horse wears its armor. It also adds spears to the vanilla
-enchantable tags in EXTENDED, so every enchantment using them takes spears. Do not hand-edit the generated files.
+those in BODY_SLOT also work in the body slot, where a horse wears its armor. It also adds spears and the speargun
+(com.eternalreturn.items.Speargun) to the vanilla enchantable tags in EXTENDED, so every enchantment using them takes
+them. Do not hand-edit the generated files.
 """
 import glob
 import json
@@ -45,9 +46,14 @@ MORE = {
     'sword_or_spear': '#eternalreturn:spears',
 }
 BODY_SLOT = {'protection', 'fire_protection', 'blast_protection', 'projectile_protection', 'frost_walker'}
-# Vanilla enchantable tags spears join: Sharpness, Smite and Bane of Arthropods; Fire Aspect; Unbreaking, Mending and
-# Curse of Vanishing.
-EXTENDED = {'sharp_weapon': '#eternalreturn:spears', 'fire_aspect': '#eternalreturn:spears', 'durability': '#eternalreturn:spears'}
+# Vanilla enchantable tags spears and the speargun join: Sharpness, Smite and Bane of Arthropods; Fire Aspect; Unbreaking,
+# Mending and Curse of Vanishing; Quick Charge, Multishot and Piercing (the speargun is a crossbow).
+EXTENDED = {
+    'sharp_weapon': ['#eternalreturn:spears'],
+    'fire_aspect': ['#eternalreturn:spears'],
+    'durability': ['#eternalreturn:spears', 'eternalreturn:speargun'],
+    'crossbow': ['eternalreturn:speargun'],
+}
 
 
 def write(path, data):
@@ -72,7 +78,7 @@ def main():
     for tag, vanilla in tags.items():
         write(os.path.join(RESOURCES, 'data', 'eternalreturn', 'tags', 'item', 'enchantable', f'{tag}.json'), {'values': [vanilla, MORE[tag]]})
     for tag, more in EXTENDED.items():
-        write(os.path.join(RESOURCES, 'data', 'minecraft', 'tags', 'item', 'enchantable', f'{tag}.json'), {'values': [more]})
+        write(os.path.join(RESOURCES, 'data', 'minecraft', 'tags', 'item', 'enchantable', f'{tag}.json'), {'values': more})
     print(f'wrote {len(ENCHANTMENTS)} enchantments, {len(tags)} tags and {len(EXTENDED)} vanilla tag additions')
 
 

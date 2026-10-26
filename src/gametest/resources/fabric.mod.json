@@ -46,6 +46,7 @@
 			"com.eternalreturn.gametest.BeholderTests",
 			"com.eternalreturn.gametest.SoldierTests",
 			"com.eternalreturn.gametest.SandownTests",
+			"com.eternalreturn.gametest.SunkenTests",
 			"com.eternalreturn.gametest.GimpTests",
 			"com.eternalreturn.gametest.SpiderClimbingTests",
 			"com.eternalreturn.gametest.VisionTests",

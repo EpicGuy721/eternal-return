@@ -11,6 +11,7 @@ import com.eternalreturn.mobs.entity.GimpEntity;
 import com.eternalreturn.mobs.entity.GrimlockEntity;
 import com.eternalreturn.mobs.entity.ParchedEntity;
 import com.eternalreturn.mobs.entity.SandownEntity;
+import com.eternalreturn.mobs.entity.SunkenEntity;
 import com.eternalreturn.mobs.entity.SoldierEntity;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
@@ -34,6 +35,7 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.tag.BiomeTags;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.biome.BiomeKeys;
@@ -42,7 +44,8 @@ import net.minecraft.world.biome.SpawnSettings;
 /**
  * Frostbites (cold biomes), the parched (deserts), bone spiders (the Nether), skeleton wolves (a wolf variant of the
  * Nether, data/eternalreturn/wolf_variant/skeleton.json), beholders (rare, the Nether), grimlocks (deep caves, below
- * y 0, in small groups), mooblooms (autumnal forests), moolips (cherry groves) and Sandowns (rare, the End). Soldiers, gimps and atropals are
+ * y 0, in small groups), mooblooms (autumnal forests), moolips (cherry groves), Sandowns (rare, the End) and Sunkens
+ * (deep in the sea, now and then riding a dolphin). Soldiers, gimps and atropals are
  * kept (spawn eggs, commands) but no longer spawn naturally (a gimp from an egg still brings its atropal).
  * Frostbites and the parched take most of the zombies' and skeletons' place where they live, as strays do in the
  * snow: biome tags eternalreturn:frostbite_biomes and eternalreturn:parched_biomes.
@@ -70,6 +73,10 @@ public final class NewMobs {
 	/** As tall as his hat (4.4 blocks), about as wide as his chest. */
 	public static final EntityType<SandownEntity> SANDOWN = type("sandown",
 			EntityType.Builder.<SandownEntity>create(SandownEntity::new, SpawnGroup.MONSTER).dimensions(1.1F, 4.3F).eyeHeight(3.4F).maxTrackingRange(10));
+	/** A skeleton's size. */
+	public static final EntityType<SunkenEntity> SUNKEN = type("sunken",
+			EntityType.Builder.<SunkenEntity>create(SunkenEntity::new, SpawnGroup.MONSTER).dimensions(0.6F, 1.99F).eyeHeight(1.74F).vehicleAttachment(-0.7F)
+					.maxTrackingRange(8));
 	public static final EntityType<FlowerCowEntity> MOOBLOOM = type("moobloom",
 			EntityType.Builder.<FlowerCowEntity>create(FlowerCowEntity::new, SpawnGroup.CREATURE).dimensions(0.9F, 1.4F).eyeHeight(1.3F).maxTrackingRange(10));
 	public static final EntityType<FlowerCowEntity> MOOLIP = type("moolip",
@@ -99,6 +106,7 @@ public final class NewMobs {
 		FabricDefaultAttributeRegistry.register(ATROPAL, AtropalEntity.createAtropalAttributes());
 		FabricDefaultAttributeRegistry.register(GRIMLOCK, GrimlockEntity.createGrimlockAttributes());
 		FabricDefaultAttributeRegistry.register(SANDOWN, SandownEntity.createSandownAttributes());
+		FabricDefaultAttributeRegistry.register(SUNKEN, AbstractSkeletonEntity.createAbstractSkeletonAttributes());
 		FabricDefaultAttributeRegistry.register(MOOBLOOM, CowEntity.createCowAttributes());
 		FabricDefaultAttributeRegistry.register(MOOLIP, CowEntity.createCowAttributes());
 		SpawnRestriction.register(FROSTBITE, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, HostileEntity::canSpawnInDark);
@@ -109,6 +117,7 @@ public final class NewMobs {
 		SpawnRestriction.register(GIMP, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, GimpEntity::canSpawn);
 		SpawnRestriction.register(GRIMLOCK, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, GrimlockEntity::canSpawn);
 		SpawnRestriction.register(SANDOWN, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, SandownEntity::canSpawn);
+		SpawnRestriction.register(SUNKEN, SpawnLocationTypes.IN_WATER, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, SunkenEntity::canSpawn);
 		SpawnRestriction.register(MOOBLOOM, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, AnimalEntity::isValidNaturalSpawn);
 		SpawnRestriction.register(MOOLIP, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, AnimalEntity::isValidNaturalSpawn);
 
@@ -136,6 +145,9 @@ public final class NewMobs {
 		// Rare: alone, a small weight beside endermen's 10 (in fours), and SandownEntity.canSpawn passes half of them.
 		BiomeModifications.create(EternalReturn.id("end_sandowns")).add(ModificationPhase.ADDITIONS, BiomeSelectors.foundInTheEnd(),
 				context -> context.getSpawnSettings().addSpawn(SpawnGroup.MONSTER, new SpawnSettings.SpawnEntry(SANDOWN, 1, 1, 1)));
+		// Deep in the sea (SunkenEntity.canSpawn passes a third of them), alone or in pairs.
+		BiomeModifications.create(EternalReturn.id("ocean_sunkens")).add(ModificationPhase.ADDITIONS, BiomeSelectors.tag(BiomeTags.IS_OCEAN),
+				context -> context.getSpawnSettings().addSpawn(SpawnGroup.MONSTER, new SpawnSettings.SpawnEntry(SUNKEN, 3, 1, 2)));
 		BiomeModifications.create(EternalReturn.id("nether_wolves")).add(ModificationPhase.ADDITIONS, BiomeSelectors.foundInTheNether(),
 				context -> context.getSpawnSettings().addSpawn(SpawnGroup.CREATURE, new SpawnSettings.SpawnEntry(EntityType.WOLF, 20, 1, 3)));
 		BiomeModifications.create(EternalReturn.id("mooblooms")).add(ModificationPhase.ADDITIONS,
@@ -155,6 +167,7 @@ public final class NewMobs {
 		Item moobloom = egg("moobloom", MOOBLOOM, 0xF4D23A, 0xFFF6C8);
 		Item moolip = egg("moolip", MOOLIP, 0xEFA2C6, 0xFFE3F0);
 		Item sandown = egg("sandown", SANDOWN, 0x3C5D47, 0xD8BB58);
+		Item sunken = egg("sunken", SUNKEN, 0xA49F86, 0x3F6E4A);
 		ItemGroupEvents.modifyEntriesEvent(ItemGroups.SPAWN_EGGS).register(entries -> {
 			entries.addAfter(Items.FOX_SPAWN_EGG, frostbite);
 			entries.addAfter(Items.PANDA_SPAWN_EGG, parched);
@@ -165,6 +178,7 @@ public final class NewMobs {
 			entries.addAfter(Items.ZOMBIE_SPAWN_EGG, grimlock);
 			entries.addAfter(Items.MOOSHROOM_SPAWN_EGG, moobloom, moolip);
 			entries.addAfter(Items.ENDERMAN_SPAWN_EGG, sandown);
+			entries.addAfter(Items.STRAY_SPAWN_EGG, sunken);
 		});
 	}
 }

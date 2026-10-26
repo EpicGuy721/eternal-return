@@ -41,6 +41,7 @@
 		"frames.SignBlockEntityMixin",
 		"frames.SignInvisibilityMixin",
 		"mobs.AbstractSkeletonEntityMixin",
+		"mobs.SkeletonSinkingMixin",
 		"mobs.ActiveTargetGoalMixin",
 		"mobs.BoatEntityPillagerMixin",
 		"mobs.BrainAccessor",

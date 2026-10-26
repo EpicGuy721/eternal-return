@@ -53,6 +53,9 @@ public final class NewMobRendering {
 		EntityModelLayerRegistry.registerModelLayer(SandownModel.LAYER, SandownModel::getTexturedModelData);
 		EntityRendererRegistry.register(NewMobs.SANDOWN, SandownRenderer::new);
 		EntityRendererRegistry.register(com.eternalreturn.items.LaserBlaster.BOLT, LaserBoltRenderer::new);
+		EntityModelLayerRegistry.registerModelLayer(SunkenModel.LAYER, SunkenModel::getTexturedModelData);
+		EntityRendererRegistry.register(NewMobs.SUNKEN, SunkenRenderer::new);
+		SpeargunClient.register();
 		EntityModelLayerRegistry.registerModelLayer(GimpModel.LAYER, GimpModel::getTexturedModelData);
 		EntityRendererRegistry.register(NewMobs.GIMP, GimpRenderer::new);
 		EntityModelLayerRegistry.registerModelLayer(AtropalModel.LAYER, AtropalModel::getTexturedModelData);

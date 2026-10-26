@@ -23,7 +23,9 @@
 		"SpearMovementMixin",
 		"WeatherAboveCloudsMixin",
 		"mobs.CreeperEntityRendererMixin",
-		"mobs.LivingEntityRendererMixin"
+		"mobs.LivingEntityRendererMixin",
+		"SpeargunHeldItemMixin",
+		"SpeargunArmPoseMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

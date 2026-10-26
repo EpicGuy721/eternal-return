@@ -404,7 +404,7 @@ public class MaterialsMobsAndRulesTests implements FabricGameTest {
 			for (SpawnGroup group : SpawnGroup.values()) {
 				for (var entry : biome.getSpawnSettings().getSpawnEntries(group).getEntries()) {
 					ctx.assertTrue(!List.of(EntityType.ALLAY, EntityType.ARMADILLO, EntityType.AXOLOTL, EntityType.CAMEL, EntityType.FROG, EntityType.GLOW_SQUID,
-							EntityType.SNIFFER, EntityType.TADPOLE, EntityType.TURTLE, EntityType.DOLPHIN, EntityType.GOAT).contains(entry.type),
+							EntityType.SNIFFER, EntityType.TADPOLE, EntityType.TURTLE, EntityType.GOAT).contains(entry.type),
 							entry.type.getUntranslatedName() + " still spawns in " + key.getValue());
 				}
 			}

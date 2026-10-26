@@ -8,7 +8,9 @@ import net.minecraft.entity.SpawnGroup;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.ZombieEntity;
+import net.minecraft.entity.passive.DolphinEntity;
 import net.minecraft.entity.passive.PolarBearEntity;
+import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.LocalDifficulty;
@@ -61,6 +63,30 @@ public final class Jockeys {
 		((JockeyMount) bear).eternalreturn$setJockeyMount(true);
 		if (stray.startRiding(bear)) {
 			world.spawnEntity(bear);
+		}
+	}
+
+	/**
+	 * Called from a Sunken's initialize: now and then it comes riding a dolphin, if it's in water. The dolphin goes into the
+	 * world now; the Sunken follows when its spawn finishes.
+	 */
+	public static void tryDolphinMount(MobEntity sunken, ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason reason) {
+		if (sunken.hasVehicle() || !world.getFluidState(sunken.getBlockPos()).isIn(FluidTags.WATER)
+				|| world.getRandom().nextFloat() >= EternalReturnConfig.get().mobs.sunkenDolphinJockeyChance) {
+			return;
+		}
+		DolphinEntity dolphin = EntityType.DOLPHIN.create(sunken.getWorld());
+		if (dolphin == null) {
+			return;
+		}
+		dolphin.refreshPositionAndAngles(sunken.getX(), sunken.getY(), sunken.getZ(), sunken.getYaw(), 0.0F);
+		// Room for the dolphin plus the Sunken sitting on it.
+		if (!world.isSpaceEmpty(dolphin, dolphin.getBoundingBox().stretch(0.0, sunken.getHeight(), 0.0))) {
+			return;
+		}
+		dolphin.initialize(world, difficulty, reason, null);
+		if (sunken.startRiding(dolphin)) {
+			world.spawnEntity(dolphin);
 		}
 	}
 

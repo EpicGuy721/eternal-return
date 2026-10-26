@@ -1,0 +1,6 @@
+{
+  "parent": "eternalreturn:item/speargun",
+  "textures": {
+    "layer0": "eternalreturn:item/speargun_arrow"
+  }
+}

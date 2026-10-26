@@ -120,6 +120,8 @@ public final class EternalReturnConfig {
 		/** Riders come from eternalreturn:jockey_riders, weighted by how often each spawns in the local biome. */
 		public boolean biomeMatchedJockeyRiders = true;
 		public double strayPolarBearJockeyChance = 0.05;
+		/** Chance a Sunken spawning in water comes riding a dolphin. */
+		public double sunkenDolphinJockeyChance = 0.1;
 
 		public double zombieFishingRodChance = 0.05;
 		/** Fraction of the distance to its target that a zombie's fishing rod yanks the hooked entity per tick. */
@@ -234,7 +236,9 @@ public final class EternalReturnConfig {
 		 */
 		public List<String> noNaturalSpawns = new ArrayList<>(List.of("minecraft:allay", "minecraft:armadillo", "minecraft:axolotl",
 				"minecraft:camel", "minecraft:frog", "minecraft:glow_squid", "minecraft:sniffer", "minecraft:tadpole", "minecraft:turtle",
-				"minecraft:dolphin", "minecraft:goat"));
+				"minecraft:goat"));
+		/** Which defaults noNaturalSpawns was written with; version 1 let dolphins spawn again. Don't edit. */
+		public int spawnsVersion;
 		/** Chance a zombie, skeleton or creeper spawns large (twice the size). */
 		public double largeVariantChance = 0.005;
 	}
@@ -736,6 +740,7 @@ public final class EternalReturnConfig {
 		if (loaded == null) {
 			loaded = new EternalReturnConfig();
 			loaded.materialsVersion = 3;
+			loaded.mobs.spawnsVersion = 1;
 			loaded.fishing.baitsVersion = BAITS_VERSION;
 			loaded.worldgen.caves.typesVersion = CaveTypes.SETTINGS_VERSION;
 		}
@@ -752,6 +757,13 @@ public final class EternalReturnConfig {
 				loaded.survival.armorWeight.put("minecraft:gold", 0.10);
 			}
 			loaded.survival.armorWeightVersion = 1;
+		}
+		if (loaded.mobs != null && loaded.mobs.spawnsVersion < 1) {
+			// Dolphins spawn again (they used to be in the list by default).
+			if (loaded.mobs.noNaturalSpawns != null) {
+				loaded.mobs.noNaturalSpawns.remove("minecraft:dolphin");
+			}
+			loaded.mobs.spawnsVersion = 1;
 		}
 		if (loaded.materialsVersion < 3) {
 			loaded.updateMaterials();
