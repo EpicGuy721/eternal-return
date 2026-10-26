@@ -181,9 +181,17 @@ public class SunkenEntity extends SkeletonEntity implements CrossbowUser {
 		this.despawnCounter = 0;
 	}
 
+	/**
+	 * The loaded speargun's shot at the target, as a pillager's crossbow shot (CrossbowUser.shoot only finds a hand
+	 * holding the crossbow item itself).
+	 */
 	@Override
 	public void shootAt(LivingEntity target, float pullProgress) {
-		this.shoot(this, 1.6F);
+		ItemStack stack = this.getMainHandStack();
+		if (stack.getItem() instanceof CrossbowItem crossbow) {
+			crossbow.shootAll(this.getWorld(), this, Hand.MAIN_HAND, stack, 1.6F, 14 - this.getWorld().getDifficulty().getId() * 4, target);
+		}
+		this.postShoot();
 	}
 
 	@Override
@@ -298,9 +306,10 @@ public class SunkenEntity extends SkeletonEntity implements CrossbowUser {
 			return target != null && target.isAlive() && this.actor.isHolding(Speargun.SPEARGUN);
 		}
 
+		/** For as long as the target lives and it has the speargun (stopping forgets the target). */
 		@Override
 		public boolean shouldContinue() {
-			return this.canStart() && (this.actor.getNavigation().isIdle() || !this.isUncharged());
+			return this.canStart();
 		}
 
 		private boolean isUncharged() {

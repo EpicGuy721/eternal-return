@@ -5,6 +5,7 @@ import com.eternalreturn.items.Speargun;
 import com.eternalreturn.mixin.mobs.MobEntityAccessor;
 import com.eternalreturn.mobs.Jockeys;
 import com.eternalreturn.mobs.NewMobs;
+import com.eternalreturn.mobs.ai.Lounging;
 import com.eternalreturn.mobs.entity.SunkenEntity;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.block.Blocks;
@@ -12,16 +13,18 @@ import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ChargedProjectilesComponent;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.mob.SkeletonEntity;
+import net.minecraft.entity.mob.ZombieEntity;
 import net.minecraft.entity.passive.DolphinEntity;
-import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.tag.EntityTypeTags;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.test.GameTest;
@@ -62,16 +65,20 @@ public class SunkenTests implements FabricGameTest {
 		}
 	}
 
-	/** A pig that stays put but can be moved (no goals, rather than no AI: a mob without AI doesn't move at all). */
-	private static PigEntity stillPig(TestContext ctx, BlockPos pos) {
-		PigEntity pig = ctx.spawnEntity(EntityType.PIG, pos);
-		((MobEntityAccessor) pig).eternalreturn$goalSelector().clear(goal -> true);
-		return pig;
+	/**
+	 * A husk (it doesn't burn, and lives through a player's critical shot) that stays put but can be moved: no goals,
+	 * rather than no AI (a mob without AI doesn't move at all).
+	 */
+	private static ZombieEntity stillTarget(TestContext ctx, BlockPos pos) {
+		ZombieEntity husk = ctx.spawnEntity(EntityType.HUSK, pos);
+		((MobEntityAccessor) husk).eternalreturn$goalSelector().clear(goal -> true);
+		((MobEntityAccessor) husk).eternalreturn$targetSelector().clear(goal -> true);
+		return husk;
 	}
 
-	/** Aimed at the pig's middle, raised by as much as a shot this fast drops on the way (gravity 0.05 a tick). */
-	private static Vec3d lead(Vec3d from, PigEntity pig, double speed) {
-		Vec3d to = new Vec3d(pig.getX(), pig.getBodyY(0.5), pig.getZ()).subtract(from);
+	/** Aimed at the husk's middle, raised by as much as a shot this fast drops on the way (gravity 0.05 a tick). */
+	private static Vec3d lead(Vec3d from, LivingEntity husk, double speed) {
+		Vec3d to = new Vec3d(husk.getX(), husk.getBodyY(0.5), husk.getZ()).subtract(from);
 		double ticks = to.horizontalLength() / speed;
 		return to.add(0.0, 0.025 * ticks * ticks + 0.05 * ticks, 0.0);
 	}
@@ -82,6 +89,7 @@ public class SunkenTests implements FabricGameTest {
 		SunkenEntity sunken = sunken(ctx, new BlockPos(2, 1, 2));
 		ctx.assertTrue(sunken.getMainHandStack().isOf(Speargun.SPEARGUN), "a speargun in hand: " + sunken.getMainHandStack());
 		ctx.assertTrue(sunken.getMaxHealth() == 20.0F, "a skeleton's health: " + sunken.getMaxHealth());
+		ctx.assertTrue(sunken.getType().isIn(EntityTypeTags.UNDEAD) && sunken.canBreatheInWater(), "undead, so it doesn't drown");
 		sunken.setVariant(2);
 		NbtCompound nbt = new NbtCompound();
 		sunken.writeNbt(nbt);
@@ -123,57 +131,98 @@ public class SunkenTests implements FabricGameTest {
 		});
 	}
 
-	/** A Sunken's harpoon hooks a pig, and the Sunken reels it in. */
+	/** A Sunken draws its speargun at a target in range and shoots it (and keeps after it while it draws). */
+	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 300)
+	public void shootsItsTarget(TestContext ctx) {
+		SunkenEntity sunken = sunken(ctx, new BlockPos(8, 2, 4));
+		// A helmet, so the sun doesn't send it looking for shade.
+		sunken.equipStack(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));
+		ZombieEntity husk = ctx.spawnEntity(EntityType.HUSK, new BlockPos(8, 2, 14));
+		husk.setAiDisabled(true);
+		float health = husk.getHealth();
+		int[] seen = new int[5];
+		ctx.runAtEveryTick(() -> {
+			Lounging.stand(sunken);
+			if (sunken.getTarget() == null) {
+				seen[4]++;
+				sunken.setTarget(husk);
+			}
+			if (sunken.isCharging()) {
+				seen[0]++;
+			}
+			if (sunken.isUsingItem()) {
+				seen[1]++;
+			}
+			if (net.minecraft.item.CrossbowItem.isCharged(sunken.getMainHandStack())) {
+				seen[2]++;
+			}
+			seen[3] = Math.max(seen[3], world(ctx).getEntitiesByClass(Speargun.Harpoon.class, new Box(sunken.getBlockPos()).expand(40.0), h -> true).size());
+		});
+		ctx.runAtTick(250, () -> {
+			ctx.assertTrue(husk.getHealth() < health, "it shot the target: " + husk.getHealth() + " of " + health + " (charging " + seen[0] + ", using "
+					+ seen[1] + ", loaded " + seen[2] + ", harpoons " + seen[3] + ", target lost " + seen[4] + ", hand " + sunken.getMainHandStack() + ")");
+			sunken.discard();
+			husk.discard();
+			world(ctx).getEntitiesByClass(Speargun.Harpoon.class, new Box(sunken.getBlockPos()).expand(40.0), h -> true).forEach(h -> h.discard());
+			ctx.complete();
+		});
+	}
+
+	private static ServerWorld world(TestContext ctx) {
+		return ctx.getWorld();
+	}
+
+	/** A Sunken's harpoon hooks a husk, and the Sunken reels it in. */
 	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 200)
 	public void harpoonHooksAndReels(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
 		SunkenEntity sunken = ctx.spawnEntity(NewMobs.SUNKEN, new BlockPos(8, 2, 4));
 		sunken.setAiDisabled(true);
-		PigEntity pig = stillPig(ctx, new BlockPos(8, 2, 16));
+		ZombieEntity husk = stillTarget(ctx, new BlockPos(8, 2, 16));
 		Speargun.Harpoon harpoon = new Speargun.Harpoon(world, sunken, new ItemStack(Items.ARROW), new ItemStack(Speargun.SPEARGUN));
 		Vec3d from = sunken.getEyePos();
-		Vec3d aim = lead(from, pig, 2.5);
+		Vec3d aim = lead(from, husk, 2.5);
 		harpoon.setPosition(from);
 		harpoon.setVelocity(aim.x, aim.y, aim.z, 2.5F, 0.0F);
 		world.spawnEntity(harpoon);
-		double before = sunken.distanceTo(pig);
+		double before = sunken.distanceTo(husk);
 		boolean[] hooked = {false};
 		double[] nearest = {before};
 		ctx.runAtEveryTick(() -> {
-			hooked[0] |= harpoon.getHooked() == pig;
-			nearest[0] = Math.min(nearest[0], sunken.distanceTo(pig));
+			hooked[0] |= harpoon.getHooked() == husk;
+			nearest[0] = Math.min(nearest[0], sunken.distanceTo(husk));
 		});
 		ctx.runAtTick(Speargun.MOB_REEL_TIME + 30, () -> {
-			ctx.assertTrue(hooked[0], "the harpoon hooked the pig (pig health " + pig.getHealth() + ", harpoon removed " + harpoon.isRemoved()
-					+ " at " + harpoon.getPos() + ", pig at " + pig.getPos() + ", stuck " + harpoon.isStuck() + ", velocity " + harpoon.getVelocity() + ")");
+			ctx.assertTrue(hooked[0], "the harpoon hooked the husk (husk health " + husk.getHealth() + ", harpoon removed " + harpoon.isRemoved()
+					+ " at " + harpoon.getPos() + ", husk at " + husk.getPos() + ", stuck " + harpoon.isStuck() + ", velocity " + harpoon.getVelocity() + ")");
 			ctx.assertTrue(nearest[0] < before - 4.0, "and the Sunken reeled it in: from " + before + " to " + nearest[0]);
 			sunken.discard();
-			pig.discard();
+			husk.discard();
 			harpoon.discard();
 			ctx.complete();
 		});
 	}
 
-	/** A player's loaded speargun shoots a harpoon; with the pig hooked, using the speargun reels it in. */
+	/** A player's loaded speargun shoots a harpoon; with the husk hooked, using the speargun reels it in. */
 	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 200)
 	public void playerReelsIn(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
 		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(8, 2, 4));
-		PigEntity pig = stillPig(ctx, new BlockPos(8, 2, 14));
+		ZombieEntity husk = stillTarget(ctx, new BlockPos(8, 2, 14));
 		ItemStack speargun = new ItemStack(Speargun.SPEARGUN);
 		speargun.set(DataComponentTypes.CHARGED_PROJECTILES, ChargedProjectilesComponent.of(new ItemStack(Items.ARROW)));
 		player.setStackInHand(Hand.MAIN_HAND, speargun);
-		Vec3d aim = lead(player.getEyePos(), pig, 3.15);
+		Vec3d aim = lead(player.getEyePos(), husk, 3.15);
 		player.setYaw((float) Math.toDegrees(Math.atan2(-aim.x, aim.z)));
 		player.setPitch((float) -Math.toDegrees(Math.atan2(aim.y, aim.horizontalLength())));
 		player.setHeadYaw(player.getYaw());
 		speargun.use(world, player, Hand.MAIN_HAND);
-		double before = player.distanceTo(pig);
+		double before = player.distanceTo(husk);
 		boolean[] reeling = {false};
 		ctx.runAtTick(20, () -> {
 			try {
 				Speargun.Harpoon harpoon = Speargun.hooked(player);
-				ctx.assertTrue(harpoon != null && harpoon.getHooked() == pig, "the player's harpoon hooked the pig");
+				ctx.assertTrue(harpoon != null && harpoon.getHooked() == husk, "the player's harpoon hooked the husk");
 				speargun.use(world, player, Hand.MAIN_HAND);
 				reeling[0] = true;
 			} catch (RuntimeException e) {
@@ -191,12 +240,12 @@ public class SunkenTests implements FabricGameTest {
 		});
 		ctx.runAtTick(60, () -> {
 			try {
-				ctx.assertTrue(player.distanceTo(pig) < before - 3.0, "reeled in: from " + before + " to " + player.distanceTo(pig) + " (reels " + reels[0]
-						+ ", still hooked " + (Speargun.hooked(player) != null) + ", pig velocity " + pig.getVelocity() + ", using " + player.isUsingItem() + ")");
+				ctx.assertTrue(player.distanceTo(husk) < before - 3.0, "reeled in: from " + before + " to " + player.distanceTo(husk) + " (reels " + reels[0]
+						+ ", still hooked " + (Speargun.hooked(player) != null) + ", husk velocity " + husk.getVelocity() + ", using " + player.isUsingItem() + ")");
 			} finally {
 				reeling[0] = false;
 				FishingTests.disconnect(player);
-				pig.discard();
+				husk.discard();
 				world.getEntitiesByClass(Speargun.Harpoon.class, new Box(player.getBlockPos()).expand(40.0), h -> true).forEach(h -> h.discard());
 			}
 			ctx.complete();
