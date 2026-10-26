@@ -18,8 +18,8 @@ import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 /**
- * The Sandown (SandownModel) and his laser blaster, its grip in his right hand: pointing ahead at his side, or along his
- * arm as he aims.
+ * The Sandown (SandownModel) and his laser blaster, its handle in his right fist and its barrel along his arm: pointing
+ * down at his side, ahead as he aims.
  */
 public class SandownRenderer extends MobEntityRenderer<SandownEntity, SandownModel> {
 	public SandownRenderer(EntityRendererFactory.Context ctx) {
@@ -56,15 +56,10 @@ public class SandownRenderer extends MobEntityRenderer<SandownEntity, SandownMod
 			Quaternionf armTurn = new Quaternionf().rotationZYX(arm.roll, arm.yaw, arm.pitch);
 			// In the model's space (blocks; y points down, the front is -z).
 			Vector3f hand = armTurn.transform(new Vector3f(0.0F, SandownModel.HAND, 0.0F)).add(arm.pivotX, arm.pivotY, arm.pivotZ).div(16.0F);
-			Vector3f barrel = entity.isAiming() ? armTurn.transform(new Vector3f(0.0F, 1.0F, 0.0F)) : new Vector3f(0.0F, 0.0F, -1.0F);
-			barrel.normalize();
-			// Its top as near up as it can be, square to the barrel.
-			Vector3f up = new Vector3f(0.0F, -1.0F, 0.0F);
-			Vector3f top = new Vector3f(up).sub(new Vector3f(barrel).mul(barrel.dot(up)));
-			if (top.lengthSquared() < 1.0E-6F) {
-				top.set(0.0F, 0.0F, -1.0F);
-			}
-			top.normalize();
+			// Gripped as a pistol is: the barrel along his arm (pointing down at his side, ahead when he aims), its top to the
+			// front of his arm, the handle through his fist.
+			Vector3f barrel = armTurn.transform(new Vector3f(0.0F, 1.0F, 0.0F)).normalize();
+			Vector3f top = armTurn.transform(new Vector3f(0.0F, 0.0F, -1.0F)).normalize();
 			Vector3f face = new Vector3f(barrel).cross(top);
 			Matrix3f turn = new Matrix3f().setColumn(0, barrel).setColumn(1, top).setColumn(2, face);
 			Vector3f middle = turn.transform(new Vector3f(ICON_GRIP).mul(-SCALE)).add(hand);
