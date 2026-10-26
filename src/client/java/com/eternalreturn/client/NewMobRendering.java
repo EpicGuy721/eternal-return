@@ -33,7 +33,10 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.RotationAxis;
 
-/** Drawing frostbites, the parched, bone spiders, mooblooms and moolips (NewMobs), ice balls, and Necromancy's tooltip. */
+/**
+ * Drawing frostbites, the parched, bone spiders, mooblooms and moolips (NewMobs), ice balls, and Necromancy's tooltip;
+ * registering the other new mobs' renderers (soldiers, Sandowns, gimps, ...), bullets and laser bolts.
+ */
 public final class NewMobRendering {
 	private NewMobRendering() {
 	}
@@ -47,6 +50,9 @@ public final class NewMobRendering {
 		EntityRendererRegistry.register(NewMobs.BEHOLDER, BeholderRenderer::new);
 		EntityModelLayerRegistry.registerModelLayer(SoldierModel.LAYER, SoldierModel::getTexturedModelData);
 		EntityRendererRegistry.register(NewMobs.SOLDIER, SoldierRenderer::new);
+		EntityModelLayerRegistry.registerModelLayer(SandownModel.LAYER, SandownModel::getTexturedModelData);
+		EntityRendererRegistry.register(NewMobs.SANDOWN, SandownRenderer::new);
+		EntityRendererRegistry.register(com.eternalreturn.items.LaserBlaster.BOLT, LaserBoltRenderer::new);
 		EntityModelLayerRegistry.registerModelLayer(GimpModel.LAYER, GimpModel::getTexturedModelData);
 		EntityRendererRegistry.register(NewMobs.GIMP, GimpRenderer::new);
 		EntityModelLayerRegistry.registerModelLayer(AtropalModel.LAYER, AtropalModel::getTexturedModelData);

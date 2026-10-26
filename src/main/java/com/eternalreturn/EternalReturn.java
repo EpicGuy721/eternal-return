@@ -79,6 +79,7 @@ public class EternalReturn implements ModInitializer {
 		com.eternalreturn.weather.LocalWeather.register();
 		com.eternalreturn.logic.BlockLocks.register();
 		com.eternalreturn.items.Firearms.register();
+		com.eternalreturn.items.LaserBlaster.register();
 		com.eternalreturn.mobs.NewMobs.register();
 		com.eternalreturn.birds.Birds.register();
 		com.eternalreturn.blocks.Minecarts.register();

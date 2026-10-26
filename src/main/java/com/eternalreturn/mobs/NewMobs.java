@@ -10,6 +10,7 @@ import com.eternalreturn.mobs.entity.FrostbiteEntity;
 import com.eternalreturn.mobs.entity.GimpEntity;
 import com.eternalreturn.mobs.entity.GrimlockEntity;
 import com.eternalreturn.mobs.entity.ParchedEntity;
+import com.eternalreturn.mobs.entity.SandownEntity;
 import com.eternalreturn.mobs.entity.SoldierEntity;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
@@ -41,7 +42,7 @@ import net.minecraft.world.biome.SpawnSettings;
 /**
  * Frostbites (cold biomes), the parched (deserts), bone spiders (the Nether), skeleton wolves (a wolf variant of the
  * Nether, data/eternalreturn/wolf_variant/skeleton.json), beholders (rare, the Nether), grimlocks (deep caves, below
- * y 0, in small groups), mooblooms (autumnal forests) and moolips (cherry groves). Soldiers, gimps and atropals are
+ * y 0, in small groups), mooblooms (autumnal forests), moolips (cherry groves) and Sandowns (rare, the End). Soldiers, gimps and atropals are
  * kept (spawn eggs, commands) but no longer spawn naturally (a gimp from an egg still brings its atropal).
  * Frostbites and the parched take most of the zombies' and skeletons' place where they live, as strays do in the
  * snow: biome tags eternalreturn:frostbite_biomes and eternalreturn:parched_biomes.
@@ -66,6 +67,9 @@ public final class NewMobs {
 			EntityType.Builder.<AtropalEntity>create(AtropalEntity::new, SpawnGroup.MONSTER).dimensions(0.7F, 1.5F).eyeHeight(1.2F).maxTrackingRange(8));
 	public static final EntityType<GrimlockEntity> GRIMLOCK = type("grimlock",
 			EntityType.Builder.<GrimlockEntity>create(GrimlockEntity::new, SpawnGroup.MONSTER).dimensions(0.6F, 1.95F).eyeHeight(1.74F).maxTrackingRange(8));
+	/** As tall as his hat (4.4 blocks), about as wide as his chest. */
+	public static final EntityType<SandownEntity> SANDOWN = type("sandown",
+			EntityType.Builder.<SandownEntity>create(SandownEntity::new, SpawnGroup.MONSTER).dimensions(1.1F, 4.3F).eyeHeight(3.4F).maxTrackingRange(10));
 	public static final EntityType<FlowerCowEntity> MOOBLOOM = type("moobloom",
 			EntityType.Builder.<FlowerCowEntity>create(FlowerCowEntity::new, SpawnGroup.CREATURE).dimensions(0.9F, 1.4F).eyeHeight(1.3F).maxTrackingRange(10));
 	public static final EntityType<FlowerCowEntity> MOOLIP = type("moolip",
@@ -94,6 +98,7 @@ public final class NewMobs {
 		FabricDefaultAttributeRegistry.register(GIMP, GimpEntity.createGimpAttributes());
 		FabricDefaultAttributeRegistry.register(ATROPAL, AtropalEntity.createAtropalAttributes());
 		FabricDefaultAttributeRegistry.register(GRIMLOCK, GrimlockEntity.createGrimlockAttributes());
+		FabricDefaultAttributeRegistry.register(SANDOWN, SandownEntity.createSandownAttributes());
 		FabricDefaultAttributeRegistry.register(MOOBLOOM, CowEntity.createCowAttributes());
 		FabricDefaultAttributeRegistry.register(MOOLIP, CowEntity.createCowAttributes());
 		SpawnRestriction.register(FROSTBITE, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, HostileEntity::canSpawnInDark);
@@ -103,6 +108,7 @@ public final class NewMobs {
 		SpawnRestriction.register(SOLDIER, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, SoldierEntity::canSpawn);
 		SpawnRestriction.register(GIMP, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, GimpEntity::canSpawn);
 		SpawnRestriction.register(GRIMLOCK, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, GrimlockEntity::canSpawn);
+		SpawnRestriction.register(SANDOWN, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, SandownEntity::canSpawn);
 		SpawnRestriction.register(MOOBLOOM, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, AnimalEntity::isValidNaturalSpawn);
 		SpawnRestriction.register(MOOLIP, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, AnimalEntity::isValidNaturalSpawn);
 
@@ -127,6 +133,9 @@ public final class NewMobs {
 		// Deep caves only (GrimlockEntity.canSpawn: below y 0), in small groups.
 		BiomeModifications.create(EternalReturn.id("grimlocks")).add(ModificationPhase.ADDITIONS, BiomeSelectors.foundInOverworld(),
 				context -> context.getSpawnSettings().addSpawn(SpawnGroup.MONSTER, new SpawnSettings.SpawnEntry(GRIMLOCK, 30, 2, 3)));
+		// Rare: alone, a small weight beside endermen's 10 (in fours), and SandownEntity.canSpawn passes half of them.
+		BiomeModifications.create(EternalReturn.id("end_sandowns")).add(ModificationPhase.ADDITIONS, BiomeSelectors.foundInTheEnd(),
+				context -> context.getSpawnSettings().addSpawn(SpawnGroup.MONSTER, new SpawnSettings.SpawnEntry(SANDOWN, 1, 1, 1)));
 		BiomeModifications.create(EternalReturn.id("nether_wolves")).add(ModificationPhase.ADDITIONS, BiomeSelectors.foundInTheNether(),
 				context -> context.getSpawnSettings().addSpawn(SpawnGroup.CREATURE, new SpawnSettings.SpawnEntry(EntityType.WOLF, 20, 1, 3)));
 		BiomeModifications.create(EternalReturn.id("mooblooms")).add(ModificationPhase.ADDITIONS,
@@ -145,6 +154,7 @@ public final class NewMobs {
 		Item grimlock = egg("grimlock", GRIMLOCK, 0x6E7172, 0x6E6457);
 		Item moobloom = egg("moobloom", MOOBLOOM, 0xF4D23A, 0xFFF6C8);
 		Item moolip = egg("moolip", MOOLIP, 0xEFA2C6, 0xFFE3F0);
+		Item sandown = egg("sandown", SANDOWN, 0x3C5D47, 0xD8BB58);
 		ItemGroupEvents.modifyEntriesEvent(ItemGroups.SPAWN_EGGS).register(entries -> {
 			entries.addAfter(Items.FOX_SPAWN_EGG, frostbite);
 			entries.addAfter(Items.PANDA_SPAWN_EGG, parched);
@@ -154,6 +164,7 @@ public final class NewMobs {
 			entries.addAfter(Items.SPIDER_SPAWN_EGG, gimp, atropal);
 			entries.addAfter(Items.ZOMBIE_SPAWN_EGG, grimlock);
 			entries.addAfter(Items.MOOSHROOM_SPAWN_EGG, moobloom, moolip);
+			entries.addAfter(Items.ENDERMAN_SPAWN_EGG, sandown);
 		});
 	}
 }
