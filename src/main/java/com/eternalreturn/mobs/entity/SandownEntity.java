@@ -64,8 +64,9 @@ import java.util.UUID;
  * dropped one time in 100) and shoots whoever he's angry with when he can see them within RANGE blocks, every
  * SHOT_COOLDOWN ticks. Out of his reach (out of sight or range) for REACH_PATIENCE ticks, they're teleported in front of
  * him, where he can see them (at most every PULL_COOLDOWN ticks). He teleports, as an enderman does: away from a player
- * who comes within TOO_CLOSE blocks (at most every EVADE_COOLDOWN ticks), away from a projectile coming at him or a
- * block falling on him (and one that reaches him doesn't hurt him: he's gone), and now and then when idle.
+ * who comes within TOO_CLOSE blocks, away from a projectile coming at him or a block falling on him (and one that
+ * reaches him doesn't hurt him: he's gone), and now and then when idle; but at most once every TELEPORT_COOLDOWN ticks,
+ * so for a while after a teleport he can be caught and hit. Mostly silent: a robotic noise now and then.
  */
 public class SandownEntity extends HostileEntity implements Angerable, RangedAttackMob {
 	public static final float RANGE = 32.0F;
@@ -73,7 +74,11 @@ public class SandownEntity extends HostileEntity implements Angerable, RangedAtt
 	public static final int REACH_PATIENCE = 40;
 	public static final int PULL_COOLDOWN = 200;
 	public static final double TOO_CLOSE = 3.5;
-	public static final int EVADE_COOLDOWN = 60;
+	/** Five seconds between his teleports. */
+	public static final int TELEPORT_COOLDOWN = 100;
+	/** Robotic noises, picked from now and then. */
+	private static final SoundEvent[] NOISES = {SoundEvents.BLOCK_CRAFTER_CRAFT, SoundEvents.BLOCK_BEACON_POWER_SELECT, SoundEvents.BLOCK_COPPER_BULB_TURN_ON,
+			SoundEvents.BLOCK_CRAFTER_FAIL};
 	/** How far in front of him a target is put, in blocks. */
 	private static final int[] PULL_DISTANCES = {6, 5, 7, 4, 8};
 	private static final UniformIntProvider ANGER_TIME = TimeHelper.betweenSeconds(20, 39);
@@ -81,10 +86,8 @@ public class SandownEntity extends HostileEntity implements Angerable, RangedAtt
 	private int angerTime;
 	@Nullable
 	private UUID angryAt;
-	private int evadeCooldown;
+	private int teleportCooldown;
 	private int pullCooldown;
-	/** Ticks since he last dodged, so one threat sends him off once. */
-	private int sinceDodge = 100;
 
 	public SandownEntity(EntityType<? extends SandownEntity> type, World world) {
 		super(type, world);
@@ -191,13 +194,12 @@ public class SandownEntity extends HostileEntity implements Angerable, RangedAtt
 		if (this.getWorld() instanceof ServerWorld server) {
 			this.tickAngerLogic(server, true);
 		}
-		if (this.evadeCooldown > 0) {
-			this.evadeCooldown--;
+		if (this.teleportCooldown > 0) {
+			this.teleportCooldown--;
 		}
 		if (this.pullCooldown > 0) {
 			this.pullCooldown--;
 		}
-		this.sinceDodge++;
 		if (this.getTarget() == null && this.random.nextInt(800) == 0) {
 			this.teleportAway(this.getPos(), 8.0, 24.0);
 		}
@@ -208,7 +210,7 @@ public class SandownEntity extends HostileEntity implements Angerable, RangedAtt
 
 	/** A projectile or falling block about to hit him sends him off; so does a player (or his target) too close. */
 	private void dodge() {
-		if (this.sinceDodge < 5) {
+		if (this.teleportCooldown > 0) {
 			return;
 		}
 		Box box = this.getBoundingBox();
@@ -227,11 +229,9 @@ public class SandownEntity extends HostileEntity implements Angerable, RangedAtt
 			this.teleportAway(falling.get(0).getPos(), 6.0, 14.0);
 			return;
 		}
-		if (this.evadeCooldown == 0) {
-			Entity near = this.tooClose();
-			if (near != null && this.teleportAway(near.getPos(), 8.0, 16.0)) {
-				this.evadeCooldown = EVADE_COOLDOWN;
-			}
+		Entity near = this.tooClose();
+		if (near != null) {
+			this.teleportAway(near.getPos(), 8.0, 16.0);
 		}
 	}
 
@@ -265,10 +265,10 @@ public class SandownEntity extends HostileEntity implements Angerable, RangedAtt
 
 	/**
 	 * Off to somewhere between min and max blocks from here, away from the threat (to either side of straight away), on
-	 * solid ground; where he can see his target, if he can find such a place.
+	 * solid ground; where he can see his target, if he can find such a place. Not again until TELEPORT_COOLDOWN is up.
 	 */
 	public boolean teleportAway(Vec3d threat, double min, double max) {
-		if (this.getWorld().isClient() || !this.isAlive()) {
+		if (this.getWorld().isClient() || !this.isAlive() || this.teleportCooldown > 0) {
 			return false;
 		}
 		double away = Math.atan2(this.getZ() - threat.z, this.getX() - threat.x);
@@ -285,7 +285,7 @@ public class SandownEntity extends HostileEntity implements Angerable, RangedAtt
 			// The first two thirds of the tries want a view of his target.
 			boolean wantView = target != null && attempt < 32;
 			if (this.teleportTo(x, y, z, wantView ? target : null)) {
-				this.sinceDodge = 0;
+				this.teleportCooldown = TELEPORT_COOLDOWN;
 				return true;
 			}
 		}
@@ -423,26 +423,33 @@ public class SandownEntity extends HostileEntity implements Angerable, RangedAtt
 		return false;
 	}
 
-	// A low, giggling voice.
+	// Mostly silent: a whir, click or clunk of machinery about once a minute or more; a clank when hurt, a power-down when
+	// he dies.
 
+	@Nullable
 	@Override
 	protected SoundEvent getAmbientSound() {
-		return SoundEvents.ENTITY_WITCH_CELEBRATE;
+		return NOISES[this.random.nextInt(NOISES.length)];
+	}
+
+	@Override
+	public int getMinAmbientSoundDelay() {
+		return 1200;
 	}
 
 	@Override
 	protected SoundEvent getHurtSound(DamageSource source) {
-		return SoundEvents.ENTITY_WITCH_HURT;
+		return SoundEvents.ENTITY_IRON_GOLEM_HURT;
 	}
 
 	@Override
 	protected SoundEvent getDeathSound() {
-		return SoundEvents.ENTITY_WITCH_DEATH;
+		return SoundEvents.BLOCK_BEACON_DEACTIVATE;
 	}
 
 	@Override
 	public float getSoundPitch() {
-		return 0.55F + this.random.nextFloat() * 0.1F;
+		return 0.7F + this.random.nextFloat() * 0.5F;
 	}
 
 	/** Shoots whoever he's angry with in his reach; pulls them in front of him when they keep out of it. */

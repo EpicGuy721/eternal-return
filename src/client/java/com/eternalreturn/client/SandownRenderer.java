@@ -33,13 +33,13 @@ public class SandownRenderer extends MobEntityRenderer<SandownEntity, SandownMod
 	}
 
 	static class BlasterFeature extends FeatureRenderer<SandownEntity, SandownModel> {
-		/** His blaster is bigger than a player's. */
-		private static final float SCALE = 1.2F;
+		/** About as big against his hand as a player's is against theirs. */
+		private static final float SCALE = 0.7F;
 		/**
-		 * Where the icon's grip is from its middle (blocks, at scale 1): low on the left. The icon's barrel points to its
-		 * right (+x), its top up (+y), its face out of the screen (+z).
+		 * Where the icon's grip is from its middle (blocks, at scale 1): the top of its handle, low on the left. The icon's
+		 * barrel points to its right (+x), its top up (+y), its face out of the screen (+z).
 		 */
-		private static final Vector3f ICON_GRIP = new Vector3f(-4.5F / 16.0F, -3.5F / 16.0F, 0.0F);
+		private static final Vector3f ICON_GRIP = new Vector3f(-4.0F / 16.0F, -4.0F / 16.0F, 0.0F);
 
 		BlasterFeature(FeatureRendererContext<SandownEntity, SandownModel> context) {
 			super(context);

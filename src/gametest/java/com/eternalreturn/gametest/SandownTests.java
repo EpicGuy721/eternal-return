@@ -141,16 +141,42 @@ public class SandownTests implements FabricGameTest {
 		});
 	}
 
-	/** A player who comes up close sees him teleport off. */
-	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 100)
+	/**
+	 * A player who comes up close sees him teleport off; caught up with again straight away, he stays put (his teleport
+	 * is cooling down), and once it's ready he's off again.
+	 */
+	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 300)
 	public void teleportsAwayFromCloseCallers(TestContext ctx) {
 		SandownEntity sandown = sandown(ctx, new BlockPos(8, 1, 12));
 		Vec3d from = sandown.getPos();
 		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(8, 1, 14));
+		Vec3d[] caught = new Vec3d[1];
 		ctx.runAtTick(20, () -> {
 			try {
 				ctx.assertTrue(sandown.getPos().distanceTo(from) > 5.0, "he teleported away: " + sandown.getPos().distanceTo(from) + " blocks");
 				ctx.assertTrue(sandown.distanceTo(player) > SandownEntity.TOO_CLOSE + 1.0, "out of the player's reach: " + sandown.distanceTo(player));
+			} catch (RuntimeException e) {
+				FishingTests.disconnect(player);
+				sandown.discard();
+				throw e;
+			}
+			player.teleport(ctx.getWorld(), sandown.getX() + 2.0, sandown.getY(), sandown.getZ(), 0.0F, 0.0F);
+			caught[0] = sandown.getPos();
+		});
+		ctx.runAtTick(40, () -> {
+			try {
+				ctx.assertTrue(sandown.getPos().distanceTo(caught[0]) < 3.0, "caught up with during his cooldown, he stays: "
+						+ sandown.getPos().distanceTo(caught[0]) + " blocks");
+			} catch (RuntimeException e) {
+				FishingTests.disconnect(player);
+				sandown.discard();
+				throw e;
+			}
+		});
+		ctx.runAtTick(20 + SandownEntity.TELEPORT_COOLDOWN + 20, () -> {
+			try {
+				ctx.assertTrue(sandown.getPos().distanceTo(caught[0]) > 5.0, "and once it's up he's off again: "
+						+ sandown.getPos().distanceTo(caught[0]) + " blocks");
 			} finally {
 				FishingTests.disconnect(player);
 				sandown.discard();
