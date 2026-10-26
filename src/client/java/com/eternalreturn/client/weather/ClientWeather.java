@@ -76,6 +76,7 @@ public final class ClientWeather {
 			blizzard = 0.0F;
 		});
 		ClientTickEvents.END_CLIENT_TICK.register(ClientWeather::tick);
+		SnowTextures.register();
 	}
 
 	/** Whether the weather here is storms (and the overworld). */

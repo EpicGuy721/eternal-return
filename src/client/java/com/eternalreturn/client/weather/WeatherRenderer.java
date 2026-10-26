@@ -19,6 +19,7 @@ import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.render.WorldRenderer;
+import net.minecraft.client.util.BufferAllocator;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.particle.ParticleEffect;
@@ -38,9 +39,10 @@ import net.minecraft.world.biome.Biome;
 /**
  * Rain and snow with storms (ClientWeather), in place of vanilla's (LocalWeatherRenderMixin): drawn column by column
  * where a storm covers, out to 32 blocks (16 on fast graphics) so the rain of a storm a short way off can be seen
- * falling; never above the clouds. Rain is as strong as the storm covers; snow is as many sheets of it, each one at full
- * strength, so a weak or fading storm has fewer flakes rather than fainter ones. Each sheet of snow falls at its own
- * pace, slants its own way and flutters, and a blizzard's is thick (more sheets), falls fast and drives sideways. The
+ * falling; never above the clouds. Rain is as strong as the storm covers; snow is as many flakes, each at full
+ * strength, so a weak or fading storm has fewer flakes, spread evenly, rather than fainter ones (SnowTextures). Each
+ * sheet of snow falls at its own pace, slants its own way and flutters, and a blizzard's is thick (up to three sheets
+ * a column), falls fast and drives sideways. The
  * flakes are fixed to the world's heights and each sheet turns smoothly to face the camera, so moving and jumping never
  * jolt them; the sheets fade out at their ends. The wind slants it all (weather.windyRain), snow most; slanting, it stops
  * where the ground upwind is in the way, so none comes through blocks into a hole. Splashes and the sound of rain come
@@ -48,11 +50,12 @@ import net.minecraft.world.biome.Biome;
  */
 public final class WeatherRenderer {
 	private static final Identifier RAIN = Identifier.ofVanilla("textures/environment/rain.png");
-	private static final Identifier SNOW = Identifier.ofVanilla("textures/environment/snow.png");
 	/** A sheet fades out over this many blocks at its ends. */
 	private static final double FADE = 3.0;
 	/** Sheets of snow in a column: one, and two more in a blizzard. */
 	private static final int SNOW_LAYERS = 3;
+	/** Room for the snow of each level of thinning (SnowTextures), drawn together. */
+	private static final BufferAllocator[] SNOW_ALLOCATORS = new BufferAllocator[SnowTextures.LEVELS];
 	private static int rainSoundCounter;
 	private static final Heights HEIGHTS = new Heights();
 
@@ -80,14 +83,13 @@ public final class WeatherRenderer {
 		int cj = MathHelper.floor(cameraY);
 		int ck = MathHelper.floor(cameraZ);
 		manager.enable();
-		Tessellator tessellator = Tessellator.getInstance();
-		BufferBuilder buffer = null;
+		BufferBuilder rain = null;
+		BufferBuilder[] snow = new BufferBuilder[SnowTextures.LEVELS];
 		RenderSystem.disableCull();
 		RenderSystem.enableBlend();
 		RenderSystem.enableDepthTest();
 		RenderSystem.depthMask(MinecraftClient.isFabulousGraphicsOrBetter());
 		RenderSystem.setShader(GameRenderer::getParticleProgram);
-		int texture = -1;
 		double time = ticks + tickDelta;
 		BlockPos.Mutable pos = new BlockPos.Mutable();
 		Heights heights = HEIGHTS.around(world, ci, ck, far + 48);
@@ -137,14 +139,6 @@ public final class WeatherRenderer {
 				pos.set(x, Math.max(ground, cj), z);
 				int light = WorldRenderer.getLightmapCoordinates(world, pos);
 				if (precipitation == Biome.Precipitation.RAIN) {
-					if (texture != 0) {
-						if (texture >= 0) {
-							draw(buffer);
-						}
-						texture = 0;
-						RenderSystem.setShaderTexture(0, RAIN);
-						buffer = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR_LIGHT);
-					}
 					// Carried a little per block it falls (rain falls about 9 blocks a second).
 					double leanX = windX * 2.5;
 					double leanZ = windZ * 2.5;
@@ -159,29 +153,24 @@ public final class WeatherRenderer {
 					float speed = 3.0F + random.nextFloat();
 					float v = -(scroll + offset + tickDelta) / 32.0F * speed % 32.0F;
 					float alpha = (float) ((0.5 + 0.5 * fade) * edge) * cover;
-					sheet(buffer, x + 0.5 - cameraX, z + 0.5 - cameraZ, sx, sz, from - cameraY, top - cameraY, hanging && from == bottom, ground - cameraY,
+					if (rain == null) {
+						rain = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR_LIGHT);
+					}
+					sheet(rain, x + 0.5 - cameraX, z + 0.5 - cameraZ, sx, sz, from - cameraY, top - cameraY, hanging && from == bottom, ground - cameraY,
 							leanX, leanZ, 0.0F, 1.0F, v, cameraY, 0.25, alpha, light);
 				} else {
-					if (texture != 1) {
-						if (texture >= 0) {
-							draw(buffer);
-						}
-						texture = 1;
-						RenderSystem.setShaderTexture(0, SNOW);
-						buffer = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR_LIGHT);
-					}
 					int sky = light >> 16 & 65535;
 					int block = light & 65535;
 					int snowLight = ((block * 3 + 240) / 4) | ((sky * 3 + 240) / 4) << 16;
 					float alpha = (float) ((0.5 + 0.3 * fade) * edge);
-					// How much snow there is: a weak or fading storm has fewer sheets, a blizzard more.
-					float thick = Math.min(1.0F, cover * 1.25F);
+					// How much snow there is, in sheets' worth: a weak or fading storm has fewer flakes, a blizzard up to three sheets.
+					float amount = Math.min(1.0F, cover * 1.25F) * (1.0F + (SNOW_LAYERS - 1) * blizzard);
 					for (int layer = 0; layer < SNOW_LAYERS; layer++) {
 						long seed = seed(x, z, layer);
-						float density = layer == 0 ? thick : thick * blizzard;
-						// Each sheet shows above its own share of the storm's strength, widening in quickly from a sliver.
-						float shown = MathHelper.clamp((density - 0.875F * unit(seed, 0)) * 8.0F, 0.0F, 1.0F);
-						if (shown <= 0.0F) {
+						// This sheet's share of it, as that many of the flakes (the nearest level of thinning, up or down at random
+						// from sheet to sheet, so the levels never show as steps).
+						int level = (int) (MathHelper.clamp(amount - layer, 0.0F, 1.0F) * SnowTextures.LEVELS + unit(seed, 0));
+						if (level <= 0) {
 							continue;
 						}
 						// Each its own: where in the column it hangs, how it slants, how big its flakes are, how fast they fall.
@@ -208,15 +197,27 @@ public final class WeatherRenderer {
 						double u = unit(seed, 8) + time * 0.012 * (unit(seed, 9) - 0.5)
 								+ 0.12 * (1.0 - 0.8 * blizzard) * Math.sin(time * (0.05 + 0.06 * unit(seed, 10)) + unit(seed, 11) * MathHelper.TAU);
 						u -= Math.floor(u);
-						sheet(buffer, sheetX - cameraX, sheetZ - cameraZ, sx * shown, sz * shown, from - cameraY, sheetTop - cameraY,
-								hanging && from == bottom, ground - cameraY, leanX, leanZ, (float) u, (float) (u + shown * size), (float) (v - Math.floor(v)), cameraY,
-								0.25 * size, alpha, snowLight);
+						if (snow[level - 1] == null) {
+							if (SNOW_ALLOCATORS[level - 1] == null) {
+								SNOW_ALLOCATORS[level - 1] = new BufferAllocator(65536);
+							}
+							snow[level - 1] = new BufferBuilder(SNOW_ALLOCATORS[level - 1], VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR_LIGHT);
+						}
+						sheet(snow[level - 1], sheetX - cameraX, sheetZ - cameraZ, sx, sz, from - cameraY, sheetTop - cameraY, hanging && from == bottom,
+								ground - cameraY, leanX, leanZ, (float) u, (float) (u + size), (float) (v - Math.floor(v)), cameraY, 0.25 * size, alpha, snowLight);
 					}
 				}
 			}
 		}
-		if (texture >= 0) {
-			draw(buffer);
+		if (rain != null) {
+			RenderSystem.setShaderTexture(0, RAIN);
+			draw(rain);
+		}
+		for (int level = 1; level <= SnowTextures.LEVELS; level++) {
+			if (snow[level - 1] != null) {
+				RenderSystem.setShaderTexture(0, SnowTextures.get(level));
+				draw(snow[level - 1]);
+			}
 		}
 		RenderSystem.enableCull();
 		RenderSystem.disableBlend();
@@ -261,7 +262,7 @@ public final class WeatherRenderer {
 		buffer.vertex((float) (x - sx + bottomX), (float) y0, (float) (z - sz + bottomZ)).texture(u0, v0).color(1.0F, 1.0F, 1.0F, alpha0).light(light);
 	}
 
-	/** Draws what is in the buffer, if anything (every sheet since the last texture may have been left out). */
+	/** Draws what is in the buffer, if anything (every sheet in it may have been left out). */
 	private static void draw(BufferBuilder buffer) {
 		BuiltBuffer built = buffer.endNullable();
 		if (built != null) {

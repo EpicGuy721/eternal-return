@@ -22,7 +22,7 @@ Everything that asks whether it rains at a spot asks the storms there: undead an
 
 Each player's game is told of the storms near them every second, and eases each storm's strength and the wind toward what it is told, so neither jumps; a storm it is no longer told of fades out over a few seconds. The sky and clouds darken as a storm comes near (from 160 blocks beyond its edge), rain falls on them only inside one, and the rain of a storm a short way off can be seen falling, out to 32 blocks (16 on fast graphics).
 
-Rain is fainter where a storm is weaker. Snow is not: a weaker or fading snowstorm has fewer sheets of flakes, each as bright, and a blizzard has up to three in each column. Each sheet of snow falls at its own pace, slants a little more or less, has bigger or smaller flakes and flutters sideways (less in a blizzard). The flakes are fixed to the world's heights and each sheet turns smoothly to face the camera, so walking and jumping don't jolt them, and sheets fade out at their ends rather than stopping at a line.
+Rain is fainter where a storm is weaker. Snow is not: a weaker or fading snowstorm has fewer flakes, spread evenly and each as bright (copies of the snow texture with a share of its flakes taken out, made from whatever snow texture the resource packs give), and a blizzard has up to three sheets of flakes in each column. Each sheet of snow falls at its own pace, slants a little more or less, has bigger or smaller flakes and flutters sideways (less in a blizzard). The flakes are fixed to the world's heights and each sheet turns smoothly to face the camera, so walking and jumping don't jolt them, and sheets fade out at their ends rather than stopping at a line.
 
 ## Commands
 
