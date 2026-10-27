@@ -213,6 +213,13 @@ public final class EternalReturnConfig {
 		public boolean witherRework = true;
 		/** Flocking birds (songbirds, ducks, gulls, corvids; waders loosely) take off together and fly as a flock (boids). */
 		public boolean birdFlocks = true;
+		/**
+		 * Wild songbirds and corvids peck at seeds and young crops on farmland; villagers and tamed wolves and cats
+		 * chase them off, and a scarecrow (an armor stand wearing a carved pumpkin) keeps them off crops within
+		 * scarecrowRadius blocks (CropPests).
+		 */
+		public boolean birdsEatCrops = true;
+		public double scarecrowRadius = 10.0;
 		/** Cod, salmon and tropical fish school by the boids rules instead of following a leader. */
 		public boolean fishSchools = true;
 		/** Spiders, cave spiders, bone spiders and gimps walk on walls and ceilings, turning to fit each surface (else vanilla climbing). */

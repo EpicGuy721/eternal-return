@@ -50,6 +50,7 @@ import org.jetbrains.annotations.Nullable;
  * It flies off from players who come too close (BirdGoals.FlyAway); perching shapes rest on leaves and logs, the
  * others wander low, and ducks swim. Each shape flies at its own speed. Flocking shapes take off together when one is
  * startled (or now and then on their own) and fly as a flock, steering by the boids rules (BirdGoals.FlockFlight).
+ * Wild songbirds and corvids peck at seeds and young crops on farmland (CropPests).
  * Songbirds and corvids (shapes marked tameable) can be tamed with seeds, one try in three: a pet follows its owner,
  * sits or stands when its owner uses it with an empty hand, heals on seeds, and no longer flies off or flocks.
  * Drops feathers (loot table eternalreturn:entities/bird).
@@ -61,6 +62,10 @@ public class BirdEntity extends TameableEntity implements Flutterer {
 	/** Server side: ticks left of a flock flight (0: not flying with the flock), and where it is headed. */
 	private int flockTicks;
 	private Vec3d flockTarget = Vec3d.ZERO;
+	/** Server side: the crop it is pecking at (CropPests), or null; and the age before which it won't go for crops. */
+	@Nullable
+	BlockPos peckingAt;
+	int noPeckUntil;
 
 	public BirdEntity(EntityType<? extends BirdEntity> type, World world) {
 		super(type, world);
@@ -107,6 +112,11 @@ public class BirdEntity extends TameableEntity implements Flutterer {
 	@Override
 	protected float getOffGroundSpeed() {
 		return (float) (this.getShape().flightSpeed() * 0.09 / FLYING_SPEED);
+	}
+
+	/** At the crops, pecking (CropPests). */
+	public boolean isPecking() {
+		return this.peckingAt != null;
 	}
 
 	public boolean isFlocking() {
@@ -160,6 +170,7 @@ public class BirdEntity extends TameableEntity implements Flutterer {
 		this.goalSelector.add(2, new FollowOwnerGoal(this, 1.0, 5.0F, 1.0F));
 		this.goalSelector.add(2, new BirdGoals.FlyAway(this));
 		this.goalSelector.add(3, new BirdGoals.FlockFlight(this));
+		this.goalSelector.add(4, new CropPests.PeckCrops(this));
 		this.goalSelector.add(5, new BirdGoals.FlockWander(this));
 		this.goalSelector.add(5, new BirdGoals.Perch(this));
 		this.goalSelector.add(5, new BirdGoals.WanderLow(this));

@@ -1,5 +1,7 @@
 package com.eternalreturn.villager;
 
+import com.eternalreturn.birds.BirdEntity;
+import com.eternalreturn.birds.CropPests;
 import com.eternalreturn.config.EternalReturnConfig;
 import net.minecraft.component.type.PotionContentsComponent;
 import net.minecraft.entity.Entity;
@@ -43,12 +45,13 @@ import java.util.List;
  * player's feeding does;</li>
  * <li>shepherds now and then (every 2 to 4 minutes) shear a woolly sheep within 12 blocks;</li>
  * <li>fishermen go fishing once a day: they walk to the edge of water within 24 blocks, fish for half a minute or
- * so with a rod in hand, and pocket what they catch (cod, salmon, now and then a tropical fish).</li>
+ * so with a rod in hand, and pocket what they catch (cod, salmon, now and then a tropical fish);</li>
+ * <li>any of them, first of all, chases off a bird pecking at crops within 16 blocks (CropPests).</li>
  * </ul>
  * A chore they can't reach in 30 seconds is given up.
  */
 public final class VillagerChores {
-	public enum Kind { REPAIR, HEAL, FEED, SHEAR, FISH }
+	public enum Kind { REPAIR, HEAL, FEED, SHEAR, FISH, SHOO }
 
 	/** What a villager keeps while busy (VillagerEntityMixin); not saved: a chore just starts over. */
 	public static final class State {
@@ -126,6 +129,18 @@ public final class VillagerChores {
 				state.nextChoreAge = villager.age + 100;
 			});
 			case FISH -> fish(villager, world, state);
+			case SHOO -> {
+				if (!(state.target instanceof BirdEntity bird) || !bird.isPecking()) {
+					finish(villager, state);
+					state.nextChoreAge = villager.age + 20;
+					return;
+				}
+				reach(villager, state, 2.5, () -> {
+					CropPests.scareOff(bird, villager);
+					world.playSound(null, villager.getBlockPos(), SoundEvents.ENTITY_VILLAGER_NO, SoundCategory.NEUTRAL, 1.0F, 1.0F);
+					state.nextChoreAge = villager.age + 20;
+				});
+			}
 		}
 	}
 
@@ -166,6 +181,11 @@ public final class VillagerChores {
 	}
 
 	private static void pick(VillagerEntity villager, ServerWorld world, State state) {
+		BirdEntity pest = CropPests.nearestPecking(villager, CropPests.CHASE_RANGE);
+		if (pest != null) {
+			start(villager, state, Kind.SHOO, pest);
+			return;
+		}
 		VillagerProfession job = villager.getVillagerData().getProfession();
 		if (job == VillagerProfession.ARMORER || job == VillagerProfession.WEAPONSMITH || job == VillagerProfession.TOOLSMITH) {
 			IronGolemEntity golem = nearest(villager, IronGolemEntity.class, 16.0, g -> g.getHealth() < g.getMaxHealth());

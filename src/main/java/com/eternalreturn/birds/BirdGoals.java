@@ -51,6 +51,19 @@ final class BirdGoals {
 		return BirdVariant.shape(other.getVariant()) == BirdVariant.shape(bird.getVariant());
 	}
 
+	/** Flies off away from a threat: with its flock, far, if it flocks; else 8 to 16 blocks. */
+	static void fleeFrom(BirdEntity bird, Vec3d threat) {
+		Vec3d away = bird.getPos().subtract(threat);
+		if (flocks(bird)) {
+			takeOff(bird, bird.getPos().add(away.normalize().multiply(20.0)).add(0.0, 6.0, 0.0));
+			return;
+		}
+		Vec3d target = AboveGroundTargeting.find(bird, 16, 7, away.x, away.z, MathHelper.HALF_PI, 4, 2);
+		if (target != null) {
+			bird.getNavigation().startMovingTo(target.x, target.y, target.z, 1.6);
+		}
+	}
+
 	/** The bird takes off toward target, and so do its flockmates nearby that are not flying yet (a startled flock bursts up together). */
 	static void takeOff(BirdEntity bird, Vec3d target) {
 		int ticks = 80 + bird.getRandom().nextInt(60);
