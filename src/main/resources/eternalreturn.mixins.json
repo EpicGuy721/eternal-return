@@ -40,6 +40,8 @@
 		"frames.ItemFrameEntityMixin",
 		"frames.SignBlockEntityMixin",
 		"frames.SignInvisibilityMixin",
+		"mobs.PiglinBarterMixin",
+		"mobs.PiglinTradesMixin",
 		"mobs.AbstractSkeletonEntityMixin",
 		"mobs.SkeletonSinkingMixin",
 		"mobs.ActiveTargetGoalMixin",

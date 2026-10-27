@@ -241,6 +241,14 @@ public final class EternalReturnConfig {
 		public int spawnsVersion;
 		/** Chance a zombie, skeleton or creeper spawns large (twice the size). */
 		public double largeVariantChance = 0.005;
+		/**
+		 * Bartering: a piglin takes this many gold ingots, and this many rubies (loot table
+		 * eternalreturn:gameplay/piglin_ruby_bartering), before it won't barter any more until its trades come back,
+		 * this many minutes after its first since they last did (0: no limit). PiglinTrades.
+		 */
+		public int piglinGoldTrades = 16;
+		public int piglinRubyTrades = 4;
+		public int piglinTradeResetMinutes = 60;
 	}
 
 	public static final class FishingTweaks {
