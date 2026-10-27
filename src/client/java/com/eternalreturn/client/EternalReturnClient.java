@@ -37,9 +37,8 @@ public class EternalReturnClient implements ClientModInitializer {
 		com.eternalreturn.client.weather.ClientWeather.register();
 		net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap.INSTANCE.putBlock(com.eternalreturn.blocks.CopperRail.BLOCK,
 				net.minecraft.client.render.RenderLayer.getCutout());
-		// Troughs: water seen through, tinted the biome's water colour.
+		// Troughs: water tinted the biome's water colour (solid, as in a cauldron).
 		Block[] troughs = com.eternalreturn.survival.Troughs.BLOCKS.toArray(Block[]::new);
-		net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap.INSTANCE.putBlocks(net.minecraft.client.render.RenderLayer.getTranslucent(), troughs);
 		net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry.BLOCK.register((state, world, pos, tintIndex) ->
 				world != null && pos != null ? net.minecraft.client.color.world.BiomeColors.getWaterColor(world, pos) : 0x3F76E4, troughs);
 
@@ -89,8 +88,23 @@ public class EternalReturnClient implements ClientModInitializer {
 				}
 			}
 
+			// Inherent enchantments show only in advanced tooltips (F3+H); else an enchantment the item has no more of than
+			// its inherent level isn't listed.
 			Map<RegistryEntry<Enchantment>, Integer> inherent = InherentEnchantments.inherentPortion(stack);
-			if (!inherent.isEmpty()) {
+			if (!type.isAdvanced()) {
+				for (Map.Entry<RegistryEntry<Enchantment>, Integer> e : inherent.entrySet()) {
+					int level = stack.getEnchantments().getLevel(e.getKey());
+					if (level <= e.getValue()) {
+						String name = Enchantment.getName(e.getKey(), level).getString();
+						for (int i = 1; i < lines.size(); i++) {
+							if (lines.get(i).getString().equals(name)) {
+								lines.remove(i);
+								break;
+							}
+						}
+					}
+				}
+			} else if (!inherent.isEmpty()) {
 				MutableText names = Text.empty();
 				boolean first = true;
 				for (Map.Entry<RegistryEntry<Enchantment>, Integer> e : inherent.entrySet()) {

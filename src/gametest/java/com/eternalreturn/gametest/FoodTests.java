@@ -43,6 +43,8 @@ public class FoodTests implements FabricGameTest {
 		try {
 			ctx.assertTrue(new ItemStack(Items.COOKED_BEEF).getMaxCount() == 4 && new ItemStack(Items.COOKED_BEEF).getMaxUseTime(player) == 48,
 					"steak: 4 a stack, 2.4 seconds to eat");
+			ctx.assertTrue(new ItemStack(Items.ROTTEN_FLESH).getMaxCount() == 64 && new ItemStack(Items.SPIDER_EYE).getMaxCount() == 64,
+					"rotten flesh and spider eyes stack to 64");
 			ctx.assertTrue(new ItemStack(Items.PUMPKIN_PIE).getMaxCount() == 2 && new ItemStack(Items.DRIED_KELP).getMaxUseTime(player) == 8,
 					"pie: 2 a stack; dried kelp: 0.4 seconds");
 			ctx.assertTrue(new ItemStack(Items.HONEY_BOTTLE).getMaxUseTime(player) == 40, "honey: 2 seconds");

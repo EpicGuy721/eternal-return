@@ -70,13 +70,39 @@ public class PiglinTradeTests implements FabricGameTest {
 				piglin.interactMob(player, Hand.MAIN_HAND);
 				ctx.assertTrue(piglin.getOffHandStack().isEmpty() && player.getMainHandStack().getCount() == 2, "no ruby taken when out of trades");
 				ctx.assertTrue(PiglinTrades.willTrade(piglin, new ItemStack(Items.GOLD_INGOT)), "gold still taken");
+				PiglinTrades.sync(piglin);
+				int out = ((PiglinTrades.Holder) piglin).eternalreturn$tradedOut();
+				ctx.assertTrue(out == PiglinTrades.RUBY_OUT, "the client is told it's out of ruby trades, not gold: " + out);
+				ctx.assertTrue(!PiglinTrades.mayGrumble(piglin), "it grumbled just now, and won't again so soon");
 				counts.resetAt = ctx.getWorld().getTime();
 				ctx.assertTrue(PiglinTrades.willTrade(piglin, new ItemStack(Gems.RUBY)), "the trades come back");
+				PiglinTrades.sync(piglin);
+				ctx.assertTrue(((PiglinTrades.Holder) piglin).eternalreturn$tradedOut() == 0, "and the client is told");
 			} finally {
 				FishingTests.disconnect(player);
 				piglin.discard();
 			}
 			ctx.complete();
 		});
+	}
+
+	/** /enchant raises an enchantment the held item already has (as an inherent one), where vanilla refuses it. */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "piglin_rubies")
+	public void enchantCommandRaisesOwnEnchantment(TestContext ctx) {
+		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(1, 1, 1));
+		try {
+			var sharpness = ctx.getWorld().getRegistryManager().get(net.minecraft.registry.RegistryKeys.ENCHANTMENT).getEntry(net.minecraft.enchantment.Enchantments.SHARPNESS)
+					.orElseThrow();
+			ItemStack sword = new ItemStack(Items.IRON_SWORD);
+			sword.addEnchantment(sharpness, 1);
+			player.setStackInHand(Hand.MAIN_HAND, sword);
+			var server = ctx.getWorld().getServer();
+			server.getCommandManager().executeWithPrefix(server.getCommandSource().withSilent(), "enchant " + player.getGameProfile().getName() + " minecraft:sharpness 3");
+			ctx.assertTrue(player.getMainHandStack().getEnchantments().getLevel(sharpness) == 3, "Sharpness I raised to III: "
+					+ player.getMainHandStack().getEnchantments());
+		} finally {
+			FishingTests.disconnect(player);
+		}
+		ctx.complete();
 	}
 }

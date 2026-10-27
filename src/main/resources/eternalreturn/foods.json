@@ -104,7 +104,7 @@
 			"effects": []
 		},
 		"minecraft:spider_eye": {
-			"stack": 16,
+			"stack": 64,
 			"eat_seconds": 1.0,
 			"heal": 0,
 			"heal_seconds": 0,
@@ -112,7 +112,7 @@
 			"effects": "vanilla"
 		},
 		"minecraft:rotten_flesh": {
-			"stack": 16,
+			"stack": 64,
 			"eat_seconds": 1.6,
 			"heal": 2,
 			"heal_seconds": 0,

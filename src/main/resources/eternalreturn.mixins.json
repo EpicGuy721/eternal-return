@@ -93,6 +93,7 @@
 		"survival.AbstractBlockSnowMixin",
 		"enchantments.AttractionMixin",
 		"enchantments.BackstabMixin",
+		"enchantments.EnchantCommandMixin",
 		"enchantments.HorseArmorDamageMixin",
 		"enchantments.HorseArmorEnchantableMixin",
 		"enchantments.LavaSwimmingMixin",

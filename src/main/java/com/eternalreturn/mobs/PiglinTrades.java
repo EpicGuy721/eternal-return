@@ -21,7 +21,8 @@ import java.util.List;
  * Bartering with piglins (PiglinBarterMixin): besides gold ingots, they take rubies, for better things (loot table
  * eternalreturn:gameplay/piglin_ruby_bartering, scrolls and enchanted books among them). Each piglin takes only so
  * many of each (mobs.piglinGoldTrades, piglinRubyTrades) before it won't barter any more, ignoring what's thrown it,
- * until its trades come back, mobs.piglinTradeResetMinutes after the first of them.
+ * until its trades come back, mobs.piglinTradeResetMinutes after the first of them. The client is told which trades a
+ * piglin is out of, so it doesn't keep offering (holding use down) what the piglin refuses.
  */
 public final class PiglinTrades {
 	public static final RegistryKey<LootTable> RUBY_BARTERING = RegistryKey.of(RegistryKeys.LOOT_TABLE, EternalReturn.id("gameplay/piglin_ruby_bartering"));
@@ -29,13 +30,23 @@ public final class PiglinTrades {
 	/** What a piglin keeps (PiglinTradesMixin). */
 	public interface Holder {
 		Counts eternalreturn$trades();
+
+		/** Which trades it's out of (GOLD_OUT, RUBY_OUT), kept in step on the client, which can't count them. */
+		int eternalreturn$tradedOut();
+
+		void eternalreturn$setTradedOut(int flags);
 	}
+
+	public static final int GOLD_OUT = 1;
+	public static final int RUBY_OUT = 2;
 
 	public static final class Counts {
 		public int gold;
 		public int ruby;
 		/** When the trades come back, on the world's clock; 0 when none have been made since they last did. */
 		public long resetAt;
+		/** When it last grumbled at an ingot or ruby held out to it (not saved). */
+		public long lastGrumble = Long.MIN_VALUE;
 
 		public void write(NbtCompound nbt) {
 			NbtCompound trades = new NbtCompound();
@@ -86,7 +97,33 @@ public final class PiglinTrades {
 	}
 
 	public static boolean willTrade(PiglinEntity piglin, ItemStack stack) {
-		return !isBarterItem(stack) || tradesLeft(piglin, stack) > 0;
+		if (!isBarterItem(stack)) {
+			return true;
+		}
+		if (piglin.getWorld().isClient) {
+			return (((Holder) piglin).eternalreturn$tradedOut() & (isRuby(stack) ? RUBY_OUT : GOLD_OUT)) == 0;
+		}
+		return tradesLeft(piglin, stack) > 0;
+	}
+
+	/** Server side: tells the client which trades the piglin is out of (from its tick, and after each trade). */
+	public static void sync(PiglinEntity piglin) {
+		int flags = (tradesLeft(piglin, new ItemStack(PiglinBrain.BARTERING_ITEM)) <= 0 ? GOLD_OUT : 0)
+				| (tradesLeft(piglin, new ItemStack(Gems.RUBY)) <= 0 ? RUBY_OUT : 0);
+		if (((Holder) piglin).eternalreturn$tradedOut() != flags) {
+			((Holder) piglin).eternalreturn$setTradedOut(flags);
+		}
+	}
+
+	/** Whether to grumble at an ingot or ruby held out now: once in two seconds at most. */
+	public static boolean mayGrumble(PiglinEntity piglin) {
+		Counts counts = counts(piglin);
+		long now = piglin.getWorld().getTime();
+		if (now - counts.lastGrumble < 40L) {
+			return false;
+		}
+		counts.lastGrumble = now;
+		return true;
 	}
 
 	/** One trade of this made: counted, the clock started if it's the first. */
@@ -100,6 +137,7 @@ public final class PiglinTrades {
 		if (counts.resetAt == 0L) {
 			counts.resetAt = piglin.getWorld().getTime() + 1200L * Math.max(1, EternalReturnConfig.get().mobs.piglinTradeResetMinutes);
 		}
+		sync(piglin);
 	}
 
 	public static List<ItemStack> rubyLoot(PiglinEntity piglin) {

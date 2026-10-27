@@ -20,7 +20,8 @@ import java.util.List;
 
 /**
  * Piglins barter for rubies as for gold, for their own loot, and only so many times before their trades come back
- * (PiglinTrades): past that they don't take a thrown ingot or ruby, and grumble at one held out to them.
+ * (PiglinTrades): past that they don't take a thrown ingot or ruby, and grumble (every two seconds at most) at one held
+ * out to them.
  */
 @Mixin(PiglinBrain.class)
 public abstract class PiglinBarterMixin {
@@ -47,7 +48,7 @@ public abstract class PiglinBarterMixin {
 
 	@Inject(method = "playerInteract", at = @At("HEAD"))
 	private static void eternalreturn$grumble(PiglinEntity piglin, PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
-		if (piglin.isAdult() && !PiglinTrades.willTrade(piglin, player.getStackInHand(hand)) && !piglin.getWorld().isClient) {
+		if (piglin.isAdult() && !piglin.getWorld().isClient && !PiglinTrades.willTrade(piglin, player.getStackInHand(hand)) && PiglinTrades.mayGrumble(piglin)) {
 			piglin.playSound(SoundEvents.ENTITY_PIGLIN_JEALOUS, 1.0F, piglin.getSoundPitch());
 		}
 	}
