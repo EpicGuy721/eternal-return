@@ -36,7 +36,8 @@ import java.util.function.Supplier;
  * the edge;</li>
  * <li>above its target on a ceiling it lets go and drops on it; stuck, or in water, or dead, it lets go and falls.</li>
  * </ul>
- * Its legs keep walking with its movement up and down. On the client it keeps a smoothed orientation (up away from the
+ * It doesn't step straight back onto the surface it just left (TURN_BACK_TICKS), so it can't flip between two in a
+ * corner. Its legs keep walking with its movement up and down. On the client it keeps a smoothed orientation (up away from the
  * surface, forward the way it moves) that the renderer turns the model by (ClimberRendering), so it tips smoothly
  * from floor to wall to ceiling. Which side it clings to is synced through a tracked value the mob supplies.
  */
@@ -55,6 +56,8 @@ public final class Climber {
 	private static final int REROUTE_TICKS = 20;
 	/** How fast the drawn body turns toward its new orientation each tick (share of the way). */
 	private static final float TURN_RATE = 0.3F;
+	/** Ticks before it may step back onto the surface it just left (else in a corner it flips between the two, shaking). */
+	private static final int TURN_BACK_TICKS = 20;
 	private final MobEntity mob;
 	private final Supplier<Byte> read;
 	private final Consumer<Byte> write;
@@ -64,6 +67,8 @@ public final class Climber {
 	private int steerAge = -100;
 	private int loose;
 	private int stuck;
+	/** Ticks on the floor pressed against a wall. */
+	private int bumped;
 	@Nullable
 	private Vec3d destination;
 	private double destinationSpeed = 1.0;
@@ -72,6 +77,10 @@ public final class Climber {
 	private List<SurfacePaths.Step> route;
 	private int step;
 	private int rerouteAt;
+	/** The surface it last stepped off, and when. */
+	@Nullable
+	private Direction left;
+	private int leftAge = -100;
 	@Nullable
 	private Vec3d routedTo;
 	// Client side: the drawn orientation.
@@ -100,10 +109,17 @@ public final class Climber {
 
 	public void setAttach(Direction side) {
 		if (side != this.attach()) {
+			this.left = this.attach();
+			this.leftAge = this.mob.age;
 			this.write.accept((byte) side.getId());
 			this.loose = 0;
 			this.stuck = 0;
 		}
+	}
+
+	/** Whether it may step onto this surface of its own accord: not straight back onto the one it just left. */
+	private boolean mayStepOnto(Direction side) {
+		return side != this.left || this.mob.age - this.leftAge > TURN_BACK_TICKS;
 	}
 
 	/** On a wall or ceiling (not the floor). */
@@ -203,7 +219,7 @@ public final class Climber {
 		}
 		Vec3d center = this.mob.getBoundingBox().getCenter();
 		Direction side = next.place().side();
-		if (side != this.attach() && this.touching(side, 0.1)) {
+		if (side != this.attach() && this.touching(side, 0.1) && this.mayStepOnto(side)) {
 			this.setAttach(side);
 		}
 		double distance = center.squaredDistanceTo(next.center());
@@ -265,7 +281,7 @@ public final class Climber {
 		// Walked into a surface it wants to go through: step onto it.
 		if (push.lengthSquared() > 1.0E-4) {
 			Direction blocked = blockedSide(velocity, moved, side);
-			if (blocked != null && want.normalize().dotProduct(Vec3d.of(blocked.getVector())) > 0.2 && this.touching(blocked, 0.05)) {
+			if (blocked != null && want.normalize().dotProduct(Vec3d.of(blocked.getVector())) > 0.2 && this.touching(blocked, 0.05) && this.mayStepOnto(blocked)) {
 				this.setAttach(blocked);
 				return true;
 			}
@@ -279,7 +295,7 @@ public final class Climber {
 					motion = push;
 				}
 				Direction behind = motion.lengthSquared() < 1.0E-6 ? null : Direction.getFacing(-motion.x, -motion.y, -motion.z);
-				if (behind != null && behind.getAxis() != side.getAxis()) {
+				if (behind != null && behind.getAxis() != side.getAxis() && this.mayStepOnto(behind)) {
 					// Round the edge: on toward where the surface was, then cling to the face behind.
 					this.mob.move(MovementType.SELF, n.multiply(0.4));
 					this.mob.setVelocity(n.multiply(0.1));
@@ -335,7 +351,9 @@ public final class Climber {
 			return;
 		}
 		this.route();
-		if (this.offFloor() || !this.mob.horizontalCollision || this.nextStep() != null) {
+		this.bumped = !this.offFloor() && this.mob.horizontalCollision ? this.bumped + 1 : 0;
+		// (bumping a wall on the way somewhere it can walk to, it walks round, unless it's caught on it)
+		if (this.offFloor() || !this.mob.horizontalCollision || this.nextStep() != null || (this.walkable() && this.bumped < 10)) {
 			return;
 		}
 		Vec3d goal = this.destination() != null ? this.destination() : this.goal();
@@ -351,7 +369,7 @@ public final class Climber {
 		double most = 0.2;
 		for (Direction side : Direction.Type.HORIZONTAL) {
 			double toward = want.dotProduct(Vec3d.of(side.getVector()));
-			if (toward > most && this.touching(side, 0.05)) {
+			if (toward > most && this.touching(side, 0.05) && this.mayStepOnto(side)) {
 				most = toward;
 				best = side;
 			}

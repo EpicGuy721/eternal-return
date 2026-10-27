@@ -346,6 +346,8 @@ public final class EternalReturnConfig {
 		public double traderVillageRadius = 64.0;
 		/** Villagers do chores by day: blacksmiths repair golems, clerics heal, farmers feed babies, shepherds shear, fishermen fish (VillagerChores). */
 		public boolean chores = true;
+		/** Villagers path through fence gates, opening them and closing them behind them (FenceGates). */
+		public boolean openFenceGates = true;
 		/** Villagers summon iron golems (vanilla); off: golems only come from players. */
 		public boolean villagersSummonGolems = false;
 		/** Curing a zombie villager gives a discount (vanilla); off: it doesn't. */

@@ -98,6 +98,7 @@ public abstract class VillagerEntityMixin implements NeedyVillager, com.eternalr
 	private void eternalreturn$tickNeeds(CallbackInfo ci) {
 		VillagerNeeds.tick((VillagerEntity) (Object) this);
 		com.eternalreturn.villager.VillagerChores.tick((VillagerEntity) (Object) this);
+		com.eternalreturn.villager.FenceGates.tick((VillagerEntity) (Object) this);
 	}
 
 	/** Iron golems don't come by themselves: villagers never summon one (villagers.villagersSummonGolems). */

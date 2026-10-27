@@ -107,4 +107,28 @@ public class LoungingTests implements FabricGameTest {
 			ctx.complete();
 		});
 	}
+
+	/** A sitting piglin gets up to trade: handed something (in its off hand), or a player near holding gold. */
+	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 100)
+	public void piglinsGetUpToTrade(TestContext ctx) {
+		net.minecraft.entity.mob.PiglinEntity handed = ctx.spawnEntity(EntityType.PIGLIN, new BlockPos(4, 2, 10));
+		net.minecraft.entity.mob.PiglinEntity watching = ctx.spawnEntity(EntityType.PIGLIN, new BlockPos(8, 2, 30));
+		for (var piglin : new net.minecraft.entity.mob.PiglinEntity[] {handed, watching}) {
+			piglin.setImmuneToZombification(true);
+			Lounging.sit(piglin, 2000);
+		}
+		handed.equipStack(net.minecraft.entity.EquipmentSlot.OFFHAND, new net.minecraft.item.ItemStack(com.eternalreturn.items.Gems.RUBY));
+		net.minecraft.server.network.ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(8, 2, 34));
+		player.setStackInHand(net.minecraft.util.Hand.MAIN_HAND, new net.minecraft.item.ItemStack(net.minecraft.item.Items.GOLD_INGOT));
+		ctx.runAtTick(40, () -> {
+			try {
+				ctx.assertTrue(!Lounging.isLounging(handed), "the piglin handed a ruby got up");
+				ctx.assertTrue(!Lounging.isLounging(watching), "the one near a player holding gold got up");
+			} finally {
+				FishingTests.disconnect(player);
+				ctx.killAllEntities();
+			}
+			ctx.complete();
+		});
+	}
 }

@@ -537,4 +537,31 @@ public class MobVillagerCartTests implements FabricGameTest {
 		return world.getEntitiesByClass(ItemEntity.class, near.getBoundingBox().expand(4.0), item -> item.getStack().isOf(Items.CHAIN)).stream()
 				.mapToInt(item -> item.getStack().getCount()).sum();
 	}
+
+	/** A villager in a fenced pen walks out through the gate, opening it, and closes it behind it. */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "fence_gates", tickLimit = 600)
+	public void villagersOpenAndCloseGates(TestContext ctx) {
+		ctx.getWorld().setTimeOfDay(1000);
+		for (BlockPos pos : BlockPos.iterate(new BlockPos(0, 0, 0), new BlockPos(7, 0, 7))) {
+			ctx.setBlockState(pos, net.minecraft.block.Blocks.STONE);
+		}
+		for (BlockPos pos : BlockPos.iterate(new BlockPos(1, 1, 1), new BlockPos(5, 1, 5))) {
+			if (pos.getX() == 1 || pos.getX() == 5 || pos.getZ() == 1 || pos.getZ() == 5) {
+				ctx.setBlockState(pos, net.minecraft.block.Blocks.OAK_FENCE);
+			}
+		}
+		BlockPos gate = new BlockPos(3, 1, 5);
+		ctx.setBlockState(gate, net.minecraft.block.Blocks.OAK_FENCE_GATE.getDefaultState().with(net.minecraft.block.FenceGateBlock.FACING, net.minecraft.util.math.Direction.SOUTH));
+		net.minecraft.entity.passive.VillagerEntity villager = ctx.spawnEntity(EntityType.VILLAGER, new BlockPos(3, 1, 3));
+		BlockPos out = ctx.getAbsolutePos(new BlockPos(3, 1, 7));
+		boolean[] opened = {false};
+		ctx.runAtEveryTick(() -> {
+			villager.getBrain().remember(net.minecraft.entity.ai.brain.MemoryModuleType.WALK_TARGET, new net.minecraft.entity.ai.brain.WalkTarget(out, 0.6F, 0));
+			opened[0] |= ctx.getBlockState(gate).get(net.minecraft.block.FenceGateBlock.OPEN);
+			if (opened[0] && villager.getZ() > out.getZ() - 0.5 && !ctx.getBlockState(gate).get(net.minecraft.block.FenceGateBlock.OPEN)) {
+				villager.discard();
+				ctx.complete();
+			}
+		});
+	}
 }
