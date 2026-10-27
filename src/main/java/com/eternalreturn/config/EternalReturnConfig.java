@@ -196,6 +196,11 @@ public final class EternalReturnConfig {
 		public int witherBedrockDistance = 8;
 		/** Weight of each of the brown, black and sun bears among creatures in forest biomes (0: none). Needs a restart. */
 		public int bearSpawnWeight = 3;
+		/**
+		 * Bears raid beehives near them, strip sweet berry bushes, and fish rivers by day (BearEntity); without it they
+		 * only come for honeycomb and breed on honey.
+		 */
+		public boolean bearHabits = true;
 		/** Seconds a villager bitten by a vampire or its bat takes to turn into a vampire. */
 		public int vampireTurnSeconds = 30;
 		/** Seconds of Poison a vampire's bat gives a player it bites. */
