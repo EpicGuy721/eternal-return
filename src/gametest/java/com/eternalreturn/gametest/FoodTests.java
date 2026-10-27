@@ -41,10 +41,10 @@ public class FoodTests implements FabricGameTest {
 		ServerWorld world = ctx.getWorld();
 		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(1, 1, 1));
 		try {
-			ctx.assertTrue(new ItemStack(Items.COOKED_BEEF).getMaxCount() == 16 && new ItemStack(Items.COOKED_BEEF).getMaxUseTime(player) == 48,
-					"steak: 16 a stack, 2.4 seconds to eat");
-			ctx.assertTrue(new ItemStack(Items.PUMPKIN_PIE).getMaxCount() == 8 && new ItemStack(Items.DRIED_KELP).getMaxUseTime(player) == 8,
-					"pie: 8 a stack; dried kelp: 0.4 seconds");
+			ctx.assertTrue(new ItemStack(Items.COOKED_BEEF).getMaxCount() == 4 && new ItemStack(Items.COOKED_BEEF).getMaxUseTime(player) == 48,
+					"steak: 4 a stack, 2.4 seconds to eat");
+			ctx.assertTrue(new ItemStack(Items.PUMPKIN_PIE).getMaxCount() == 2 && new ItemStack(Items.DRIED_KELP).getMaxUseTime(player) == 8,
+					"pie: 2 a stack; dried kelp: 0.4 seconds");
 			ctx.assertTrue(new ItemStack(Items.HONEY_BOTTLE).getMaxUseTime(player) == 40, "honey: 2 seconds");
 			FoodComponent steak = new ItemStack(Items.COOKED_BEEF).get(DataComponentTypes.FOOD);
 			ctx.assertTrue(steak.canAlwaysEat() && steak.effects().stream().anyMatch(e -> e.effect().getEffectType() == StatusEffects.STRENGTH),
@@ -52,7 +52,8 @@ public class FoodTests implements FabricGameTest {
 			FoodComponent notch = new ItemStack(Items.ENCHANTED_GOLDEN_APPLE).get(DataComponentTypes.FOOD);
 			ctx.assertTrue(notch.effects().stream().anyMatch(e -> e.effect().getEffectType() == StatusEffects.REGENERATION), "the enchanted golden apple keeps its own effects");
 			ItemStack fish = new ItemStack(FishingItems.FISH.get(0));
-			ctx.assertTrue(fish.getMaxCount() == 64 && Meals.heal(fish).equals(Meals.heal(new ItemStack(Items.SALMON))), "the mod's fish heal like raw salmon");
+			ctx.assertTrue(fish.getMaxCount() == new ItemStack(Items.SALMON).getMaxCount() && Meals.heal(fish).equals(Meals.heal(new ItemStack(Items.SALMON))),
+					"the mod's fish stack and heal like raw salmon");
 		} finally {
 			FishingTests.disconnect(player);
 		}

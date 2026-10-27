@@ -101,6 +101,7 @@
 		"spears.SpearMobMixin",
 		"spears.ZombieSpearMixin",
 		"spears.ZombifiedPiglinSpearMixin",
+		"tweaks.LightningGlassMixin",
 		"tweaks.BlockLockClearMixin",
 		"tweaks.BlockLockMixin",
 		"tweaks.DrownedLoyalTridentMixin",

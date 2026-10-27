@@ -393,6 +393,7 @@
 	"enchantment.eternalreturn.necromancy": "Necromancy",
 	"enchantment.eternalreturn.telekinesis": "Telekinesis",
 	"enchantment.eternalreturn.backstabber": "Backstabber",
+	"enchantment.eternalreturn.marking": "Marking",
 	"enchantment.eternalreturn.attraction": "Attraction",
 	"enchantment.eternalreturn.gale_step": "Gale Step",
 	"tooltip.eternalreturn.necromancy.stored": "[Stored: %s]",

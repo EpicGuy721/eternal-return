@@ -242,5 +242,9 @@
     "minecraft:wind_charge",
     "minecraft:feather",
     "minecraft:breeze_rod"
+  ],
+  "eternalreturn:marking": [
+    "minecraft:glowstone_dust",
+    "minecraft:spectral_arrow"
   ]
 }

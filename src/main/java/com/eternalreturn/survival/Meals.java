@@ -37,7 +37,7 @@ import java.util.Map;
  * (src/main/resources/eternalreturn/foods.json): how many fit in a stack, how long it takes to eat, how much health
  * it heals and how fast (at once, or spread over a few seconds), and what effects it gives. Ordinary food can only
  * be eaten when hurt; food with a perk any time. Healing from several foods runs side by side. The Hunger effect
- * halves food healing; Saturation heals. The mod's fish keep their own settings and heal like raw salmon.
+ * halves food healing; Saturation heals. The mod's fish keep their own settings but stack and heal as raw salmon does.
  */
 public final class Meals {
 	/** A food's healing: so much health over so many seconds (0: at once). */
@@ -94,6 +94,10 @@ public final class Meals {
 					entry.get("eat_seconds").getAsFloat(), food.usingConvertsTo(), List.copyOf(effects)));
 			builder.add(DataComponentTypes.MAX_STACK_SIZE, entry.get("stack").getAsInt());
 		})));
+		// The mod's fish stack as raw salmon does.
+		int fishStack = entries.get(Items.SALMON).get("stack").getAsInt();
+		DefaultItemComponentEvents.MODIFY.register(context -> context.modify(item -> item instanceof FishingItems.FishItem,
+				(builder, item) -> builder.add(DataComponentTypes.MAX_STACK_SIZE, fishStack)));
 	}
 
 	/** How a food heals, or null if it doesn't (the mod's fish heal like raw salmon). */

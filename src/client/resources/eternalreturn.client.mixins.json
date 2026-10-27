@@ -25,7 +25,8 @@
 		"mobs.CreeperEntityRendererMixin",
 		"mobs.LivingEntityRendererMixin",
 		"SpeargunHeldItemMixin",
-		"SpeargunArmPoseMixin"
+		"SpeargunArmPoseMixin",
+		"BreakingCooldownMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
