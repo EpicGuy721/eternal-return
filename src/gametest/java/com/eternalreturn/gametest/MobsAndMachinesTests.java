@@ -33,6 +33,7 @@ import net.minecraft.entity.mob.ZombieEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.CowEntity;
 import net.minecraft.entity.passive.PigEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.recipe.RecipeType;
@@ -625,5 +626,22 @@ public class MobsAndMachinesTests implements FabricGameTest {
 			glass.discard();
 		}
 		ctx.complete();
+	}
+
+	/** Glow item frames and glowing glass frames are made with a glowstone, no longer a glow ink sac. */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "frames")
+	public void glowFramesTakeGlowstone(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		ctx.assertTrue(craft(world, Items.ITEM_FRAME, Items.GLOWSTONE).isOf(Items.GLOW_ITEM_FRAME), "item frame and glowstone: a glow item frame");
+		ctx.assertTrue(craft(world, Frames.GLASS_ITEM_FRAME_ITEM, Items.GLOWSTONE).isOf(Frames.GLOWING_GLASS_ITEM_FRAME_ITEM),
+				"glass item frame and glowstone: a glowing one");
+		ctx.assertTrue(craft(world, Items.ITEM_FRAME, Items.GLOW_INK_SAC).isEmpty(), "no glow ink sac");
+		ctx.complete();
+	}
+
+	private static ItemStack craft(ServerWorld world, Item a, Item b) {
+		CraftingRecipeInput input = CraftingRecipeInput.create(2, 1, List.of(new ItemStack(a), new ItemStack(b)));
+		return world.getRecipeManager().getFirstMatch(RecipeType.CRAFTING, input, world).map(r -> r.value().craft(input, world.getRegistryManager()))
+				.orElse(ItemStack.EMPTY);
 	}
 }

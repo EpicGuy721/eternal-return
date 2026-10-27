@@ -1,6 +1,15 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eternalreturn:item/glowing_glass_item_frame"
-  }
+    "layer0": "eternalreturn:item/glass_item_frame_border",
+    "layer1": "eternalreturn:item/glowing_glass_item_frame_inside"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "eternalreturn:dyed": 1.0
+      },
+      "model": "eternalreturn:item/dyed_glowing_glass_item_frame"
+    }
+  ]
 }

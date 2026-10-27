@@ -1,7 +1,14 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "eternalreturn:item/item_frame_border",
-    "layer1": "eternalreturn:item/item_frame_inside"
-  }
+    "layer0": "minecraft:item/item_frame"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "eternalreturn:dyed": 1.0
+      },
+      "model": "eternalreturn:item/dyed_item_frame"
+    }
+  ]
 }

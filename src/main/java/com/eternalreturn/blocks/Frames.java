@@ -32,9 +32,10 @@ import net.minecraft.world.event.GameEvent;
  * <li>glass item frames: an empty one shows a thin glass frame; once it holds something the frame
  * disappears and only the item shows, flat against the wall. Right-clicking one that holds an item opens
  * the chest (furnace, barrel...) it hangs on, instead of turning the item; sneak to turn it. Crafted from
- * 8 glass panes around leather; a glowing glass item frame is one plus a glow ink sac;</li>
- * <li>item frames of every kind can be dyed in a crafting grid like leather armour (any mix of dyes);
- * the frame keeps its colour when placed and when picked up again.</li>
+ * 8 glass panes around leather; a glowing glass item frame is one plus a glowstone (as a glow item frame is now
+ * an item frame plus a glowstone, not a glow ink sac);</li>
+ * <li>item frames of every kind can be dyed in a crafting grid like leather armour (any mix of dyes), the dye
+ * colouring the back (client FrameModels); the frame keeps its colour when placed and when picked up again.</li>
  * </ul>
  */
 public final class Frames {
@@ -91,7 +92,8 @@ public final class Frames {
 			super(type, world, pos, facing);
 		}
 
-		public boolean isGlowing() {
+		/** The glowing kind (not Entity.isGlowing, the Glowing effect's outline). */
+		public boolean isGlowingFrame() {
 			return this.getType() == GLOWING_GLASS_ITEM_FRAME;
 		}
 
@@ -103,7 +105,7 @@ public final class Frames {
 
 		@Override
 		protected ItemStack getAsItemStack() {
-			return colored(this, new ItemStack(this.isGlowing() ? GLOWING_GLASS_ITEM_FRAME_ITEM : GLASS_ITEM_FRAME_ITEM));
+			return colored(this, new ItemStack(this.isGlowingFrame() ? GLOWING_GLASS_ITEM_FRAME_ITEM : GLASS_ITEM_FRAME_ITEM));
 		}
 
 		/** With an item in it, a click goes through to the container behind (sneak to turn the item instead). */

@@ -21,15 +21,20 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 /**
- * Glass and dyed item frames (Frames): a glass frame draws its own model (with see-through parts), a
- * glowing glass frame lights up like a glow item frame, and any frame is tinted with its dye colour.
+ * Glass and dyed item frames (Frames): a glass frame draws its own model (with see-through parts), a dyed frame
+ * its dyed model (FrameModels), a glowing glass frame lights up like a glow item frame, and the dye colours the
+ * faces marked for it (the back).
  */
 @Mixin(ItemFrameEntityRenderer.class)
 public abstract class ItemFrameEntityRendererMixin {
 	@WrapOperation(method = "render(Lnet/minecraft/entity/decoration/ItemFrameEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V",
 			at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/model/BakedModelManager;getModel(Lnet/minecraft/client/util/ModelIdentifier;)Lnet/minecraft/client/render/model/BakedModel;"))
-	private BakedModel eternalreturn$glassModel(BakedModelManager models, ModelIdentifier id, Operation<BakedModel> original, @Local(argsOnly = true) ItemFrameEntity frame) {
-		return frame instanceof Frames.GlassItemFrameEntity ? FrameModels.glassFrame(models) : original.call(models, id);
+	private BakedModel eternalreturn$frameModel(BakedModelManager models, ModelIdentifier id, Operation<BakedModel> original, @Local(argsOnly = true) ItemFrameEntity frame) {
+		boolean dyed = ((Frames.Dyed) frame).eternalreturn$color() >= 0;
+		if (frame instanceof Frames.GlassItemFrameEntity glass) {
+			return FrameModels.glassFrame(models, glass.isGlowingFrame(), dyed);
+		}
+		return dyed ? FrameModels.dyedFrame(models, frame.getType() == EntityType.GLOW_ITEM_FRAME, id.variant().contains("map=true")) : original.call(models, id);
 	}
 
 	@WrapOperation(method = "render(Lnet/minecraft/entity/decoration/ItemFrameEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V",
@@ -56,6 +61,6 @@ public abstract class ItemFrameEntityRendererMixin {
 			"getBlockLight(Lnet/minecraft/entity/decoration/ItemFrameEntity;Lnet/minecraft/util/math/BlockPos;)I", "getLight"},
 			at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/decoration/ItemFrameEntity;getType()Lnet/minecraft/entity/EntityType;"))
 	private EntityType<?> eternalreturn$glowingGlass(ItemFrameEntity frame, Operation<EntityType<?>> original) {
-		return frame instanceof Frames.GlassItemFrameEntity glass && glass.isGlowing() ? EntityType.GLOW_ITEM_FRAME : original.call(frame);
+		return frame instanceof Frames.GlassItemFrameEntity glass && glass.isGlowingFrame() ? EntityType.GLOW_ITEM_FRAME : original.call(frame);
 	}
 }
