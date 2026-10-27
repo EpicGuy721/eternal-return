@@ -142,6 +142,7 @@
 		"survival.HoneyBottleMixin",
 		"survival.HorseFoodMixin",
 		"survival.HungerManagerMixin",
+		"survival.IceLandingMixin",
 		"survival.ItemEntitySaplingMixin",
 		"survival.LivingEntityAccessor",
 		"survival.LivingEntityFreezingMixin",

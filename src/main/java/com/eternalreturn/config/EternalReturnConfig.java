@@ -490,6 +490,19 @@ public final class EternalReturnConfig {
 		public boolean swimKey = true;
 		/** Damage done to creatures shows as numbers rising from them (client DamageNumbers). */
 		public boolean damageNumbers = true;
+		/**
+		 * Ice (not packed or blue) cracks under players (faster in heavier armor, sprinting or landing on it, slower
+		 * sneaking) and heavy mobs (polar bears, bears, iron golems, horses in armor), healing when left alone, and
+		 * breaks through when cracked through (IceCracking).
+		 */
+		public boolean iceCracks = true;
+		/**
+		 * Seconds a player can be out in the cold (where it would snow) before freezing, with no warmth near (block tag
+		 * eternalreturn:heat_sources: fire, lava, lit furnaces...); 0 turns the cold off (ColdExposure).
+		 */
+		public int coldFreezeSeconds = 120;
+		/** Seconds more in the cold for each piece of leather armor worn. */
+		public int leatherColdSeconds = 90;
 	}
 
 	/** How far monsters smell a player, by kind: the undead hungry for flesh and the beasts far, the noseless skeletons hardly at all. */
