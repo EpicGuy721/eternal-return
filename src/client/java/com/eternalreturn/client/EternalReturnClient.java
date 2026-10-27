@@ -1,5 +1,6 @@
 package com.eternalreturn.client;
 
+import net.minecraft.block.Block;
 import com.eternalreturn.logic.EnchantCaps;
 import com.eternalreturn.logic.EnchantLevels;
 import com.eternalreturn.logic.InherentEnchantments;
@@ -36,6 +37,11 @@ public class EternalReturnClient implements ClientModInitializer {
 		com.eternalreturn.client.weather.ClientWeather.register();
 		net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap.INSTANCE.putBlock(com.eternalreturn.blocks.CopperRail.BLOCK,
 				net.minecraft.client.render.RenderLayer.getCutout());
+		// Troughs: water seen through, tinted the biome's water colour.
+		Block[] troughs = com.eternalreturn.survival.Troughs.BLOCKS.toArray(Block[]::new);
+		net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap.INSTANCE.putBlocks(net.minecraft.client.render.RenderLayer.getTranslucent(), troughs);
+		net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry.BLOCK.register((state, world, pos, tintIndex) ->
+				world != null && pos != null ? net.minecraft.client.color.world.BiomeColors.getWaterColor(world, pos) : 0x3F76E4, troughs);
 
 		ItemTooltipCallback.EVENT.register((stack, context, type, lines) -> {
 			if (lines.isEmpty() || EnchantLevels.isConcealed(stack)) {

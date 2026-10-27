@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "trough",
+  "pattern": [
+    "S S",
+    "SSS"
+  ],
+  "key": {
+    "S": {
+      "item": "eternalreturn:maple_slab"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "eternalreturn:maple_trough"
+  }
+}

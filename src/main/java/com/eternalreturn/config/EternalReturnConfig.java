@@ -469,8 +469,18 @@ public final class EternalReturnConfig {
 		public double grazeChance = 0.125;
 		/** Days without food before an animal starts to lose health. */
 		public double daysBeforeStarving = 3.0;
-		/** A starving animal loses a point of health this often. */
+		/** A starving animal loses a point of health this often (a dying of thirst one too). */
 		public int starveDamageSeconds = 30;
+		/**
+		 * Farm animals get thirsty too: a day after they last drank they go for water (in or next to it, the rain, a
+		 * trough of water near or open water), and after daysBeforeDehydrating without, they lose health as starving
+		 * ones do (AnimalHunger, Troughs).
+		 */
+		public boolean animalsGetThirsty = true;
+		public double thirstyAfterDays = 1.0;
+		public double daysBeforeDehydrating = 3.0;
+		/** Farmers top up troughs within 16 blocks: water, and hay, carrots or seeds from their pockets (VillagerChores). */
+		public boolean farmersFillTroughs = true;
 		/** When a herd animal (entity tag eternalreturn:herd_animals) is hurt, the same kind around it flees too. */
 		public boolean herdPanic = true;
 		public double herdPanicRadius = 16.0;

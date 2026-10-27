@@ -65,6 +65,7 @@ public class EternalReturn implements ModInitializer {
 		com.eternalreturn.logic.Curses.register();
 		com.eternalreturn.blocks.CopperRail.register();
 		com.eternalreturn.blocks.Woods.register();
+		com.eternalreturn.survival.Troughs.register();
 		com.eternalreturn.mobs.ForestMobs.register();
 		com.eternalreturn.items.Materials.register();
 		com.eternalreturn.items.HorseArmor.register();

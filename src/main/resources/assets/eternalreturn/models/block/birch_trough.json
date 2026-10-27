@@ -1,0 +1,7 @@
+{
+  "parent": "eternalreturn:block/template_trough",
+  "textures": {
+    "planks": "minecraft:block/birch_planks",
+    "particle": "minecraft:block/birch_planks"
+  }
+}

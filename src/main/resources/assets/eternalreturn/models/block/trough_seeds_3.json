@@ -1,0 +1,25 @@
+{
+  "textures": {
+    "particle": "eternalreturn:block/trough_seeds",
+    "surface": "eternalreturn:block/trough_seeds"
+  },
+  "elements": [
+    {
+      "from": [
+        2,
+        6.5,
+        2
+      ],
+      "to": [
+        14,
+        6.5,
+        14
+      ],
+      "faces": {
+        "up": {
+          "texture": "#surface"
+        }
+      }
+    }
+  ]
+}

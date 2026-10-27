@@ -1,0 +1,153 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "eternalreturn:block/maple_trough"
+      }
+    },
+    {
+      "when": {
+        "contents": "water",
+        "level": "1"
+      },
+      "apply": {
+        "model": "eternalreturn:block/trough_water_1"
+      }
+    },
+    {
+      "when": {
+        "contents": "water",
+        "level": "2"
+      },
+      "apply": {
+        "model": "eternalreturn:block/trough_water_2"
+      }
+    },
+    {
+      "when": {
+        "contents": "water",
+        "level": "3"
+      },
+      "apply": {
+        "model": "eternalreturn:block/trough_water_3"
+      }
+    },
+    {
+      "when": {
+        "contents": "water",
+        "level": "4"
+      },
+      "apply": {
+        "model": "eternalreturn:block/trough_water_4"
+      }
+    },
+    {
+      "when": {
+        "contents": "hay",
+        "level": "1"
+      },
+      "apply": {
+        "model": "eternalreturn:block/trough_hay_1"
+      }
+    },
+    {
+      "when": {
+        "contents": "hay",
+        "level": "2"
+      },
+      "apply": {
+        "model": "eternalreturn:block/trough_hay_2"
+      }
+    },
+    {
+      "when": {
+        "contents": "hay",
+        "level": "3"
+      },
+      "apply": {
+        "model": "eternalreturn:block/trough_hay_3"
+      }
+    },
+    {
+      "when": {
+        "contents": "hay",
+        "level": "4"
+      },
+      "apply": {
+        "model": "eternalreturn:block/trough_hay_4"
+      }
+    },
+    {
+      "when": {
+        "contents": "carrots",
+        "level": "1"
+      },
+      "apply": {
+        "model": "eternalreturn:block/trough_carrots_1"
+      }
+    },
+    {
+      "when": {
+        "contents": "carrots",
+        "level": "2"
+      },
+      "apply": {
+        "model": "eternalreturn:block/trough_carrots_2"
+      }
+    },
+    {
+      "when": {
+        "contents": "carrots",
+        "level": "3"
+      },
+      "apply": {
+        "model": "eternalreturn:block/trough_carrots_3"
+      }
+    },
+    {
+      "when": {
+        "contents": "carrots",
+        "level": "4"
+      },
+      "apply": {
+        "model": "eternalreturn:block/trough_carrots_4"
+      }
+    },
+    {
+      "when": {
+        "contents": "seeds",
+        "level": "1"
+      },
+      "apply": {
+        "model": "eternalreturn:block/trough_seeds_1"
+      }
+    },
+    {
+      "when": {
+        "contents": "seeds",
+        "level": "2"
+      },
+      "apply": {
+        "model": "eternalreturn:block/trough_seeds_2"
+      }
+    },
+    {
+      "when": {
+        "contents": "seeds",
+        "level": "3"
+      },
+      "apply": {
+        "model": "eternalreturn:block/trough_seeds_3"
+      }
+    },
+    {
+      "when": {
+        "contents": "seeds",
+        "level": "4"
+      },
+      "apply": {
+        "model": "eternalreturn:block/trough_seeds_4"
+      }
+    }
+  ]
+}

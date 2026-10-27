@@ -2,11 +2,14 @@ package com.eternalreturn.villager;
 
 import com.eternalreturn.birds.BirdEntity;
 import com.eternalreturn.birds.CropPests;
+import com.eternalreturn.blocks.TroughBlock;
+import com.eternalreturn.survival.Troughs;
 import com.eternalreturn.config.EternalReturnConfig;
 import net.minecraft.component.type.PotionContentsComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.ai.brain.BlockPosLookTarget;
 import net.minecraft.entity.ai.brain.EntityLookTarget;
 import net.minecraft.entity.ai.brain.MemoryModuleType;
@@ -41,8 +44,9 @@ import java.util.List;
  * as an iron ingot does), every 30 seconds at most;</li>
  * <li>clerics throw a splash potion of Healing at a hurt villager within 12 blocks (one being attacked first),
  * every 8 seconds at most;</li>
- * <li>farmers feed a baby animal within 12 blocks with its food from their pockets, which helps it grow up as a
- * player's feeding does;</li>
+ * <li>farmers top up a trough within 16 blocks that isn't full (survival.farmersFillTroughs): with water, or with
+ * more of the hay (two wheat a level), carrots or seeds it held, from their pockets; and they feed a baby animal
+ * within 12 blocks with its food from their pockets, which helps it grow up as a player's feeding does;</li>
  * <li>shepherds now and then (every 2 to 4 minutes) shear a woolly sheep within 12 blocks;</li>
  * <li>fishermen go fishing once a day: they walk to the edge of water within 24 blocks, fish for half a minute or
  * so with a rod in hand, and pocket what they catch (cod, salmon, now and then a tropical fish);</li>
@@ -51,7 +55,7 @@ import java.util.List;
  * A chore they can't reach in 30 seconds is given up.
  */
 public final class VillagerChores {
-	public enum Kind { REPAIR, HEAL, FEED, SHEAR, FISH, SHOO }
+	public enum Kind { REPAIR, HEAL, FEED, SHEAR, FISH, SHOO, REFILL }
 
 	/** What a villager keeps while busy (VillagerEntityMixin); not saved: a chore just starts over. */
 	public static final class State {
@@ -63,6 +67,8 @@ public final class VillagerChores {
 		BlockPos shore;
 		@Nullable
 		BlockPos water;
+		@Nullable
+		BlockPos trough;
 		int startedAge;
 		int doneAge;
 		int nextChoreAge;
@@ -129,6 +135,23 @@ public final class VillagerChores {
 				state.nextChoreAge = villager.age + 100;
 			});
 			case FISH -> fish(villager, world, state);
+			case REFILL -> {
+				BlockPos trough = state.trough;
+				if (trough == null || !refillable(villager, world.getBlockState(trough))) {
+					finish(villager, state);
+					return;
+				}
+				villager.getBrain().remember(MemoryModuleType.LOOK_TARGET, new BlockPosLookTarget(trough));
+				if (!trough.isWithinDistance(villager.getPos(), 2.5)) {
+					if (villager.age % 10 == 0) {
+						villager.getBrain().remember(MemoryModuleType.WALK_TARGET, new WalkTarget(trough, 0.6F, 1));
+					}
+					return;
+				}
+				refill(villager, world, trough);
+				finish(villager, state);
+				state.nextChoreAge = villager.age + 200;
+			}
 			case SHOO -> {
 				if (!(state.target instanceof BirdEntity bird) || !bird.isPecking()) {
 					finish(villager, state);
@@ -170,6 +193,7 @@ public final class VillagerChores {
 		state.target = null;
 		state.shore = null;
 		state.water = null;
+		state.trough = null;
 		state.doneAge = 0;
 	}
 
@@ -200,6 +224,13 @@ public final class VillagerChores {
 				start(villager, state, Kind.HEAL, hurt.get(0));
 			}
 		} else if (job == VillagerProfession.FARMER) {
+			BlockPos trough = EternalReturnConfig.get().survival.farmersFillTroughs
+					? Troughs.nearest(world, villager.getBlockPos(), 16, s -> refillable(villager, s)) : null;
+			if (trough != null) {
+				start(villager, state, Kind.REFILL, null);
+				state.trough = trough;
+				return;
+			}
 			AnimalEntity baby = nearest(villager, AnimalEntity.class, 12.0, a -> a.isBaby() && !food(villager, a).isEmpty());
 			if (baby != null) {
 				start(villager, state, Kind.FEED, baby);
@@ -223,6 +254,66 @@ public final class VillagerChores {
 	private static <T extends LivingEntity> T nearest(VillagerEntity villager, Class<T> type, double range, java.util.function.Predicate<T> wanted) {
 		return villager.getWorld().getEntitiesByClass(type, villager.getBoundingBox().expand(range), e -> e.isAlive() && wanted.test(e)).stream()
 				.min(Comparator.comparingDouble(villager::squaredDistanceTo)).orElse(null);
+	}
+
+	/** What fills a level of this in a trough: two wheat for hay, a carrot, a seed; null for water (fetched, free). */
+	@Nullable
+	private static java.util.function.Predicate<ItemStack> filler(TroughBlock.Contents contents) {
+		return switch (contents) {
+			case HAY -> stack -> stack.isOf(Items.WHEAT);
+			case CARROTS -> stack -> stack.isOf(Items.CARROT);
+			case SEEDS -> stack -> stack.isIn(TroughBlock.SEEDS);
+			default -> null;
+		};
+	}
+
+	/** How many of what fills this the villager has in its pockets. */
+	private static int pocketed(VillagerEntity villager, java.util.function.Predicate<ItemStack> filler) {
+		int count = 0;
+		for (int i = 0; i < villager.getInventory().size(); i++) {
+			ItemStack stack = villager.getInventory().getStack(i);
+			if (!stack.isEmpty() && filler.test(stack)) {
+				count += stack.getCount();
+			}
+		}
+		return count;
+	}
+
+	/** A trough that's held something, isn't full, and that the villager can top up. */
+	private static boolean refillable(VillagerEntity villager, BlockState state) {
+		if (!(state.getBlock() instanceof TroughBlock) || state.get(TroughBlock.LEVEL) >= TroughBlock.MAX_LEVEL) {
+			return false;
+		}
+		TroughBlock.Contents contents = state.get(TroughBlock.CONTENTS);
+		if (contents == TroughBlock.Contents.NONE) {
+			return false;
+		}
+		java.util.function.Predicate<ItemStack> filler = filler(contents);
+		return filler == null || pocketed(villager, filler) >= (contents == TroughBlock.Contents.HAY ? 2 : 1);
+	}
+
+	/** Tops the trough up as far as its pockets go (water to the brim). */
+	private static void refill(VillagerEntity villager, ServerWorld world, BlockPos trough) {
+		BlockState state = world.getBlockState(trough);
+		TroughBlock.Contents contents = state.get(TroughBlock.CONTENTS);
+		java.util.function.Predicate<ItemStack> filler = filler(contents);
+		if (filler == null) {
+			TroughBlock.fill(world, trough, contents, TroughBlock.MAX_LEVEL);
+			world.playSound(null, trough, SoundEvents.ITEM_BUCKET_EMPTY, SoundCategory.BLOCKS, 1.0F, 1.0F);
+			return;
+		}
+		int cost = contents == TroughBlock.Contents.HAY ? 2 : 1;
+		int levels = Math.min(TroughBlock.MAX_LEVEL - state.get(TroughBlock.LEVEL), pocketed(villager, filler) / cost);
+		int toTake = TroughBlock.fill(world, trough, contents, levels) * cost;
+		for (int i = 0; i < villager.getInventory().size() && toTake > 0; i++) {
+			ItemStack stack = villager.getInventory().getStack(i);
+			if (!stack.isEmpty() && filler.test(stack)) {
+				int taken = Math.min(toTake, stack.getCount());
+				stack.decrement(taken);
+				toTake -= taken;
+			}
+		}
+		world.playSound(null, trough, SoundEvents.BLOCK_COMPOSTER_FILL, SoundCategory.BLOCKS, 1.0F, 1.0F);
 	}
 
 	/** Something from the villager's pockets this baby eats, or EMPTY. */

@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Animal hunger (AnimalHunger): when it last ate, ticking, saving, and feeding by hand; and jockey mounts despawning. */
+/** Animal hunger and thirst (AnimalHunger): when it last ate and drank, ticking, saving, feeding by hand, troughs; and jockey mounts despawning. */
 @Mixin(AnimalEntity.class)
 public abstract class AnimalEntityMixin extends PassiveEntity implements AnimalHunger.Holder, JockeyMount, Farming.Holder {
 	@Unique
@@ -26,6 +26,8 @@ public abstract class AnimalEntityMixin extends PassiveEntity implements AnimalH
 
 	@Unique
 	private long eternalreturn$lastFed = Long.MIN_VALUE;
+	@Unique
+	private long eternalreturn$lastWatered = Long.MIN_VALUE;
 
 	/** Spawned as a mount for a hostile rider (a polar bear under a stray, a cow under a baby zombie): despawns like the rider. */
 	@Unique
@@ -96,6 +98,24 @@ public abstract class AnimalEntityMixin extends PassiveEntity implements AnimalH
 		this.eternalreturn$lastFed = time;
 	}
 
+	@Override
+	public long eternalreturn$lastWatered() {
+		return this.eternalreturn$lastWatered;
+	}
+
+	@Override
+	public void eternalreturn$setLastWatered(long time) {
+		this.eternalreturn$lastWatered = time;
+	}
+
+	/** Hungry or thirsty, it goes to a trough (or open water): Troughs.FeedGoal. */
+	@Inject(method = "<init>", at = @At("TAIL"))
+	private void eternalreturn$feedGoal(EntityType<? extends AnimalEntity> type, World world, CallbackInfo ci) {
+		if (!world.isClient) {
+			this.goalSelector.add(4, new com.eternalreturn.survival.Troughs.FeedGoal((AnimalEntity) (Object) this));
+		}
+	}
+
 	@Inject(method = "mobTick", at = @At("HEAD"))
 	private void eternalreturn$hunger(CallbackInfo ci) {
 		AnimalHunger.tick((AnimalEntity) (Object) this);
@@ -115,6 +135,9 @@ public abstract class AnimalEntityMixin extends PassiveEntity implements AnimalH
 		if (this.eternalreturn$lastFed != Long.MIN_VALUE) {
 			nbt.putLong(FED_KEY, this.eternalreturn$lastFed);
 		}
+		if (this.eternalreturn$lastWatered != Long.MIN_VALUE) {
+			nbt.putLong("EternalReturnLastWatered", this.eternalreturn$lastWatered);
+		}
 		if (this.eternalreturn$jockeyMount) {
 			nbt.putBoolean("EternalReturnJockeyMount", true);
 		}
@@ -126,6 +149,7 @@ public abstract class AnimalEntityMixin extends PassiveEntity implements AnimalH
 	@Inject(method = "readCustomDataFromNbt", at = @At("TAIL"))
 	private void eternalreturn$loadFed(NbtCompound nbt, CallbackInfo ci) {
 		this.eternalreturn$lastFed = nbt.contains(FED_KEY, NbtElement.LONG_TYPE) ? nbt.getLong(FED_KEY) : Long.MIN_VALUE;
+		this.eternalreturn$lastWatered = nbt.contains("EternalReturnLastWatered", NbtElement.LONG_TYPE) ? nbt.getLong("EternalReturnLastWatered") : Long.MIN_VALUE;
 		this.eternalreturn$jockeyMount = nbt.getBoolean("EternalReturnJockeyMount");
 		this.eternalreturn$stunted = nbt.getBoolean("EternalReturnStunted");
 	}

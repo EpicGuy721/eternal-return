@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "group": "trough",
+  "pattern": [
+    "S S",
+    "SSS"
+  ],
+  "key": {
+    "S": {
+      "item": "eternalreturn:pale_oak_slab"
+    }
+  },
+  "result": {
+    "count": 1,
+    "id": "eternalreturn:pale_oak_trough"
+  }
+}
