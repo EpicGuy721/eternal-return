@@ -1,6 +1,7 @@
 package com.eternalreturn.items;
 
 import com.eternalreturn.EternalReturn;
+import com.eternalreturn.blocks.Slabs;
 import com.eternalreturn.logic.BlockLocks;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.block.Block;
@@ -40,7 +41,8 @@ import java.util.Set;
  * The wrench and the hammer, for setting blocks by hand (250 uses each):
  * <ul>
  * <li>the wrench (4 iron ingots) turns a block: right-click turns it to the next way it can face, or the next axis it
- * can lie along (sneaking, the other way round), where it can stand;</li>
+ * can lie along (sneaking, the other way round), where it can stand. A slab moves to the side of its space clicked, and
+ * a pair of slabs (double or mixed) turns a quarter turn, the half aimed at going to the side clicked (Slabs);</li>
  * <li>the hammer (5 iron ingots, 2 sticks) is a survival debug stick: right-click sets the chosen property of a block
  * to its next value, sneak and right-click chooses the next property (both shown above the hotbar). Properties that
  * would make or destroy something (a crop's age, water, cake slices, books, the eyes of an end portal frame, ...)
@@ -48,7 +50,9 @@ import java.util.Set;
  * sides).</li>
  * </ul>
  * Neither works on two-block things (doors, beds, tall plants, double chests, extended pistons) or unbreakable blocks. A
- * block set with either keeps its state (BlockLocks).
+ * block set with either keeps its state (BlockLocks), except a slab moved or turned: nothing on a slab changes by itself
+ * (a lock would only keep the water in a waterlogged one from flowing). The hammer leaves which way a slab lies to the
+ * wrench.
  */
 public final class BlockTools {
 	public static final Item WRENCH = Registry.register(Registries.ITEM, EternalReturn.id("block_wrench"), new Wrench(new Item.Settings().maxDamage(250)));
@@ -80,6 +84,7 @@ public final class BlockTools {
 
 	public static boolean hammerable(BlockState state, Property<?> property) {
 		return !MAKES_OR_DESTROYS.contains(property.getName()) && property != Properties.SLAB_TYPE && property != Properties.CHEST_TYPE
+				&& property != Slabs.AXIS && property != Slabs.FLIPPED
 				&& !(state.getBlock() instanceof MultifaceGrowthBlock && property instanceof BooleanProperty);
 	}
 
@@ -131,7 +136,19 @@ public final class BlockTools {
 			if (player == null || !mayEdit(player, world, pos)) {
 				return ActionResult.PASS;
 			}
-			BlockState turned = turned(world.getBlockState(pos), world, pos, player.isSneaking());
+			BlockState state = world.getBlockState(pos);
+			if (Slabs.isSlab(state) || state.contains(Slabs.FLIPPED)) {
+				BlockState moved = Slabs.wrenched(state, pos, context.getSide(), context.getHitPos());
+				if (moved == null) {
+					return ActionResult.FAIL;
+				}
+				if (!world.isClient) {
+					world.setBlockState(pos, moved, Block.NOTIFY_ALL);
+					used(context, world, pos);
+				}
+				return ActionResult.success(world.isClient);
+			}
+			BlockState turned = turned(state, world, pos, player.isSneaking());
 			if (turned == null) {
 				return ActionResult.FAIL;
 			}

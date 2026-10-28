@@ -30,6 +30,7 @@ public class EternalReturnClient implements ClientModInitializer {
 		HardenedBlockModels.register();
 		OreVariantRendering.register();
 		FrameModels.register();
+		SlabModels.register();
 		GaleStepClient.register();
 		SpearClient.register();
 		SwimKeyClient.register();

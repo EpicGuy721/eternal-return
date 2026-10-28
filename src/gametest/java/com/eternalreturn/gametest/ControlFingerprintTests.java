@@ -180,7 +180,7 @@ public class ControlFingerprintTests implements FabricGameTest {
 	 * A state as the baselines recorded it. Carpets have a layers property now (CarpetLayers); a one-layer
 	 * carpet is exactly vanilla's carpet, so it is written without it.
 	 */
-	private static String stateName(BlockState state) {
+	static String stateName(BlockState state) {
 		String name = state.toString();
 		if (state.getBlock() instanceof net.minecraft.block.CarpetBlock && state.get(com.eternalreturn.blocks.CarpetLayers.LAYERS) == 1) {
 			return name.replace("[layers=1]", "");
@@ -188,6 +188,10 @@ public class ControlFingerprintTests implements FabricGameTest {
 		// Vines have a "cut" property now (Farming); an uncut vine is vanilla's.
 		if (state.getBlock() instanceof net.minecraft.block.VineBlock && !state.get(com.eternalreturn.survival.Farming.CUT)) {
 			return name.replace("cut=false,", "");
+		}
+		// Slabs have a "slab_axis" property now (Slabs); a slab lying flat is vanilla's.
+		if (state.getBlock() instanceof net.minecraft.block.SlabBlock && state.get(com.eternalreturn.blocks.Slabs.AXIS) == net.minecraft.util.math.Direction.Axis.Y) {
+			return name.replace("slab_axis=y,", "");
 		}
 		return name;
 	}

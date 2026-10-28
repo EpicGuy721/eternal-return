@@ -1,21 +1,27 @@
 package com.eternalreturn.client;
 
+import com.eternalreturn.blocks.MixedSlabs;
 import com.eternalreturn.duck.MovedData;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.PistonBlockEntity;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.block.BlockRenderManager;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.random.Random;
 
 import java.util.Map;
 import java.util.WeakHashMap;
 
 /**
  * Draws the block entity of a block a piston is moving (Redstone moves them), from a stand-in made from the
- * moving block's state and the data it carries, so chests, signs and the like stay visible as they slide.
+ * moving block's state and the data it carries, so chests, signs and the like stay visible as they slide. A mixed
+ * slab (MixedSlabs), whose model needs its data, is drawn as its two halves.
  */
 public final class MovingBlockEntities {
 	private static final Map<PistonBlockEntity, BlockEntity> STAND_INS = new WeakHashMap<>();
@@ -45,6 +51,15 @@ public final class MovingBlockEntities {
 		matrices.push();
 		matrices.translate(piston.getRenderOffsetX(tickDelta), piston.getRenderOffsetY(tickDelta), piston.getRenderOffsetZ(tickDelta));
 		MinecraftClient.getInstance().getBlockEntityRenderDispatcher().renderEntity(standIn, matrices, vertices, light, overlay);
+		if (standIn instanceof MixedSlabs.MixedSlabEntity mixed && mixed.halves() != null) {
+			BlockPos from = piston.getPos().offset(piston.getMovementDirection().getOpposite());
+			BlockRenderManager manager = MinecraftClient.getInstance().getBlockRenderManager();
+			for (boolean positive : new boolean[] {false, true}) {
+				BlockState half = MixedSlabs.half(pushed, mixed.halves(), positive);
+				manager.getModelRenderer().render(piston.getWorld(), manager.getModel(half), half, from, matrices,
+						vertices.getBuffer(RenderLayers.getMovingBlockLayer(half)), false, Random.create(), half.getRenderingSeed(from), overlay);
+			}
+		}
 		matrices.pop();
 	}
 }

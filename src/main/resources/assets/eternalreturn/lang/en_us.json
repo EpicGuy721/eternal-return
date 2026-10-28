@@ -26,6 +26,7 @@
 	"enchantment.eternalreturn.slayer": "Slayer",
 	"block.eternalreturn.stairs": "%s Stairs",
 	"block.eternalreturn.slab": "%s Slab",
+	"block.eternalreturn.mixed_slab": "Mixed Slab",
 	"item.eternalreturn.scroll": "Scroll",
 	"item.eternalreturn.scroll.of": "Scroll of %s",
 	"item.eternalreturn.scroll.hint": "Left-click to read: learn to craft its enchanted book",

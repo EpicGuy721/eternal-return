@@ -65,7 +65,8 @@
 			"com.eternalreturn.gametest.SystemTests",
 			"com.eternalreturn.gametest.WeatherTests",
 			"com.eternalreturn.gametest.BirdTests",
-			"com.eternalreturn.gametest.FishSchoolTests"
+			"com.eternalreturn.gametest.FishSchoolTests",
+			"com.eternalreturn.gametest.SlabTests"
 		]
 	},
 	"mixins": [
