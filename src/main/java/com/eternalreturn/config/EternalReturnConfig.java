@@ -509,6 +509,8 @@ public final class EternalReturnConfig {
 		public boolean hitsInterruptEating = true;
 		/** Minutes for a milked-dry cow to fill up again: 4 bottles of milk or a bucket (Milk.CowMilk; 0: no limit). */
 		public double cowMilkMinutes = 20.0;
+		/** Armor stands as in Bedrock: arms always, and poses players step through (sneak and use) or redstone sets (ArmorStandPoses). */
+		public boolean armorStandPoses = true;
 		/** Raw food (item tag eternalreturn:raw_foods) poisons for 5 seconds this often. */
 		public double rawFoodPoisonChance = 0.7;
 		/** Pigs have litters of 2 or 3 (2 to 5 if a parent ate a golden carrot). */

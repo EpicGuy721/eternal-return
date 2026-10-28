@@ -5,21 +5,27 @@ import com.eternalreturn.config.EternalReturnConfig;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.ZombieEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameRules;
+import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 
 import java.util.EnumSet;
 
 /**
  * Zombies put out the lights (mobs.zombiesBreakLights): with nothing to chase, a zombie looks for a torch
- * within 8 blocks (block tag eternalreturn:zombie_torches), walks up to it and knocks it off. A zombie with
+ * within 8 blocks (block tag eternalreturn:zombie_torches), walks right up to it (REACH, with nothing in between: no
+ * reaching through walls) and knocks it off. A zombie with
  * a pickaxe or shovel also goes for other lights and beds (eternalreturn:zombie_tool_targets: lanterns,
  * glowstone, sea lanterns, jack o'lanterns, froglights, lamps, end rods, beds...), digging them out as fast
  * as a player with that tool would. Needs mobGriefing. Not grimlocks: they shun light, and keep away from it.
@@ -28,6 +34,8 @@ public class BreakLightsGoal extends Goal {
 	public static final TagKey<Block> TORCHES = TagKey.of(RegistryKeys.BLOCK, EternalReturn.id("zombie_torches"));
 	public static final TagKey<Block> TOOL_TARGETS = TagKey.of(RegistryKeys.BLOCK, EternalReturn.id("zombie_tool_targets"));
 	private static final int RANGE = 8;
+	/** How far from its eyes a zombie reaches a block: about to the next block over. */
+	public static final double REACH = 2.0;
 	private final ZombieEntity zombie;
 	private BlockPos target;
 	private float progress;
@@ -40,6 +48,20 @@ public class BreakLightsGoal extends Goal {
 	public BreakLightsGoal(ZombieEntity zombie) {
 		this.zombie = zombie;
 		this.setControls(EnumSet.of(Control.MOVE, Control.LOOK));
+	}
+
+	/** Within reach of its arms: the block no more than REACH from its eyes, and nothing in the way. */
+	public static boolean canReach(MobEntity mob, BlockPos pos) {
+		Vec3d eye = mob.getEyePos();
+		double dx = Math.max(Math.max(pos.getX() - eye.x, eye.x - (pos.getX() + 1)), 0.0);
+		double dy = Math.max(Math.max(pos.getY() - eye.y, eye.y - (pos.getY() + 1)), 0.0);
+		double dz = Math.max(Math.max(pos.getZ() - eye.z, eye.z - (pos.getZ() + 1)), 0.0);
+		if (dx * dx + dy * dy + dz * dz > REACH * REACH) {
+			return false;
+		}
+		BlockHitResult hit = mob.getWorld().raycast(new RaycastContext(eye, pos.toCenterPos(), RaycastContext.ShapeType.OUTLINE,
+				RaycastContext.FluidHandling.NONE, mob));
+		return hit.getType() == HitResult.Type.MISS || hit.getBlockPos().equals(pos);
 	}
 
 	private boolean wants(BlockState state) {
@@ -111,8 +133,7 @@ public class BreakLightsGoal extends Goal {
 		this.giveUp--;
 		World world = this.zombie.getWorld();
 		this.zombie.getLookControl().lookAt(this.target.getX() + 0.5, this.target.getY() + 0.5, this.target.getZ() + 0.5);
-		// Within reach of its arms: 3 blocks from its eyes.
-		if (this.zombie.getEyePos().squaredDistanceTo(this.target.toCenterPos()) > 9.0) {
+		if (!canReach(this.zombie, this.target)) {
 			if (this.zombie.getNavigation().isIdle()) {
 				this.zombie.getNavigation().startMovingTo(this.target.getX() + 0.5, this.target.getY(), this.target.getZ() + 0.5, 1.0);
 			}

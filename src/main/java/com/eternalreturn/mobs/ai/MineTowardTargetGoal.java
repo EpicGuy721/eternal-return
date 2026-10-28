@@ -68,7 +68,7 @@ public class MineTowardTargetGoal extends Goal {
 	public boolean shouldContinue() {
 		LivingEntity target = this.zombie.getTarget();
 		return this.digging != null && target != null && target.isAlive() && holdsDiggingTool(this.zombie)
-				&& canDig(this.zombie.getWorld(), this.digging) && this.zombie.squaredDistanceTo(this.digging.toCenterPos()) < 9.0;
+				&& canDig(this.zombie.getWorld(), this.digging) && BreakLightsGoal.canReach(this.zombie, this.digging);
 	}
 
 	@Override

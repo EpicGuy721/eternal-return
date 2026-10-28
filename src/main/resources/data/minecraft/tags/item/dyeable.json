@@ -4,6 +4,7 @@
     "minecraft:item_frame",
     "minecraft:glow_item_frame",
     "eternalreturn:glass_item_frame",
-    "eternalreturn:glowing_glass_item_frame"
+    "eternalreturn:glowing_glass_item_frame",
+    "minecraft:redstone_lamp"
   ]
 }

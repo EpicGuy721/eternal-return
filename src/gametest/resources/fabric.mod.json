@@ -52,6 +52,7 @@
 			"com.eternalreturn.gametest.BearHabitTests",
 			"com.eternalreturn.gametest.CropPestTests",
 			"com.eternalreturn.gametest.TroughTests",
+			"com.eternalreturn.gametest.DyeingTests",
 			"com.eternalreturn.gametest.GimpTests",
 			"com.eternalreturn.gametest.SpiderClimbingTests",
 			"com.eternalreturn.gametest.VisionTests",

@@ -40,6 +40,16 @@ public class EternalReturnClient implements ClientModInitializer {
 		// A bottle of milk: the potion bottle, its liquid milk white.
 		net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry.ITEM.register((stack, tintIndex) -> tintIndex == 0 ? 0xFF000000 | com.eternalreturn.items.Milk.COLOR : -1,
 				com.eternalreturn.items.Milk.BOTTLE);
+		// Dyed water cauldrons and lamps: their colour (Dyeing); a dyed lamp's glass, drawn over it, cut out round the frame.
+		net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry.BLOCK.register((state, world, pos, tintIndex) ->
+				world != null && pos != null && world.getBlockEntityRenderData(pos) instanceof Integer color ? color : 0xFFFFFF,
+				com.eternalreturn.blocks.Dyeing.DYED_WATER_CAULDRON, com.eternalreturn.blocks.Dyeing.DYED_REDSTONE_LAMP);
+		net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap.INSTANCE.putBlock(com.eternalreturn.blocks.Dyeing.DYED_REDSTONE_LAMP,
+				net.minecraft.client.render.RenderLayer.getCutout());
+		net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry.ITEM.register((stack, tintIndex) ->
+				tintIndex == 0 ? net.minecraft.component.type.DyedColorComponent.getColor(stack, -1) : -1, net.minecraft.item.Items.REDSTONE_LAMP);
+		net.minecraft.client.item.ModelPredicateProviderRegistry.register(net.minecraft.item.Items.REDSTONE_LAMP, com.eternalreturn.EternalReturn.id("dyed"),
+				(stack, world, entity, seed) -> stack.contains(net.minecraft.component.DataComponentTypes.DYED_COLOR) ? 1.0F : 0.0F);
 		// Troughs: water tinted the biome's water colour (solid, as in a cauldron).
 		Block[] troughs = com.eternalreturn.survival.Troughs.BLOCKS.toArray(Block[]::new);
 		net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry.BLOCK.register((state, world, pos, tintIndex) ->

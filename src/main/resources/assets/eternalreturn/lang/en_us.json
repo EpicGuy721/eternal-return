@@ -272,6 +272,8 @@
 	"item.minecraft.splash_potion.effect.milk": "Splash Bottle of Milk",
 	"item.minecraft.lingering_potion.effect.milk": "Lingering Bottle of Milk",
 	"item.minecraft.tipped_arrow.effect.milk": "Arrow of Milk",
+	"block.eternalreturn.dyed_water_cauldron": "Water Cauldron",
+	"block.eternalreturn.dyed_redstone_lamp": "Redstone Lamp",
 	"block.eternalreturn.maple_planks": "Maple Planks",
 	"block.eternalreturn.maple_stairs": "Maple Stairs",
 	"block.eternalreturn.maple_slab": "Maple Slab",

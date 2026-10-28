@@ -61,6 +61,7 @@ public class EternalReturn implements ModInitializer {
 		com.eternalreturn.logic.OldCombat.register();
 		com.eternalreturn.items.Potions2.register();
 		com.eternalreturn.items.Milk.register();
+		com.eternalreturn.blocks.Dyeing.register();
 		com.eternalreturn.items.DiscCopyRecipe.register();
 		com.eternalreturn.mobs.SpawnTweaks.register();
 		com.eternalreturn.logic.Curses.register();

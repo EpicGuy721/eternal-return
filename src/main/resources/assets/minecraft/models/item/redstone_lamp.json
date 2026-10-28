@@ -1,0 +1,11 @@
+{
+  "parent": "minecraft:block/redstone_lamp",
+  "overrides": [
+    {
+      "predicate": {
+        "eternalreturn:dyed": 1.0
+      },
+      "model": "eternalreturn:item/dyed_redstone_lamp"
+    }
+  ]
+}
