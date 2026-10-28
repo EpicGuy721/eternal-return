@@ -204,23 +204,20 @@ public class TerrainFeatureTests implements FabricGameTest {
 		int cells = 2048 / FloatingIslands.CELL;
 		for (int cx = -cells; cx < cells; cx++) {
 			for (int cz = -cells; cz < cells; cz++) {
-				FloatingIslands.Island island = FloatingIslands.inCell(noise, cx, cz);
-				if (island != null) {
-					islands.add(island);
-				}
+				islands.addAll(FloatingIslands.inCell(noise, cx, cz));
 			}
 		}
 		islands.sort(Comparator.comparingInt(island -> Math.abs(island.x()) + Math.abs(island.z())));
 		List<String> all = new ArrayList<>();
 		for (FloatingIslands.Island island : islands) {
-			all.add(island.x() + " " + island.top() + " " + island.z() + " r" + island.radius() + " over "
+			all.add(island.x() + " " + island.top() + " " + island.z() + " r" + island.radius() + "x" + island.minor() + " over "
 					+ biome(world, world.getChunkManager().getChunkGenerator(), noise, island.x(), sea, island.z()));
 		}
 		EternalReturn.LOGGER.info("[terrain] every floating island within 2,048 blocks, nearest first (x top z): {}", all);
 		ctx.assertTrue(islands.size() >= 10, "only " + islands.size() + " floating islands within 2,048 blocks");
 		List<String> checked = new ArrayList<>();
 		for (FloatingIslands.Island island : islands.subList(0, 4)) {
-			int reach = island.radius() + 2;
+			int reach = (int) Math.ceil(island.radius() * 1.3) + 2;
 			for (int x = (island.x() - reach) >> 4; x <= (island.x() + reach) >> 4; x++) {
 				for (int z = (island.z() - reach) >> 4; z <= (island.z() + reach) >> 4; z++) {
 					world.getChunk(x, z, ChunkStatus.FULL, true);
@@ -242,17 +239,18 @@ public class TerrainFeatureTests implements FabricGameTest {
 			ctx.assertTrue(!world.getBlockState(pos.set(x, bottom, z)).isAir() && world.getBlockState(pos.set(x, bottom - 1, z)).isAir(),
 					island + " has no rock at its point (y " + bottom + ")");
 			int hang = top - bottom;
-			ctx.assertTrue(hang >= 8 && hang <= 46, island + " hangs " + hang + " blocks under its middle");
-			// Pointed: at two thirds of the radius the underside is much shallower than in the middle.
-			int edgeX = x + island.radius() * 2 / 3;
-			FloatingIslands.Column side = FloatingIslands.column(island, shape, edgeX, z);
+			ctx.assertTrue(hang >= 6 && hang <= island.depth() + 24 && bottom >= FloatingIslands.LOWEST_BOTTOM, island + " hangs " + hang + " blocks under its middle, to y " + bottom);
+			// Pointed: two thirds of the way to its edge (across its width) the underside is much shallower than in the middle.
+			int edgeX = x + (int) Math.round(-Math.sin(island.angle()) * island.minor() * 2 / 3.0);
+			int edgeZ = z + (int) Math.round(Math.cos(island.angle()) * island.minor() * 2 / 3.0);
+			FloatingIslands.Column side = FloatingIslands.column(island, shape, edgeX, edgeZ);
 			if (side != null) {
 				ctx.assertTrue(side.bottom() - bottom >= 3, island + " is not pointed: bottom y " + bottom + " in the middle, " + side.bottom() + " towards the edge");
 			}
 			// Made of the ground below: its top block is the ground's (or sand over water).
 			BlockState islandTop = world.getBlockState(pos.set(x, middle.top(), z));
 			int ground = world.getTopY(Heightmap.Type.OCEAN_FLOOR, x, z);
-			int scan = Math.min(FloatingIslands.MIN_TOP - 50, world.getTopY(Heightmap.Type.WORLD_SURFACE, x, z));
+			int scan = Math.min(FloatingIslands.LOWEST_BOTTOM - 1, world.getTopY(Heightmap.Type.WORLD_SURFACE, x, z));
 			while (scan > world.getBottomY() && (world.getBlockState(pos.set(x, scan, z)).isAir() || world.getBlockState(pos).isIn(BlockTags.LEAVES)
 					|| world.getBlockState(pos).isIn(BlockTags.LOGS) || (world.getBlockState(pos).isReplaceable() && world.getBlockState(pos).getFluidState().isEmpty()))) {
 				scan--;

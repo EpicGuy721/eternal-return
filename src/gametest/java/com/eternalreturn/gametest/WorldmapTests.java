@@ -202,22 +202,23 @@ public class WorldmapTests implements FabricGameTest {
 		com.eternalreturn.worldgen.terrain.FloatingIslands.Island island = null;
 		for (int cx = -6; cx < 6; cx++) {
 			for (int cz = -6; cz < 6; cz++) {
-				var candidate = com.eternalreturn.worldgen.terrain.FloatingIslands.inCell(noise, cx, cz);
-				if (candidate == null || candidate.radius() < 14) {
-					continue;
-				}
-				String id = biomes.getBiome(BiomeCoords.fromBlock(candidate.x()), BiomeCoords.fromBlock(sea), BiomeCoords.fromBlock(candidate.z()), noise.getMultiNoiseSampler())
-						.getKey().map(key -> key.getValue().toString()).orElse("?");
-				if (id.contains("ocean") || id.contains("river") || id.contains("beach")) {
-					continue;
-				}
-				if (island == null || Math.abs(candidate.x()) + Math.abs(candidate.z()) < Math.abs(island.x()) + Math.abs(island.z())) {
-					island = candidate;
+				for (var candidate : com.eternalreturn.worldgen.terrain.FloatingIslands.inCell(noise, cx, cz)) {
+					if (candidate.radius() < 14) {
+						continue;
+					}
+					String id = biomes.getBiome(BiomeCoords.fromBlock(candidate.x()), BiomeCoords.fromBlock(sea), BiomeCoords.fromBlock(candidate.z()), noise.getMultiNoiseSampler())
+							.getKey().map(key -> key.getValue().toString()).orElse("?");
+					if (id.contains("ocean") || id.contains("river") || id.contains("beach")) {
+						continue;
+					}
+					if (island == null || Math.abs(candidate.x()) + Math.abs(candidate.z()) < Math.abs(island.x()) + Math.abs(island.z())) {
+						island = candidate;
+					}
 				}
 			}
 		}
 		if (island != null) {
-			int reach = island.radius() + 4;
+			int reach = (int) Math.ceil(island.radius() * 1.3) + 4;
 			for (int x = (island.x() - reach) >> 4; x <= (island.x() + reach) >> 4; x++) {
 				for (int z = (island.z() - reach) >> 4; z <= (island.z() + reach) >> 4; z++) {
 					world.getChunk(x, z, ChunkStatus.FULL, true);

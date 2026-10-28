@@ -31,7 +31,7 @@ public final class LocateCommand {
 	/** How far each search reaches, in blocks. */
 	private static final int MONOLITH_REACH = 3 * Monoliths.CELL;
 	private static final int SINKHOLE_REACH = 8 * TerrainShape.SINKHOLE_CELL;
-	private static final int ISLAND_REACH = 4 * FloatingIslands.CELL;
+	private static final int ISLAND_REACH = 2 * FloatingIslands.CELL;
 
 	private LocateCommand() {
 	}
@@ -130,9 +130,10 @@ public final class LocateCommand {
 		int cell = FloatingIslands.CELL;
 		for (int cx = Math.floorDiv(at.getX() - ISLAND_REACH, cell); cx <= Math.floorDiv(at.getX() + ISLAND_REACH, cell); cx++) {
 			for (int cz = Math.floorDiv(at.getZ() - ISLAND_REACH, cell); cz <= Math.floorDiv(at.getZ() + ISLAND_REACH, cell); cz++) {
-				FloatingIslands.Island island = FloatingIslands.inCell(noise, cx, cz);
-				if (island != null && nearer(at, island.x(), island.z(), best)) {
-					best = new BlockPos(island.x(), island.top() + 1, island.z());
+				for (FloatingIslands.Island island : FloatingIslands.inCell(noise, cx, cz)) {
+					if (nearer(at, island.x(), island.z(), best)) {
+						best = new BlockPos(island.x(), island.top() + 1, island.z());
+					}
 				}
 			}
 		}
