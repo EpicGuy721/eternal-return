@@ -68,7 +68,7 @@ public class MineTowardTargetGoal extends Goal {
 	public boolean shouldContinue() {
 		LivingEntity target = this.zombie.getTarget();
 		return this.digging != null && target != null && target.isAlive() && holdsDiggingTool(this.zombie)
-				&& canDig(this.zombie.getWorld(), this.digging) && BreakLightsGoal.canReach(this.zombie, this.digging);
+				&& canDig(this.zombie.getWorld(), this.digging) && Reach.inReach(this.zombie, this.digging, 0.0) && Reach.inSight(this.zombie, this.digging);
 	}
 
 	@Override
@@ -99,6 +99,10 @@ public class MineTowardTargetGoal extends Goal {
 		}
 		World world = this.zombie.getWorld();
 		this.zombie.getLookControl().lookAt(this.digging.getX() + 0.5, this.digging.getY() + 0.5, this.digging.getZ() + 0.5);
+		// It digs what it's looking at (Reach).
+		if (!Reach.facing(this.zombie, this.digging.toCenterPos())) {
+			return;
+		}
 		BlockState state = world.getBlockState(this.digging);
 		ItemStack tool = this.zombie.getMainHandStack();
 		float hardness = state.getHardness(world, this.digging);

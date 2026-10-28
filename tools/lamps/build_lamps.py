@@ -11,19 +11,31 @@ Writes (all under src/main/resources):
 - textures eternalreturn:block/dyed_redstone_lamp(_on) (the lamp) and dyed_redstone_lamp(_on)_glass (its glass, grey);
 - block models dyed_redstone_lamp(_on) (the two layers, the glass marked for the tint), its blockstate (lit or not),
   vanilla's redstone_lamp item model with an eternalreturn:dyed override to eternalreturn:item/dyed_redstone_lamp;
-- the dyed water cauldron's models (on vanilla's cauldron templates, the water tinted with the dye) and blockstate;
+- the dyed water cauldron's models (on vanilla's cauldron templates, the water tinted with the dye) and blockstate, and
+  its water, eternalreturn:block/dyed_water: vanilla's still water (from the Minecraft jar in the Loom cache, so run a
+  Gradle build first) lightened to WATER_GREYS, as Bedrock's cauldron water is light, so dyes show near their colour;
 - loot tables: the dyed lamp drops a redstone lamp of its colour, the dyed cauldron a cauldron.
 
 Do not hand-edit the generated files; change this script or the textures and rerun it.
 """
+import glob
+import io
 import json
 import os
+import zipfile
 
 from PIL import Image
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 RES = os.path.join(HERE, '..', '..', 'src', 'main', 'resources')
 NS = 'eternalreturn'
+LOOM = os.path.join(HERE, '..', '..', '.gradle', 'loom-cache', 'minecraftMaven', 'net', 'minecraft')
+CLIENT = [j for j in glob.glob(os.path.join(LOOM, 'minecraft-clientOnly-*', '*', '*.jar')) if not j.endswith('-sources.jar')]
+if not CLIENT:
+    raise SystemExit('Minecraft jars not found in the Loom cache; run ./gradlew build first')
+JAR = zipfile.ZipFile(CLIENT[0])
+# Dyed water's lightness, darkest to lightest: light, as Bedrock's cauldron water is, so the dye shows near its own colour.
+WATER_GREYS = (215, 255)
 # The grey the glass's darkest and lightest pixels become, unlit and lit.
 GREYS = {'redstone_lamp': (40, 200), 'redstone_lamp_on': (110, 255)}
 
@@ -84,11 +96,20 @@ def main():
     write_json(f'assets/{NS}/models/item/dyed_redstone_lamp.json', {'parent': f'{NS}:block/dyed_redstone_lamp'})
     write_json('assets/minecraft/models/item/redstone_lamp.json', {'parent': 'minecraft:block/redstone_lamp',
             'overrides': [{'predicate': {f'{NS}:dyed': 1.0}, 'model': f'{NS}:item/dyed_redstone_lamp'}]})
+    # Dyed water: vanilla's still water, animated as it is, lightened (and solid).
+    water = Image.open(io.BytesIO(JAR.read('assets/minecraft/textures/block/water_still.png'))).convert('RGBA')
+    lumas = [luma(p) for p in water.getdata()]
+    lo, hi = min(lumas), max(lumas)
+    low, high = WATER_GREYS
+    water.putdata([(v, v, v, 255) for v in (round(low + (l - lo) / (hi - lo) * (high - low)) for l in lumas)])
+    water.save(os.path.join(RES, 'assets', NS, 'textures', 'block', 'dyed_water.png'))
+    with open(os.path.join(RES, 'assets', NS, 'textures', 'block', 'dyed_water.png.mcmeta'), 'wb') as f:
+        f.write(JAR.read('assets/minecraft/textures/block/water_still.png.mcmeta'))
     # The cauldron's own models (vanilla's water cauldron ones, which resource packs may draw untinted), its water tinted.
     for level, template in ((1, 'level1'), (2, 'level2'), (3, 'full')):
         write_json(f'assets/{NS}/models/block/dyed_water_cauldron_{template}.json', {
             'parent': f'minecraft:block/template_cauldron_{template}',
-            'textures': {'bottom': 'minecraft:block/cauldron_bottom', 'content': 'minecraft:block/water_still', 'inside': 'minecraft:block/cauldron_inner',
+            'textures': {'bottom': 'minecraft:block/cauldron_bottom', 'content': f'{NS}:block/dyed_water', 'inside': 'minecraft:block/cauldron_inner',
                          'particle': 'minecraft:block/cauldron_side', 'side': 'minecraft:block/cauldron_side', 'top': 'minecraft:block/cauldron_top'}})
     write_json(f'assets/{NS}/blockstates/dyed_water_cauldron.json', {'variants': {
         f'level={level}': {'model': f'{NS}:block/dyed_water_cauldron_{template}'} for level, template in ((1, 'level1'), (2, 'level2'), (3, 'full'))}})

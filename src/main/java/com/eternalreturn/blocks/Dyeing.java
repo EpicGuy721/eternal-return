@@ -127,16 +127,20 @@ public final class Dyeing {
 		return r << 16 | g << 8 | bl;
 	}
 
-	/** A colour kept by a block: a dyed water cauldron's or a dyed lamp's (drawn by tinting: getRenderData). */
+	/**
+	 * A colour kept by a block: a dyed water cauldron's or a dyed lamp's (drawn by tinting: getRenderData). On the
+	 * client it's UNKNOWN until the server's data comes (a cauldron just dyed draws its water plain meanwhile, not white).
+	 */
 	public static class DyedBlockEntity extends BlockEntity implements RenderDataBlockEntity {
-		private int color = 0xFFFFFF;
+		public static final int UNKNOWN = -1;
+		private int color = UNKNOWN;
 
 		public DyedBlockEntity(BlockPos pos, BlockState state) {
 			super(DYED_BLOCK_ENTITY, pos, state);
 		}
 
 		public int color() {
-			return this.color;
+			return this.color == UNKNOWN ? 0xFFFFFF : this.color;
 		}
 
 		public void setColor(int color) {
@@ -150,13 +154,15 @@ public final class Dyeing {
 		@Override
 		protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
 			super.writeNbt(nbt, registries);
-			nbt.putInt("Color", this.color);
+			if (this.color != UNKNOWN) {
+				nbt.putInt("Color", this.color);
+			}
 		}
 
 		@Override
 		protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
 			super.readNbt(nbt, registries);
-			this.color = nbt.contains("Color") ? nbt.getInt("Color") : 0xFFFFFF;
+			this.color = nbt.contains("Color") ? nbt.getInt("Color") : UNKNOWN;
 			// (on the client, drawn again in the new colour)
 			if (this.world != null && this.world.isClient) {
 				this.world.updateListeners(this.pos, this.getCachedState(), this.getCachedState(), Block.NOTIFY_ALL);
@@ -175,7 +181,7 @@ public final class Dyeing {
 		@Override
 		protected void addComponents(ComponentMap.Builder builder) {
 			super.addComponents(builder);
-			builder.add(DataComponentTypes.DYED_COLOR, new DyedColorComponent(this.color, true));
+			builder.add(DataComponentTypes.DYED_COLOR, new DyedColorComponent(this.color(), true));
 		}
 
 		@Nullable
@@ -189,9 +195,10 @@ public final class Dyeing {
 			return this.createNbt(registries);
 		}
 
+		@Nullable
 		@Override
 		public Object getRenderData() {
-			return this.color;
+			return this.color == UNKNOWN ? null : this.color;
 		}
 	}
 

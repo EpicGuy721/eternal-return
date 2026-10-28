@@ -2,6 +2,7 @@ package com.eternalreturn.mobs.entity;
 
 import com.eternalreturn.config.EternalReturnConfig;
 import com.eternalreturn.fishing.Overfishing;
+import com.eternalreturn.mobs.ai.Reach;
 import net.minecraft.block.BeehiveBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -63,7 +64,8 @@ import java.util.UUID;
 /**
  * Brown, black and sun bears (com.eternalreturn.mobs.ForestMobs): polar bears (neutral, they fight back when hit, a
  * mother goes for anyone near her cub, they drop fish) but for their coat, size and where they live, and their habits
- * (mobs.bearHabits): a bear within HIVE_RANGE of a beehive or bee nest goes and breaks it open for the honey, its bees
+ * (mobs.bearHabits): a bear within HIVE_RANGE of a beehive or bee nest goes right up to it, rears up looking at it and
+ * breaks it open for the honey (Reach: no reaching from afar or through walls), its bees
  * coming out after it (now and then: RAID_COOLDOWN); it strips sweet berry bushes back to bare; and by day it wades
  * into a river and swipes fish out onto the bank, as many as a fisherman would catch there (the spot gets overfished
  * for both: Overfishing). Honeycomb (or honey) lures a bear; a honey bottle breeds two (the bottle given back), and a
@@ -344,10 +346,8 @@ public class BearEntity extends PolarBearEntity {
 			this.ticks++;
 			Vec3d center = Vec3d.ofCenter(this.hive);
 			BearEntity.this.getLookControl().lookAt(center.x, center.y, center.z);
-			double dx = center.x - BearEntity.this.getX();
-			double dz = center.z - BearEntity.this.getZ();
-			boolean inReach = dx * dx + dz * dz < 3.0 * 3.0 && Math.abs(center.y - BearEntity.this.getY()) < 3.0;
-			if (!inReach) {
+			// Right up against it (reared up, it reaches a block higher), and with nothing between (Reach).
+			if (!Reach.inReach(BearEntity.this, this.hive, 1.0) || !Reach.inSight(BearEntity.this, this.hive)) {
 				if (this.ticks % 20 == 0) {
 					BearEntity.this.getNavigation().startMovingTo(center.x, this.hive.getY(), center.z, 1.1);
 				}
@@ -355,6 +355,10 @@ public class BearEntity extends PolarBearEntity {
 			}
 			BearEntity.this.getNavigation().stop();
 			BearEntity.this.setWarning(true);
+			// Looking at it before it claws at it.
+			if (!Reach.facing(BearEntity.this, center)) {
+				return;
+			}
 			if (this.ticks % 10 == 0) {
 				BearEntity.this.playSound(SoundEvents.BLOCK_BEEHIVE_SHEAR, 1.0F, 0.7F);
 			}
@@ -401,7 +405,10 @@ public class BearEntity extends PolarBearEntity {
 
 		@Override
 		public void tick() {
-			if (this.hasReached() && ++this.timer >= 40) {
+			Vec3d bush = Vec3d.ofCenter(this.targetPos);
+			BearEntity.this.getLookControl().lookAt(bush.x, bush.y, bush.z);
+			// At it, and looking at it (Reach), for two seconds.
+			if (this.hasReached() && Reach.canReach(BearEntity.this, this.targetPos, 0.0) && ++this.timer >= 40) {
 				BearEntity.this.eatBerries(this.targetPos);
 			}
 			super.tick();

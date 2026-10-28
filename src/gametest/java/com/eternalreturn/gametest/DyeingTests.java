@@ -2,7 +2,7 @@ package com.eternalreturn.gametest;
 
 import com.eternalreturn.blocks.Dyeing;
 import com.eternalreturn.logic.ArmorStandPoses;
-import com.eternalreturn.mobs.ai.BreakLightsGoal;
+import com.eternalreturn.mobs.ai.Reach;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.LeveledCauldronBlock;
@@ -135,19 +135,26 @@ public class DyeingTests implements FabricGameTest {
 		});
 	}
 
-	/** A zombie reaches a block only right beside it, and not through a wall. */
+	/** A zombie reaches a block only right against it, looking at it, and not through a wall. */
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "dyeing")
 	public void zombiesReachOnlyNear(TestContext ctx) {
 		ZombieEntity zombie = ctx.spawnEntity(EntityType.ZOMBIE, new BlockPos(1, 1, 1));
 		zombie.setAiDisabled(true);
 		ctx.setBlockState(new BlockPos(2, 1, 1), Blocks.TORCH);
-		ctx.setBlockState(new BlockPos(4, 1, 1), Blocks.TORCH);
+		ctx.setBlockState(new BlockPos(3, 1, 1), Blocks.TORCH);
 		ctx.setBlockState(new BlockPos(1, 1, 3), Blocks.TORCH);
 		ctx.setBlockState(new BlockPos(1, 2, 2), Blocks.STONE);
 		ctx.setBlockState(new BlockPos(1, 1, 2), Blocks.STONE);
-		ctx.assertTrue(BreakLightsGoal.canReach(zombie, ctx.getAbsolutePos(new BlockPos(2, 1, 1))), "a torch beside it");
-		ctx.assertFalse(BreakLightsGoal.canReach(zombie, ctx.getAbsolutePos(new BlockPos(4, 1, 1))), "not one 3 blocks off");
-		ctx.assertFalse(BreakLightsGoal.canReach(zombie, ctx.getAbsolutePos(new BlockPos(1, 1, 3))), "nor one behind a wall");
+		BlockPos beside = ctx.getAbsolutePos(new BlockPos(2, 1, 1));
+		ctx.assertTrue(Reach.inReach(zombie, beside, 0.0) && Reach.inSight(zombie, beside), "a torch right beside it");
+		ctx.assertFalse(Reach.inReach(zombie, ctx.getAbsolutePos(new BlockPos(3, 1, 1)), 0.0), "not one 2 blocks off");
+		ctx.assertFalse(Reach.inSight(zombie, ctx.getAbsolutePos(new BlockPos(1, 1, 3))), "nor one behind a wall");
+		// Facing +x (yaw -90), looking a little down: it faces the torch beside it, not one behind it.
+		zombie.setHeadYaw(-90.0F);
+		zombie.setPitch(30.0F);
+		ctx.assertTrue(Reach.facing(zombie, beside.toCenterPos()), "looking at the torch beside it");
+		zombie.setHeadYaw(90.0F);
+		ctx.assertFalse(Reach.facing(zombie, beside.toCenterPos()), "not when looking away");
 		zombie.discard();
 		ctx.complete();
 	}

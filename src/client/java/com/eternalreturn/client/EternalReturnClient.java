@@ -40,10 +40,15 @@ public class EternalReturnClient implements ClientModInitializer {
 		// A bottle of milk: the potion bottle, its liquid milk white.
 		net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry.ITEM.register((stack, tintIndex) -> tintIndex == 0 ? 0xFF000000 | com.eternalreturn.items.Milk.COLOR : -1,
 				com.eternalreturn.items.Milk.BOTTLE);
-		// Dyed water cauldrons and lamps: their colour (Dyeing); a dyed lamp's glass, drawn over it, cut out round the frame.
-		net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry.BLOCK.register((state, world, pos, tintIndex) ->
-				world != null && pos != null && world.getBlockEntityRenderData(pos) instanceof Integer color ? color : 0xFFFFFF,
-				com.eternalreturn.blocks.Dyeing.DYED_WATER_CAULDRON, com.eternalreturn.blocks.Dyeing.DYED_REDSTONE_LAMP);
+		// Dyed water cauldrons and lamps: their colour (Dyeing), or till it comes from the server, plain water (a lamp white);
+		// a dyed lamp's glass, drawn over it, cut out round the frame.
+		net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry.BLOCK.register((state, world, pos, tintIndex) -> {
+			if (world != null && pos != null && world.getBlockEntityRenderData(pos) instanceof Integer color) {
+				return color;
+			}
+			return world != null && pos != null && state.isOf(com.eternalreturn.blocks.Dyeing.DYED_WATER_CAULDRON)
+					? net.minecraft.client.color.world.BiomeColors.getWaterColor(world, pos) : 0xFFFFFF;
+		}, com.eternalreturn.blocks.Dyeing.DYED_WATER_CAULDRON, com.eternalreturn.blocks.Dyeing.DYED_REDSTONE_LAMP);
 		net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap.INSTANCE.putBlock(com.eternalreturn.blocks.Dyeing.DYED_REDSTONE_LAMP,
 				net.minecraft.client.render.RenderLayer.getCutout());
 		net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry.ITEM.register((stack, tintIndex) ->
