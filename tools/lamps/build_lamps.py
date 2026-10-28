@@ -1,10 +1,11 @@
 """Generates the resources for dyed redstone lamps and dyed water cauldrons (com.eternalreturn.blocks.Dyeing), from the
-hand-made lamp textures in tools/lamps/textures (redstone_lamp.png, redstone_lamp_on.png).
+hand-made lamp textures in tools/lamps/textures (redstone_lamp.png, redstone_lamp_on.png) and their colour maps
+(redstone_lamp_map.png, redstone_lamp_on_map.png: the texture with every pixel the dye leaves alone painted MASK).
 
 Run from anywhere: python tools/lamps/build_lamps.py
 
-A dyed lamp is drawn as two layers: the lamp texture itself, and over it its glass in grey (the frame left clear),
-tinted with the lamp's colour, so the dye shows true (as a dyed item frame's back does).
+A dyed lamp is drawn as two layers: the lamp texture itself, and over it the part its map colours, in grey (the rest
+left clear), tinted with the lamp's colour, so the dye shows true (as a dyed item frame's back does).
 
 Writes (all under src/main/resources):
 - textures eternalreturn:block/dyed_redstone_lamp(_on) (the lamp) and dyed_redstone_lamp(_on)_glass (its glass, grey);
@@ -39,14 +40,13 @@ def luma(p):
     return 0.299 * p[0] + 0.587 * p[1] + 0.114 * p[2]
 
 
-def is_glass(p):
-    """The lamp's glass against its frame: the glass is strongly coloured (its colour a large share of its brightness) or bright."""
-    top = max(p[:3])
-    return p[3] > 0 and (top > 0 and (top - min(p[:3])) / top >= 0.5 or luma(p) >= 170)
+# The colour maps' mark for a pixel the dye leaves alone.
+MASK = (0xFF, 0x00, 0x6E)
 
 
-def glass_layer(image, low, high):
-    pixels = [(x, y) for y in range(image.height) for x in range(image.width) if is_glass(image.getpixel((x, y)))]
+def glass_layer(image, colour_map, low, high):
+    """The pixels the map colours (not MASK), in grey: their lightness spread from low to high."""
+    pixels = [(x, y) for y in range(image.height) for x in range(image.width) if colour_map.getpixel((x, y))[:3] != MASK]
     lumas = [luma(image.getpixel(xy)) for xy in pixels]
     lo, hi = min(lumas), max(lumas)
     out = Image.new('RGBA', image.size, (0, 0, 0, 0))
@@ -70,9 +70,10 @@ def cube(texture, tint):
 def main():
     for name, (low, high) in GREYS.items():
         image = Image.open(os.path.join(HERE, 'textures', name + '.png')).convert('RGBA')
+        colour_map = Image.open(os.path.join(HERE, 'textures', name + '_map.png')).convert('RGBA')
         dyed = 'dyed_' + name
         image.save(os.path.join(RES, 'assets', NS, 'textures', 'block', dyed + '.png'))
-        glass_layer(image, low, high).save(os.path.join(RES, 'assets', NS, 'textures', 'block', dyed + '_glass.png'))
+        glass_layer(image, colour_map, low, high).save(os.path.join(RES, 'assets', NS, 'textures', 'block', dyed + '_glass.png'))
         write_json(f'assets/{NS}/models/block/{dyed}.json', {
             'parent': 'minecraft:block/block',
             'textures': {'particle': f'{NS}:block/{dyed}', 'lamp': f'{NS}:block/{dyed}', 'glass': f'{NS}:block/{dyed}_glass'},
