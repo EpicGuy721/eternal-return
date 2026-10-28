@@ -346,8 +346,8 @@ public class BearEntity extends PolarBearEntity {
 			this.ticks++;
 			Vec3d center = Vec3d.ofCenter(this.hive);
 			BearEntity.this.getLookControl().lookAt(center.x, center.y, center.z);
-			// Right up against it (reared up, it reaches a block higher), and with nothing between (Reach).
-			if (!Reach.inReach(BearEntity.this, this.hive, 1.0) || !Reach.inSight(BearEntity.this, this.hive)) {
+			// Up against it (reared up, it reaches a block and a half higher), and with nothing between (Reach).
+			if (!Reach.inReach(BearEntity.this, this.hive, 1.5) || !Reach.inSight(BearEntity.this, this.hive)) {
 				if (this.ticks % 20 == 0) {
 					BearEntity.this.getNavigation().startMovingTo(center.x, this.hive.getY(), center.z, 1.1);
 				}

@@ -10,15 +10,15 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 
 /**
- * Whether a mob can get its hands (or paws) on a block, to break it, dig it or tear it open: the block right against
+ * Whether a mob can get its hands (or paws) on a block, to break it, dig it or tear it open: the block close by
  * it (within ARM of its body, or up to `up` above its head), nothing between its eyes and the block, and its head
  * turned to look at it (within FACING degrees). Zombies (BreakLightsGoal, MineTowardTargetGoal) and bears (BearEntity).
  */
 public final class Reach {
 	/** How far past its body a mob reaches (blocks). */
-	public static final double ARM = 0.5;
+	public static final double ARM = 1.0;
 	/** How far off its line of sight it may be looking (degrees). */
-	public static final double FACING = 35.0;
+	public static final double FACING = 60.0;
 
 	private Reach() {
 	}
