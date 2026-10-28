@@ -505,8 +505,10 @@ public final class EternalReturnConfig {
 		 * elsewhere each growth step happens only this often (0.25 = four times slower).
 		 */
 		public double cropGrowthOutsideIdealBiome = 0.25;
-		/** Getting hurt stops eating and drinking. */
+		/** Getting hurt stops eating (not drinking). */
 		public boolean hitsInterruptEating = true;
+		/** Minutes for a milked-dry cow to fill up again: 4 bottles of milk or a bucket (Milk.CowMilk; 0: no limit). */
+		public double cowMilkMinutes = 20.0;
 		/** Raw food (item tag eternalreturn:raw_foods) poisons for 5 seconds this often. */
 		public double rawFoodPoisonChance = 0.7;
 		/** Pigs have litters of 2 or 3 (2 to 5 if a parent ate a golden carrot). */

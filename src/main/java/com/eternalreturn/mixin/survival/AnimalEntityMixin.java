@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /** Animal hunger and thirst (AnimalHunger): when it last ate and drank, ticking, saving, feeding by hand, troughs; and jockey mounts despawning. */
 @Mixin(AnimalEntity.class)
-public abstract class AnimalEntityMixin extends PassiveEntity implements AnimalHunger.Holder, JockeyMount, Farming.Holder {
+public abstract class AnimalEntityMixin extends PassiveEntity implements AnimalHunger.Holder, JockeyMount, Farming.Holder, com.eternalreturn.items.Milk.CowMilk.Holder {
 	@Unique
 	private static final String FED_KEY = "EternalReturnLastFed";
 
@@ -28,6 +28,19 @@ public abstract class AnimalEntityMixin extends PassiveEntity implements AnimalH
 	private long eternalreturn$lastFed = Long.MIN_VALUE;
 	@Unique
 	private long eternalreturn$lastWatered = Long.MIN_VALUE;
+	/** A cow's: when its milk is full again (Milk.CowMilk). */
+	@Unique
+	private long eternalreturn$milkFullAt;
+
+	@Override
+	public long eternalreturn$milkFullAt() {
+		return this.eternalreturn$milkFullAt;
+	}
+
+	@Override
+	public void eternalreturn$setMilkFullAt(long time) {
+		this.eternalreturn$milkFullAt = time;
+	}
 
 	/** Spawned as a mount for a hostile rider (a polar bear under a stray, a cow under a baby zombie): despawns like the rider. */
 	@Unique
@@ -138,6 +151,9 @@ public abstract class AnimalEntityMixin extends PassiveEntity implements AnimalH
 		if (this.eternalreturn$lastWatered != Long.MIN_VALUE) {
 			nbt.putLong("EternalReturnLastWatered", this.eternalreturn$lastWatered);
 		}
+		if (this.eternalreturn$milkFullAt != 0L) {
+			nbt.putLong("EternalReturnMilkFullAt", this.eternalreturn$milkFullAt);
+		}
 		if (this.eternalreturn$jockeyMount) {
 			nbt.putBoolean("EternalReturnJockeyMount", true);
 		}
@@ -150,6 +166,7 @@ public abstract class AnimalEntityMixin extends PassiveEntity implements AnimalH
 	private void eternalreturn$loadFed(NbtCompound nbt, CallbackInfo ci) {
 		this.eternalreturn$lastFed = nbt.contains(FED_KEY, NbtElement.LONG_TYPE) ? nbt.getLong(FED_KEY) : Long.MIN_VALUE;
 		this.eternalreturn$lastWatered = nbt.contains("EternalReturnLastWatered", NbtElement.LONG_TYPE) ? nbt.getLong("EternalReturnLastWatered") : Long.MIN_VALUE;
+		this.eternalreturn$milkFullAt = nbt.getLong("EternalReturnMilkFullAt");
 		this.eternalreturn$jockeyMount = nbt.getBoolean("EternalReturnJockeyMount");
 		this.eternalreturn$stunted = nbt.getBoolean("EternalReturnStunted");
 	}

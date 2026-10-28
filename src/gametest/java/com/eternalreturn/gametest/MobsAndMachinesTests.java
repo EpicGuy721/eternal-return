@@ -103,7 +103,7 @@ public class MobsAndMachinesTests implements FabricGameTest {
 		});
 	}
 
-	/** Snacks 0.8 s, meals 2.4 s, other food 1.6 s, drinks 1 s; getting hurt stops eating; raw beef poisons about 70% of the time. */
+	/** Snacks 0.8 s, meals 2.4 s, other food 1.6 s, drinks 1 s; getting hurt stops eating (not drinking); raw beef poisons about 70% of the time. */
 	@GameTest(templateName = EMPTY_STRUCTURE)
 	public void eatingAndDrinking(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
@@ -129,6 +129,11 @@ public class MobsAndMachinesTests implements FabricGameTest {
 			boolean stillEating = eater.isUsingItem();
 			eater.discard();
 			ctx.assertTrue(!stillEating, "damage that lands stops eating");
+			player.setStackInHand(Hand.MAIN_HAND, new ItemStack(Items.POTION));
+			player.setCurrentHand(Hand.MAIN_HAND);
+			Food.interrupt(player);
+			ctx.assertTrue(player.isUsingItem(), "a hit doesn't stop drinking");
+			player.stopUsingItem();
 
 			int poisoned = 0;
 			for (int i = 0; i < 200; i++) {

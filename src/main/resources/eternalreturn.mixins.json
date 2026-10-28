@@ -138,6 +138,7 @@
 		"survival.BiomeGrassColorMixin",
 		"survival.CactusBlockFertilizableMixin",
 		"survival.CakeBlockMixin",
+		"survival.CowMilkMixin",
 		"survival.CropGrowthMixin",
 		"survival.DeathDropsMixin",
 		"survival.DrinkTimeMixin",

@@ -28,13 +28,10 @@ public final class Food {
 	private Food() {
 	}
 
-	/** After damage lands: an eater or drinker stops. */
+	/** After damage lands: an eater stops (a drinker drinks on). */
 	public static void interrupt(LivingEntity entity) {
-		if (EternalReturnConfig.get().survival.hitsInterruptEating && entity.isUsingItem()) {
-			UseAction action = entity.getActiveItem().getUseAction();
-			if (action == UseAction.EAT || action == UseAction.DRINK) {
-				entity.stopUsingItem();
-			}
+		if (EternalReturnConfig.get().survival.hitsInterruptEating && entity.isUsingItem() && entity.getActiveItem().getUseAction() == UseAction.EAT) {
+			entity.stopUsingItem();
 		}
 	}
 

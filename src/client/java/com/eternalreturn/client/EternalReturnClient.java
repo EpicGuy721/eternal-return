@@ -37,6 +37,9 @@ public class EternalReturnClient implements ClientModInitializer {
 		com.eternalreturn.client.weather.ClientWeather.register();
 		net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap.INSTANCE.putBlock(com.eternalreturn.blocks.CopperRail.BLOCK,
 				net.minecraft.client.render.RenderLayer.getCutout());
+		// A bottle of milk: the potion bottle, its liquid milk white.
+		net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry.ITEM.register((stack, tintIndex) -> tintIndex == 0 ? 0xFF000000 | com.eternalreturn.items.Milk.COLOR : -1,
+				com.eternalreturn.items.Milk.BOTTLE);
 		// Troughs: water tinted the biome's water colour (solid, as in a cauldron).
 		Block[] troughs = com.eternalreturn.survival.Troughs.BLOCKS.toArray(Block[]::new);
 		net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry.BLOCK.register((state, world, pos, tintIndex) ->

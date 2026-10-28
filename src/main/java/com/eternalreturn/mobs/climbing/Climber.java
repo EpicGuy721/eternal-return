@@ -37,9 +37,10 @@ import java.util.function.Supplier;
  * <li>above its target on a ceiling it lets go and drops on it; stuck, or in water, or dead, it lets go and falls.</li>
  * </ul>
  * It doesn't step straight back onto the surface it just left (TURN_BACK_TICKS), so it can't flip between two in a
- * corner. Its legs keep walking with its movement up and down. On the client it keeps a smoothed orientation (up away from the
- * surface, forward the way it moves) that the renderer turns the model by (ClimberRendering), so it tips smoothly
- * from floor to wall to ceiling. Which side it clings to is synced through a tracked value the mob supplies.
+ * corner. Its legs keep walking with its movement up and down. On the client it keeps a smoothed orientation (up away
+ * from the surface, leaning off any other near it, forward the way it moves) that the renderer turns the model by
+ * (ClimberRendering), so it tips smoothly from floor to wall to ceiling, through the angles between. Which side it
+ * clings to is synced through a tracked value the mob supplies.
  */
 public final class Climber {
 	/** Off the floor, how strongly it's pulled against its surface (blocks per tick per tick; gravity is 0.08). */
@@ -55,7 +56,9 @@ public final class Climber {
 	/** Ticks between working out routes. */
 	private static final int REROUTE_TICKS = 20;
 	/** How fast the drawn body turns toward its new orientation each tick (share of the way). */
-	private static final float TURN_RATE = 0.3F;
+	private static final float TURN_RATE = 0.2F;
+	/** How far off a surface beside it the drawn body starts leaning toward it (blocks). */
+	private static final double LEAN_REACH = 0.6;
 	/** Ticks before it may step back onto the surface it just left (else in a corner it flips between the two, shaking). */
 	private static final int TURN_BACK_TICKS = 20;
 	private final MobEntity mob;
@@ -389,7 +392,7 @@ public final class Climber {
 
 	// Client side: the drawn orientation.
 
-	/** One tick of turning the drawn body toward its surface (up away from it) and its way (forward). */
+	/** One tick of turning the drawn body toward its surface (up away from it, leaning off those near it) and its way (forward). */
 	private void turn() {
 		Vec3d targetUp = Vec3d.of(this.attach().getOpposite().getVector());
 		Vec3d targetForward;
@@ -411,7 +414,7 @@ public final class Climber {
 			}
 		}
 		this.forward = targetForward;
-		Quaternionf target = basis(targetForward, targetUp);
+		Quaternionf target = basis(targetForward, this.lean(targetUp, targetForward));
 		this.prevOrientation.set(this.orientation);
 		this.prevUp = this.up;
 		if (!this.primed) {
@@ -426,6 +429,40 @@ public final class Climber {
 		}
 		Vector3f drawnUp = this.orientation.transform(new Vector3f(0.0F, 1.0F, 0.0F));
 		this.up = new Vec3d(drawnUp.x, drawnUp.y, drawnUp.z);
+	}
+
+	/**
+	 * Up, leaning off the other surfaces near it (not its own or the one facing it): the nearer, the more, and more for
+	 * one ahead of or behind it than beside it. Walking into a wall it tips up toward it bit by bit, half way (45
+	 * degrees) when it steps onto it, and the rest of the way as it climbs off the floor, rather than all at once.
+	 */
+	private Vec3d lean(Vec3d up, Vec3d forward) {
+		Direction side = this.attach();
+		Box box = this.mob.getBoundingBox();
+		Vec3d leaned = up;
+		for (Direction other : Direction.values()) {
+			if (other.getAxis() == side.getAxis()) {
+				continue;
+			}
+			double near = this.nearness(box, other);
+			if (near > 0.0) {
+				Vec3d toward = Vec3d.of(other.getVector());
+				double weight = near * Math.max(0.1, Math.abs(forward.dotProduct(toward)));
+				leaned = leaned.subtract(toward.multiply(weight));
+			}
+		}
+		return leaned.lengthSquared() > 1.0E-4 ? leaned.normalize() : up;
+	}
+
+	/** 1 touching a surface on that side, falling to 0 at LEAN_REACH away. */
+	private double nearness(Box box, Direction side) {
+		Vec3d step = Vec3d.of(side.getVector());
+		for (int i = 1; i <= 4; i++) {
+			if (!this.mob.getWorld().isSpaceEmpty(this.mob, box.offset(step.multiply(LEAN_REACH * i / 4.0)))) {
+				return 1.0 - (i - 1) / 4.0;
+			}
+		}
+		return 0.0;
 	}
 
 	/** The rotation taking the model's frame (forward -z, up +y) to forward and up: as vanilla's 180 - yaw turn on the floor. */

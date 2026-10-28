@@ -7,6 +7,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.CakeBlock;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.FoodComponent;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.ItemStack;
@@ -22,6 +23,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.Difficulty;
+
+import java.util.List;
 
 /**
  * No hunger, and food that heals (Meals): the food bar stays full and health doesn't come back by itself; each
@@ -132,5 +135,72 @@ public class FoodTests implements FabricGameTest {
 			world.getServer().setDifficulty(difficulty, true);
 			ctx.complete();
 		});
+	}
+
+	/**
+	 * A glass bottle milks a cow (4 to a stack); the cow fills up again only slowly, so a bucket needs a full one. Drunk, a
+	 * bottle of milk takes a minute off each effect; it and gunpowder make a splash bottle of milk, and that and dragon's
+	 * breath a lingering one; a splash takes a minute off the effects of whatever it lands on.
+	 */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "milk", tickLimit = 100)
+	public void milkByTheBottle(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(1, 1, 1));
+		try {
+			net.minecraft.entity.passive.CowEntity cow = ctx.spawnEntity(EntityType.COW, new BlockPos(3, 1, 1));
+			cow.setAiDisabled(true);
+			player.setStackInHand(Hand.MAIN_HAND, new ItemStack(Items.GLASS_BOTTLE, 6));
+			for (int i = 0; i < 5; i++) {
+				cow.interactMob(player, Hand.MAIN_HAND);
+			}
+			ctx.assertTrue(player.getInventory().count(com.eternalreturn.items.Milk.BOTTLE) == 4 && player.getMainHandStack().getCount() == 2,
+					"four bottles from a full cow, then no more: " + player.getInventory().count(com.eternalreturn.items.Milk.BOTTLE));
+			ctx.assertTrue(new ItemStack(com.eternalreturn.items.Milk.BOTTLE).getMaxCount() == 4, "4 to a stack");
+			player.setStackInHand(Hand.MAIN_HAND, new ItemStack(Items.BUCKET));
+			cow.interactMob(player, Hand.MAIN_HAND);
+			ctx.assertTrue(player.getMainHandStack().isOf(Items.BUCKET), "no bucket from a milked-dry cow");
+			net.minecraft.entity.passive.CowEntity full = ctx.spawnEntity(EntityType.COW, new BlockPos(5, 1, 1));
+			full.setAiDisabled(true);
+			full.interactMob(player, Hand.MAIN_HAND);
+			ctx.assertTrue(player.getMainHandStack().isOf(Items.MILK_BUCKET), "a bucket from a full cow");
+			ctx.assertTrue(com.eternalreturn.items.Milk.CowMilk.available(full) == 0, "which empties it");
+
+			player.clearStatusEffects();
+			player.addStatusEffect(new StatusEffectInstance(StatusEffects.SPEED, 3000));
+			player.addStatusEffect(new StatusEffectInstance(StatusEffects.POISON, 1000));
+			com.eternalreturn.items.Milk.BOTTLE.finishUsing(new ItemStack(com.eternalreturn.items.Milk.BOTTLE), world, player);
+			StatusEffectInstance speed = player.getStatusEffect(StatusEffects.SPEED);
+			ctx.assertTrue(speed != null && speed.getDuration() == 1800 && !player.hasStatusEffect(StatusEffects.POISON),
+					"a minute off each effect: speed " + speed + ", poison gone");
+
+			var input = net.minecraft.recipe.input.CraftingRecipeInput.create(2, 1,
+					List.of(new ItemStack(com.eternalreturn.items.Milk.BOTTLE), new ItemStack(Items.GUNPOWDER)));
+			ItemStack splash = world.getRecipeManager().getFirstMatch(net.minecraft.recipe.RecipeType.CRAFTING, input, world)
+					.map(r -> r.value().craft(input, world.getRegistryManager())).orElse(ItemStack.EMPTY);
+			ctx.assertTrue(splash.isOf(Items.SPLASH_POTION) && splash.get(DataComponentTypes.POTION_CONTENTS).matches(com.eternalreturn.items.Milk.POTION),
+					"bottle of milk and gunpowder: a splash bottle of milk: " + splash);
+			var input2 = net.minecraft.recipe.input.CraftingRecipeInput.create(2, 1, List.of(splash, new ItemStack(Items.DRAGON_BREATH)));
+			ItemStack lingering = world.getRecipeManager().getFirstMatch(net.minecraft.recipe.RecipeType.CRAFTING, input2, world)
+					.map(r -> r.value().craft(input2, world.getRegistryManager())).orElse(ItemStack.EMPTY);
+			ctx.assertTrue(lingering.isOf(Items.LINGERING_POTION) && lingering.get(DataComponentTypes.POTION_CONTENTS).matches(com.eternalreturn.items.Milk.POTION),
+					"and dragon's breath: a lingering one: " + lingering);
+
+			net.minecraft.entity.mob.ZombieEntity husk = ctx.spawnEntity(EntityType.HUSK, new BlockPos(1, 1, 4));
+			husk.setAiDisabled(true);
+			husk.addStatusEffect(new StatusEffectInstance(StatusEffects.SLOWNESS, 2000));
+			net.minecraft.entity.projectile.thrown.PotionEntity thrown = new net.minecraft.entity.projectile.thrown.PotionEntity(world, player);
+			thrown.setItem(splash);
+			thrown.setPosition(husk.getX(), husk.getY() + 1.0, husk.getZ());
+			thrown.setVelocity(0.0, -0.5, 0.0);
+			world.spawnEntity(thrown);
+			ctx.runAtTick(20, () -> {
+				StatusEffectInstance slow = husk.getStatusEffect(StatusEffects.SLOWNESS);
+				ctx.assertTrue(slow != null && slow.getDuration() < 1000, "the splash took most of a minute off: " + slow);
+				husk.discard();
+				ctx.complete();
+			});
+		} finally {
+			FishingTests.disconnect(player);
+		}
 	}
 }
