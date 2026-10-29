@@ -2,6 +2,7 @@ package com.eternalreturn.items;
 
 import com.eternalreturn.EternalReturn;
 import com.eternalreturn.blocks.Slabs;
+import com.eternalreturn.blocks.SnowCover;
 import com.eternalreturn.logic.BlockLocks;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.block.Block;
@@ -63,7 +64,7 @@ public final class BlockTools {
 			Properties.VERTICAL_DIRECTION, Properties.AXIS, Properties.HORIZONTAL_AXIS, Properties.ROTATION, Properties.ORIENTATION);
 	/** What the hammer won't change: these would make or destroy something. */
 	private static final Set<String> MAKES_OR_DESTROYS = Set.of("age", "eggs", "hatch", "bites", "level", "honey_level", "charges", "candles",
-			"pickles", "layers", "flower_amount", "segment_amount", "waterlogged", "has_book", "has_record", "has_bottle_0", "has_bottle_1",
+			"pickles", "layers", "snow", "flower_amount", "segment_amount", "waterlogged", "has_book", "has_record", "has_bottle_0", "has_bottle_1",
 			"has_bottle_2", "dusted", "berries", "moisture", "stage", "distance", "eye", "vault_state", "ominous", "trial_spawner_state",
 			"slot_0_occupied", "slot_1_occupied", "slot_2_occupied", "slot_3_occupied", "slot_4_occupied", "slot_5_occupied");
 
@@ -143,7 +144,8 @@ public final class BlockTools {
 					return ActionResult.FAIL;
 				}
 				if (!world.isClient) {
-					world.setBlockState(pos, moved, Block.NOTIFY_ALL);
+					// A slab moved or turned shakes its snow off (SnowCover); snow lying on a pair's top stays there.
+					world.setBlockState(pos, SnowCover.settle(SnowCover.bare(moved), world, pos), Block.NOTIFY_ALL);
 					used(context, world, pos);
 				}
 				return ActionResult.success(world.isClient);
@@ -154,7 +156,7 @@ public final class BlockTools {
 			}
 			if (!world.isClient) {
 				BlockLocks.lock(world, pos);
-				world.setBlockState(pos, turned, Block.NOTIFY_ALL);
+				world.setBlockState(pos, SnowCover.settle(turned, world, pos), Block.NOTIFY_ALL);
 				used(context, world, pos);
 			}
 			return ActionResult.success(world.isClient);
@@ -211,7 +213,7 @@ public final class BlockTools {
 				return ActionResult.FAIL;
 			}
 			BlockLocks.lock(world, pos);
-			world.setBlockState(pos, next, Block.NOTIFY_LISTENERS | Block.FORCE_STATE);
+			world.setBlockState(pos, SnowCover.settle(next, world, pos), Block.NOTIFY_LISTENERS | Block.FORCE_STATE);
 			player.sendMessage(Text.translatable("item.minecraft.debug_stick.update", property.getName(), value(next, property)), true);
 			used(context, world, pos);
 			return ActionResult.SUCCESS;

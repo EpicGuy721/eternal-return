@@ -1,5 +1,6 @@
 package com.eternalreturn.survival;
 
+import com.eternalreturn.blocks.SnowCover;
 import com.eternalreturn.config.EternalReturnConfig;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -52,13 +53,16 @@ public final class SnowFall {
 	}
 
 	/**
-	 * Falling snow landing on a snow layer at pos: piles the layers there and above. Returns whether it did
-	 * (the falling block is then used up).
+	 * Falling snow landing on a snow layer at pos: piles the layers there and above; landing in or on a block that holds
+	 * snow (SnowCover), piles them on it. Returns whether it did (the falling block is then used up).
 	 */
 	public static boolean land(World world, BlockPos pos, BlockState falling, BlockState landingOn) {
 		int adding = layers(falling);
-		if (world.isClient || adding == 0 || !landingOn.isOf(Blocks.SNOW) || !EternalReturnConfig.get().survival.snowFalls) {
+		if (world.isClient || adding == 0 || !EternalReturnConfig.get().survival.snowFalls) {
 			return false;
+		}
+		if (!landingOn.isOf(Blocks.SNOW)) {
+			return pileOnto(world, pos, adding, landingOn);
 		}
 		int total = landingOn.get(SnowBlock.LAYERS) + adding;
 		world.setBlockState(pos, Blocks.SNOW.getDefaultState().with(SnowBlock.LAYERS, Math.min(SnowBlock.MAX_LAYERS, total)), Block.NOTIFY_ALL);
@@ -68,6 +72,26 @@ public final class SnowFall {
 			world.setBlockState(above, Blocks.SNOW.getDefaultState().with(SnowBlock.LAYERS, rest), Block.NOTIFY_ALL);
 		}
 		world.playSound(null, pos, SoundEvents.BLOCK_SNOW_PLACE, SoundCategory.BLOCKS, 1.0F, 0.8F);
+		return true;
+	}
+
+	/** Falling snow landing in a block that holds snow, or on one from the space above it: as much as it holds goes on it, the rest lies on top. */
+	private static boolean pileOnto(World world, BlockPos pos, int adding, BlockState landingOn) {
+		BlockPos host = SnowCover.property(landingOn) != null ? pos : pos.down();
+		BlockState state = world.getBlockState(host);
+		int held = SnowCover.held(state);
+		int room = SnowCover.capacity(state) - held;
+		if (room <= 0 || !host.equals(pos) && !landingOn.isAir() || SnowCover.capOnly(state) && !world.getBlockState(host.up()).isAir()) {
+			return false;
+		}
+		int taken = Math.min(room, adding);
+		world.setBlockState(host, SnowCover.with(state, held + taken), Block.NOTIFY_ALL);
+		BlockPos above = host.up();
+		int rest = adding - taken;
+		if (rest > 0 && world.getBlockState(above).isReplaceable() && Blocks.SNOW.getDefaultState().canPlaceAt(world, above)) {
+			world.setBlockState(above, Blocks.SNOW.getDefaultState().with(SnowBlock.LAYERS, Math.min(SnowBlock.MAX_LAYERS, rest)), Block.NOTIFY_ALL);
+		}
+		world.playSound(null, host, SoundEvents.BLOCK_SNOW_PLACE, SoundCategory.BLOCKS, 1.0F, 0.8F);
 		return true;
 	}
 

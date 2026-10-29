@@ -77,9 +77,9 @@ public final class Slabs {
 		return slab.get(SlabBlock.TYPE) == SlabType.DOUBLE ? VoxelShapes.fullCube() : SHAPES[side(slab).getId()];
 	}
 
-	/** A slab as a mixed slab keeps it: flat, bottom and dry (any other property, a mod's own, kept). */
+	/** A slab as a mixed slab keeps it: flat, bottom, dry and without snow (any other property, a mod's own, kept). */
 	public static BlockState normalized(BlockState slab) {
-		BlockState flat = slab.with(SlabBlock.TYPE, SlabType.BOTTOM).with(SlabBlock.WATERLOGGED, false);
+		BlockState flat = SnowCover.bare(slab).with(SlabBlock.TYPE, SlabType.BOTTOM).with(SlabBlock.WATERLOGGED, false);
 		return flat.contains(AXIS) ? flat.with(AXIS, Direction.Axis.Y) : flat;
 	}
 

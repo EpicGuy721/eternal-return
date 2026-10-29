@@ -31,6 +31,8 @@ public class EternalReturnClient implements ClientModInitializer {
 		OreVariantRendering.register();
 		FrameModels.register();
 		SlabModels.register();
+		// After SlabModels: the snow is drawn on a vertical slab as turned.
+		SnowModels.register();
 		GaleStepClient.register();
 		SpearClient.register();
 		SwimKeyClient.register();

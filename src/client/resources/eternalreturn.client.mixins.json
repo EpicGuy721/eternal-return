@@ -19,6 +19,7 @@
 		"MinecartEntityRendererMixin",
 		"PistonBlockEntityRendererMixin",
 		"SignRendererMixin",
+		"SnowMiningMixin",
 		"SpearArmPoseMixin",
 		"SpearAttackMixin",
 		"SpearFirstPersonMixin",

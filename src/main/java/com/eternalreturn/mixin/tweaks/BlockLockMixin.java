@@ -1,5 +1,6 @@
 package com.eternalreturn.mixin.tweaks;
 
+import com.eternalreturn.blocks.SnowCover;
 import com.eternalreturn.logic.BlockLocks;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
@@ -17,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** A locked block (BlockLocks) ignores its neighbours' changes and its own ticks. */
+/** A locked block (BlockLocks) ignores its neighbours' changes (but for snow on it) and its own ticks. */
 @Mixin(AbstractBlock.AbstractBlockState.class)
 public abstract class BlockLockMixin {
 	@Shadow
@@ -26,8 +27,10 @@ public abstract class BlockLockMixin {
 	@Inject(method = "getStateForNeighborUpdate", at = @At("RETURN"), cancellable = true)
 	private void eternalreturn$keepShape(Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos,
 			CallbackInfoReturnable<BlockState> cir) {
-		if (cir.getReturnValue() != this.asBlockState() && BlockLocks.isLocked(world, pos)) {
-			cir.setReturnValue(this.asBlockState());
+		// Snow on it (SnowCover) still comes and goes.
+		BlockState kept = cir.getReturnValue().isOf(this.asBlockState().getBlock()) ? SnowCover.withSnowOf(this.asBlockState(), cir.getReturnValue()) : this.asBlockState();
+		if (cir.getReturnValue() != kept && BlockLocks.isLocked(world, pos)) {
+			cir.setReturnValue(kept);
 			// A player's game may have guessed the change itself (breaking the block beside it): set it right.
 			if (world instanceof ServerWorld server) {
 				server.getChunkManager().markForUpdate(pos);

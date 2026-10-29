@@ -2,6 +2,7 @@ package com.eternalreturn.client;
 
 import com.eternalreturn.blocks.MixedSlabs;
 import com.eternalreturn.blocks.Slabs;
+import com.eternalreturn.blocks.SnowCover;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
 import net.fabricmc.fabric.api.renderer.v1.material.BlendMode;
@@ -134,7 +135,7 @@ public final class SlabModels {
 		VerticalSlabModel(BakedModel wrapped, BlockState state) {
 			this.wrapped = wrapped;
 			boolean pair = state.get(SlabBlock.TYPE) == SlabType.DOUBLE;
-			this.flat = (pair ? state : state.with(SlabBlock.TYPE, SlabType.BOTTOM)).with(Slabs.AXIS, Direction.Axis.Y);
+			this.flat = SnowCover.bare(pair ? state : state.with(SlabBlock.TYPE, SlabType.BOTTOM)).with(Slabs.AXIS, Direction.Axis.Y);
 			this.side = pair ? Direction.from(state.get(Slabs.AXIS), Direction.AxisDirection.NEGATIVE) : Slabs.side(state);
 		}
 

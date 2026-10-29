@@ -189,6 +189,11 @@ public class ControlFingerprintTests implements FabricGameTest {
 		if (state.getBlock() instanceof net.minecraft.block.VineBlock && !state.get(com.eternalreturn.survival.Farming.CUT)) {
 			return name.replace("cut=false,", "");
 		}
+		// Slabs, stairs, walls, fences and gates have a "snow" property now (SnowCover): the snow on them is the one
+		// change these worlds' generation has (snowy biomes lay it where vanilla could lay none), so it's left out.
+		if (com.eternalreturn.blocks.SnowCover.property(state) != null) {
+			name = name.replaceAll("snow=\\d,", "").replaceAll(",snow=\\d]", "]");
+		}
 		// Slabs have a "slab_axis" property now (Slabs); a slab lying flat is vanilla's.
 		if (state.getBlock() instanceof net.minecraft.block.SlabBlock && state.get(com.eternalreturn.blocks.Slabs.AXIS) == net.minecraft.util.math.Direction.Axis.Y) {
 			return name.replace("slab_axis=y,", "");

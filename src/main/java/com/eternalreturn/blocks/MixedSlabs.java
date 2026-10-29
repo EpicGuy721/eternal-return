@@ -94,8 +94,14 @@ public final class MixedSlabs {
 		return half == null ? mixed : half;
 	}
 
-	/** What an entity at pos stands on: for a mixed slab, its top half, or the half under its middle when on edge. */
+	/**
+	 * What an entity at pos stands on: for a mixed slab, its top half, or the half under its middle when on edge; for a
+	 * block with snow on it (SnowCover), the snow.
+	 */
 	public static BlockState underfoot(Entity entity, BlockPos pos, BlockState state) {
+		if (SnowCover.held(state) > 0) {
+			return SnowCover.asSnowLayer(state);
+		}
 		if (!state.isOf(MIXED_SLAB)) {
 			return state;
 		}
