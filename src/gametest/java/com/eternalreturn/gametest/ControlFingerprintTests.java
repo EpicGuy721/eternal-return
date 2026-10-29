@@ -78,7 +78,8 @@ public class ControlFingerprintTests implements FabricGameTest {
 							for (int z = 0; z < 16; z++) {
 								net.minecraft.block.Block block = chunk.getBlockState(pos.set(chunkX * 16 + x, y, chunkZ * 16 + z)).getBlock();
 								net.minecraft.util.Identifier id = net.minecraft.registry.Registries.BLOCK.getId(block);
-								if (id.getNamespace().equals(EternalReturn.MOD_ID) && (!eternalReturn || biomeStoneBlock(block))) {
+								// (Snow covers are snow lying on fences and the like: SnowCover.)
+								if (id.getNamespace().equals(EternalReturn.MOD_ID) && (!eternalReturn || biomeStoneBlock(block)) && block != com.eternalreturn.blocks.Snowlogging.SNOW_COVER) {
 									ours.merge(id.getPath(), 1, Integer::sum);
 								}
 							}
@@ -189,10 +190,13 @@ public class ControlFingerprintTests implements FabricGameTest {
 		if (state.getBlock() instanceof net.minecraft.block.VineBlock && !state.get(com.eternalreturn.survival.Farming.CUT)) {
 			return name.replace("cut=false,", "");
 		}
-		// Slabs, stairs, walls, fences and gates have a "snow" property now (SnowCover): the snow on them is the one
-		// change these worlds' generation has (snowy biomes lay it where vanilla could lay none), so it's left out.
-		if (com.eternalreturn.blocks.SnowCover.property(state) != null) {
-			name = name.replaceAll("snow=\\d,", "").replaceAll(",snow=\\d]", "]");
+		// Snow on slabs, stairs, walls, fences and gates (SnowCover) is the one change these worlds' generation has
+		// (snowy biomes lay it where vanilla could lay none), so it's left out: their "snowy" property, and snow covers.
+		if (com.eternalreturn.blocks.SnowCover.isHost(state)) {
+			name = name.replaceAll("snowy=\\d,", "").replaceAll(",snowy=\\d]", "]");
+		}
+		if (com.eternalreturn.blocks.SnowCover.isCover(state)) {
+			return net.minecraft.block.Blocks.AIR.getDefaultState().toString();
 		}
 		// Slabs have a "slab_axis" property now (Slabs); a slab lying flat is vanilla's.
 		if (state.getBlock() instanceof net.minecraft.block.SlabBlock && state.get(com.eternalreturn.blocks.Slabs.AXIS) == net.minecraft.util.math.Direction.Axis.Y) {

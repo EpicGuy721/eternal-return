@@ -1,6 +1,7 @@
 package com.eternalreturn.mixin.snow;
 
 import com.eternalreturn.blocks.SnowCover;
+import com.eternalreturn.blocks.Snowlogging;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.block.Block;
@@ -20,8 +21,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 
 /**
- * A player digging a block with snow on it (SnowCover) with a tool that digs snow digs only the snow: it breaks as snow
- * (its particles and sound), the block stays, and the tool wear, the drops and the stat are the snow's.
+ * A player breaking a block with snow logged in it (SnowCover): aiming at the snow breaks only the snow, as a snow
+ * layer (its particles and sound, its tool wear, drops and stat: snowballs with a shovel), and leaves the block; aiming
+ * at the block breaks it and leaves the snow, as a snow layer of its own (Snowlogging.leftBehind).
  */
 @Mixin(ServerPlayerInteractionManager.class)
 public abstract class SnowBreakMixin {
@@ -31,16 +33,23 @@ public abstract class SnowBreakMixin {
 
 	@WrapOperation(method = "tryBreakBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;onBreak(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/entity/player/PlayerEntity;)Lnet/minecraft/block/BlockState;"))
 	private BlockState eternalreturn$breakTheSnow(Block block, World world, BlockPos pos, BlockState state, PlayerEntity player, Operation<BlockState> original) {
-		return original.call(block, world, pos, SnowCover.digsSnow(player, state) ? SnowCover.asSnowLayer(state) : state, player);
+		boolean snow = SnowCover.aimsSnow(player, world, pos, state);
+		return original.call(block, world, pos, snow ? SnowCover.asSnowLayer(SnowCover.layers(world, pos, state)) : state, player);
 	}
 
 	@WrapOperation(method = "tryBreakBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;removeBlock(Lnet/minecraft/util/math/BlockPos;Z)Z"))
-	private boolean eternalreturn$leaveTheBlock(ServerWorld world, BlockPos pos, boolean move, Operation<Boolean> original) {
+	private boolean eternalreturn$snowOrBlock(ServerWorld world, BlockPos pos, boolean move, Operation<Boolean> original) {
 		BlockState state = world.getBlockState(pos);
-		if (SnowCover.digsSnow(this.player, state)) {
-			return world.setBlockState(pos, SnowCover.bare(state), Block.NOTIFY_ALL);
+		int layers = SnowCover.layers(world, pos, state);
+		if (layers > 0 && SnowCover.aimsSnow(this.player, world, pos, state)) {
+			Snowlogging.snowlog(world, pos, 0, Block.NOTIFY_ALL);
+			return true;
 		}
-		return original.call(world, pos, move);
+		boolean removed = original.call(world, pos, move);
+		if (removed) {
+			Snowlogging.leftBehind(world, pos, layers);
+		}
+		return removed;
 	}
 
 	@WrapOperation(method = "tryBreakBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;afterBreak(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Lnet/minecraft/block/entity/BlockEntity;Lnet/minecraft/item/ItemStack;)V"))

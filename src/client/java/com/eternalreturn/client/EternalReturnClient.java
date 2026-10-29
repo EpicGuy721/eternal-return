@@ -33,6 +33,7 @@ public class EternalReturnClient implements ClientModInitializer {
 		SlabModels.register();
 		// After SlabModels: the snow is drawn on a vertical slab as turned.
 		SnowModels.register();
+		ClientSnow.register();
 		GaleStepClient.register();
 		SpearClient.register();
 		SwimKeyClient.register();

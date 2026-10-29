@@ -3,6 +3,7 @@ package com.eternalreturn.gametest;
 import com.eternalreturn.blocks.MixedSlabs;
 import com.eternalreturn.blocks.Slabs;
 import com.eternalreturn.blocks.SnowCover;
+import com.eternalreturn.blocks.Snowlogging;
 import com.eternalreturn.gametest.mixin.StepSoundInvoker;
 import com.eternalreturn.items.BlockTools;
 import com.eternalreturn.weather.Storm;
@@ -20,6 +21,7 @@ import net.minecraft.block.WallBlock;
 import net.minecraft.block.Waterloggable;
 import net.minecraft.block.enums.BlockHalf;
 import net.minecraft.block.enums.SlabType;
+import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.decoration.ArmorStandEntity;
@@ -29,7 +31,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.Items;
 import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -58,10 +59,10 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Snow on slabs, stairs, walls, fences and gates (SnowCover): every such block holds it and hides no more of its
- * neighbours for it; how much each holds and how it collides; putting it on by hand; caps knocked off by what's put
- * above; gates knocking theirs off as they open; digging it off with a shovel and what everything drops; falling snow
- * piling on; snowfall, world generation and melting.
+ * Snow on slabs, stairs, walls, fences and gates (SnowCover, Snowlogging, SnowCoverBlock): every such block holds it
+ * and hides no more of its neighbours for it; how much each takes and how it collides; it's its own target (aimed at,
+ * mined, dropped); putting it on by hand and placing blocks into snow; snow covers turning to snow layers and back; the
+ * wrench and other changes keeping it; snowfall, world generation and melting; falling snow; gates.
  */
 public class SnowTests implements FabricGameTest {
 	private static final String BATCH = "snow";
@@ -74,10 +75,6 @@ public class SnowTests implements FabricGameTest {
 	/** 16 by 40 blocks of stone floor (at y 1 here: stand on y 2), 14 high. */
 	private static final String ARENA = "eternalreturn_test:arena";
 
-	private static BlockState snowed(BlockState state, int snow) {
-		return SnowCover.with(state, snow);
-	}
-
 	private static BlockState stairs() {
 		return Blocks.STONE_BRICK_STAIRS.getDefaultState().with(StairsBlock.FACING, Direction.NORTH);
 	}
@@ -85,6 +82,26 @@ public class SnowTests implements FabricGameTest {
 	/** A slab standing on edge, filling a side. */
 	private static BlockState vertical(Direction side) {
 		return Slabs.onSide(Blocks.STONE_SLAB.getDefaultState(), side);
+	}
+
+	private static int logged(ServerWorld world, BlockPos pos) {
+		return SnowCover.layers(world, pos, world.getBlockState(pos));
+	}
+
+	/** A block put in place with snow logged in it. */
+	private static void snowy(ServerWorld world, BlockPos pos, BlockState state, int layers) {
+		world.setBlockState(pos, state);
+		Snowlogging.snowlog(world, pos, layers, Block.NOTIFY_ALL);
+	}
+
+	private static int cover(ServerWorld world, BlockPos pos) {
+		BlockState state = world.getBlockState(pos);
+		return SnowCover.isCover(state) ? state.get(SnowBlock.LAYERS) : 0;
+	}
+
+	private static int snowLayer(ServerWorld world, BlockPos pos) {
+		BlockState state = world.getBlockState(pos);
+		return state.isOf(Blocks.SNOW) ? state.get(SnowBlock.LAYERS) : 0;
 	}
 
 	private static double top(VoxelShape shape) {
@@ -100,11 +117,11 @@ public class SnowTests implements FabricGameTest {
 				.mapToInt(entity -> entity.getStack().getCount()).sum();
 	}
 
-	/** A player's right-click on a block's top with what's in its hand, using the block first as a player's click does. */
-	private static ActionResult clickTop(ServerPlayerEntity player, ServerWorld world, ItemStack stack, BlockPos pos) {
+	/** A player's right-click on a block's top at a height (0 to 1) with what's in its hand, using the block first as a player's click does. */
+	private static ActionResult clickTop(ServerPlayerEntity player, ServerWorld world, ItemStack stack, BlockPos pos, double height) {
 		player.setStackInHand(Hand.MAIN_HAND, stack);
 		return player.interactionManager.interactBlock(player, world, stack, Hand.MAIN_HAND,
-				new BlockHitResult(Vec3d.ofCenter(pos).add(0.0, 0.49, 0.0), Direction.UP, pos, false));
+				new BlockHitResult(Vec3d.of(pos).add(0.5, height, 0.5), Direction.UP, pos, false));
 	}
 
 	/** An item used on a block's side without using the block (as when sneaking). */
@@ -112,6 +129,12 @@ public class SnowTests implements FabricGameTest {
 		player.setStackInHand(Hand.MAIN_HAND, stack);
 		Vec3d hit = Vec3d.ofCenter(pos).add(side.getOffsetX() * 0.5, side.getOffsetY() * 0.5, side.getOffsetZ() * 0.5);
 		return stack.useOnBlock(new ItemUsageContext(player, Hand.MAIN_HAND, new BlockHitResult(hit, side, pos, false)));
+	}
+
+	/** A player standing a few blocks south of a block, looking at a point of it. */
+	private static void lookAt(ServerPlayerEntity player, ServerWorld world, BlockPos pos, Vec3d point, double above) {
+		player.teleport(world, pos.getX() + 0.5, pos.getY() + above, pos.getZ() + 2.5, 180.0F, 0.0F);
+		player.lookAt(EntityAnchorArgumentType.EntityAnchor.EYES, Vec3d.of(pos).add(point));
 	}
 
 	/** A biome over the test's own area, from the bottom of the world up. */
@@ -135,29 +158,28 @@ public class SnowTests implements FabricGameTest {
 	}
 
 	/**
-	 * Every stair, slab, wall, fence and gate in the game (this mod's and others' too) holds snow, none by default; and
-	 * with snow on it, it hides exactly what it hides bare, lets the same light through and stands the same against
-	 * neighbours (what leaves holes in other snow mods' blocks: neighbours leaving out faces the snow doesn't cover).
+	 * Every stair, slab, wall, fence and gate in the game (this mod's and others' too) and the mixed slab can be snowy,
+	 * none by default; snowy, it hides exactly what it hides bare, lets the same light through and stands the same
+	 * against neighbours (what leaves holes in other snow mods' blocks: neighbours leaving out faces the snow doesn't
+	 * cover). The hammer leaves the snowy mark alone.
 	 */
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = BATCH)
 	public void everyShapeHoldsSnowAndHidesNoMore(TestContext ctx) {
 		int blocks = 0;
-		int states = 0;
 		for (Block block : Registries.BLOCK) {
 			BlockState plain = block.getDefaultState();
 			boolean kind = block instanceof SlabBlock || block instanceof StairsBlock || block instanceof WallBlock || block instanceof FenceBlock
 					|| block instanceof FenceGateBlock || block == MixedSlabs.MIXED_SLAB;
 			if (!kind) {
-				ctx.assertTrue(SnowCover.property(plain) == null, Registries.BLOCK.getId(block) + " doesn't hold snow");
+				ctx.assertTrue(!SnowCover.isHost(plain), Registries.BLOCK.getId(block) + " doesn't hold snow");
 				continue;
 			}
 			blocks++;
-			ctx.assertTrue(SnowCover.property(plain) != null && SnowCover.raw(plain) == 0, Registries.BLOCK.getId(block) + " holds snow, none by default");
+			ctx.assertTrue(SnowCover.isHost(plain) && !SnowCover.marked(plain), Registries.BLOCK.getId(block) + " holds snow, none by default");
 			for (BlockState state : block.getStateManager().getStates()) {
-				if (SnowCover.raw(state) == 0) {
+				if (!SnowCover.marked(state)) {
 					continue;
 				}
-				states++;
 				BlockState bare = SnowCover.bare(state);
 				for (Direction side : Direction.values()) {
 					ctx.assertTrue(sameShape(state.getCullingFace(EmptyBlockView.INSTANCE, BlockPos.ORIGIN, side),
@@ -172,58 +194,52 @@ public class SnowTests implements FabricGameTest {
 		}
 		// Vanilla's 56 stairs, 60 slabs, 25 walls, 12 fences and 11 gates at the least.
 		ctx.assertTrue(blocks >= 164, "every such block holds snow: " + blocks);
-		ctx.assertTrue(BlockTools.hammerable(snowed(Blocks.STONE_SLAB.getDefaultState(), 1), SnowCover.LAYERS) == false, "the hammer leaves snow alone");
-		ctx.assertTrue(states > 0, "snowy states: " + states);
+		ctx.assertTrue(!BlockTools.hammerable(Blocks.STONE_SLAB.getDefaultState(), SnowCover.SNOWY), "the hammer leaves the snowy mark alone");
 		ctx.complete();
 	}
 
 	/**
-	 * How much snow each shape holds: 4 layers in a bottom slab's or upright stairs' open space, one on a vertical slab's
-	 * top edge and one cap on a wall, fence or gate; none in a top, double or mixed slab or upside-down stairs (snow layers
-	 * lie on those), a waterlogged block or an open gate. Snow in the open space collides as snow layers (a layer lower
-	 * than drawn); caps never do.
+	 * How much snow each takes in its space: 4 layers on a bottom slab and upright stairs' lower step, 8 on the ground
+	 * around a fence, wall or gate and beside a vertical slab; none in a top, double or mixed slab or upside-down stairs
+	 * (snow layers lie on those) or in water. Its snow collides as snow layers (a layer lower than drawn), on the topmost
+	 * thing in each column: none over a fence post.
 	 */
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = BATCH)
-	public void eachShapeHoldsItsOwnAndCollidesAsSnow(TestContext ctx) {
+	public void eachShapeTakesItsOwnAndCollidesAsSnow(TestContext ctx) {
 		BlockState slab = Blocks.STONE_SLAB.getDefaultState();
-		ctx.assertTrue(SnowCover.capacity(slab) == 4 && SnowCover.capacity(stairs()) == 4, "4 layers in a bottom slab and upright stairs");
-		ctx.assertTrue(SnowCover.capacity(vertical(Direction.NORTH)) == 1 && SnowCover.capOnly(vertical(Direction.NORTH)), "one layer on a vertical slab's edge");
-		for (BlockState cap : List.of(Blocks.OAK_FENCE.getDefaultState(), Blocks.COBBLESTONE_WALL.getDefaultState(), Blocks.OAK_FENCE_GATE.getDefaultState())) {
-			ctx.assertTrue(SnowCover.capacity(cap) == 1 && SnowCover.capOnly(cap), "one cap on " + cap);
+		ctx.assertTrue(SnowCover.capacity(slab) == 4 && SnowCover.capacity(stairs()) == 4, "4 layers on a bottom slab and upright stairs");
+		for (BlockState ground : List.of(vertical(Direction.NORTH), Blocks.OAK_FENCE.getDefaultState(), Blocks.COBBLESTONE_WALL.getDefaultState(),
+				Blocks.OAK_FENCE_GATE.getDefaultState())) {
+			ctx.assertTrue(SnowCover.capacity(ground) == 8, "8 on the ground in " + ground);
 		}
 		for (BlockState whole : List.of(slab.with(SlabBlock.TYPE, SlabType.TOP), slab.with(SlabBlock.TYPE, SlabType.DOUBLE),
 				stairs().with(StairsBlock.HALF, BlockHalf.TOP), MixedSlabs.MIXED_SLAB.getDefaultState())) {
-			ctx.assertTrue(SnowCover.capacity(whole) == 0 && SnowCover.wholeTop(whole), "snow lies on top of " + whole);
+			ctx.assertTrue(SnowCover.capacity(whole) == 0 && SnowCover.whole(whole, 0), "snow layers lie on " + whole);
 		}
 		ctx.assertTrue(SnowCover.capacity(slab.with(SlabBlock.WATERLOGGED, true)) == 0, "none in water");
-		ctx.assertTrue(SnowCover.capacity(Blocks.OAK_FENCE_GATE.getDefaultState().with(FenceGateBlock.OPEN, true)) == 0, "none on an open gate");
-
+		ctx.assertTrue(SnowCover.whole(slab, 4) && !SnowCover.whole(slab, 3) && SnowCover.whole(stairs(), 4), "a slab and stairs are whole with 4 layers");
+		ctx.assertTrue(SnowCover.reachesTop(stairs()) && SnowCover.reachesTop(vertical(Direction.EAST)) && SnowCover.reachesTop(Blocks.OAK_FENCE.getDefaultState())
+				&& !SnowCover.reachesTop(slab), "stairs' upper step, a vertical slab and a fence post reach the top; a bottom slab doesn't");
 		for (int layers = 1; layers <= 4; layers++) {
-			BlockState snowy = snowed(slab, layers);
-			double collision = top(snowy.getCollisionShape(EmptyBlockView.INSTANCE, BlockPos.ORIGIN));
-			double outline = top(snowy.getOutlineShape(EmptyBlockView.INSTANCE, BlockPos.ORIGIN));
-			ctx.assertTrue(Math.abs(collision - (8 + 2 * (layers - 1)) / 16.0) < 1.0E-6, layers + " layers on a slab collide at " + collision);
+			double collision = top(SnowCover.snowCollision(slab, layers));
+			double outline = top(SnowCover.snowOutline(slab, layers));
+			ctx.assertTrue(layers == 1 ? collision == 0.0 : Math.abs(collision - (8 + 2 * (layers - 1)) / 16.0) < 1.0E-6, layers + " layers on a slab collide at " + collision);
 			ctx.assertTrue(Math.abs(outline - (8 + 2 * layers) / 16.0) < 1.0E-6, layers + " layers on a slab are aimed at up to " + outline);
-			int[] steps = SnowCover.topHeights(snowed(stairs(), layers).getCollisionShape(EmptyBlockView.INSTANCE, BlockPos.ORIGIN));
-			// Facing north, the upper step is at the north.
-			ctx.assertTrue(steps[8 + 16 * 15] == 8 + 2 * (layers - 1) && steps[8] == 16, layers + " layers on stairs: the lower step at " + steps[8 + 16 * 15] + ", the upper at " + steps[8]);
+			int[] steps = SnowCover.topHeights(SnowCover.snowOutline(stairs(), layers));
+			// Facing north, the upper step is at the north: no snow there.
+			ctx.assertTrue(steps[8 + 16 * 15] == 8 + 2 * layers && steps[8] == -1, layers + " layers on stairs: on the lower step up to " + steps[8 + 16 * 15]);
 		}
-		ctx.assertTrue(SnowCover.full(snowed(slab, 4)) && !SnowCover.full(snowed(slab, 3)), "a slab is full with 4 layers");
-		for (BlockState cap : List.of(Blocks.OAK_FENCE.getDefaultState(), Blocks.COBBLESTONE_WALL.getDefaultState(), Blocks.OAK_FENCE_GATE.getDefaultState(),
-				vertical(Direction.EAST))) {
-			ctx.assertTrue(sameShape(snowed(cap, 1).getCollisionShape(EmptyBlockView.INSTANCE, BlockPos.ORIGIN), cap.getCollisionShape(EmptyBlockView.INSTANCE, BlockPos.ORIGIN))
-					&& sameShape(snowed(cap, 1).getOutlineShape(EmptyBlockView.INSTANCE, BlockPos.ORIGIN), cap.getOutlineShape(EmptyBlockView.INSTANCE, BlockPos.ORIGIN)),
-					"a cap on " + cap + " doesn't change its shape");
-		}
+		int[] fence = SnowCover.topHeights(SnowCover.snowOutline(Blocks.OAK_FENCE.getDefaultState(), 2));
+		ctx.assertTrue(fence[0] == 4 && fence[8 + 16 * 8] == -1, "2 layers around a fence post, none on it: " + fence[0] + ", " + fence[8 + 16 * 8]);
 		ctx.complete();
 	}
 
-	/** Something standing on snow in a slab stands on the snow: 3 layers, a layer lower as snow layers are. */
+	/** Something standing on snow logged in a slab stands on the snow: 3 layers, a layer lower as snow layers are. */
 	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 80)
 	public void standingOnSnowInASlab(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
 		BlockPos pos = ctx.getAbsolutePos(new BlockPos(4, 2, 4));
-		world.setBlockState(pos, snowed(Blocks.STONE_SLAB.getDefaultState(), 3));
+		snowy(world, pos, Blocks.STONE_SLAB.getDefaultState(), 3);
 		ArmorStandEntity stand = EntityType.ARMOR_STAND.create(world);
 		stand.refreshPositionAndAngles(pos.getX() + 0.5, pos.getY() + 1.5, pos.getZ() + 0.5, 0.0F, 0.0F);
 		world.spawnEntity(stand);
@@ -235,9 +251,65 @@ public class SnowTests implements FabricGameTest {
 	}
 
 	/**
-	 * Snow put on by hand, clicking a block's top: a layer a click into a slab or stairs up to 4, after which a snow layer
-	 * lies on it; one on a vertical slab, a fence, a wall and a gate (which stays shut); snow layers on a top slab, which
-	 * then says snow lies on it. Not on the side (snow goes beside, as vanilla's), not in water, not under a block.
+	 * The snow is its own target: aimed at, a player mines it at snow's speed and it breaks alone, as a snow layer
+	 * (snowballs with a shovel, nothing by hand), leaving the block; aiming at the block breaks the block, and the snow
+	 * stays, as a snow layer of its own: on the ground around a fence, and fallen from a slab.
+	 */
+	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 40)
+	public void theSnowIsItsOwnTarget(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(8, 2, 2));
+		BlockPos picked = ctx.getAbsolutePos(new BlockPos(10, 2, 8));
+		try {
+			BlockPos slab = ctx.getAbsolutePos(new BlockPos(2, 2, 8));
+			snowy(world, slab, Blocks.STONE_SLAB.getDefaultState(), 3);
+			lookAt(player, world, slab, new Vec3d(0.5, 0.8, 0.5), 1.0);
+			ctx.assertTrue(SnowCover.aimsSnow(player, world, slab, world.getBlockState(slab)), "looking down on it, the snow is aimed at");
+			ItemStack shovel = new ItemStack(Items.IRON_SHOVEL);
+			player.setStackInHand(Hand.MAIN_HAND, shovel);
+			BlockState snowyState = world.getBlockState(slab);
+			float speed = snowyState.calcBlockBreakingDelta(player, world, slab);
+			ctx.assertTrue(speed == SnowCover.asSnowLayer(3).calcBlockBreakingDelta(player, world, slab), "a shovel digs it at snow's speed: " + speed);
+			ctx.assertTrue(player.interactionManager.tryBreakBlock(slab), "the snow is dug off");
+			ctx.assertTrue(world.getBlockState(slab).isOf(Blocks.STONE_SLAB) && logged(world, slab) == 0, "the slab stays: " + world.getBlockState(slab));
+			ctx.assertTrue(dropped(world, slab, Items.SNOWBALL) == 3 && dropped(world, slab, Items.STONE_SLAB) == 0, "3 snowballs, no slab");
+			ctx.assertTrue(Heard.events(slab, WorldEvents.BLOCK_BROKEN).contains(Block.getRawIdFromState(SnowCover.asSnowLayer(3))), "it breaks as snow");
+
+			BlockPos byHand = ctx.getAbsolutePos(new BlockPos(6, 2, 8));
+			snowy(world, byHand, Blocks.OAK_SLAB.getDefaultState(), 2);
+			lookAt(player, world, byHand, new Vec3d(0.5, 0.7, 0.5), 1.0);
+			player.setStackInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
+			player.interactionManager.tryBreakBlock(byHand);
+			ctx.assertTrue(world.getBlockState(byHand).isOf(Blocks.OAK_SLAB) && logged(world, byHand) == 0 && dropped(world, byHand, Items.SNOWBALL) == 0,
+					"by hand the snow goes and drops nothing, as a snow layer");
+
+			snowy(world, picked, Blocks.STONE_SLAB.getDefaultState(), 3);
+			lookAt(player, world, picked, new Vec3d(0.5, 0.25, 1.0), 0.0);
+			ctx.assertTrue(!SnowCover.aimsSnow(player, world, picked, world.getBlockState(picked)), "looking at its side, the slab is aimed at");
+			player.setStackInHand(Hand.MAIN_HAND, new ItemStack(Items.IRON_PICKAXE));
+			player.interactionManager.tryBreakBlock(picked);
+			ctx.assertTrue(dropped(world, picked, Items.STONE_SLAB) == 1 && dropped(world, picked, Items.SNOWBALL) == 0, "the slab breaks alone");
+
+			BlockPos fence = ctx.getAbsolutePos(new BlockPos(14, 2, 8));
+			snowy(world, fence, Blocks.OAK_FENCE.getDefaultState(), 2);
+			lookAt(player, world, fence, new Vec3d(0.5, 0.8, 0.5), 1.0);
+			player.setStackInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
+			player.interactionManager.tryBreakBlock(fence);
+			ctx.assertTrue(dropped(world, fence, Items.OAK_FENCE) == 1 && snowLayer(world, fence) == 2, "a fence pulled out of the snow leaves it: " + world.getBlockState(fence));
+		} finally {
+			FishingTests.disconnect(player);
+		}
+		ctx.runAtTick(30, () -> {
+			ctx.assertTrue(snowLayer(world, picked) == 3, "the slab's snow fell and lies where it was: " + world.getBlockState(picked));
+			ctx.killAllEntities();
+			ctx.complete();
+		});
+	}
+
+	/**
+	 * Snow put on by hand: clicking inside a block's space (a slab's top, the ground beside a fence), a layer logged in
+	 * it, up to what it takes, then snow layers on a whole top; clicking the top of a post, a vertical slab's edge or the
+	 * upper step, a snow cover over just those parts, thickening; a gate stays shut. Not in water.
 	 */
 	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 40)
 	public void puttingSnowOnByHand(TestContext ctx) {
@@ -248,63 +320,49 @@ public class SnowTests implements FabricGameTest {
 			BlockPos slab = ctx.getAbsolutePos(new BlockPos(2, 2, 6));
 			world.setBlockState(slab, Blocks.STONE_SLAB.getDefaultState());
 			for (int layers = 1; layers <= 4; layers++) {
-				ctx.assertTrue(clickTop(player, world, snow, slab).isAccepted(), "a click puts on layer " + layers);
-				ctx.assertTrue(SnowCover.held(world.getBlockState(slab)) == layers, layers + " layers on the slab: " + world.getBlockState(slab));
+				ctx.assertTrue(clickTop(player, world, snow, slab, 0.5 + 0.125 * (layers - 1)).isAccepted(), "a click logs layer " + layers);
+				ctx.assertTrue(logged(world, slab) == layers, layers + " layers in the slab: " + logged(world, slab));
 			}
 			ctx.assertTrue(snow.getCount() == 60, "a snow layer used a layer: " + snow.getCount());
-			clickTop(player, world, snow, slab);
-			BlockState above = world.getBlockState(slab.up());
-			ctx.assertTrue(SnowCover.held(world.getBlockState(slab)) == 4 && above.isOf(Blocks.SNOW) && above.get(SnowBlock.LAYERS) == 1,
-					"the slab full, a snow layer lies on it: " + above);
+			clickTop(player, world, snow, slab, 1.0);
+			ctx.assertTrue(snowLayer(world, slab.up()) == 1, "the slab whole, a snow layer lies on it: " + world.getBlockState(slab.up()));
 
-			BlockPos stairs = ctx.getAbsolutePos(new BlockPos(4, 2, 6));
+			BlockPos fence = ctx.getAbsolutePos(new BlockPos(5, 2, 6));
+			world.setBlockState(fence, Blocks.OAK_FENCE.getDefaultState());
+			useOn(player, snow, fence.down(), Direction.UP);
+			useOn(player, snow, fence.down(), Direction.UP);
+			ctx.assertTrue(logged(world, fence) == 2, "clicking the ground under it, snow is logged in the fence: " + logged(world, fence));
+			clickTop(player, world, snow, fence, 1.0);
+			clickTop(player, world, snow, fence, 1.0);
+			ctx.assertTrue(cover(world, fence.up()) == 2 && logged(world, fence) == 2, "clicking the post's top, a snow cover on it: " + world.getBlockState(fence.up()));
+
+			BlockPos stairs = ctx.getAbsolutePos(new BlockPos(8, 2, 6));
 			world.setBlockState(stairs, stairs());
+			clickTop(player, world, snow, stairs, 1.0);
 			useOn(player, snow, stairs, Direction.UP);
-			useOn(player, snow, stairs, Direction.UP);
-			ctx.assertTrue(SnowCover.held(world.getBlockState(stairs)) == 2, "sneaking, it goes on too: " + world.getBlockState(stairs));
+			ctx.assertTrue(cover(world, stairs.up()) == 2, "on the upper step, a snow cover, by hand and sneaking: " + world.getBlockState(stairs.up()));
 
-			for (int x : new int[] {6, 8, 10, 12}) {
-				BlockPos pos = ctx.getAbsolutePos(new BlockPos(x, 2, 6));
-				BlockState state = switch (x) {
-					case 6 -> vertical(Direction.NORTH);
-					case 8 -> Blocks.OAK_FENCE.getDefaultState();
-					case 10 -> Blocks.COBBLESTONE_WALL.getDefaultState();
-					default -> Blocks.OAK_FENCE_GATE.getDefaultState();
-				};
-				world.setBlockState(pos, state);
-				ctx.assertTrue(clickTop(player, world, snow, pos).isAccepted(), "a cap goes on " + state);
-				BlockState capped = world.getBlockState(pos);
-				ctx.assertTrue(SnowCover.held(capped) == 1, "one on " + capped);
-				if (capped.contains(FenceGateBlock.OPEN)) {
-					// (Clicked again, a gate with its cap opens, as it would for anything in hand.)
-					ctx.assertTrue(!capped.get(FenceGateBlock.OPEN), "the gate stays shut");
-					continue;
-				}
-				clickTop(player, world, snow, pos);
-				ctx.assertTrue(SnowCover.held(world.getBlockState(pos)) == 1 && world.getBlockState(pos.up()).isAir(), "and no more on " + capped);
-			}
+			BlockPos edge = ctx.getAbsolutePos(new BlockPos(11, 2, 6));
+			world.setBlockState(edge, vertical(Direction.NORTH));
+			clickTop(player, world, snow, edge, 1.0);
+			useOn(player, snow, edge.down(), Direction.UP);
+			ctx.assertTrue(cover(world, edge.up()) == 1 && logged(world, edge) == 1, "a vertical slab: a cover on its edge, snow on the ground beside it");
+
+			BlockPos gate = ctx.getAbsolutePos(new BlockPos(14, 2, 6));
+			world.setBlockState(gate, Blocks.OAK_FENCE_GATE.getDefaultState());
+			ctx.assertTrue(clickTop(player, world, snow, gate, 1.0).isAccepted() && cover(world, gate.up()) == 1, "a cover on the gate's posts");
+			ctx.assertTrue(!world.getBlockState(gate).get(FenceGateBlock.OPEN), "the gate stays shut");
 
 			BlockPos top = ctx.getAbsolutePos(new BlockPos(2, 2, 10));
 			world.setBlockState(top, Blocks.STONE_SLAB.getDefaultState().with(SlabBlock.TYPE, SlabType.TOP));
-			clickTop(player, world, snow, top);
-			ctx.assertTrue(world.getBlockState(top.up()).isOf(Blocks.SNOW) && SnowCover.snowOnTop(world.getBlockState(top)),
-					"a snow layer on a top slab, which says snow lies on it: " + world.getBlockState(top));
+			clickTop(player, world, snow, top, 1.0);
+			ctx.assertTrue(snowLayer(world, top.up()) == 1 && SnowCover.marked(world.getBlockState(top)),
+					"a snow layer on a top slab, which is snowy: " + world.getBlockState(top));
 
-			BlockPos side = ctx.getAbsolutePos(new BlockPos(4, 2, 10));
-			world.setBlockState(side, Blocks.STONE_SLAB.getDefaultState());
-			useOn(player, snow, side, Direction.EAST);
-			ctx.assertTrue(SnowCover.held(world.getBlockState(side)) == 0 && world.getBlockState(side.east()).isOf(Blocks.SNOW), "clicked on its side, snow goes beside it");
-
-			BlockPos wet = ctx.getAbsolutePos(new BlockPos(8, 2, 10));
+			BlockPos wet = ctx.getAbsolutePos(new BlockPos(5, 2, 10));
 			world.setBlockState(wet, Blocks.STONE_SLAB.getDefaultState().with(SlabBlock.WATERLOGGED, true));
-			clickTop(player, world, snow, wet);
-			ctx.assertTrue(SnowCover.held(world.getBlockState(wet)) == 0, "none in water");
-
-			BlockPos covered = ctx.getAbsolutePos(new BlockPos(10, 2, 10));
-			world.setBlockState(covered, Blocks.OAK_FENCE.getDefaultState());
-			world.setBlockState(covered.up(), Blocks.STONE.getDefaultState());
-			clickTop(player, world, snow, covered);
-			ctx.assertTrue(SnowCover.held(world.getBlockState(covered)) == 0, "no cap with a block on top");
+			clickTop(player, world, snow, wet, 0.5);
+			ctx.assertTrue(logged(world, wet) == 0, "none in water");
 		} finally {
 			FishingTests.disconnect(player);
 		}
@@ -312,149 +370,104 @@ public class SnowTests implements FabricGameTest {
 		ctx.complete();
 	}
 
-	/**
-	 * Anything put in the space above a cap knocks it off (a fence's, a wall's, a vertical slab's); the snow in stairs'
-	 * open space stays under a block. A whole top says whether snow layers lie on it as they come and go.
-	 */
+	/** A fence, wall or slab placed into a snow layer keeps the snow, logged in it (what lies above a slab's floor). */
 	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 20)
-	public void whatsAboveSaysWhatStays(TestContext ctx) {
+	public void placingIntoSnowKeepsIt(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
-		BlockPos fence = ctx.getAbsolutePos(new BlockPos(2, 2, 4));
-		BlockPos wall = ctx.getAbsolutePos(new BlockPos(4, 2, 4));
-		BlockPos edge = ctx.getAbsolutePos(new BlockPos(6, 2, 4));
-		BlockPos stairs = ctx.getAbsolutePos(new BlockPos(8, 2, 4));
-		BlockPos top = ctx.getAbsolutePos(new BlockPos(10, 2, 4));
-		BlockPos mixed = ctx.getAbsolutePos(new BlockPos(12, 2, 4));
-		world.setBlockState(fence, snowed(Blocks.OAK_FENCE.getDefaultState(), 1));
-		world.setBlockState(wall, snowed(Blocks.COBBLESTONE_WALL.getDefaultState(), 1));
-		world.setBlockState(edge, snowed(vertical(Direction.SOUTH), 1));
-		world.setBlockState(stairs, snowed(stairs(), 2));
-		world.setBlockState(top, Blocks.STONE_SLAB.getDefaultState().with(SlabBlock.TYPE, SlabType.TOP));
-		world.setBlockState(mixed, MixedSlabs.MIXED_SLAB.getDefaultState());
-		world.setBlockState(fence.up(), Blocks.TORCH.getDefaultState());
-		world.setBlockState(wall.up(), Blocks.STONE.getDefaultState());
-		world.setBlockState(edge.up(), Blocks.STONE.getDefaultState());
-		world.setBlockState(stairs.up(), Blocks.STONE.getDefaultState());
-		world.setBlockState(top.up(), Blocks.SNOW.getDefaultState());
-		world.setBlockState(mixed.up(), Blocks.SNOW.getDefaultState());
-		ctx.assertTrue(SnowCover.raw(world.getBlockState(fence)) == 0, "a torch on a fence post knocks its cap off");
-		ctx.assertTrue(SnowCover.raw(world.getBlockState(wall)) == 0, "a block on a wall knocks its cap off");
-		ctx.assertTrue(SnowCover.raw(world.getBlockState(edge)) == 0, "a block on a vertical slab knocks its snow off");
-		ctx.assertTrue(SnowCover.held(world.getBlockState(stairs)) == 2, "the snow on stairs' lower step stays under a block");
-		ctx.assertTrue(SnowCover.snowOnTop(world.getBlockState(top)) && SnowCover.snowOnTop(world.getBlockState(mixed)),
-				"a top slab and a mixed slab say snow lies on them");
-		world.setBlockState(top.up(), Blocks.AIR.getDefaultState());
-		ctx.assertTrue(!SnowCover.snowOnTop(world.getBlockState(top)), "and not once it's gone");
+		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(8, 2, 2));
+		try {
+			BlockPos fence = ctx.getAbsolutePos(new BlockPos(3, 2, 6));
+			BlockPos wall = ctx.getAbsolutePos(new BlockPos(6, 2, 6));
+			BlockPos slab = ctx.getAbsolutePos(new BlockPos(9, 2, 6));
+			world.setBlockState(fence, SnowCover.asSnowLayer(3));
+			world.setBlockState(wall, SnowCover.asSnowLayer(2));
+			world.setBlockState(slab, SnowCover.asSnowLayer(6));
+			useOn(player, new ItemStack(Items.OAK_FENCE), fence, Direction.UP);
+			useOn(player, new ItemStack(Items.COBBLESTONE_WALL), wall, Direction.UP);
+			useOn(player, new ItemStack(Items.STONE_SLAB), slab, Direction.UP);
+			ctx.assertTrue(world.getBlockState(fence).isOf(Blocks.OAK_FENCE) && logged(world, fence) == 3, "a fence put into 3 layers keeps them: " + logged(world, fence));
+			ctx.assertTrue(world.getBlockState(wall).isOf(Blocks.COBBLESTONE_WALL) && logged(world, wall) == 2, "a wall into 2 keeps them");
+			ctx.assertTrue(world.getBlockState(slab).isOf(Blocks.STONE_SLAB) && logged(world, slab) == 2, "a slab into 6 keeps the 2 above it: " + logged(world, slab));
+		} finally {
+			FishingTests.disconnect(player);
+		}
 		ctx.complete();
 	}
 
-	/** Opening a gate with snow on it knocks the snow off with a puff of snow: by hand and by redstone. It doesn't come back when shut. */
+	/**
+	 * Snow keeps through changes to its block: the wrench turning a snowy slab (its snow goes where the slab leaves room),
+	 * stairs turned; a snow cover on a vertical slab turns into a snow layer when a slab fills its other half, and back
+	 * into a cover when the half goes; with 4 layers on stairs, the cover on the upper step turns into a snow layer over
+	 * the whole top; a cover with nothing below to lie on goes. Water melts logged snow.
+	 */
+	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 20)
+	public void snowKeepsThroughChanges(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(8, 2, 2));
+		try {
+			BlockPos turned = ctx.getAbsolutePos(new BlockPos(2, 2, 6));
+			snowy(world, turned, Blocks.STONE_SLAB.getDefaultState(), 2);
+			useOn(player, new ItemStack(BlockTools.WRENCH), turned, Direction.NORTH);
+			ctx.assertTrue(Slabs.axis(world.getBlockState(turned)) != Direction.Axis.Y && logged(world, turned) == 2,
+					"turned on edge with the wrench, the slab keeps its snow: " + logged(world, turned));
+
+			BlockPos edge = ctx.getAbsolutePos(new BlockPos(5, 2, 6));
+			world.setBlockState(edge, vertical(Direction.NORTH));
+			world.setBlockState(edge.up(), Snowlogging.SNOW_COVER.getDefaultState());
+			world.setBlockState(edge, Blocks.STONE_SLAB.getDefaultState().with(SlabBlock.TYPE, SlabType.DOUBLE).with(Slabs.AXIS, Direction.Axis.Z));
+			ctx.assertTrue(snowLayer(world, edge.up()) == 1, "filled to a pair, the cover is a snow layer on its whole top: " + world.getBlockState(edge.up()));
+			world.setBlockState(edge, vertical(Direction.SOUTH));
+			ctx.assertTrue(cover(world, edge.up()) == 1, "a half gone, the snow is a cover again: " + world.getBlockState(edge.up()));
+
+			BlockPos stairs = ctx.getAbsolutePos(new BlockPos(8, 2, 6));
+			world.setBlockState(stairs, stairs());
+			world.setBlockState(stairs.up(), Snowlogging.SNOW_COVER.getDefaultState());
+			Snowlogging.snowlog(world, stairs, 4, Block.NOTIFY_ALL);
+			ctx.assertTrue(snowLayer(world, stairs.up()) == 1, "4 layers make the stairs' top whole: the cover is a snow layer: " + world.getBlockState(stairs.up()));
+			world.setBlockState(stairs, world.getBlockState(stairs).with(StairsBlock.FACING, Direction.EAST));
+			ctx.assertTrue(logged(world, stairs) == 4, "turned, the stairs keep their snow");
+
+			BlockPos fence = ctx.getAbsolutePos(new BlockPos(11, 2, 6));
+			world.setBlockState(fence, Blocks.OAK_FENCE.getDefaultState());
+			world.setBlockState(fence.up(), Snowlogging.SNOW_COVER.getDefaultState());
+			world.setBlockState(fence, Blocks.AIR.getDefaultState());
+			ctx.assertTrue(world.getBlockState(fence.up()).isAir(), "with nothing below it, the cover goes");
+
+			BlockPos wet = ctx.getAbsolutePos(new BlockPos(14, 2, 6));
+			snowy(world, wet, Blocks.STONE_SLAB.getDefaultState(), 2);
+			((Waterloggable) Blocks.STONE_SLAB).tryFillWithFluid(world, wet, world.getBlockState(wet), Fluids.WATER.getStill(false));
+			ctx.assertTrue(logged(world, wet) == 0, "water melts it");
+		} finally {
+			FishingTests.disconnect(player);
+		}
+		ctx.complete();
+	}
+
+	/** Opening a gate with snow on its rails knocks it off in a puff of snow (it lies on the ground): by hand and by redstone. */
 	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 20)
 	public void openingAGateKnocksItsSnowOff(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
 		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(8, 2, 2));
 		try {
 			BlockPos byHand = ctx.getAbsolutePos(new BlockPos(4, 2, 6));
-			world.setBlockState(byHand, snowed(Blocks.OAK_FENCE_GATE.getDefaultState(), 1));
-			clickTop(player, world, ItemStack.EMPTY, byHand);
-			BlockState opened = world.getBlockState(byHand);
-			ctx.assertTrue(opened.get(FenceGateBlock.OPEN) && SnowCover.raw(opened) == 0, "opened by hand, its snow is off: " + opened);
+			snowy(world, byHand, Blocks.OAK_FENCE_GATE.getDefaultState(), 1);
+			clickTop(player, world, ItemStack.EMPTY, byHand, 0.9);
+			ctx.assertTrue(world.getBlockState(byHand).get(FenceGateBlock.OPEN), "opened by hand");
 			ctx.assertTrue(Heard.events(byHand, WorldEvents.BLOCK_BROKEN).contains(Block.getRawIdFromState(Blocks.SNOW.getDefaultState())), "in a puff of snow");
-			clickTop(player, world, ItemStack.EMPTY, byHand);
-			ctx.assertTrue(!world.getBlockState(byHand).get(FenceGateBlock.OPEN) && SnowCover.raw(world.getBlockState(byHand)) == 0, "shut, it has none");
+			ctx.assertTrue(logged(world, byHand) == 1, "the snow lies on the ground");
 
 			BlockPos powered = ctx.getAbsolutePos(new BlockPos(10, 2, 6));
-			world.setBlockState(powered, snowed(Blocks.SPRUCE_FENCE_GATE.getDefaultState(), 1));
+			snowy(world, powered, Blocks.SPRUCE_FENCE_GATE.getDefaultState(), 1);
 			world.setBlockState(powered.east(), Blocks.REDSTONE_BLOCK.getDefaultState());
-			BlockState open = world.getBlockState(powered);
-			ctx.assertTrue(open.get(FenceGateBlock.OPEN) && SnowCover.raw(open) == 0, "opened by redstone, its snow is off: " + open);
+			ctx.assertTrue(world.getBlockState(powered).get(FenceGateBlock.OPEN)
+					&& Heard.events(powered, WorldEvents.BLOCK_BROKEN).contains(Block.getRawIdFromState(Blocks.SNOW.getDefaultState())), "opened by redstone, in a puff");
 		} finally {
 			FishingTests.disconnect(player);
 		}
 		ctx.complete();
 	}
 
-	/**
-	 * A shovel digs the snow off, at snow's speed, as snow (its particles, sound and drops: a snowball a layer, snow
-	 * layers with Silk Touch), and leaves the block; anything else breaks both, each dropping its own.
-	 */
-	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 40)
-	public void aShovelDigsTheSnowOff(TestContext ctx) {
-		ServerWorld world = ctx.getWorld();
-		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(8, 2, 2));
-		try {
-			BlockPos dug = ctx.getAbsolutePos(new BlockPos(2, 2, 8));
-			BlockState snowy = snowed(Blocks.STONE_SLAB.getDefaultState(), 3);
-			world.setBlockState(dug, snowy);
-			ItemStack shovel = new ItemStack(Items.IRON_SHOVEL);
-			player.setStackInHand(Hand.MAIN_HAND, shovel);
-			float speed = snowy.calcBlockBreakingDelta(player, world, dug);
-			ctx.assertTrue(speed == SnowCover.asSnowLayer(snowy).calcBlockBreakingDelta(player, world, dug) && speed > Blocks.STONE_SLAB.getDefaultState().calcBlockBreakingDelta(player, world, dug),
-					"a shovel digs it at snow's speed: " + speed);
-			ctx.assertTrue(player.interactionManager.tryBreakBlock(dug), "the snow is dug off");
-			BlockState left = world.getBlockState(dug);
-			ctx.assertTrue(left.isOf(Blocks.STONE_SLAB) && SnowCover.raw(left) == 0, "the slab stays: " + left);
-			ctx.assertTrue(dropped(world, dug, Items.SNOWBALL) == 3 && dropped(world, dug, Items.STONE_SLAB) == 0, "3 snowballs, no slab");
-			ctx.assertTrue(Heard.events(dug, WorldEvents.BLOCK_BROKEN).contains(Block.getRawIdFromState(SnowCover.asSnowLayer(snowy))), "it breaks as snow");
-			ctx.assertTrue(shovel.getDamage() == 1, "the shovel wears a use: " + shovel.getDamage());
-
-			BlockPos silk = ctx.getAbsolutePos(new BlockPos(6, 2, 8));
-			world.setBlockState(silk, snowed(Blocks.OAK_SLAB.getDefaultState(), 2));
-			ItemStack silky = new ItemStack(Items.IRON_SHOVEL);
-			silky.addEnchantment(world.getRegistryManager().get(RegistryKeys.ENCHANTMENT).getEntry(net.minecraft.enchantment.Enchantments.SILK_TOUCH).orElseThrow(), 1);
-			player.setStackInHand(Hand.MAIN_HAND, silky);
-			player.interactionManager.tryBreakBlock(silk);
-			ctx.assertTrue(dropped(world, silk, Items.SNOW) == 2 && world.getBlockState(silk).isOf(Blocks.OAK_SLAB), "with Silk Touch, 2 snow layers");
-
-			BlockPos picked = ctx.getAbsolutePos(new BlockPos(10, 2, 8));
-			world.setBlockState(picked, snowed(Blocks.STONE_SLAB.getDefaultState(), 2));
-			player.setStackInHand(Hand.MAIN_HAND, new ItemStack(Items.IRON_PICKAXE));
-			player.interactionManager.tryBreakBlock(picked);
-			ctx.assertTrue(world.getBlockState(picked).isAir() && dropped(world, picked, Items.STONE_SLAB) == 1 && dropped(world, picked, Items.SNOWBALL) == 2,
-					"a pickaxe breaks both: the slab and 2 snowballs");
-
-			BlockPos fence = ctx.getAbsolutePos(new BlockPos(14, 2, 8));
-			world.setBlockState(fence, snowed(Blocks.OAK_FENCE.getDefaultState(), 1));
-			player.setStackInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
-			player.interactionManager.tryBreakBlock(fence);
-			ctx.assertTrue(dropped(world, fence, Items.OAK_FENCE) == 1 && dropped(world, fence, Items.SNOWBALL) == 1, "by hand, the fence and a snowball");
-		} finally {
-			FishingTests.disconnect(player);
-		}
-		ctx.killAllEntities();
-		ctx.complete();
-	}
-
-	/** Filling a snowy slab's other half, or turning it with the wrench, shakes its snow off; water melts it. */
-	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 20)
-	public void fillingTurningAndWaterTakeItOff(TestContext ctx) {
-		ServerWorld world = ctx.getWorld();
-		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(8, 2, 2));
-		try {
-			BlockPos filled = ctx.getAbsolutePos(new BlockPos(4, 2, 6));
-			world.setBlockState(filled, snowed(Blocks.STONE_SLAB.getDefaultState(), 2));
-			useOn(player, new ItemStack(Items.STONE_SLAB), filled, Direction.UP);
-			BlockState pair = world.getBlockState(filled);
-			ctx.assertTrue(pair.get(SlabBlock.TYPE) == SlabType.DOUBLE && SnowCover.raw(pair) == 0, "filled, no snow: " + pair);
-
-			BlockPos turned = ctx.getAbsolutePos(new BlockPos(8, 2, 6));
-			world.setBlockState(turned, snowed(Blocks.STONE_SLAB.getDefaultState(), 2));
-			useOn(player, new ItemStack(BlockTools.WRENCH), turned, Direction.NORTH);
-			BlockState edge = world.getBlockState(turned);
-			ctx.assertTrue(Slabs.axis(edge) != Direction.Axis.Y && SnowCover.raw(edge) == 0, "turned on edge, no snow: " + edge);
-
-			BlockPos wet = ctx.getAbsolutePos(new BlockPos(12, 2, 6));
-			BlockState snowy = snowed(Blocks.STONE_SLAB.getDefaultState(), 2);
-			world.setBlockState(wet, snowy);
-			((Waterloggable) Blocks.STONE_SLAB).tryFillWithFluid(world, wet, snowy, Fluids.WATER.getStill(false));
-			ctx.assertTrue(SnowCover.held(world.getBlockState(wet)) == 0, "water melts it");
-		} finally {
-			FishingTests.disconnect(player);
-		}
-		ctx.complete();
-	}
-
-	/** Falling snow (snow gravity) landing on a slab piles into it, any more lying on it; on a fence, a cap. */
+	/** Falling snow (snow gravity) landing on a slab is logged in it, any more lying on it; on a fence, around it. */
 	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 120)
 	public void fallingSnowPilesOn(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
@@ -462,17 +475,15 @@ public class SnowTests implements FabricGameTest {
 		BlockPos full = ctx.getAbsolutePos(new BlockPos(8, 2, 6));
 		BlockPos fence = ctx.getAbsolutePos(new BlockPos(12, 2, 6));
 		world.setBlockState(slab, Blocks.STONE_SLAB.getDefaultState());
-		world.setBlockState(full, snowed(Blocks.STONE_SLAB.getDefaultState(), 3));
+		snowy(world, full, Blocks.STONE_SLAB.getDefaultState(), 3);
 		world.setBlockState(fence, Blocks.OAK_FENCE.getDefaultState());
-		world.setBlockState(slab.up(5), Blocks.SNOW.getDefaultState().with(SnowBlock.LAYERS, 3));
-		world.setBlockState(full.up(5), Blocks.SNOW.getDefaultState().with(SnowBlock.LAYERS, 3));
-		world.setBlockState(fence.up(5), Blocks.SNOW.getDefaultState());
+		world.setBlockState(slab.up(5), SnowCover.asSnowLayer(3));
+		world.setBlockState(full.up(5), SnowCover.asSnowLayer(3));
+		world.setBlockState(fence.up(5), SnowCover.asSnowLayer(2));
 		ctx.runAtTick(100, () -> {
-			ctx.assertTrue(SnowCover.held(world.getBlockState(slab)) == 3, "3 layers fell into the slab: " + world.getBlockState(slab));
-			BlockState above = world.getBlockState(full.up());
-			ctx.assertTrue(SnowCover.held(world.getBlockState(full)) == 4 && above.isOf(Blocks.SNOW) && above.get(SnowBlock.LAYERS) == 2,
-					"3 onto 3 fill it, 2 lie on it: " + above);
-			ctx.assertTrue(SnowCover.held(world.getBlockState(fence)) == 1, "a cap on the fence");
+			ctx.assertTrue(logged(world, slab) == 3, "3 layers fell into the slab: " + logged(world, slab));
+			ctx.assertTrue(logged(world, full) == 4 && snowLayer(world, full.up()) == 2, "3 onto 3 fill it, 2 lie on it: " + world.getBlockState(full.up()));
+			ctx.assertTrue(logged(world, fence) == 2, "2 around the fence: " + logged(world, fence));
 			ctx.killAllEntities();
 			ctx.complete();
 		});
@@ -485,7 +496,7 @@ public class SnowTests implements FabricGameTest {
 		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(8, 2, 2));
 		try {
 			BlockPos pos = ctx.getAbsolutePos(new BlockPos(4, 2, 6));
-			world.setBlockState(pos, snowed(Blocks.STONE_SLAB.getDefaultState(), 2));
+			snowy(world, pos, Blocks.STONE_SLAB.getDefaultState(), 2);
 			player.teleport(world, pos.getX() + 0.5, pos.getY() + 0.625, pos.getZ() + 0.5, 0.0F, 0.0F);
 			((StepSoundInvoker) player).eternalreturn$playStepSounds(pos, world.getBlockState(pos));
 			List<SoundEvent> heard = Heard.near(player.getPos());
@@ -498,9 +509,10 @@ public class SnowTests implements FabricGameTest {
 	}
 
 	/**
-	 * Snowfall in a snowy biome under a storm settles on these blocks where it would on a full block: a layer into a slab
-	 * and stairs, a cap on a fence, wall and gate, snow layers on a top slab; with the snow-piling game rule up to 4 in a
-	 * slab, then snow layers on it.
+	 * Snowfall in a snowy biome under a storm settles where it would on a full block: a layer in a slab and on stairs'
+	 * lower step, on the ground around a fence, wall and gate and beside a vertical slab, with a snow cover on their
+	 * parts reaching the top; snow layers on a top slab. With the snow-piling game rule, up to 4 in a slab, then snow
+	 * layers on it.
 	 */
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = WEATHER_BATCH, skyAccess = true, tickLimit = 40)
 	public void snowfallSettlesOnThem(TestContext ctx) {
@@ -529,20 +541,19 @@ public class SnowTests implements FabricGameTest {
 				for (int i = 0; i < 3; i++) {
 					all.forEach(world::tickIceAndSnow);
 				}
-				ctx.assertTrue(SnowCover.held(world.getBlockState(slab)) == 1 && SnowCover.held(world.getBlockState(stairs)) == 1,
-						"a layer in the slab and the stairs (the game rule piles 1): " + world.getBlockState(slab));
-				for (BlockPos cap : List.of(fence, wall, gate, edge)) {
-					ctx.assertTrue(SnowCover.held(world.getBlockState(cap)) == 1, "a cap on " + world.getBlockState(cap));
+				for (BlockPos pos : List.of(slab, stairs, fence, wall, gate, edge)) {
+					ctx.assertTrue(logged(world, pos) == 1, "a layer logged in " + world.getBlockState(pos) + " (the game rule piles 1): " + logged(world, pos));
 				}
-				ctx.assertTrue(world.getBlockState(top.up()).isOf(Blocks.SNOW) && SnowCover.snowOnTop(world.getBlockState(top)), "a snow layer on the top slab");
+				for (BlockPos pos : List.of(stairs, fence, wall, gate, edge)) {
+					ctx.assertTrue(cover(world, pos.up()) == 1, "a snow cover on " + world.getBlockState(pos) + ": " + world.getBlockState(pos.up()));
+				}
+				ctx.assertTrue(snowLayer(world, top.up()) == 1 && SnowCover.marked(world.getBlockState(top)), "a snow layer on the top slab, which is snowy");
 				piling.set(8, world.getServer());
-				// 3 more layers fill it, then a snow layer on it grows to 2.
+				// 3 more layers make the slab whole, then a snow layer on it grows to 2.
 				for (int i = 0; i < 5; i++) {
 					world.tickIceAndSnow(slab);
 				}
-				BlockState above = world.getBlockState(slab.up());
-				ctx.assertTrue(SnowCover.held(world.getBlockState(slab)) == 4 && above.isOf(Blocks.SNOW) && above.get(SnowBlock.LAYERS) == 2,
-						"piling: 4 in the slab, then a snow layer on it: " + above);
+				ctx.assertTrue(logged(world, slab) == 4 && snowLayer(world, slab.up()) == 2, "piling: 4 in the slab, then a snow layer on it: " + world.getBlockState(slab.up()));
 			} finally {
 				piling.set(1, world.getServer());
 				Weathers.dry(world, storm);
@@ -552,7 +563,7 @@ public class SnowTests implements FabricGameTest {
 	}
 
 	/** Snowfall doesn't settle by a light (block light 10 or more above the block), as it doesn't on full blocks. */
-	@GameTest(templateName = EMPTY_STRUCTURE, batchId = WEATHER_BATCH, skyAccess = true, tickLimit = 40)
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = WEATHER_BATCH, skyAccess = true, tickLimit = 200)
 	public void noSnowByALight(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
 		floor(ctx);
@@ -561,10 +572,16 @@ public class SnowTests implements FabricGameTest {
 		world.setBlockState(slab, Blocks.STONE_SLAB.getDefaultState());
 		world.setBlockState(slab.up().east(), Blocks.GLOWSTONE.getDefaultState());
 		Storm storm = Weathers.rain(world, Vec3d.ofCenter(slab), false);
-		ctx.runAtTick(20, () -> {
+		boolean[] done = {false};
+		// Once the glowstone's light has spread.
+		ctx.runAtEveryTick(() -> {
+			if (done[0] || world.getLightLevel(net.minecraft.world.LightType.BLOCK, slab.up()) < 10) {
+				return;
+			}
+			done[0] = true;
 			try {
 				world.tickIceAndSnow(slab);
-				ctx.assertTrue(SnowCover.raw(world.getBlockState(slab)) == 0, "no snow by the glowstone");
+				ctx.assertTrue(logged(world, slab) == 0, "no snow by the glowstone");
 			} finally {
 				Weathers.dry(world, storm);
 			}
@@ -587,7 +604,7 @@ public class SnowTests implements FabricGameTest {
 			try {
 				world.tickIceAndSnow(slab);
 				world.tickIceAndSnow(fence);
-				ctx.assertTrue(SnowCover.raw(world.getBlockState(slab)) == 0 && SnowCover.raw(world.getBlockState(fence)) == 0, "no snow in the rain");
+				ctx.assertTrue(logged(world, slab) == 0 && logged(world, fence) == 0 && world.getBlockState(fence.up()).isAir(), "no snow in the rain");
 			} finally {
 				Weathers.dry(world, storm);
 			}
@@ -595,7 +612,7 @@ public class SnowTests implements FabricGameTest {
 		});
 	}
 
-	/** Snowy biomes' generation lays a layer on these blocks, as it lays snow layers on full blocks (and on a top slab). */
+	/** Snowy biomes' generation lays a layer in and on these blocks, as it lays snow layers on full blocks (and on a top slab). */
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = WORLDGEN_BATCH, skyAccess = true, tickLimit = 40)
 	public void generationSnowsOnThem(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
@@ -612,36 +629,39 @@ public class SnowTests implements FabricGameTest {
 		world.setBlockState(top, Blocks.SPRUCE_SLAB.getDefaultState().with(SlabBlock.TYPE, SlabType.TOP));
 		ctx.runAtTick(5, () -> {
 			BlockPos corner = ctx.getAbsolutePos(BlockPos.ORIGIN);
-			BlockPos origin = new BlockPos(Math.min(corner.getX(), ctx.getAbsolutePos(new BlockPos(7, 0, 7)).getX()), corner.getY(),
-					Math.min(corner.getZ(), ctx.getAbsolutePos(new BlockPos(7, 0, 7)).getZ()));
+			BlockPos far = ctx.getAbsolutePos(new BlockPos(7, 0, 7));
+			BlockPos origin = new BlockPos(Math.min(corner.getX(), far.getX()), corner.getY(), Math.min(corner.getZ(), far.getZ()));
 			Feature.FREEZE_TOP_LAYER.generate(new FeatureContext<>(Optional.empty(), world, world.getChunkManager().getChunkGenerator(), world.random, origin,
 					DefaultFeatureConfig.INSTANCE));
-			ctx.assertTrue(world.getBlockState(ground.up()).isOf(Blocks.SNOW), "a snow layer on the ground");
+			ctx.assertTrue(snowLayer(world, ground.up()) == 1, "a snow layer on the ground");
 			for (BlockPos pos : List.of(slab, stairs, fence)) {
-				ctx.assertTrue(SnowCover.held(world.getBlockState(pos)) == 1, "a layer on " + world.getBlockState(pos));
+				ctx.assertTrue(logged(world, pos) == 1, "a layer logged in " + world.getBlockState(pos));
 			}
-			ctx.assertTrue(world.getBlockState(top.up()).isOf(Blocks.SNOW) && SnowCover.snowOnTop(world.getBlockState(top)), "a snow layer on the top slab, which says so");
+			ctx.assertTrue(cover(world, stairs.up()) == 1 && cover(world, fence.up()) == 1, "snow covers on the upper step and the post");
+			ctx.assertTrue(snowLayer(world, top.up()) == 1 && SnowCover.marked(world.getBlockState(top)), "a snow layer on the top slab, which is snowy");
 			ctx.complete();
 		});
 	}
 
 	/**
-	 * The snow melts as snow layers do, at random, where block light is above 11 (here, glowstone beside it), and drops
-	 * nothing; in the dark it stays. A snowy block ticks at random only for its snow.
+	 * Logged snow melts as snow layers do, at random, where block light is above 11 (glowstone beside it), dropping
+	 * nothing; a snow cover too; in the dark it stays. A snowy block ticks at random only for its snow.
 	 */
 	@GameTest(templateName = ARENA, batchId = MELT_BATCH, tickLimit = 200)
 	public void snowMeltsInTheLight(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
 		BlockPos lit = ctx.getAbsolutePos(new BlockPos(4, 2, 6));
 		BlockPos dark = ctx.getAbsolutePos(new BlockPos(12, 2, 30));
-		world.setBlockState(lit, snowed(Blocks.OAK_STAIRS.getDefaultState(), 2));
+		snowy(world, lit, Blocks.OAK_FENCE.getDefaultState(), 2);
+		world.setBlockState(lit.up(), Snowlogging.SNOW_COVER.getDefaultState());
 		world.setBlockState(lit.east(), Blocks.GLOWSTONE.getDefaultState());
-		world.setBlockState(dark, snowed(Blocks.OAK_FENCE.getDefaultState(), 1));
-		ctx.assertTrue(world.getBlockState(lit).hasRandomTicks() && !Blocks.OAK_STAIRS.getDefaultState().hasRandomTicks(), "snowy stairs tick, bare ones don't");
+		world.setBlockState(lit.up().east(), Blocks.GLOWSTONE.getDefaultState());
+		snowy(world, dark, Blocks.OAK_FENCE.getDefaultState(), 1);
+		ctx.assertTrue(world.getBlockState(lit).hasRandomTicks() && !Blocks.OAK_FENCE.getDefaultState().hasRandomTicks(), "snowy fences tick, bare ones don't");
 		boolean[] done = {false};
 		// Once the glowstone's light has spread (a while, with the arena's own light still settling).
 		ctx.runAtEveryTick(() -> {
-			if (done[0] || !SnowCover.meltsHere(world, lit)) {
+			if (done[0] || !Snowlogging.meltsHere(world, lit) || !Snowlogging.meltsHere(world, lit.up())) {
 				return;
 			}
 			done[0] = true;
@@ -649,9 +669,10 @@ public class SnowTests implements FabricGameTest {
 				world.tickChunk(world.getWorldChunk(lit), 40000);
 				world.tickChunk(world.getWorldChunk(dark), 40000);
 			}
-			ctx.assertTrue(world.getBlockState(lit).isOf(Blocks.OAK_STAIRS) && SnowCover.raw(world.getBlockState(lit)) == 0, "it melted by the glowstone: " + world.getBlockState(lit));
+			ctx.assertTrue(logged(world, lit) == 0 && world.getBlockState(lit).isOf(Blocks.OAK_FENCE), "it melted by the glowstone, leaving the fence");
+			ctx.assertTrue(world.getBlockState(lit.up()).isAir(), "the cover melted too");
 			ctx.assertTrue(dropped(world, lit, Items.SNOWBALL) == 0, "dropping nothing");
-			ctx.assertTrue(SnowCover.held(world.getBlockState(dark)) == 1, "in the dark it stays");
+			ctx.assertTrue(logged(world, dark) == 1, "in the dark it stays");
 			ctx.complete();
 		});
 	}

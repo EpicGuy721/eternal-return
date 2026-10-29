@@ -99,8 +99,9 @@ public final class MixedSlabs {
 	 * block with snow on it (SnowCover), the snow.
 	 */
 	public static BlockState underfoot(Entity entity, BlockPos pos, BlockState state) {
-		if (SnowCover.held(state) > 0) {
-			return SnowCover.asSnowLayer(state);
+		int snow = SnowCover.layers(entity.getWorld(), pos, state);
+		if (snow > 0) {
+			return SnowCover.asSnowLayer(snow);
 		}
 		if (!state.isOf(MIXED_SLAB)) {
 			return state;

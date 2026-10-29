@@ -94,8 +94,8 @@ public final class FenceGates {
 		if (state.get(FenceGateBlock.FACING) == facing.getOpposite()) {
 			state = state.with(FenceGateBlock.FACING, facing);
 		}
-		world.setBlockState(pos, com.eternalreturn.blocks.SnowCover.gateMoved(world, pos, state.with(FenceGateBlock.OPEN, true), null),
-				Block.NOTIFY_LISTENERS | Block.REDRAW_ON_MAIN_THREAD);
+		com.eternalreturn.blocks.Snowlogging.gateOpened(world, pos, state.with(FenceGateBlock.OPEN, true), null);
+		world.setBlockState(pos, state.with(FenceGateBlock.OPEN, true), Block.NOTIFY_LISTENERS | Block.REDRAW_ON_MAIN_THREAD);
 		world.playSound(null, pos, SoundEvents.BLOCK_FENCE_GATE_OPEN, SoundCategory.BLOCKS, 1.0F, world.random.nextFloat() * 0.1F + 0.9F);
 		world.emitGameEvent(villager, GameEvent.BLOCK_OPEN, pos);
 		OPENED.computeIfAbsent(villager, v -> new HashSet<>()).add(pos.toImmutable());

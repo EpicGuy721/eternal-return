@@ -2,7 +2,7 @@ package com.eternalreturn.mixin.slabs;
 
 import com.eternalreturn.blocks.MixedSlabs;
 import com.eternalreturn.blocks.Slabs;
-import com.eternalreturn.blocks.SnowCover;
+import com.eternalreturn.blocks.Snowlogging;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
@@ -47,15 +47,15 @@ public abstract class SlabBlockMixin extends Block {
 	private void eternalreturn$mixedSlab(ItemPlacementContext context, CallbackInfoReturnable<BlockState> cir) {
 		BlockState mixed = MixedSlabs.placementState(context, this);
 		if (mixed != null) {
-			cir.setReturnValue(SnowCover.settle(mixed, context.getWorld(), context.getBlockPos()));
+			cir.setReturnValue(Snowlogging.settle(mixed, context.getWorld(), context.getBlockPos()));
 		}
 	}
 
-	/** A slab filled to a pair loses the snow in its open half (snow on the pair's top is the snow layer above it). */
+	/** A slab filled to a pair keeps its snowy mark as its snow says (the snow in its open half has no room left: Snowlogging). */
 	@Inject(method = "getPlacementState", at = @At("RETURN"), cancellable = true)
 	private void eternalreturn$filledSnow(ItemPlacementContext context, CallbackInfoReturnable<BlockState> cir) {
 		if (cir.getReturnValue() != null) {
-			cir.setReturnValue(SnowCover.settle(cir.getReturnValue(), context.getWorld(), context.getBlockPos()));
+			cir.setReturnValue(Snowlogging.settle(cir.getReturnValue(), context.getWorld(), context.getBlockPos()));
 		}
 	}
 

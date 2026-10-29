@@ -3,6 +3,7 @@ package com.eternalreturn.client;
 import com.eternalreturn.EternalReturn;
 import com.eternalreturn.blocks.MixedSlabs;
 import com.eternalreturn.blocks.SnowCover;
+import com.eternalreturn.blocks.Snowlogging;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
 import net.fabricmc.fabric.api.renderer.v1.Renderer;
 import net.fabricmc.fabric.api.renderer.v1.RendererAccess;
@@ -13,12 +14,21 @@ import net.fabricmc.fabric.api.renderer.v1.mesh.MeshBuilder;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadView;
+import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.SnowBlock;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.block.BlockModels;
 import net.minecraft.client.render.model.BakedModel;
+import net.minecraft.client.render.model.BakedQuad;
+import net.minecraft.client.render.model.Baker;
+import net.minecraft.client.render.model.ModelBakeSettings;
+import net.minecraft.client.render.model.UnbakedModel;
+import net.minecraft.client.render.model.json.ModelOverrideList;
+import net.minecraft.client.render.model.json.ModelTransformation;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.client.util.ModelIdentifier;
 import net.minecraft.client.util.SpriteIdentifier;
@@ -37,44 +47,53 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
- * Snow on blocks (SnowCover), drawn on the block's own model as it's drawn, so any shape (another mod's, a resource
- * pack's, a slab turned on edge) gets snow that follows it: the snow lies on every surface the model shows from above,
- * filling a slab's or stairs' open space by its layers or capping the top (a layer on slabs and stairs, a thin cap on
- * walls, fences and gates), and the snow drip (textures/block/snow_drip, its drips along its top edge) lies over every
- * face of the block whose top edge has snow on it. Only snowy states are drawn this way; the rest are left as they are.
+ * Snow on blocks (SnowCover), drawn on the blocks' own models as they're drawn, so any shape (another mod's, a resource
+ * pack's, a slab turned on edge) gets snow that follows it:
+ * <ul>
+ * <li>a snowy block (snow logged in it, or lying on it) is drawn as it is, then the snow logged in it on the topmost
+ * thing in each column of the space it leaves open, as many layers deep as the player's game knows (ClientSnow), then
+ * the snow drip (textures/block/snow_drip, drips along its top edge) over every face whose top edge has snow on it;</li>
+ * <li>a snow cover is drawn over the parts of the block below it reaching the top of its space.</li>
+ * </ul>
  * <p>So that the snow leaves no holes or flicker, with Sodium too (which draws through the same Fabric rendering API):
- * what the block hides of its neighbours is the bare block's (SnowShapeMixin), so no neighbour leaves out a face the
- * snow doesn't cover; the snow's own faces are left out only where an opaque neighbour covers them, as checked here,
- * never by the renderer's cull faces; and each drip has exactly the corners of the face under it (a face with snow over
- * only part of its top edge is drawn in pieces to match), as vanilla's snowy grass has, so neither wins over the other
- * by a hair. Texture coordinates are pulled in from the texture's edges as vanilla's are.
+ * what a block hides of its neighbours is the bare block's (SnowShapeMixin), so no neighbour leaves out a face the snow
+ * doesn't cover; the snow's own faces are left out only where snow beside them or an opaque neighbour covers them, as
+ * checked here, never by the renderer's cull faces (a face against the block is drawn and hidden by it); and each drip
+ * has exactly the corners of the face under it (a face with snow over only part of its top edge is drawn in pieces to
+ * match), as vanilla's snowy grass has, so neither wins over the other by a hair. Texture coordinates are pulled in
+ * from the texture's edges as vanilla's are.
  */
 public final class SnowModels {
 	private static final SpriteIdentifier SNOW = new SpriteIdentifier(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE, Identifier.ofVanilla("block/snow"));
 	private static final SpriteIdentifier DRIP = new SpriteIdentifier(PlayerScreenHandler.BLOCK_ATLAS_TEXTURE, EternalReturn.id("block/snow_drip"));
-	/** A wall's, fence's or gate's cap, in pixels; a layer is 2. */
-	private static final int THIN_CAP = 1;
 	/** How far the drips hang (the rows of the drip texture drawn): on a face less than twice that high, half its height. */
 	private static final int DRIP_ROWS = 4;
 	private static final Direction[] SIDES = {Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST};
+	/** The tops of the blocks snow covers lie on, as drawn (per bare state; made anew as models load). */
+	private static Map<BlockState, int[]> coveredTops = new ConcurrentHashMap<>();
 
 	private SnowModels() {
 	}
 
 	public static void register() {
 		ModelLoadingPlugin.register(plugin -> {
-			// Every snowy state, by its model id (its blockstate file's variants without snow match it too).
+			coveredTops = new ConcurrentHashMap<>();
+			// Every snowy state, by its model id (its blockstate file's variants match it too).
 			Set<ModelIdentifier> snowy = new HashSet<>();
 			for (Block block : Registries.BLOCK) {
-				if (SnowCover.property(block.getDefaultState()) != null) {
+				if (SnowCover.isHost(block.getDefaultState())) {
 					for (BlockState state : block.getStateManager().getStates()) {
-						if (SnowCover.raw(state) > 0) {
+						if (SnowCover.marked(state)) {
 							snowy.add(BlockModels.getModelId(state));
 						}
 					}
@@ -82,11 +101,21 @@ public final class SnowModels {
 			}
 			plugin.modifyModelAfterBake().register((model, context) -> model == null || context.topLevelId() == null || !snowy.contains(context.topLevelId())
 					? model : new SnowyModel(model, context.textureGetter().apply(SNOW), context.textureGetter().apply(DRIP)));
+			plugin.registerBlockStateResolver(Snowlogging.SNOW_COVER, context -> {
+				UnbakedModel cover = new CoverUnbaked();
+				for (BlockState state : Snowlogging.SNOW_COVER.getStateManager().getStates()) {
+					context.setModel(state, cover);
+				}
+			});
 		});
 	}
 
 	private static Renderer renderer() {
 		return RendererAccess.INSTANCE.getRenderer();
+	}
+
+	private static RenderMaterial snowMaterial() {
+		return renderer().materialFinder().shadeMode(ShadeMode.VANILLA).blendMode(BlendMode.SOLID).find();
 	}
 
 	/** A quad's extent, in pixels. */
@@ -136,6 +165,23 @@ public final class SnowModels {
 			// Measuring only: nothing is drawn.
 			return false;
 		}
+	}
+
+	/** The top of a block a snow cover lies on, as drawn, measured once per bare state. */
+	private static int[] coveredTop(BlockRenderView view, BlockState below, BlockPos pos, Supplier<Random> randomSupplier, RenderContext context) {
+		BlockState bare = SnowCover.bare(below);
+		int[] known = coveredTops.get(bare);
+		if (known != null) {
+			return known;
+		}
+		Measure measure = new Measure();
+		context.pushTransform(measure);
+		MinecraftClient.getInstance().getBlockRenderManager().getModel(bare).emitBlockQuads(view, bare, pos, randomSupplier, context);
+		context.popTransform();
+		if (measure.any) {
+			coveredTops.put(bare, measure.heights);
+		}
+		return measure.heights;
 	}
 
 	/**
@@ -203,14 +249,13 @@ public final class SnowModels {
 			this.anyParts = true;
 			return false;
 		}
-
 	}
 
 	/** A face of the model under a drip: its side, its corners (x, y, z in the face's own order), cull face and material. */
 	private record Face(Direction side, float[] corners, @Nullable Direction cullFace, RenderMaterial material) {
 	}
 
-	/** A snowy state's model: the block's own (its faces under drips in pieces where need be), the snow on it and the drips. */
+	/** A snowy state's model: the block's own (its faces under drips in pieces where need be), the snow logged in it and the drips. */
 	static final class SnowyModel extends ForwardingBakedModel {
 		private final Sprite snow;
 		private final Sprite drip;
@@ -223,7 +268,7 @@ public final class SnowModels {
 			this.wrapped = wrapped;
 			this.snow = snow;
 			this.drip = drip;
-			this.snowMaterial = renderer().materialFinder().shadeMode(ShadeMode.VANILLA).blendMode(BlendMode.SOLID).find();
+			this.snowMaterial = snowMaterial();
 		}
 
 		@Override
@@ -244,31 +289,21 @@ public final class SnowModels {
 					this.heights = heights;
 				}
 			}
-			int held = SnowCover.held(state);
-			if (held == 0 && !SnowCover.snowOnTop(state)) {
+			int layers = Math.min(ClientSnow.layers(pos), SnowCover.capacity(state));
+			boolean snowAbove = SnowCover.isSnow(view.getBlockState(pos.up()));
+			if (layers == 0 && !snowAbove) {
 				this.wrapped.emitBlockQuads(view, state, pos, randomSupplier, context);
 				return;
 			}
-			// The snow's top in each column (its own top where there's none), and the columns with snow on them.
-			int[] tops = heights.clone();
+			// Each column's floor and the snow's top on it (the floor itself where there's none), and the columns whose top has snow on it.
+			int[] floors = new int[256];
+			int[] tops = new int[256];
 			boolean[] snowy = new boolean[256];
-			if (held > 0) {
-				boolean openAbove = view.getBlockState(pos.up()).isAir();
-				int fill = 2 * held * Integer.signum(SnowCover.openSpace(state));
-				int cap = SnowCover.property(state) == SnowCover.CAP ? THIN_CAP : 2;
-				for (int i = 0; i < 256; i++) {
-					int height = heights[i];
-					int top = fill > 0 && height < 16 ? Math.min(16, height + fill) : height + cap;
-					if (height >= 0 && (top <= 16 || openAbove)) {
-						tops[i] = top;
-						snowy[i] = true;
-					}
-				}
-			} else {
-				// Snow layers lying on its whole top.
-				for (int i = 0; i < 256; i++) {
-					snowy[i] = heights[i] >= 16;
-				}
+			for (int i = 0; i < 256; i++) {
+				int height = heights[i];
+				floors[i] = Math.max(0, height);
+				tops[i] = layers > 0 && floors[i] < 16 ? Math.min(16, floors[i] + 2 * layers) : floors[i];
+				snowy[i] = height >= 0 && (height < 16 ? layers > 0 : snowAbove);
 			}
 			Drips drips = new Drips(heights, snowy);
 			context.pushTransform(drips);
@@ -276,11 +311,8 @@ public final class SnowModels {
 			context.popTransform();
 			QuadEmitter emitter = context.getEmitter();
 			this.emitDrips(drips, emitter);
-			if (held > 0) {
-				this.emitTops(view, pos, heights, tops, emitter);
-				for (Direction side : SIDES) {
-					this.emitSnowSides(view, pos, side, heights, tops, emitter);
-				}
+			if (layers > 0) {
+				emitSnow(view, pos, floors, tops, emitter, this.snow, this.snowMaterial);
 			}
 		}
 
@@ -384,146 +416,158 @@ public final class SnowModels {
 				v[i] = skipped + (top - corners[3 * i + 1]) * 16.0F;
 				emitter.pos(i, corners[3 * i], corners[3 * i + 1], corners[3 * i + 2]);
 			}
-			this.finish(emitter, u, v, this.drip, material, side, cullFace);
+			finish(emitter, u, v, this.drip, material, side, cullFace);
 		}
+	}
 
-		/** The snow's top: rectangles of columns of one height, but under a full block above. */
-		private void emitTops(BlockRenderView view, BlockPos pos, int[] heights, int[] tops, QuadEmitter emitter) {
-			boolean covered = view.getBlockState(pos.up()).isOpaqueFullCube(view, pos.up());
-			boolean[] done = new boolean[256];
-			for (int z = 0; z < 16; z++) {
-				for (int x = 0; x < 16; x++) {
+	/**
+	 * Snow over columns of a block's space (pixels: floors and tops, the floor itself where there's none): its tops (but
+	 * under a full block above), and its sides where neither snow beside them nor an opaque neighbour covers them.
+	 */
+	private static void emitSnow(BlockRenderView view, BlockPos pos, int[] floors, int[] tops, QuadEmitter emitter, Sprite snow, RenderMaterial material) {
+		boolean covered = view.getBlockState(pos.up()).isOpaqueFullCube(view, pos.up());
+		boolean[] done = new boolean[256];
+		for (int z = 0; z < 16; z++) {
+			for (int x = 0; x < 16; x++) {
+				int i = x + 16 * z;
+				if (done[i] || tops[i] <= floors[i]) {
+					continue;
+				}
+				int top = tops[i];
+				int x1 = x + 1;
+				while (x1 < 16 && same(x1 + 16 * z, top, floors, tops, done)) {
+					x1++;
+				}
+				int z1 = z + 1;
+				while (z1 < 16 && rowSame(x, x1, z1, top, floors, tops, done)) {
+					z1++;
+				}
+				for (int zz = z; zz < z1; zz++) {
+					for (int xx = x; xx < x1; xx++) {
+						done[xx + 16 * zz] = true;
+					}
+				}
+				if (!(covered && top == 16)) {
+					up(emitter, x, z, x1, z1, top, snow, material);
+				}
+			}
+		}
+		for (Direction side : SIDES) {
+			emitSides(view, pos, side, floors, tops, emitter, snow, material);
+		}
+	}
+
+	private static boolean same(int i, int top, int[] floors, int[] tops, boolean[] done) {
+		return !done[i] && tops[i] > floors[i] && tops[i] == top;
+	}
+
+	private static boolean rowSame(int x0, int x1, int z, int top, int[] floors, int[] tops, boolean[] done) {
+		for (int x = x0; x < x1; x++) {
+			if (!same(x + 16 * z, top, floors, tops, done)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/** The snow's faces toward one side: what of each column's snow the snow in the column beside doesn't cover (nor, at the edge, an opaque neighbour). */
+	private static void emitSides(BlockRenderView view, BlockPos pos, Direction side, int[] floors, int[] tops, QuadEmitter emitter, Sprite snow, RenderMaterial material) {
+		boolean alongX = side.getAxis() == Direction.Axis.Z;
+		for (int line = 0; line < 16; line++) {
+			int runFrom = 0;
+			int runBottom = -1;
+			int runTop = -1;
+			for (int along = 0; along <= 16; along++) {
+				int bottom = -1;
+				int top = -1;
+				if (along < 16) {
+					int x = alongX ? along : line;
+					int z = alongX ? line : along;
 					int i = x + 16 * z;
-					if (done[i] || tops[i] <= heights[i]) {
-						continue;
-					}
-					int top = tops[i];
-					int x1 = x + 1;
-					while (x1 < 16 && same(x1 + 16 * z, top, heights, tops, done)) {
-						x1++;
-					}
-					int z1 = z + 1;
-					while (z1 < 16 && rowSame(x, x1, z1, top, heights, tops, done)) {
-						z1++;
-					}
-					for (int zz = z; zz < z1; zz++) {
-						for (int xx = x; xx < x1; xx++) {
-							done[xx + 16 * zz] = true;
-						}
-					}
-					if (!(covered && top == 16)) {
-						this.up(emitter, x, z, x1, z1, top);
-					}
-				}
-			}
-		}
-
-		private static boolean same(int i, int top, int[] heights, int[] tops, boolean[] done) {
-			return !done[i] && tops[i] > heights[i] && tops[i] == top;
-		}
-
-		private static boolean rowSame(int x0, int x1, int z, int top, int[] heights, int[] tops, boolean[] done) {
-			for (int x = x0; x < x1; x++) {
-				if (!same(x + 16 * z, top, heights, tops, done)) {
-					return false;
-				}
-			}
-			return true;
-		}
-
-		/** The snow's faces toward one side: where neither the block nor its snow next to it covers them, nor an opaque neighbour. */
-		private void emitSnowSides(BlockRenderView view, BlockPos pos, Direction side, int[] heights, int[] tops, QuadEmitter emitter) {
-			boolean alongX = side.getAxis() == Direction.Axis.Z;
-			for (int line = 0; line < 16; line++) {
-				int runFrom = 0;
-				int runBottom = -1;
-				int runTop = -1;
-				for (int along = 0; along <= 16; along++) {
-					int bottom = -1;
-					int top = -1;
-					if (along < 16) {
-						int x = alongX ? along : line;
-						int z = alongX ? line : along;
-						int i = x + 16 * z;
-						if (tops[i] > heights[i]) {
-							int nx = x + side.getOffsetX();
-							int nz = z + side.getOffsetZ();
-							int cover = nx < 0 || nx > 15 || nz < 0 || nz > 15 ? -1 : Math.max(heights[nx + 16 * nz], tops[nx + 16 * nz]);
-							bottom = Math.max(heights[i], cover);
-							top = tops[i];
-							if (bottom >= top) {
-								bottom = top = -1;
+					if (tops[i] > floors[i]) {
+						bottom = floors[i];
+						top = tops[i];
+						int nx = x + side.getOffsetX();
+						int nz = z + side.getOffsetZ();
+						if (nx >= 0 && nx <= 15 && nz >= 0 && nz <= 15) {
+							int n = nx + 16 * nz;
+							// Snow beside, from as low up, hides this side up to its own top.
+							if (tops[n] > floors[n] && floors[n] <= bottom) {
+								bottom = Math.max(bottom, tops[n]);
 							}
 						}
-					}
-					if (bottom != runBottom || top != runTop) {
-						if (runTop > runBottom) {
-							int plane = side.getDirection() == Direction.AxisDirection.POSITIVE ? line + 1 : line;
-							boolean edge = plane == 0 || plane == 16;
-							if (!edge || !covered(view, pos, side, runFrom, along, runBottom, runTop)) {
-								this.side(emitter, side, plane, runFrom, along, runBottom, runTop);
-							}
+						if (bottom >= top) {
+							bottom = top = -1;
 						}
-						runFrom = along;
-						runBottom = bottom;
-						runTop = top;
 					}
 				}
-			}
-		}
-
-		/** An upward face of snow at a height, over x0..x1 and z0..z1 (pixels), laid out as vanilla's (u east, v south). */
-		private void up(QuadEmitter emitter, int x0, int z0, int x1, int z1, int y) {
-			int[][] corners = {{x0, z0}, {x0, z1}, {x1, z1}, {x1, z0}};
-			float[] u = new float[4];
-			float[] v = new float[4];
-			for (int i = 0; i < 4; i++) {
-				emitter.pos(i, corners[i][0] / 16.0F, y / 16.0F, corners[i][1] / 16.0F);
-				u[i] = corners[i][0];
-				v[i] = corners[i][1];
-			}
-			this.finish(emitter, u, v, this.snow, this.snowMaterial, Direction.UP, null);
-		}
-
-		/** A face of snow toward a side, in the plane at plane pixels, from..to along it and bottom..top up it (the bottom of the texture at its bottom). */
-		private void side(QuadEmitter emitter, Direction side, int plane, int from, int to, int bottom, int top) {
-			// Corners top-left, bottom-left, bottom-right, top-right as seen from outside, as vanilla's faces go.
-			boolean leftIsLow = side == Direction.SOUTH || side == Direction.WEST;
-			int left = leftIsLow ? from : to;
-			int right = leftIsLow ? to : from;
-			int[][] corners = {{left, top}, {left, bottom}, {right, bottom}, {right, top}};
-			float[] u = new float[4];
-			float[] v = new float[4];
-			for (int i = 0; i < 4; i++) {
-				int a = corners[i][0];
-				int y = corners[i][1];
-				if (side.getAxis() == Direction.Axis.Z) {
-					emitter.pos(i, a / 16.0F, y / 16.0F, plane / 16.0F);
-				} else {
-					emitter.pos(i, plane / 16.0F, y / 16.0F, a / 16.0F);
+				if (bottom != runBottom || top != runTop) {
+					if (runTop > runBottom) {
+						int plane = side.getDirection() == Direction.AxisDirection.POSITIVE ? line + 1 : line;
+						boolean edge = plane == 0 || plane == 16;
+						if (!edge || !covered(view, pos, side, runFrom, along, runBottom, runTop)) {
+							side(emitter, side, plane, runFrom, along, runBottom, runTop, snow, material);
+						}
+					}
+					runFrom = along;
+					runBottom = bottom;
+					runTop = top;
 				}
-				u[i] = side == Direction.SOUTH || side == Direction.WEST ? a : 16 - a;
-				v[i] = 16 - (y - bottom);
 			}
-			this.finish(emitter, u, v, this.snow, this.snowMaterial, side, null);
 		}
+	}
 
-		/** Texture coordinates (0 to 16) pulled in from the texture's edges as vanilla's are, and the rest of a quad. */
-		private void finish(QuadEmitter emitter, float[] u, float[] v, Sprite sprite, RenderMaterial material, Direction face, @Nullable Direction cullFace) {
-			float shrink = sprite.getAnimationFrameDelta();
-			float uMid = (u[0] + u[1] + u[2] + u[3]) / 4.0F;
-			float vMid = (v[0] + v[1] + v[2] + v[3]) / 4.0F;
-			for (int i = 0; i < 4; i++) {
-				emitter.uv(i, MathHelper.lerp(shrink, u[i], uMid), MathHelper.lerp(shrink, v[i], vMid));
-			}
-			emitter.cullFace(cullFace);
-			emitter.nominalFace(face);
-			emitter.spriteBake(sprite, 0);
-			emitter.color(-1, -1, -1, -1);
-			emitter.colorIndex(-1);
-			emitter.material(material);
-			emitter.emit();
+	/** An upward face of snow at a height, over x0..x1 and z0..z1 (pixels), laid out as vanilla's (u east, v south). */
+	private static void up(QuadEmitter emitter, int x0, int z0, int x1, int z1, int y, Sprite snow, RenderMaterial material) {
+		int[][] corners = {{x0, z0}, {x0, z1}, {x1, z1}, {x1, z0}};
+		float[] u = new float[4];
+		float[] v = new float[4];
+		for (int i = 0; i < 4; i++) {
+			emitter.pos(i, corners[i][0] / 16.0F, y / 16.0F, corners[i][1] / 16.0F);
+			u[i] = corners[i][0];
+			v[i] = corners[i][1];
 		}
+		finish(emitter, u, v, snow, material, Direction.UP, null);
+	}
+
+	/** A face of snow toward a side, in the plane at plane pixels, from..to along it and bottom..top up it (the bottom of the texture at its bottom). */
+	private static void side(QuadEmitter emitter, Direction side, int plane, int from, int to, int bottom, int top, Sprite snow, RenderMaterial material) {
+		// Corners top-left, bottom-left, bottom-right, top-right as seen from outside, as vanilla's faces go.
+		boolean leftIsLow = side == Direction.SOUTH || side == Direction.WEST;
+		int left = leftIsLow ? from : to;
+		int right = leftIsLow ? to : from;
+		int[][] corners = {{left, top}, {left, bottom}, {right, bottom}, {right, top}};
+		float[] u = new float[4];
+		float[] v = new float[4];
+		for (int i = 0; i < 4; i++) {
+			int a = corners[i][0];
+			int y = corners[i][1];
+			if (side.getAxis() == Direction.Axis.Z) {
+				emitter.pos(i, a / 16.0F, y / 16.0F, plane / 16.0F);
+			} else {
+				emitter.pos(i, plane / 16.0F, y / 16.0F, a / 16.0F);
+			}
+			u[i] = leftIsLow ? a : 16 - a;
+			v[i] = 16 - (y - bottom);
+		}
+		finish(emitter, u, v, snow, material, side, null);
+	}
+
+	/** Texture coordinates (0 to 16) pulled in from the texture's edges as vanilla's are, and the rest of a quad. */
+	private static void finish(QuadEmitter emitter, float[] u, float[] v, Sprite sprite, RenderMaterial material, Direction face, @Nullable Direction cullFace) {
+		float shrink = sprite.getAnimationFrameDelta();
+		float uMid = (u[0] + u[1] + u[2] + u[3]) / 4.0F;
+		float vMid = (v[0] + v[1] + v[2] + v[3]) / 4.0F;
+		for (int i = 0; i < 4; i++) {
+			emitter.uv(i, MathHelper.lerp(shrink, u[i], uMid), MathHelper.lerp(shrink, v[i], vMid));
+		}
+		emitter.cullFace(cullFace);
+		emitter.nominalFace(face);
+		emitter.spriteBake(sprite, 0);
+		emitter.color(-1, -1, -1, -1);
+		emitter.colorIndex(-1);
+		emitter.material(material);
+		emitter.emit();
 	}
 
 	/** Whether an opaque neighbour on a side covers a face of the snow there (in pixels: along the side, and up it). */
@@ -539,5 +583,94 @@ public final class SnowModels {
 		VoxelShape face = neighbor.getCullingFace(view, other, side.getOpposite());
 		VoxelShape mine = side.getAxis() == Direction.Axis.Z ? Block.createCuboidShape(from, bottom, 0, to, top, 16) : Block.createCuboidShape(0, bottom, from, 16, top, to);
 		return !face.isEmpty() && !VoxelShapes.matchesAnywhere(mine, face, BooleanBiFunction.ONLY_FIRST);
+	}
+
+	/** Bakes the snow cover's model (snow's texture for its particles). */
+	static final class CoverUnbaked implements UnbakedModel {
+		@Override
+		public Collection<Identifier> getModelDependencies() {
+			return List.of();
+		}
+
+		@Override
+		public void setParents(Function<Identifier, UnbakedModel> modelLoader) {
+		}
+
+		@Override
+		public BakedModel bake(Baker baker, Function<SpriteIdentifier, Sprite> textureGetter, ModelBakeSettings rotationContainer) {
+			return new CoverModel(textureGetter.apply(SNOW));
+		}
+	}
+
+	/** A snow cover: its layers of snow over the parts of the block below it that reach the top, as that block is drawn. */
+	static final class CoverModel implements BakedModel, FabricBakedModel {
+		private final Sprite snow;
+		private final RenderMaterial material;
+
+		CoverModel(Sprite snow) {
+			this.snow = snow;
+			this.material = snowMaterial();
+		}
+
+		@Override
+		public boolean isVanillaAdapter() {
+			return false;
+		}
+
+		@Override
+		public void emitBlockQuads(BlockRenderView view, BlockState state, BlockPos pos, Supplier<Random> randomSupplier, RenderContext context) {
+			BlockState below = view.getBlockState(pos.down());
+			if (!SnowCover.isHost(below)) {
+				return;
+			}
+			int[] heights = coveredTop(view, below, pos.down(), randomSupplier, context);
+			int depth = 2 * state.get(SnowBlock.LAYERS);
+			int[] floors = new int[256];
+			int[] tops = new int[256];
+			for (int i = 0; i < 256; i++) {
+				tops[i] = heights[i] >= 16 ? depth : 0;
+			}
+			emitSnow(view, pos, floors, tops, context.getEmitter(), this.snow, this.material);
+		}
+
+		@Override
+		public List<BakedQuad> getQuads(@Nullable BlockState state, @Nullable Direction face, Random random) {
+			return List.of();
+		}
+
+		@Override
+		public boolean useAmbientOcclusion() {
+			return true;
+		}
+
+		@Override
+		public boolean hasDepth() {
+			return false;
+		}
+
+		@Override
+		public boolean isSideLit() {
+			return true;
+		}
+
+		@Override
+		public boolean isBuiltin() {
+			return false;
+		}
+
+		@Override
+		public Sprite getParticleSprite() {
+			return this.snow;
+		}
+
+		@Override
+		public ModelTransformation getTransformation() {
+			return ModelTransformation.NONE;
+		}
+
+		@Override
+		public ModelOverrideList getOverrides() {
+			return ModelOverrideList.EMPTY;
+		}
 	}
 }
