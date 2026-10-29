@@ -81,8 +81,20 @@ public final class SnowModels {
 	private static final Direction[] SIDES = {Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST};
 	/** The tops of the blocks snow covers lie on, as drawn (per bare state; made anew as models load). */
 	private static Map<BlockState, int[]> coveredTops = new ConcurrentHashMap<>();
+	/** Set while a snowy block's model is to draw only the snow logged in it (SnowOutlineMixin: the cracks of mining that snow). */
+	private static final ThreadLocal<Boolean> SNOW_ONLY = ThreadLocal.withInitial(() -> false);
 
 	private SnowModels() {
+	}
+
+	/** Draws (through the drawing given) only the snow logged in a snowy block, not the block or its drips. */
+	public static void onlySnow(Runnable draw) {
+		SNOW_ONLY.set(true);
+		try {
+			draw.run();
+		} finally {
+			SNOW_ONLY.set(false);
+		}
 	}
 
 	public static void register() {
@@ -291,7 +303,8 @@ public final class SnowModels {
 			}
 			int layers = Math.min(ClientSnow.layers(pos), SnowCover.capacity(state));
 			boolean snowAbove = SnowCover.isSnow(view.getBlockState(pos.up()));
-			if (layers == 0 && !snowAbove) {
+			boolean onlySnow = SNOW_ONLY.get();
+			if (layers == 0 && !snowAbove && !onlySnow) {
 				this.wrapped.emitBlockQuads(view, state, pos, randomSupplier, context);
 				return;
 			}
@@ -304,6 +317,10 @@ public final class SnowModels {
 				floors[i] = Math.max(0, height);
 				tops[i] = layers > 0 && floors[i] < 16 ? Math.min(16, floors[i] + 2 * layers) : floors[i];
 				snowy[i] = height >= 0 && (height < 16 ? layers > 0 : snowAbove);
+			}
+			if (onlySnow) {
+				emitSnow(view, pos, floors, tops, context.getEmitter(), this.snow, this.snowMaterial);
+				return;
 			}
 			Drips drips = new Drips(heights, snowy);
 			context.pushTransform(drips);
