@@ -19,18 +19,12 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.mojang.authlib.GameProfile;
-import io.netty.channel.embedded.EmbeddedChannel;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.network.ClientConnection;
-import net.minecraft.network.NetworkSide;
-import net.minecraft.server.network.ConnectedClientData;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.test.GameTest;
 import net.minecraft.test.TestContext;
 import net.minecraft.util.Hand;
@@ -39,7 +33,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
 
 import java.lang.reflect.Field;
-import java.util.UUID;
 
 /** Regression tests: Lure V with bait still bites, Thriftiness, doubled fish prices. */
 public class FishingFixTests implements FabricGameTest {
@@ -51,19 +44,6 @@ public class FishingFixTests implements FabricGameTest {
 		} catch (ReflectiveOperationException e) {
 			throw new RuntimeException(e);
 		}
-	}
-
-	static ServerPlayerEntity survivalPlayer(TestContext ctx, BlockPos rel) {
-		ServerWorld world = ctx.getWorld();
-		ConnectedClientData data = ConnectedClientData.createDefault(new GameProfile(UUID.randomUUID(), "test-angler"), false);
-		ServerPlayerEntity player = new ServerPlayerEntity(world.getServer(), world, data.gameProfile(), data.syncedOptions());
-		ClientConnection connection = new ClientConnection(NetworkSide.SERVERBOUND);
-		new EmbeddedChannel(connection);
-		world.getServer().getPlayerManager().onPlayerConnect(connection, player, data);
-		player.changeGameMode(GameMode.SURVIVAL);
-		Vec3d p = Vec3d.ofBottomCenter(ctx.getAbsolutePos(rel));
-		player.teleport(world, p.x, p.y, p.z, 0.0F, 0.0F);
-		return player;
 	}
 
 	static void waterPool(TestContext ctx) {
@@ -86,7 +66,7 @@ public class FishingFixTests implements FabricGameTest {
 	public void lureFiveWithChumStillBites(TestContext ctx) {
 		ctx.getWorld().setTimeOfDay(6000);
 		waterPool(ctx);
-		ServerPlayerEntity player = survivalPlayer(ctx, new BlockPos(1, 2, 4));
+		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(1, 2, 4));
 		player.setStackInHand(Hand.MAIN_HAND, new ItemStack(Items.FISHING_ROD));
 		player.getInventory().main.set(9, new ItemStack(FishingItems.CHUM, 8));
 		FishingBobberEntity hook = new FishingBobberEntity(player, ctx.getWorld(), 0, 500);

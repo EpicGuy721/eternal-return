@@ -71,9 +71,22 @@ public abstract class TestServerMixin {
 		args.set(1, optional);
 	}
 
+	/** The chosen batches; eternalreturn.gametest.repeat runs each that many times over, one copy after another (to catch flaky tests). */
 	@ModifyVariable(method = "create", at = @At("HEAD"), argsOnly = true)
 	private static Collection<TestFunction> eternalreturn$selectBatches(Collection<TestFunction> tests) {
-		return tests.stream().filter(test -> GameTestWorld.selects(test.batchId())).toList();
+		List<TestFunction> selected = tests.stream().filter(test -> GameTestWorld.selects(test.batchId())).toList();
+		int repeat = Integer.getInteger("eternalreturn.gametest.repeat", 1);
+		if (repeat <= 1) {
+			return selected;
+		}
+		List<TestFunction> copies = new java.util.ArrayList<>();
+		for (int i = 1; i <= repeat; i++) {
+			for (TestFunction t : selected) {
+				copies.add(new TestFunction(t.batchId() + "#" + i, t.templatePath(), t.templateName(), t.rotation(), t.tickLimit(), t.setupTicks(), t.required(),
+						t.manualOnly(), t.maxAttempts(), t.requiredSuccesses(), t.skyAccess(), t.starter()));
+			}
+		}
+		return copies;
 	}
 
 	/** The test world's seed is fixed at 0; worldgen runs pick their own (eternalreturn.gametest.seed). */

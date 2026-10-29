@@ -3,10 +3,13 @@
 	"package": "com.eternalreturn.gametest.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
+		"DespawnMixin",
 		"FireSpreadInvoker",
 		"HeardMixin",
 		"RangedWeaponInvoker",
+		"SandownAccessor",
 		"StepSoundInvoker",
+		"TestContextAccessor",
 		"TestServerMixin"
 	],
 	"injectors": {

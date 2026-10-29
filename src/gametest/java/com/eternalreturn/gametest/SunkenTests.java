@@ -46,10 +46,17 @@ public class SunkenTests implements FabricGameTest {
 	private static final String BATCH = "sunken";
 	private static final String ARENA = "eternalreturn_test:arena";
 
+	/** A Sunken as from a spawn egg; not one of the large ones (one skeleton in 200), which have no weapon. */
 	private static SunkenEntity sunken(TestContext ctx, BlockPos pos) {
 		ServerWorld world = ctx.getWorld();
 		SunkenEntity sunken = ctx.spawnEntity(NewMobs.SUNKEN, pos);
-		sunken.initialize(world, world.getLocalDifficulty(sunken.getBlockPos()), SpawnReason.SPAWN_EGG, null);
+		double large = EternalReturnConfig.get().mobs.largeVariantChance;
+		EternalReturnConfig.get().mobs.largeVariantChance = 0.0;
+		try {
+			sunken.initialize(world, world.getLocalDifficulty(sunken.getBlockPos()), SpawnReason.SPAWN_EGG, null);
+		} finally {
+			EternalReturnConfig.get().mobs.largeVariantChance = large;
+		}
 		return sunken;
 	}
 
@@ -131,8 +138,11 @@ public class SunkenTests implements FabricGameTest {
 		});
 	}
 
-	/** A Sunken draws its speargun at a target in range and shoots it (and keeps after it while it draws). */
-	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 300)
+	/**
+	 * A Sunken draws its speargun at a target in range and shoots it (and keeps after it while it draws). Its shots scatter
+	 * as a skeleton's do: it has time for ten or so, as now and then the first five all miss.
+	 */
+	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 500)
 	public void shootsItsTarget(TestContext ctx) {
 		SunkenEntity sunken = sunken(ctx, new BlockPos(8, 2, 4));
 		// A helmet, so the sun doesn't send it looking for shade.
@@ -157,15 +167,17 @@ public class SunkenTests implements FabricGameTest {
 				seen[2]++;
 			}
 			seen[3] = Math.max(seen[3], world(ctx).getEntitiesByClass(Speargun.Harpoon.class, new Box(sunken.getBlockPos()).expand(40.0), h -> true).size());
+			if (husk.getHealth() < health) {
+				sunken.discard();
+				husk.discard();
+				// Its own (the other tests here may still be shooting theirs).
+				world(ctx).getEntitiesByClass(Speargun.Harpoon.class, new Box(sunken.getBlockPos()).expand(40.0), h -> h.getOwner() == sunken).forEach(h -> h.discard());
+				ctx.complete();
+			}
 		});
-		ctx.runAtTick(250, () -> {
-			ctx.assertTrue(husk.getHealth() < health, "it shot the target: " + husk.getHealth() + " of " + health + " (charging " + seen[0] + ", using "
-					+ seen[1] + ", loaded " + seen[2] + ", harpoons " + seen[3] + ", target lost " + seen[4] + ", hand " + sunken.getMainHandStack() + ")");
-			sunken.discard();
-			husk.discard();
-			world(ctx).getEntitiesByClass(Speargun.Harpoon.class, new Box(sunken.getBlockPos()).expand(40.0), h -> true).forEach(h -> h.discard());
-			ctx.complete();
-		});
+		ctx.runAtTick(480, () -> ctx.assertTrue(husk.getHealth() < health, "it shot the target: " + husk.getHealth() + " of " + health + " (charging "
+				+ seen[0] + ", using " + seen[1] + ", loaded " + seen[2] + ", harpoons " + seen[3] + ", target lost " + seen[4] + ", hand " + sunken.getMainHandStack()
+				+ ")"));
 	}
 
 	private static ServerWorld world(TestContext ctx) {

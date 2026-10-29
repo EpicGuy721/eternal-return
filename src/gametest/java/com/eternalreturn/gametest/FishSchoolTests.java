@@ -26,9 +26,10 @@ public class FishSchoolTests implements FabricGameTest {
 				}
 			}
 		}
+		// Mid-water, 6 blocks up: the school drifts down as it goes, and on the bottom it mills about.
 		List<CodEntity> school = new ArrayList<>();
 		for (int i = 0; i < 8; i++) {
-			school.add(ctx.spawnEntity(EntityType.COD, new BlockPos(6 + i % 4, 5 + i / 4, 18 + i % 3)));
+			school.add(ctx.spawnEntity(EntityType.COD, new BlockPos(6 + i % 4, 8 + i / 4, 18 + i % 3)));
 		}
 		float[] sharpest = {0.0F};
 		float[] last = new float[school.size()];
@@ -77,12 +78,12 @@ public class FishSchoolTests implements FabricGameTest {
 			school.add(ctx.spawnEntity(EntityType.COD, new BlockPos(6 + i % 4, 5 + i / 4, 18 + i % 3)));
 		}
 		net.minecraft.server.network.ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(7, 6, 15));
-		Vec3d[] start = new Vec3d[1];
-		ctx.runAtTick(25, () -> start[0] = school.stream().map(CodEntity::getPos).reduce(Vec3d.ZERO, Vec3d::add).multiply(1.0 / school.size()));
+		// From where it was as the player came up (it flees at once: by tick 25 it can be near out of their range already).
+		Vec3d start = school.stream().map(CodEntity::getPos).reduce(Vec3d.ZERO, Vec3d::add).multiply(1.0 / school.size());
 		ctx.runAtTick(120, () -> {
 			Vec3d centre = school.stream().map(CodEntity::getPos).reduce(Vec3d.ZERO, Vec3d::add).multiply(1.0 / school.size());
-			ctx.assertTrue(centre.distanceTo(player.getPos()) > start[0].distanceTo(player.getPos()) + 2.0,
-					"the school moved off: " + start[0].distanceTo(player.getPos()) + " -> " + centre.distanceTo(player.getPos()));
+			ctx.assertTrue(centre.distanceTo(player.getPos()) > start.distanceTo(player.getPos()) + 2.0,
+					"the school moved off: " + start.distanceTo(player.getPos()) + " -> " + centre.distanceTo(player.getPos()));
 			FishingTests.disconnect(player);
 			ctx.killAllEntities();
 			ctx.complete();

@@ -1,6 +1,8 @@
 package com.eternalreturn.gametest;
 
+import com.eternalreturn.gametest.mixin.SandownAccessor;
 import com.eternalreturn.items.LaserBlaster;
+import com.eternalreturn.mixin.mobs.MobEntityAccessor;
 import com.eternalreturn.mobs.NewMobs;
 import com.eternalreturn.mobs.entity.SandownEntity;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
@@ -10,6 +12,7 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.FallingBlockEntity;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.mob.ZombieEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.item.ItemStack;
@@ -20,6 +23,7 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.test.GameTest;
+import net.minecraft.test.GameTestException;
 import net.minecraft.test.TestContext;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
@@ -35,6 +39,7 @@ import net.minecraft.world.biome.BiomeKeys;
  */
 public class SandownTests implements FabricGameTest {
 	private static final String BATCH = "sandown";
+	/** 16 by 40 blocks of stone floor (at y 1 here: stand on y 2), 14 high. */
 	private static final String ARENA = "eternalreturn_test:arena";
 
 	private static SandownEntity sandown(TestContext ctx, BlockPos pos) {
@@ -42,6 +47,20 @@ public class SandownTests implements FabricGameTest {
 		SandownEntity sandown = ctx.spawnEntity(NewMobs.SANDOWN, pos);
 		sandown.initialize(world, world.getLocalDifficulty(sandown.getBlockPos()), SpawnReason.SPAWN_EGG, null);
 		return sandown;
+	}
+
+	/**
+	 * He teleports up to 24 blocks, which can take him out of the arena: the chunks that far round it are kept loaded, so
+	 * he isn't left standing still where nothing moves (only the test areas' own chunks are kept loaded otherwise).
+	 */
+	private static void keepLoadedAround(TestContext ctx) {
+		BlockPos a = ctx.getAbsolutePos(new BlockPos(-24, 0, -24));
+		BlockPos b = ctx.getAbsolutePos(new BlockPos(16 + 24, 0, 40 + 24));
+		for (int x = Math.min(a.getX(), b.getX()) >> 4; x <= Math.max(a.getX(), b.getX()) >> 4; x++) {
+			for (int z = Math.min(a.getZ(), b.getZ()) >> 4; z <= Math.max(a.getZ(), b.getZ()) >> 4; z++) {
+				ctx.getWorld().setChunkForced(x, z, true);
+			}
+		}
 	}
 
 	/** A husk (it doesn't burn under the open sky) that stands still. */
@@ -72,33 +91,43 @@ public class SandownTests implements FabricGameTest {
 		ctx.complete();
 	}
 
-	/** A player in sight is let be; hurt by them, he aims at them and shoots. */
+	/**
+	 * A player in sight is let be; hurt by them, he aims at them and shoots. Checked when his first shot lands: four kill
+	 * the player, after which he has no one to turn on. He doesn't teleport off before he's hurt (idle, now and then he
+	 * does): out of the arena, its barrier walls (which a world hasn't) would keep him from seeing the player or pulling
+	 * them over.
+	 */
 	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 300)
 	public void neutralUntilHurt(TestContext ctx) {
-		SandownEntity sandown = sandown(ctx, new BlockPos(8, 1, 6));
-		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(8, 1, 22));
+		keepLoadedAround(ctx);
+		SandownEntity sandown = sandown(ctx, new BlockPos(8, 2, 6));
+		((SandownAccessor) sandown).eternalreturn$setTeleportCooldown(60);
+		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(8, 2, 22));
 		float health = player.getHealth();
-		boolean[] aimed = {false};
-		ctx.runAtEveryTick(() -> aimed[0] |= sandown.isAiming());
-		ctx.runAtTick(60, () -> {
-			try {
-				ctx.assertTrue(sandown.getTarget() == null, "a player he hasn't been hurt by is let be: " + sandown.getTarget());
-			} catch (RuntimeException e) {
-				FishingTests.disconnect(player);
-				throw e;
+		// Aimed; turned on the player once hurt.
+		boolean[] seen = {false, false};
+		ctx.runAtEveryTick(() -> {
+			seen[0] |= sandown.isAiming();
+			if (ctx.getTick() <= 60) {
+				return;
 			}
+			seen[1] |= sandown.getTarget() == player;
+			if (player.getHealth() < health) {
+				ctx.assertTrue(seen[1], "hurt, he turns on the player: " + sandown.getTarget());
+				ctx.assertTrue(seen[0], "aims his blaster");
+				DamageSource shot = player.getRecentDamageSource();
+				ctx.assertTrue(shot != null && shot.getAttacker() == sandown, "and shoots: " + (shot == null ? null : shot.getAttacker()));
+				sandown.discard();
+				ctx.complete();
+			}
+		});
+		ctx.runAtTick(60, () -> {
+			ctx.assertTrue(sandown.getTarget() == null, "a player he hasn't been hurt by is let be: " + sandown.getTarget());
 			sandown.damage(ctx.getWorld().getDamageSources().playerAttack(player), 1.0F);
 		});
-		ctx.runAtTick(220, () -> {
-			try {
-				ctx.assertTrue(sandown.getTarget() == player, "hurt, he turns on the player: " + sandown.getTarget());
-				ctx.assertTrue(aimed[0], "aims his blaster");
-				ctx.assertTrue(player.getHealth() < health, "and shoots: " + player.getHealth() + " of " + health);
-			} finally {
-				FishingTests.disconnect(player);
-				sandown.discard();
-			}
-			ctx.complete();
+		ctx.runAtTick(290, () -> {
+			throw new GameTestException("hurt, he turns on the player and shoots: target " + sandown.getTarget() + ", aimed " + seen[0]
+					+ ", player's health " + player.getHealth() + " of " + health + ", he's " + sandown.distanceTo(player) + " blocks off" + (sandown.canSee(player) ? "" : ", out of sight"));
 		});
 	}
 
@@ -106,7 +135,8 @@ public class SandownTests implements FabricGameTest {
 	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 100)
 	public void dodgesArrows(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
-		SandownEntity sandown = sandown(ctx, new BlockPos(8, 1, 10));
+		keepLoadedAround(ctx);
+		SandownEntity sandown = sandown(ctx, new BlockPos(8, 2, 10));
 		Vec3d from = sandown.getPos();
 		Vec3d start = Vec3d.ofCenter(ctx.getAbsolutePos(new BlockPos(8, 3, 22)));
 		ArrowEntity arrow = new ArrowEntity(world, start.x, start.y, start.z, new ItemStack(Items.ARROW), null);
@@ -126,7 +156,8 @@ public class SandownTests implements FabricGameTest {
 	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 100)
 	public void dodgesFallingBlocks(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
-		SandownEntity sandown = sandown(ctx, new BlockPos(8, 1, 10));
+		keepLoadedAround(ctx);
+		SandownEntity sandown = sandown(ctx, new BlockPos(8, 2, 10));
 		Vec3d from = sandown.getPos();
 		BlockPos above = ctx.getAbsolutePos(new BlockPos(8, 11, 10));
 		world.setBlockState(above, Blocks.ANVIL.getDefaultState());
@@ -143,13 +174,16 @@ public class SandownTests implements FabricGameTest {
 
 	/**
 	 * A player who comes up close sees him teleport off; caught up with again straight away, he stays put (his teleport
-	 * is cooling down), and once it's ready he's off again.
+	 * is cooling down), and once it's ready he's off again. He doesn't wander (no goals): the player, who isn't ticked,
+	 * wouldn't follow him.
 	 */
 	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 300)
 	public void teleportsAwayFromCloseCallers(TestContext ctx) {
-		SandownEntity sandown = sandown(ctx, new BlockPos(8, 1, 12));
+		keepLoadedAround(ctx);
+		SandownEntity sandown = sandown(ctx, new BlockPos(8, 2, 12));
+		((MobEntityAccessor) sandown).eternalreturn$goalSelector().clear(goal -> true);
 		Vec3d from = sandown.getPos();
-		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(8, 1, 14));
+		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(8, 2, 14));
 		Vec3d[] caught = new Vec3d[1];
 		ctx.runAtTick(20, () -> {
 			try {
@@ -193,8 +227,9 @@ public class SandownTests implements FabricGameTest {
 				ctx.setBlockState(new BlockPos(x, y, 20), Blocks.STONE);
 			}
 		}
-		SandownEntity sandown = sandown(ctx, new BlockPos(8, 1, 6));
-		ZombieEntity husk = target(ctx, new BlockPos(8, 1, 30));
+		keepLoadedAround(ctx);
+		SandownEntity sandown = sandown(ctx, new BlockPos(8, 2, 6));
+		ZombieEntity husk = target(ctx, new BlockPos(8, 2, 30));
 		sandown.setTarget(husk);
 		float health = husk.getHealth();
 		boolean[] pulled = {false};

@@ -38,6 +38,12 @@ public class LoungingTests implements FabricGameTest {
 		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(8, 2, 13));
 		ZombieEntity husk = sitter(ctx, 2000);
 		Vec3d start = husk.getPos();
+		// Once the noise has got it up, kept up: an idle husk may sit down again now and then.
+		ctx.runAtEveryTick(() -> {
+			if (ctx.getTick() > 60) {
+				Lounging.stand(husk);
+			}
+		});
 		ctx.runAtTick(60, () -> {
 			ctx.assertTrue(Lounging.isLounging(husk), "still sitting");
 			ctx.assertTrue(husk.getTarget() == null, "ignoring the player in plain view: " + husk.getTarget());
@@ -78,12 +84,16 @@ public class LoungingTests implements FabricGameTest {
 		ZombieEntity hurt = sitter(ctx, 2000);
 		ZombieEntity rested = ctx.spawnEntity(EntityType.HUSK, new BlockPos(4, 2, 20));
 		Lounging.sit(rested, 20);
+		// Up once its time is up (an idle husk may sit down again, now and then, after that).
+		boolean[] up = {false};
+		ctx.runAtEveryTick(() -> up[0] |= !Lounging.isLounging(rested));
 		ctx.runAtTick(5, () -> {
+			ctx.assertTrue(!up[0], "the rested one still sitting");
 			hurt.damage(ctx.getWorld().getDamageSources().generic(), 1.0F);
 			ctx.assertTrue(!Lounging.isLounging(hurt), "hurt, it got up");
 		});
 		ctx.runAtTick(40, () -> {
-			ctx.assertTrue(!Lounging.isLounging(rested), "its time up, it got up");
+			ctx.assertTrue(up[0], "its time up, it got up");
 			ctx.killAllEntities();
 			ctx.complete();
 		});
@@ -100,6 +110,8 @@ public class LoungingTests implements FabricGameTest {
 		ZombieEntity hunter = ctx.spawnEntity(EntityType.HUSK, new BlockPos(8, 2, 30));
 		ctx.runAtTick(20, () -> {
 			hunter.setTarget(husk);
+			// Up first: it may have sat down already, as an idle husk does now and then.
+			Lounging.stand(husk);
 			ctx.assertTrue(Lounging.canLounge(husk), "an idle husk may sit");
 			ctx.assertTrue(!Lounging.canLounge(pillager), "an illager never does");
 			ctx.assertTrue(!Lounging.canLounge(hunter), "nor a husk on the hunt");
@@ -120,10 +132,16 @@ public class LoungingTests implements FabricGameTest {
 		handed.equipStack(net.minecraft.entity.EquipmentSlot.OFFHAND, new net.minecraft.item.ItemStack(com.eternalreturn.items.Gems.RUBY));
 		net.minecraft.server.network.ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(8, 2, 34));
 		player.setStackInHand(net.minecraft.util.Hand.MAIN_HAND, new net.minecraft.item.ItemStack(net.minecraft.item.Items.GOLD_INGOT));
+		// Got up (the one handed a ruby trades it at once, and with its hands empty may sit down again after).
+		boolean[] up = {false, false};
+		ctx.runAtEveryTick(() -> {
+			up[0] |= !Lounging.isLounging(handed);
+			up[1] |= !Lounging.isLounging(watching);
+		});
 		ctx.runAtTick(40, () -> {
 			try {
-				ctx.assertTrue(!Lounging.isLounging(handed), "the piglin handed a ruby got up");
-				ctx.assertTrue(!Lounging.isLounging(watching), "the one near a player holding gold got up");
+				ctx.assertTrue(up[0], "the piglin handed a ruby got up");
+				ctx.assertTrue(up[1], "the one near a player holding gold got up");
 			} finally {
 				FishingTests.disconnect(player);
 				ctx.killAllEntities();

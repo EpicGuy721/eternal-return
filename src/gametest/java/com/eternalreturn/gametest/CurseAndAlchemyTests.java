@@ -5,6 +5,7 @@ import com.eternalreturn.gametest.mixin.RangedWeaponInvoker;
 import com.eternalreturn.items.PhilosophersStone;
 import com.eternalreturn.logic.NewEnchantments;
 import com.eternalreturn.mobs.HeadGear;
+import com.eternalreturn.mobs.ai.Lounging;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.PillarBlock;
@@ -225,9 +226,8 @@ public class CurseAndAlchemyTests implements FabricGameTest {
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "light_zombies", tickLimit = 600)
 	public void zombiesBreakTorches(TestContext ctx) {
 		floor(ctx, 7);
-		GameRules.BooleanRule rule = ctx.getWorld().getGameRules().get(GameRules.DO_MOB_GRIEFING);
-		boolean saved = rule.get();
-		rule.set(true, ctx.getWorld().getServer());
+		// mobGriefing on (its default; not put back after: that could turn it off under the other test of the batch).
+		ctx.getWorld().getGameRules().get(GameRules.DO_MOB_GRIEFING).set(true, ctx.getWorld().getServer());
 		ZombieEntity zombie = ctx.spawnEntity(EntityType.ZOMBIE, new BlockPos(0, 1, 0));
 		zombie.setBaby(false);
 		zombie.equipStack(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));
@@ -238,11 +238,12 @@ public class CurseAndAlchemyTests implements FabricGameTest {
 		ctx.setBlockState(new BlockPos(0, 1, 5), Blocks.GLOWSTONE);
 		boolean[] done = {false};
 		ctx.runAtEveryTick(() -> {
+			// Kept up: an idle zombie may sit down a while (Lounging), its AI off.
+			Lounging.stand(zombie);
 			if (!done[0] && ctx.getBlockState(new BlockPos(5, 1, 5)).isAir()) {
 				done[0] = true;
 				// Let the zombie tick on a while after the light is gone (it once crashed there).
 				ctx.runAtTick(ctx.getTick() + 10, () -> {
-					rule.set(saved, ctx.getWorld().getServer());
 					ctx.assertTrue(zombie.isAlive(), "the zombie carried on");
 					ctx.killAllEntities();
 					ctx.expectBlock(Blocks.GLOWSTONE, new BlockPos(0, 1, 5));
@@ -256,9 +257,7 @@ public class CurseAndAlchemyTests implements FabricGameTest {
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "light_zombies", tickLimit = 600)
 	public void toolZombiesBreakLanterns(TestContext ctx) {
 		floor(ctx, 7);
-		GameRules.BooleanRule rule = ctx.getWorld().getGameRules().get(GameRules.DO_MOB_GRIEFING);
-		boolean saved = rule.get();
-		rule.set(true, ctx.getWorld().getServer());
+		ctx.getWorld().getGameRules().get(GameRules.DO_MOB_GRIEFING).set(true, ctx.getWorld().getServer());
 		ZombieEntity zombie = ctx.spawnEntity(EntityType.ZOMBIE, new BlockPos(0, 1, 0));
 		zombie.setBaby(false);
 		zombie.equipStack(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));
@@ -267,11 +266,11 @@ public class CurseAndAlchemyTests implements FabricGameTest {
 		ctx.setBlockState(new BlockPos(5, 1, 4), Blocks.LANTERN);
 		boolean[] done = {false};
 		ctx.runAtEveryTick(() -> {
+			Lounging.stand(zombie);
 			if (!done[0] && ctx.getBlockState(new BlockPos(5, 1, 4)).isAir()) {
 				done[0] = true;
 				// Let the zombie tick on a while after the light is gone (it once crashed there).
 				ctx.runAtTick(ctx.getTick() + 10, () -> {
-					rule.set(saved, ctx.getWorld().getServer());
 					ctx.assertTrue(zombie.isAlive(), "the zombie carried on");
 					ctx.killAllEntities();
 					ctx.complete();

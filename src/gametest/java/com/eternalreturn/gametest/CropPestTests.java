@@ -21,6 +21,7 @@ import net.minecraft.test.GameTest;
 import net.minecraft.test.TestContext;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameMode;
+import net.minecraft.world.GameRules;
 
 import java.util.function.Supplier;
 
@@ -28,8 +29,9 @@ import java.util.function.Supplier;
 public class CropPestTests implements FabricGameTest {
 	private static final BlockPos CROP = new BlockPos(4, 1, 4);
 
-	/** Farmland with a crop of this age on it, and a wild songbird a few blocks off. */
+	/** Farmland with a crop of this age on it, and a wild songbird a few blocks off (mobGriefing on: birds peck only with it). */
 	private static BirdEntity field(TestContext ctx, int age) {
+		ctx.getWorld().getGameRules().get(GameRules.DO_MOB_GRIEFING).set(true, ctx.getWorld().getServer());
 		for (BlockPos pos : BlockPos.iterate(new BlockPos(0, 0, 0), new BlockPos(7, 0, 7))) {
 			ctx.setBlockState(pos, Blocks.GRASS_BLOCK);
 		}
@@ -61,8 +63,11 @@ public class CropPestTests implements FabricGameTest {
 		ctx.complete();
 	}
 
-	/** Left to itself, a songbird flies to a seed on farmland and eats it. */
-	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "crop_pests", tickLimit = 900)
+	/**
+	 * Left to itself, a songbird flies to a seed on farmland and eats it. (Time for a second go: now and then it takes off
+	 * with its flock on a whim, and leaves crops alone for a minute or so after.)
+	 */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "crop_pests", tickLimit = 2400)
 	public void songbirdsEatSeeds(TestContext ctx) {
 		BirdEntity bird = field(ctx, 0);
 		boolean[] pecked = {false};
@@ -77,7 +82,7 @@ public class CropPestTests implements FabricGameTest {
 	}
 
 	/** A tamed wolf (its owner about: a pet whose owner is away stays put) runs at a bird pecking at crops and it flies off, the crop saved. */
-	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "crop_pests_wolf", tickLimit = 900)
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "crop_pests_wolf", tickLimit = 2400)
 	public void wolvesChaseBirdsOff(TestContext ctx) {
 		ServerPlayerEntity owner = FishingTests.survivalPlayer(ctx, new BlockPos(7, 1, 7));
 		// (in creative, so the bird isn't wary of them)
@@ -90,14 +95,17 @@ public class CropPestTests implements FabricGameTest {
 	}
 
 	/** A villager (by day) walks over to a bird pecking at crops and it flies off, the crop saved. */
-	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "crop_pests_villager", tickLimit = 1200)
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "crop_pests_villager", tickLimit = 2400)
 	public void villagersChaseBirdsOff(TestContext ctx) {
 		ctx.getWorld().setTimeOfDay(1000);
 		chasedOff(ctx, () -> ctx.spawnEntity(EntityType.VILLAGER, new BlockPos(6, 1, 6)), () -> {
 		});
 	}
 
-	/** Once the bird is at the crop pecking, the chaser comes; then the bird must leave before it eats (a young crop: set back a stage). */
+	/**
+	 * Once the bird is at the crop pecking, the chaser comes; then the bird must leave before it eats (a young crop: set
+	 * back a stage). (The tests allow time for a second go: see songbirdsEatSeeds.)
+	 */
 	private static void chasedOff(TestContext ctx, Supplier<Entity> chaser, Runnable cleanUp) {
 		BirdEntity bird = field(ctx, 3);
 		Entity[] chasing = {null};

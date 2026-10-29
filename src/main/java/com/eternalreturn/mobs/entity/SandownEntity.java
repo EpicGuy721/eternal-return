@@ -64,9 +64,10 @@ import java.util.UUID;
  * dropped one time in 100) and shoots whoever he's angry with when he can see them within RANGE blocks, every
  * SHOT_COOLDOWN ticks. Out of his reach (out of sight or range) for REACH_PATIENCE ticks, they're teleported in front of
  * him, where he can see them (at most every PULL_COOLDOWN ticks). He teleports, as an enderman does: away from a player
- * who comes within TOO_CLOSE blocks, away from a projectile coming at him or a block falling on him (and one that
- * reaches him doesn't hurt him: he's gone), and now and then when idle; but at most once every TELEPORT_COOLDOWN ticks,
- * so for a while after a teleport he can be caught and hit. Mostly silent: a robotic noise now and then.
+ * who comes within TOO_CLOSE blocks, away from a projectile coming at him (and off its way on) or a block falling on him
+ * (and one that reaches him doesn't hurt him: he's gone), and now and then when idle; but at most once every
+ * TELEPORT_COOLDOWN ticks, so for a while after a teleport he can be caught and hit. Mostly silent: a robotic noise now
+ * and then.
  */
 public class SandownEntity extends HostileEntity implements Angerable, RangedAttackMob {
 	public static final float RANGE = 32.0F;
@@ -219,7 +220,7 @@ public class SandownEntity extends HostileEntity implements Angerable, RangedAtt
 		if (!incoming.isEmpty()) {
 			ProjectileEntity projectile = incoming.get(0);
 			this.angerAt(projectile.getOwner());
-			this.teleportAway(projectile.getPos(), 8.0, 16.0);
+			this.teleportAway(projectile.getPos(), 8.0, 16.0, projectile.getVelocity());
 			return;
 		}
 		Box overhead = box.expand(1.0, 0.0, 1.0).stretch(0.0, 12.0, 0.0);
@@ -268,6 +269,11 @@ public class SandownEntity extends HostileEntity implements Angerable, RangedAtt
 	 * solid ground; where he can see his target, if he can find such a place. Not again until TELEPORT_COOLDOWN is up.
 	 */
 	public boolean teleportAway(Vec3d threat, double min, double max) {
+		return this.teleportAway(threat, min, max, null);
+	}
+
+	/** As teleportAway, from a projectile flying this way (heading): not anywhere on its way on, where it would still hit him. */
+	private boolean teleportAway(Vec3d threat, double min, double max, @Nullable Vec3d heading) {
 		if (this.getWorld().isClient() || !this.isAlive() || this.teleportCooldown > 0) {
 			return false;
 		}
@@ -282,6 +288,9 @@ public class SandownEntity extends HostileEntity implements Angerable, RangedAtt
 			double x = this.getX() + Math.cos(angle) * distance;
 			double z = this.getZ() + Math.sin(angle) * distance;
 			double y = this.getY() + this.random.nextInt(17) - 8;
+			if (heading != null && onTheWay(threat, heading, x, z)) {
+				continue;
+			}
 			// The first two thirds of the tries want a view of his target.
 			boolean wantView = target != null && attempt < 32;
 			if (this.teleportTo(x, y, z, wantView ? target : null)) {
@@ -290,6 +299,19 @@ public class SandownEntity extends HostileEntity implements Angerable, RangedAtt
 			}
 		}
 		return false;
+	}
+
+	/** Within two blocks (seen from above) of the way on of something at from flying this way (heading). */
+	private static boolean onTheWay(Vec3d from, Vec3d heading, double x, double z) {
+		double length = heading.horizontalLength();
+		if (length < 1.0E-4) {
+			return false;
+		}
+		double dx = x - from.x;
+		double dz = z - from.z;
+		double along = (dx * heading.x + dz * heading.z) / length;
+		double across = Math.abs(dx * heading.z - dz * heading.x) / length;
+		return along > 0.0 && across < 2.0;
 	}
 
 	/** As an enderman teleports: down to solid ground (not water) below the spot, if he fits there. */
@@ -335,7 +357,7 @@ public class SandownEntity extends HostileEntity implements Angerable, RangedAtt
 		boolean falling = source.isOf(DamageTypes.FALLING_ANVIL) || source.isOf(DamageTypes.FALLING_BLOCK) || source.isOf(DamageTypes.FALLING_STALACTITE);
 		if (projectile || falling) {
 			Entity from = source.getSource();
-			if (this.teleportAway(from != null ? from.getPos() : this.getPos(), 8.0, 16.0)) {
+			if (this.teleportAway(from != null ? from.getPos() : this.getPos(), 8.0, 16.0, projectile && from != null ? from.getVelocity() : null)) {
 				if (projectile) {
 					this.angerAt(source.getAttacker());
 				}

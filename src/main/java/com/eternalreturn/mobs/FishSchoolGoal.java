@@ -1,6 +1,7 @@
 package com.eternalreturn.mobs;
 
 import com.eternalreturn.config.EternalReturnConfig;
+import com.eternalreturn.mixin.mobs.EntityNavigationAccessor;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.Goal;
@@ -93,6 +94,9 @@ public class FishSchoolGoal extends Goal {
 	@Override
 	public void start() {
 		this.fish.getNavigation().stop();
+		// For good: a path whose recalculation was put off (blocks changed near it) would otherwise come back some ticks
+		// later and steer the fish away from its school, turning it sharply.
+		((EntityNavigationAccessor) this.fish.getNavigation()).eternalreturn$setInRecalculationCooldown(false);
 		this.sinceLook = 0;
 	}
 

@@ -173,9 +173,13 @@ public final class CropPests {
 			Vec3d center = Vec3d.ofBottomCenter(this.crop);
 			double dx = center.x - this.bird.getX();
 			double dz = center.z - this.bird.getZ();
-			if (dx * dx + dz * dz > 0.7 * 0.7 || Math.abs(center.y - this.bird.getY()) > 1.0 || !this.bird.isOnGround()) {
+			double off = dx * dx + dz * dz;
+			if (off > 0.7 * 0.7 || Math.abs(center.y - this.bird.getY()) > 1.0 || !this.bird.isOnGround()) {
 				this.bird.peckingAt = null;
-				if (this.ticks % 20 == 0) {
+				if (off > 0.7 * 0.7 && off < 2.0 * 2.0 && this.bird.getNavigation().isIdle()) {
+					// A path ends within a block of the crop: the last step straight onto it (then it drops onto it).
+					this.bird.getMoveControl().moveTo(center.x, center.y, center.z, 1.0);
+				} else if (this.ticks % 20 == 0) {
 					this.bird.getNavigation().startMovingTo(center.x, center.y, center.z, 1.0);
 				}
 				return;

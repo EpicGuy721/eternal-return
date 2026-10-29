@@ -56,13 +56,23 @@ public class PiglinTradeTests implements FabricGameTest {
 		player.setStackInHand(Hand.MAIN_HAND, new ItemStack(Gems.RUBY, 3));
 		piglin.interactMob(player, Hand.MAIN_HAND);
 		ctx.assertTrue(piglin.getOffHandStack().isOf(Gems.RUBY) && player.getMainHandStack().getCount() == 2, "the piglin takes a ruby");
+		// What it gives is looked for as the ruby goes, and cleared away: its hands are empty, so it would pick some of it
+		// up again (a golden apple to admire).
+		Box around = new Box(ctx.getAbsolutePos(new BlockPos(-3, 0, -3))).union(new Box(ctx.getAbsolutePos(new BlockPos(5, 4, 7))));
+		boolean[] given = {false, false};
+		ctx.runAtEveryTick(() -> {
+			if (!given[0] && piglin.getOffHandStack().isEmpty()) {
+				given[0] = true;
+				List<ItemEntity> drops = ctx.getWorld().getEntitiesByClass(ItemEntity.class, around, item -> !item.getStack().isOf(Gems.RUBY));
+				given[1] = !drops.isEmpty();
+				drops.forEach(ItemEntity::discard);
+			}
+		});
 		ctx.runAtTick(160, () -> {
 			try {
 				ctx.assertTrue(piglin.getOffHandStack().isEmpty(), "bartered: " + piglin.getOffHandStack());
 				ctx.assertTrue(PiglinTrades.counts(piglin).ruby == 1, "one ruby trade counted");
-				Box around = new Box(ctx.getAbsolutePos(new BlockPos(-3, 0, -3))).union(new Box(ctx.getAbsolutePos(new BlockPos(5, 4, 7))));
-				List<ItemEntity> drops = ctx.getWorld().getEntitiesByClass(ItemEntity.class, around, item -> !item.getStack().isOf(Gems.RUBY));
-				ctx.assertTrue(!drops.isEmpty(), "something given for it");
+				ctx.assertTrue(given[1], "something given for it");
 
 				PiglinTrades.Counts counts = PiglinTrades.counts(piglin);
 				counts.ruby = PiglinTrades.tradesLeft(piglin, new ItemStack(Gems.RUBY)) + counts.ruby;
@@ -97,7 +107,7 @@ public class PiglinTradeTests implements FabricGameTest {
 			sword.addEnchantment(sharpness, 1);
 			player.setStackInHand(Hand.MAIN_HAND, sword);
 			var server = ctx.getWorld().getServer();
-			server.getCommandManager().executeWithPrefix(server.getCommandSource().withSilent(), "enchant " + player.getGameProfile().getName() + " minecraft:sharpness 3");
+			server.getCommandManager().executeWithPrefix(server.getCommandSource().withSilent(), "enchant " + player.getUuidAsString() + " minecraft:sharpness 3");
 			ctx.assertTrue(player.getMainHandStack().getEnchantments().getLevel(sharpness) == 3, "Sharpness I raised to III: "
 					+ player.getMainHandStack().getEnchantments());
 		} finally {

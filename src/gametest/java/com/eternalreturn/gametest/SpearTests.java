@@ -198,12 +198,15 @@ public class SpearTests implements FabricGameTest {
 		ctx.complete();
 	}
 
-	/** A zombie with a spear and a husk to hunt 8 blocks off: it lowers its spear and speeds up. */
+	/**
+	 * A zombie with a spear and a husk to hunt 14 blocks off: it lowers its spear and speeds up. (A mob first charges 3
+	 * seconds after it appears, at a target 4 to 16 blocks off; it comes about 6 blocks closer in that time.)
+	 */
 	@GameTest(templateName = ARENA, batchId = "spear_charge", tickLimit = 200)
 	public void zombiesCharge(TestContext ctx) {
 		ZombieEntity zombie = ctx.spawnEntity(EntityType.ZOMBIE, new BlockPos(8, 2, 4));
 		zombie.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Spears.IRON));
-		ZombieEntity husk = ctx.spawnEntity(EntityType.HUSK, new BlockPos(8, 2, 13));
+		ZombieEntity husk = ctx.spawnEntity(EntityType.HUSK, new BlockPos(8, 2, 18));
 		husk.setAiDisabled(true);
 		Identifier charge = EternalReturn.id("spear_charge");
 		ctx.runAtEveryTick(() -> {

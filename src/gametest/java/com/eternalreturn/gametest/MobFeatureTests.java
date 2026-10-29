@@ -164,7 +164,9 @@ public class MobFeatureTests implements FabricGameTest {
 
 	private static void creeperBlast(TestContext ctx, boolean baby, int minFuse, int maxFuse, boolean observerShouldSurvive) {
 		night(ctx);
-		ctx.getWorld().getGameRules().get(GameRules.DO_MOB_GRIEFING).set(false, ctx.getWorld().getServer());
+		// Off for the blast (the creeper batches have a batch each), and back on after: later batches' mobs need it.
+		GameRules.BooleanRule griefing = ctx.getWorld().getGameRules().get(GameRules.DO_MOB_GRIEFING);
+		griefing.set(false, ctx.getWorld().getServer());
 		floor(ctx, 0, 7, 0, 7);
 		CreeperEntity creeper = ctx.spawnMob(EntityType.CREEPER, new BlockPos(2, 1, 2));
 		ZombieEntity observer = ctx.spawnMob(EntityType.ZOMBIE, new BlockPos(4, 1, 2));
@@ -175,6 +177,7 @@ public class MobFeatureTests implements FabricGameTest {
 			if (!creeper.isRemoved()) {
 				return;
 			}
+			griefing.set(true, ctx.getWorld().getServer());
 			long fuse = ctx.getTick() - start;
 			check(ctx, fuse >= minFuse && fuse <= maxFuse, (baby ? "baby" : "adult") + " creeper fused for " + fuse + " ticks");
 			boolean survived = observer.isAlive();

@@ -5,6 +5,7 @@ import com.eternalreturn.fishing.Bait;
 import com.eternalreturn.fishing.DeepWaterLootCondition;
 import com.eternalreturn.fishing.FishingItems;
 import com.eternalreturn.fishing.FishingLoot;
+import com.eternalreturn.gametest.mixin.TestContextAccessor;
 import com.mojang.authlib.GameProfile;
 import io.netty.channel.embedded.EmbeddedChannel;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
@@ -37,7 +38,10 @@ import net.minecraft.server.network.ConnectedClientData;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.test.GameTest;
+import net.minecraft.test.GameTestState;
 import net.minecraft.test.TestContext;
+import net.minecraft.test.TestListener;
+import net.minecraft.test.TestRunContext;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
@@ -51,10 +55,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 /** Fishing and villager trades: bait, full catch cycles in water and lava, recipes, items, trades (each fish: FishTableTests). */
 public class FishingTests implements FabricGameTest {
+	private static final AtomicInteger PLAYERS = new AtomicInteger();
+
 	// ---------- helpers ----------
 
 	private static void check(TestContext ctx, boolean condition, String message) {
@@ -138,9 +145,15 @@ public class FishingTests implements FabricGameTest {
 		return counts.entrySet().stream().filter(e -> e.getKey().getDefaultStack().isIn(FishingItems.RAW_FISH)).mapToInt(Map.Entry::getValue).sum();
 	}
 
+	/**
+	 * A survival player at rel (a connected one: it isn't ticked; see the gametest notes). Each has a name of its own, so a
+	 * command naming one can't reach another test's; and it's disconnected when its test ends, passed or failed, so one
+	 * left behind by a failed test can't get in later tests' way.
+	 */
 	static ServerPlayerEntity survivalPlayer(TestContext ctx, BlockPos rel) {
 		ServerWorld world = ctx.getWorld();
-		ConnectedClientData data = ConnectedClientData.createDefault(new GameProfile(UUID.randomUUID(), "test-angler"), false);
+		String name = "test-angler" + PLAYERS.incrementAndGet();
+		ConnectedClientData data = ConnectedClientData.createDefault(new GameProfile(UUID.randomUUID(), name), false);
 		ServerPlayerEntity player = new ServerPlayerEntity(world.getServer(), world, data.gameProfile(), data.syncedOptions());
 		ClientConnection connection = new ClientConnection(NetworkSide.SERVERBOUND);
 		new EmbeddedChannel(connection);
@@ -148,11 +161,34 @@ public class FishingTests implements FabricGameTest {
 		player.changeGameMode(GameMode.SURVIVAL);
 		Vec3d p = Vec3d.ofBottomCenter(ctx.getAbsolutePos(rel));
 		player.teleport(world, p.x, p.y, p.z, 0.0F, 0.0F);
+		((TestContextAccessor) ctx).eternalreturn$test().addListener(new TestListener() {
+			@Override
+			public void onStarted(GameTestState test) {
+			}
+
+			@Override
+			public void onPassed(GameTestState test, TestRunContext context) {
+				disconnect(player);
+			}
+
+			@Override
+			public void onFailed(GameTestState test, TestRunContext context) {
+				disconnect(player);
+			}
+
+			@Override
+			public void onRetry(GameTestState prevState, GameTestState nextState, TestRunContext context) {
+				disconnect(player);
+			}
+		});
 		return player;
 	}
 
+	/** Disconnects a survivalPlayer (once: again does nothing). */
 	static void disconnect(ServerPlayerEntity player) {
-		player.getServer().getPlayerManager().remove(player);
+		if (player.getServer().getPlayerManager().getPlayer(player.getUuid()) == player) {
+			player.getServer().getPlayerManager().remove(player);
+		}
 	}
 
 	// ---------- loot tables ----------

@@ -54,6 +54,7 @@
 		"mobs.CreeperEntityAccessor",
 		"mobs.CreeperEntityMixin",
 		"mobs.DrownedEntityMixin",
+		"mobs.EntityNavigationAccessor",
 		"mobs.LoungeHearingMixin",
 		"mobs.LoungeWakeMixin",
 		"mobs.MeleeAttackGoalMixin",
