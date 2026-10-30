@@ -1,0 +1,10 @@
+{
+  "_comment": "Read only when ColorLight (an optional client mod) is installed. ColorLight's level for a block caps how bright it draws the block's light; this mod's client draws soul lights at 13 and lit candles at 6, 9, 12, 15 for 1 to 4 candles (a candle cake as one), so the caps for these are raised to match (ColorLightBrighter). The game's light level stays vanilla's.",
+  "minecraft:soul_torch": {"light": 13},
+  "minecraft:soul_wall_torch": {"light": 13},
+  "minecraft:soul_lantern": {"light": 13},
+  "minecraft:soul_fire": {"light": 13},
+  "minecraft:soul_campfire": {"light": 13},
+  "#minecraft:candles": {"light": 15},
+  "#minecraft:candle_cakes": {"light": 6}
+}

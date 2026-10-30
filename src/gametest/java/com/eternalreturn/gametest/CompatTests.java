@@ -64,6 +64,10 @@ public class CompatTests implements FabricGameTest {
 	private static final String COLORLIGHT_SHADER = "/assets/colorlight/shaders/include/colorlight_light.glsl";
 	private static final String COLORLIGHT_DAYLIGHT_LINE =
 			"float blockShare = (fullPeak > 0.0001) ? clamp(1.0 - skyPeak / fullPeak, 0.0, 1.0) * 10.0 : 1.0;";
+	/** ColorLight's chunk scan, whose reading of a block's light ColorLightScanMixin makes brighter for soul lights and candles. */
+	private static final String COLORLIGHT_SCANNER = "/me/mrhikmen/colorlight/client/core/light/scan/ColorLightChunkScanner.class";
+	/** This mod's raised ColorLight caps for those blocks. */
+	private static final String COLORLIGHT_BRIGHTER = "/assets/colorlight/block/eternalreturn_brighter.json";
 	/** What gives moving light: entity types and items, each named by one of the files. */
 	private static final List<String> DYNAMIC_LIGHT_SOURCES = List.of("entity eternalreturn:glass_item_frame",
 			"entity eternalreturn:glowing_glass_item_frame", "entity eternalreturn:laser_bolt", "entity eternalreturn:dynamite", "item eternalreturn:glowdine");
@@ -293,6 +297,45 @@ public class CompatTests implements FabricGameTest {
 		}
 		int lines = shader.split(Pattern.quote(COLORLIGHT_DAYLIGHT_LINE), -1).length - 1;
 		ctx.assertTrue(lines == 1, "ColorLight's shader has its daylight line once (found " + lines + "), as the mixin expects");
+		ctx.complete();
+	}
+
+	/**
+	 * With ColorLight, soul lights and candles are drawn brighter (ColorLightBrighter): ColorLight's chunk scan must still
+	 * read each block's light in lambda$scanChunk$0 (ColorLightScanMixin), and this mod's ColorLight file raising its caps
+	 * for them must name only blocks and block tags that exist, with levels 1 to 15.
+	 */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "compat")
+	public void colorLightBrighterScanAndCaps(TestContext ctx) {
+		ClassNode node = new ClassNode();
+		try (InputStream in = CompatTests.class.getResourceAsStream(COLORLIGHT_SCANNER)) {
+			ctx.assertTrue(in != null, "ColorLight's chunk scan is on the classpath");
+			new ClassReader(in).accept(node, 0);
+		} catch (java.io.IOException e) {
+			throw new RuntimeException(e);
+		}
+		ctx.assertTrue(node.methods.stream().anyMatch(method -> method.name.equals("lambda$scanChunk$0")
+						&& org.objectweb.asm.Type.getArgumentTypes(method.desc).length == 3),
+				"ColorLight's chunk scan still reads block light in lambda$scanChunk$0, as the mixin expects");
+		JsonObject file;
+		try (InputStream in = CompatTests.class.getResourceAsStream(COLORLIGHT_BRIGHTER)) {
+			ctx.assertTrue(in != null, "the brighter ColorLight file is in the jar");
+			file = JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonObject();
+		} catch (java.io.IOException e) {
+			throw new RuntimeException(e);
+		}
+		for (Map.Entry<String, JsonElement> entry : file.entrySet()) {
+			if (entry.getKey().startsWith("_")) {
+				continue;
+			}
+			String key = entry.getKey();
+			boolean exists = key.startsWith("#")
+					? Registries.BLOCK.getEntryList(net.minecraft.registry.tag.TagKey.of(RegistryKeys.BLOCK, Identifier.of(key.substring(1)))).isPresent()
+					: Registries.BLOCK.containsId(Identifier.of(key));
+			ctx.assertTrue(exists, key + " is a block or block tag");
+			int light = entry.getValue().getAsJsonObject().get("light").getAsInt();
+			ctx.assertTrue(light >= 1 && light <= 15, key + " gives a level 1 to 15");
+		}
 		ctx.complete();
 	}
 }

@@ -58,6 +58,7 @@ public class EternalReturnClient implements ClientModInitializer {
 		// With ColorLight (optional), each dyed lamp's light its own colour.
 		if (net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("colorlight")) {
 			ColorLightLamps.register();
+			ColorLightBrighter.register();
 		}
 		net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry.ITEM.register((stack, tintIndex) ->
 				tintIndex == 0 ? net.minecraft.component.type.DyedColorComponent.getColor(stack, -1) : -1, net.minecraft.item.Items.REDSTONE_LAMP);

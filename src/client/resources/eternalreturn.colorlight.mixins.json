@@ -4,9 +4,11 @@
 	"plugin": "com.eternalreturn.mixin.colorlight.ColorLightMixinPlugin",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
+		"ColorLightBlockChangeMixin",
 		"ColorLightDaylightTintMixin",
 		"ColorLightHeldLevelMixin",
-		"ColorLightMovingLightMixin"
+		"ColorLightMovingLightMixin",
+		"ColorLightScanMixin"
 	],
 	"injectors": {
 		"defaultRequire": 0
