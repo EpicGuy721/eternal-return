@@ -8,6 +8,7 @@
 		"BeaconScreenMixin",
 		"BlizzardFogMixin",
 		"EnchantmentScreenMixin",
+		"HiddenWindowMixin",
 		"HungerBarMixin",
 		"ItemFrameEntityRendererMixin",
 		"LavaFogMixin",
