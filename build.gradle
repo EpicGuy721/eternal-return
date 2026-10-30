@@ -188,6 +188,50 @@ repositories {
 	}
 }
 
+// LambDynamicLights' jar is a shell holding lambdynlights_runtime (same file name), which in turn holds its libraries
+// (its API, Yumi, SpruceUI, pridelib). A released game loads nested jars; the dev runs load a remapped copy of the
+// shell without them, so the game stopped at launch asking for lambdynlights_runtime. This takes them out, once, into
+// build/lambdynlights-nested, for modLocalRuntime.
+configurations {
+	lambDynLightsShell {
+		transitive = false
+	}
+}
+dependencies {
+	lambDynLightsShell "maven.modrinth:lambdynamiclights:${project.lambdynamiclights_version}"
+}
+def lambDynLightsNested() {
+	def version = project.lambdynamiclights_version
+	def dir = file("build/lambdynlights-nested/${version}")
+	def runtime = new File(dir, "lambdynamiclights-runtime-${version}.jar")
+	if (!runtime.exists()) {
+		def shell = configurations.lambDynLightsShell.singleFile
+		copy {
+			from(zipTree(shell)) {
+				include "META-INF/jars/lambdynamiclights-${version}.jar"
+				eachFile { it.path = runtime.name }
+			}
+			includeEmptyDirs = false
+			into dir
+		}
+		// Libraries nest more libraries: open every jar taken out until none holds another.
+		def opened = [] as Set
+		def next = { dir.listFiles().find { it.name.endsWith(".jar") && !opened.contains(it.name) } }
+		for (def jar = next(); jar != null; jar = next()) {
+			opened << jar.name
+			copy {
+				from(zipTree(jar)) {
+					include "META-INF/jars/*.jar"
+					eachFile { it.path = it.name }
+				}
+				includeEmptyDirs = false
+				into dir
+			}
+		}
+	}
+	return dir.listFiles().findAll { it.name.endsWith(".jar") }.sort()
+}
+
 dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
@@ -205,6 +249,9 @@ dependencies {
 	// Dynamic lights, an optional client mod players may add: dev runs and runClientCompat, for compatibility checks.
 	// Nothing in this mod depends on it; the light it gives this mod's things is resource files it reads if present.
 	modLocalRuntime "maven.modrinth:lambdynamiclights:${project.lambdynamiclights_version}"
+	// Its actual client mod (lambdynlights_runtime) and that mod's libraries are jars nested inside its jar, which the
+	// dev runs don't load from a remapped mod: pulled out below and added on their own.
+	modLocalRuntime files(lambDynLightsNested())
 	// runClientCompat only, as released (see above).
 	compatMods "maven.modrinth:sodium:${project.sodium_version}"
 	compatMods "maven.modrinth:nostalgic-tweaks:${project.nostalgic_tweaks_version}"
