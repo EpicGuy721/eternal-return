@@ -661,6 +661,47 @@ public final class EternalReturnConfig {
 		public boolean strongholdIllagers = true;
 		/** The cave engine (com.eternalreturn.worldgen.caves). Only Eternal Return worlds are affected. */
 		public CaveTweaks caves = new CaveTweaks();
+		/** The outer End of Eternal Return worlds (com.eternalreturn.worldgen.end). */
+		public OuterEndTweaks outerEnd = new OuterEndTweaks();
+	}
+
+	/**
+	 * The outer End of Eternal Return worlds: everything past the void gap round the main island (the main island, its
+	 * pillars, the exit portal and the gateways never change). Only the End of a world made with the Eternal Return world
+	 * type is affected, and only chunks generated after a change: the numbers are read once per world when it starts, and
+	 * changing them in a world whose outer End is partly explored leaves walls where old chunks meet new ones.
+	 */
+	public static final class OuterEndTweaks {
+		/** Islands at many heights, stepped, with spires, stacked islands and drifting fragments. Off: vanilla's outer islands. */
+		public boolean islands = true;
+		/** Lowest height an island's rim sits at (the low islands hang between here and 25 above it). */
+		public int islandMinY = 22;
+		/** Highest height an island's rim sits at (the high islands float between here and 35 below it). */
+		public int islandMaxY = 185;
+		/** Middle of the band most islands sit in (about 50 blocks either side of it, drifting with the region). */
+		public int islandMiddleY = 95;
+		/** Share of islands hanging low near the void. */
+		public double lowIslandShare = 0.15;
+		/** Share of islands floating high above the rest. */
+		public double highIslandShare = 0.18;
+		/** Share of 160-block squares holding an island group (the rest hold a few fragments only). Lower: wider gaps. */
+		public double islandChance = 0.85;
+		/** Multiplies the size of every island (1: main islands mostly 32 to 100 blocks across, now and then 150). */
+		public double islandSize = 1.0;
+		/** Multiplies the number of small fragments of end stone drifting round and between the islands. */
+		public double fragmentDensity = 1.0;
+		/** Shattered obsidian megastructures. */
+		public boolean megastructures = true;
+		/** At most one megastructure in each square of this many blocks (smaller: more of them). */
+		public int megastructureSpacing = 320;
+		/** Share of those squares that hold one. */
+		public double megastructureChance = 0.55;
+		/** Share of megastructures that are massive (about 100 to 170 blocks across instead of 25 to 70). */
+		public double massiveChance = 0.1;
+		/** Roughly the share of crying obsidian in them, in veins and patches (0: plain obsidian). */
+		public double cryingObsidianRatio = 0.2;
+		/** How thickly amethyst clusters and buds grow from their broken faces (0: none, 1: default, 2: twice as thick). */
+		public double amethystDensity = 1.0;
 	}
 
 	/**

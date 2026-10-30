@@ -67,7 +67,7 @@ gameTestRun("gametestVanilla", "Game Test (vanilla generator, debug tunnel on)",
 		["gametest.preset": "minecraft:normal", "gametest.batches": "worldgen,fingerprint", "gametest.debugTunnel": "true",
 		 "gametest.fingerprint": "vanilla_tunnel"])
 gameTestRun("gametestEternalReturn", "Game Test (Eternal Return preset)", "eternal_return",
-		["gametest.preset": "eternalreturn:eternal_return", "gametest.seed": worldmapSeed, "gametest.batches": "worldgen,worldgen_er,er_extras,ores,coast,overhang,terrain_features,er_locate", "gametest.debugTunnel": "true",
+		["gametest.preset": "eternalreturn:eternal_return", "gametest.seed": worldmapSeed, "gametest.batches": "worldgen,worldgen_er,er_extras,ores,coast,overhang,terrain_features,er_locate,outer_end", "gametest.debugTunnel": "true",
 		 "gametest.fingerprint": "ore_census"])
 // Eternal Return with the new caves off, the old ones back, biome stone off and overhangs left flat must match the world as it was before the cave engine.
 gameTestRun("gametestEternalReturnOldCaves", "Game Test (Eternal Return, old caves only, control)", "eternal_return_old_caves",
@@ -108,6 +108,12 @@ gameTestRun("worldmapCaves", "World map (caves)", "worldmap_caves",
 gameTestRun("worldmapStone", "World map (biome stone)", "worldmap_stone",
 		["gametest.preset": "eternalreturn:eternal_return", "gametest.seed": worldmapSeed, "gametest.batches": "stonemap",
 		 "worldmap.out": file("${findProperty("worldmapOut") ?: "docs/worldgen-maps"}/stone").absolutePath])
+
+// Outer End images (OuterEndTests): the islands from above and side views through two megastructures, into
+// docs/worldgen-maps/outer_end (or -PworldmapOut=<dir>/outer_end).
+gameTestRun("worldmapEnd", "World map (outer End)", "worldmap_end",
+		["gametest.preset": "eternalreturn:eternal_return", "gametest.seed": worldmapSeed, "gametest.batches": "endmap",
+		 "worldmap.out": file("${findProperty("worldmapOut") ?: "docs/worldgen-maps"}/outer_end").absolutePath])
 
 // Moderner Beta is a dev-runtime mod for every run; this one takes it off the classpath to prove
 // the mod and its data work without it.
@@ -164,7 +170,7 @@ tasks.register("runAllGametests") {
 tasks.register("generateWorldMaps") {
 	group = "verification"
 	description = "Renders the world maps in docs/worldgen-maps (Eternal Return preset and the two controls)."
-	dependsOn "runWorldmapEternalReturn", "runWorldmapBeta", "runWorldmapRelease164", "runWorldmapCaves", "runWorldmapStone"
+	dependsOn "runWorldmapEternalReturn", "runWorldmapBeta", "runWorldmapRelease164", "runWorldmapCaves", "runWorldmapStone", "runWorldmapEnd"
 }
 
 repositories {

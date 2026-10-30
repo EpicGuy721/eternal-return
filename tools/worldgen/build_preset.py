@@ -298,6 +298,24 @@ if stone_rules:
                                               'then_run': {'type': 'minecraft:sequence', 'sequence': stone_rules}})
 write(f'data/{NS}/worldgen/noise_settings/eternal_return.json', {'fabric:load_conditions': LOAD_IF_MB, **noise})
 
+# ---------------------------------------------------------------- the End
+# Vanilla's End noise settings (from the Minecraft jar in the Loom cache) with two changes: the final density goes
+# through eternalreturn:outer_end (vanilla's own density within 1,000 blocks of 0, 0 and below y 128, the outer islands
+# past that) and the biome source's erosion through eternalreturn:outer_end_biome; and the noise reaches y 256, the
+# top of the End, so islands can float high. See "The outer End" in docs/worldgen.md.
+LOOM = os.path.join(ROOT, '.gradle', 'loom-cache', 'minecraftMaven', 'net', 'minecraft')
+MC_JARS = [j for j in glob.glob(os.path.join(LOOM, 'minecraft-common-*', '*', '*.jar')) if not j.endswith('-sources.jar')]
+if not MC_JARS:
+    sys.exit('Minecraft jar not found in the Loom cache; run ./gradlew build first')
+end = json.loads(zipfile.ZipFile(MC_JARS[0]).read('data/minecraft/worldgen/noise_settings/end.json'))
+end['noise']['height'] = 256
+end_noise = f'{NS}:outer_end'
+end['noise_router']['final_density'] = {'type': f'{NS}:outer_end', 'noise': end_noise, 'inner': end['noise_router']['final_density']}
+end['noise_router']['erosion'] = {'type': f'{NS}:outer_end_biome', 'noise': end_noise, 'inner': end['noise_router']['erosion']}
+write(f'data/{NS}/worldgen/noise_settings/eternal_return_end.json', end)
+# Only its seed is used (OuterEndDensity draws the outer End's seed from it).
+write(f'data/{NS}/worldgen/noise/outer_end.json', {'firstOctave': -4, 'amplitudes': [1.0]})
+
 # ---------------------------------------------------------------- world preset
 settings = {'moderner_beta:preset': f'{NS}:eternal_return'}
 write(f'data/{NS}/worldgen/world_preset/eternal_return.json', {
@@ -310,7 +328,7 @@ write(f'data/{NS}/worldgen/world_preset/eternal_return.json', {
         'minecraft:the_nether': {'type': 'minecraft:the_nether', 'generator': {
             'type': 'minecraft:noise', 'biome_source': {'type': 'minecraft:multi_noise', 'preset': 'minecraft:nether'}, 'settings': 'minecraft:nether'}},
         'minecraft:the_end': {'type': 'minecraft:the_end', 'generator': {
-            'type': 'minecraft:noise', 'biome_source': {'type': 'minecraft:the_end'}, 'settings': 'minecraft:end'}},
+            'type': 'minecraft:noise', 'biome_source': {'type': 'minecraft:the_end'}, 'settings': f'{NS}:eternal_return_end'}},
     }})
 # Shown in the create-world "World Type" list. Optional, so the tag still loads without Moderner Beta.
 write('data/minecraft/tags/worldgen/world_preset/normal.json', {'replace': False, 'values': [{'id': f'{NS}:eternal_return', 'required': False}]})

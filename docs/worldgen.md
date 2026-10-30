@@ -34,7 +34,7 @@ No modern cave biomes (lush caves, dripstone caves, deep dark) and no deepslate.
 
 ## Scope
 
-- Overworld only for now. The Nether and the End are left alone.
+- The overworld, and the outer End (see The outer End). The Nether is left alone.
 - Everything lives in this one mod, in its own worldgen package (`com.eternalreturn.worldgen`).
 - Every feature gets its own on/off toggle in `config/eternalreturn.json`.
 - Follow the repo's existing conventions: tags and data under `data/eternalreturn`, the existing config style, and README updates alongside each feature.
@@ -69,7 +69,8 @@ The preset is all data. Without Moderner Beta installed, the world type and its 
 | `data/eternalreturn/moderner_beta/settings_preset/eternal_return.json` | the Moderner Beta settings: biome layers, terrain knobs, no cave biomes, no deepslate |
 | `data/eternalreturn/worldgen/noise_settings/eternal_return.json` | Moderner Beta's `overworld_256` noise settings with the height opened up to -64..320, plus the biome stone surface rules (from `biome_stone` in the knobs) |
 | `data/eternalreturn/tags/block/biome_host_stones.json` | every host stone in the biome stone table (see Biome stone) |
-| `data/eternalreturn/worldgen/world_preset/eternal_return.json` | the world type; vanilla Nether and End |
+| `data/eternalreturn/worldgen/world_preset/eternal_return.json` | the world type; vanilla Nether, End with `eternalreturn:eternal_return_end` |
+| `data/eternalreturn/worldgen/noise_settings/eternal_return_end.json`, `data/eternalreturn/worldgen/noise/outer_end.json` | vanilla's End noise settings (from the Minecraft jar in the Loom cache) with the outer End's density and biome functions and the noise up to y 256 (see The outer End) |
 | `data/minecraft/tags/worldgen/world_preset/normal.json` | lists the world type on the create-world screen (optional entry) |
 | `data/eternalreturn/moderner_beta/settings_preset_category/`, `data/eternalreturn/tags/moderner_beta/`, `data/moderner_beta/tags/moderner_beta/settings_preset_category/selectable.json` | lists the preset in Moderner Beta's own preset picker, with its icon (`assets/eternalreturn/textures/gui/moderner_beta_settings_preset/`) |
 | `data/minecraft/tags/block/stone_ore_replaceables.json`, `data/minecraft/tags/block/deepslate_ore_replaceables.json` | move tuff from the deepslate ore tag to the stone one, so ores that land in tuff blobs use their stone variant |
@@ -617,6 +618,61 @@ Over 500 x 500 chunks of the test seed: 1,060 mineshafts, 841 oak, 79 spruce, 40
 - `runGametestEternalReturn`, `MineshaftAndOceanTests`: every mineshaft start within 250 chunks of spawn, found the way the generator places them (the structure set's placement, then the structure's own start, through the same code and hooks the generator uses), has its biome's wood in every piece; every wood turns up; mineshafts start in each of Moderner Beta's four extra biomes. The nearest mineshaft of each wood under land is then built into fully generated terrain with the game's own piece code: over a thousand of its own planks and fences, none of another wood, and its pieces save their wood. Test worlds are made with structures switched off (vanilla's test server does that), so the test places them itself. The same test class checks that all nine oceans and cherry groves appear within 4,000 blocks and logs the spots used in the README checklist.
 - Moderner Beta's list of the biomes a world can produce misses the deep cold, deep frozen and deep lukewarm oceans its ocean climate step makes. Its height table follows that list, so those oceans (and the deep warm one) first came out as land hills reporting an ocean biome; the preset now sets every ocean's height (see Oceans), and `CoastTests` checks over 8,000 x 8,000 blocks that dry land reports an ocean biome only in a handful of coastal columns a block or two above the water, where Moderner Beta blends heights across a border (Release 1.6.4 did the same). Fabric also attaches carvers only to listed biomes, so at first those oceans got no caves at all (a debug-tunnel check and two cave-type squares came up nearly empty). The cave carver and the debug tunnel are now attached to those three by name as well (`WorldgenFeatures`); they are vanilla overworld biomes, so other worlds are unchanged. A new cave test checks that every biome the world can produce, listed or not, carries the cave carver.
 - The ore census and the old-caves carving fingerprint were recorded again, since adding a biome moves every land biome; everything else in those runs is unchanged.
+
+## The outer End
+
+Code: `com.eternalreturn.worldgen.end`. Only the End of a world made with the Eternal Return world type since this came in: a world saves the End generator it was made with, so older Eternal Return worlds keep vanilla's End.
+
+**Moderner Beta.** It doesn't touch the End. Its own world preset and ours both give the End vanilla's generator (`minecraft:noise`, the `the_end` biome source); its `surface_config/end.json` is read only by its own generator, which never runs there; none of its mixins reach End generation. Nothing to conflict with.
+
+**What it looks like.** Past the void round the main island, the outer islands are replaced (see the README for the player's view). The world is split into squares of 160 blocks (`OuterEndTerrain.CELL`); `islandChance` of them (0.85) hold a group, the rest a few fragments. A group is:
+- a main island, an oval (round to 1.7 times as long as wide) with a ragged edge, mostly 32 to 100 blocks across, one in eight 100 to 150; its rim at its own height: `lowIslandShare` (0.15) of them between `islandMinY` (22) and 25 above it, `highIslandShare` (0.18) between `islandMaxY` (185) and 35 below it, the rest round `islandMiddleY` (95), give or take about 50, drifting with a regional noise so neighbours are related;
+- one to four flat steps rising towards its middle, whose edges wander; sides undercut below the rim (rough 3D noise); an underside hanging in crags up to 60 blocks below, deepest under the middle;
+- spires on it (a quarter of them hanging from its underside instead), more on a big island;
+- up to four smaller islands stacked 18 to 48 blocks above or below it, a third of those above joined to it by a pillar;
+- 5 to 20 or so fragments (small lumpy ellipsoids, now and then up to 8 blocks) drifting round it.
+
+On the test seed (12,000 x 12,000 blocks): 4,902 islands, 16 percent low (under y 55), 66 percent in the middle band (60 to 140), 17 percent high (over 150). The gap from an island's edge to its nearest neighbour's is 64 blocks at the median and 95 at the 90th percentile, with fragments between.
+
+**How.** `tools/worldgen/build_preset.py` writes `eternalreturn:eternal_return_end`: vanilla's `end.json` with the noise up to y 256 (the top of the End), the final density wrapped in `eternalreturn:outer_end` and the erosion (which the End's biome source reads) replaced by `eternalreturn:outer_end_biome`. `OuterEndDensity` returns vanilla's own density within 1,000 blocks of 0, 0 below y 128 (vanilla's End has nothing above), so the main island, its pillars, portal and gateways come out block for block. Past that it returns `OuterEndTerrain.density`, a pure function of the seed (drawn from the `eternalreturn:outer_end` noise, the only way a density function sees the seed) and the settings. It is worked out per block, not interpolated over vanilla's 8 x 4 x 8 cells, so thin spires keep their shape; each thread keeps the current chunk's shapes and columns, and a block outside every shape's height range costs one comparison. Being the terrain's own density, End cities, the exit gateways' landing search and heightmaps all see the new islands.
+
+Biomes: `OuterEndTerrain.biomeValue`, read at each chunk's middle: highlands in the middle of a main island, midlands on the rest of an island, barrens over fragments and the void, and barrens on islands whose top is over y 150 (an End city there would run into the top of the world). Never small_end_islands, whose vanilla islands would sit in a flat layer at y 55 to 70. Vanilla's chorus grows in highlands; `outer_end_chorus_plant` (vanilla's chorus feature, up to 3 a chunk, only on an outer island's top and not in highlands: `OuterEnd.OnOuterIsland`) gives the other islands theirs.
+
+**Megastructures.** `Megastructures`: at most one in each square of `megastructureSpacing` (320) blocks, in `megastructureChance` (0.55) of them, `massiveChance` (0.1) of those massive. Kinds: ring (round or square cross-section, tilted 20 to 85 degrees), monolith (a tall slab tilted 6 to 32 degrees), cube (tumbled any way, or nearly upright; hollow when big), pyramid (a quarter upside down; hollow when big), arch (a half ring on two legs), shards (three to seven pointed crystals from one root). Each is signed distance functions in its own frame, then broken:
+- one to three cuts (two to four on a massive one); past each, the piece is gone (at most one per structure) or drifted off and tilted (up to about 23 degrees);
+- two to nine round bites out of its surface;
+- cracks: thin sheets where a noise crosses zero;
+- rubble: 8 to 70 tumbled lumps on the island ground round it, or adrift by it over the void.
+
+Crying obsidian comes in veins (one noise near zero) and patches (another high), about `cryingObsidianRatio` (0.2) of it, more on broken faces. Amethyst clusters and buds (never blocks) grow into air next to a broken face (a cut, a bite, a crack), at `amethystDensity` 1.0 in about one in five such spots. Three in four are placed by an island (up to 24 tries for a spot with ground under it): 42 percent sunk into it, 43 percent resting on it, 15 percent floating over it; the rest float over the void. On the test seed, within 4,000 blocks: 265, 14 of them massive; 92 embedded, 69 resting, 104 floating. The nearest three are 14 percent crying obsidian, with 656 amethyst clusters and buds.
+
+Kept clear of:
+- the exit gateways' landing ring: nothing within 1,400 blocks of 0, 0 (gateways land 1,024 blocks out and search up to 256 further);
+- End cities: their structure placement is worked out as the game does it, and any start chunk within the structure's reach plus 96 blocks whose middle is highlands or midlands shrinks the structure once, then drops it.
+
+The feature (`MegastructureFeature`, step `local_modifications`, empty in vanilla's End) runs before return gateways and chorus, so those sit on top of it. It replaces only air and end stone and writes only into its own chunk, from the same pure function, so the parts line up in any chunk order.
+
+**Other worlds.** Both features are added to every End biome, in steps where they come after anything vanilla's End has, and do nothing outside Eternal Return's End, so no other world's End changes.
+
+**Timing.** Full chunk generation, 8 x 8 fresh chunks at a time: 24 to 28 ms a chunk in the outer End, against 8 to 13 ms for vanilla's code over the void round the main island (`outerEndChunksAreQuick`). Checked in game with Sodium 0.8.13 (runClientCompat).
+
+### Maps
+
+`./gradlew runWorldmapEnd` (part of `generateWorldMaps`) writes `docs/worldgen-maps/outer_end/`: `islands.png`, 2,048 blocks square east of the main island from above, coloured by height (low purple to high yellow), megastructures dark; `megastructures.png`, one of each kind and two massive ones seen from the south (the structure and the terrain level with it or behind it, darker further back).
+
+![The outer End from above](worldgen-maps/outer_end/islands.png)
+
+![Megastructures](worldgen-maps/outer_end/megastructures.png)
+
+### Tests
+
+`OuterEndTests`, batch `outer_end` in `runGametestEternalReturn`:
+- `innerEndIsVanilla`: within 1,000 blocks of 0, 0, the density equals vanilla's End density at 234,221 points, and nothing is solid above y 128;
+- `outerIslandsSpreadInHeight`: over 1,000 islands within 6,000 blocks, none in the void gap, more than 8 percent low and high each and half in the middle band, the 90th percentile gap under 140 blocks;
+- `outerIslandsGenerateAsPlanned`: the nearest four islands generated in full; every air and end stone block of their middle chunk matches the density;
+- `chorusGrowsOnIslands`: chorus on a big highlands island and on a high island;
+- `megastructuresAreShattered`: every kind and setting turns up; none in the landing ring; the nearest three built: crying obsidian 6 to 45 percent, amethyst clusters and buds but no amethyst blocks, no End city within reach (by the game's own locate);
+- `outerEndChunksAreQuick`: under 80 ms a chunk.
 
 ## Phase 1 findings (Moderner Beta 5.0.0-alpha.2)
 

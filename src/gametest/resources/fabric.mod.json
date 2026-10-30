@@ -14,6 +14,7 @@
 			"com.eternalreturn.gametest.WorldgenTests",
 			"com.eternalreturn.gametest.EternalReturnPresetTests",
 			"com.eternalreturn.gametest.TerrainFeatureTests",
+			"com.eternalreturn.gametest.OuterEndTests",
 			"com.eternalreturn.gametest.CompatTests",
 			"com.eternalreturn.gametest.WorldmapTests",
 			"com.eternalreturn.gametest.ControlFingerprintTests",

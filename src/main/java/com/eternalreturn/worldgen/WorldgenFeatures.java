@@ -54,6 +54,8 @@ public final class WorldgenFeatures {
 			BiomeModifications.addFeature(overworld().and(context -> EternalReturnConfig.get().worldgen.caveMushrooms),
 					GenerationStep.Feature.VEGETAL_DECORATION, RegistryKey.of(RegistryKeys.PLACED_FEATURE, EternalReturn.id(mushroom)));
 		}
+		// The outer End: islands, megastructures, chorus on the islands (Eternal Return's End only).
+		com.eternalreturn.worldgen.end.OuterEnd.register();
 	}
 
 	/**

@@ -44,7 +44,7 @@
         "biome_source": {
           "type": "minecraft:the_end"
         },
-        "settings": "minecraft:end"
+        "settings": "eternalreturn:eternal_return_end"
       }
     }
   }
