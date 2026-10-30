@@ -61,7 +61,7 @@ import java.util.function.ToIntFunction;
  */
 public final class Snowlogging {
 	public static final Block SNOW_COVER = Registry.register(Registries.BLOCK, EternalReturn.id("snow_cover"),
-			new SnowCoverBlock(AbstractBlock.Settings.copy(Blocks.SNOW).dynamicBounds()));
+			new SnowCoverBlock(AbstractBlock.Settings.copy(Blocks.SNOW).dynamicBounds().blockVision((state, world, pos) -> false)));
 	public static final AttachmentType<Map<Long, Integer>> LOGGED = AttachmentRegistry.<Map<Long, Integer>>builder()
 			.persistent(Entry.CODEC.listOf().xmap(Snowlogging::toMap, Snowlogging::toList))
 			.buildAndRegister(EternalReturn.id("snowlogged"));

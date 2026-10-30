@@ -217,6 +217,8 @@ public class SnowTests implements FabricGameTest {
 			ctx.assertTrue(SnowCover.capacity(whole) == 0 && SnowCover.whole(whole, 0), "snow layers lie on " + whole);
 		}
 		ctx.assertTrue(SnowCover.capacity(slab.with(SlabBlock.WATERLOGGED, true)) == 0, "none in water");
+		ctx.assertTrue(!Snowlogging.SNOW_COVER.getDefaultState().with(SnowBlock.LAYERS, 8).shouldBlockVision(ctx.getWorld(), BlockPos.ORIGIN)
+				&& Blocks.SNOW.getDefaultState().with(SnowBlock.LAYERS, 8).shouldBlockVision(ctx.getWorld(), BlockPos.ORIGIN), "a full snow cover doesn't blind a head in it, as a full snow layer does");
 		ctx.assertTrue(SnowCover.whole(slab, 4) && !SnowCover.whole(slab, 3) && SnowCover.whole(stairs(), 4), "a slab and stairs are whole with 4 layers");
 		ctx.assertTrue(SnowCover.reachesTop(stairs()) && SnowCover.reachesTop(vertical(Direction.EAST)) && SnowCover.reachesTop(Blocks.OAK_FENCE.getDefaultState())
 				&& !SnowCover.reachesTop(slab), "stairs' upper step, a vertical slab and a fence post reach the top; a bottom slab doesn't");
