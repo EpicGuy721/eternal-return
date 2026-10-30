@@ -1,0 +1,11 @@
+{
+	"match": {
+		"type": [
+			"eternalreturn:glass_item_frame",
+			"eternalreturn:glowing_glass_item_frame"
+		]
+	},
+	"luminance": {
+		"type": "lambdynlights:item_frame"
+	}
+}

@@ -9,9 +9,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.LanternBlock;
+import net.minecraft.entity.FallingBlockEntity;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
@@ -21,10 +24,14 @@ import net.minecraft.test.GameTest;
 import net.minecraft.test.TestContext;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -33,6 +40,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * Runs in both flat-world runs: with Moderner Beta (runGametest) and without it
@@ -43,6 +51,11 @@ public class CompatTests implements FabricGameTest {
 	private static final Identifier PRESET = EternalReturn.id("eternal_return");
 	/** The light colours ColorLight (an optional client mod) reads for this mod's blocks when it's installed. */
 	private static final String COLORLIGHT_COLOURS = "/assets/colorlight/block/eternalreturn.json";
+	/** The moving light LambDynamicLights (an optional client mod) gives this mod's things when it's installed. */
+	private static final String DYNAMIC_LIGHTS = "assets/eternalreturn/dynamiclights";
+	/** What gives moving light: entity types and items, each named by one of the files. */
+	private static final List<String> DYNAMIC_LIGHT_SOURCES = List.of("entity eternalreturn:glass_item_frame",
+			"entity eternalreturn:glowing_glass_item_frame", "entity eternalreturn:laser_bolt", "entity eternalreturn:dynamite", "item eternalreturn:glowdine");
 
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "compat")
 	public void eternalReturnPresetOnlyWithModernerBeta(TestContext ctx) {
@@ -150,5 +163,71 @@ public class CompatTests implements FabricGameTest {
 			ctx.assertTrue(state.getLuminance() == 0, state + " gives no light");
 		});
 		ctx.complete();
+	}
+
+	/**
+	 * LambDynamicLights reads light files for entities (dynamiclights/entity) and items (dynamiclights/item): each names
+	 * entity types or items and a light of 0 to 15 (or a kind of light it works out itself, such as an item frame's from
+	 * its item). Every file of this mod names only things that exist, gives a light in range, and the moving light
+	 * sources this mod means to have are all named, so a renamed entity or item can't silently lose its light.
+	 */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "compat")
+	public void dynamicLightFilesNameThisModsThings(TestContext ctx) {
+		Path root = FabricLoader.getInstance().getModContainer(EternalReturn.MOD_ID).orElseThrow().findPath(DYNAMIC_LIGHTS).orElse(null);
+		ctx.assertTrue(root != null, "the LambDynamicLights files are in the jar");
+		List<String> named = new ArrayList<>();
+		try (Stream<Path> files = Files.walk(root)) {
+			for (Path path : files.filter(file -> file.toString().endsWith(".json")).toList()) {
+				String kind = root.relativize(path).getName(0).toString();
+				ctx.assertTrue(kind.equals("entity") || kind.equals("item"), path + " is an entity or item light");
+				JsonObject light;
+				try (Reader in = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+					light = JsonParser.parseReader(in).getAsJsonObject();
+				}
+				JsonElement ids = light.getAsJsonObject("match").get(kind.equals("entity") ? "type" : "items");
+				for (JsonElement id : ids.isJsonArray() ? ids.getAsJsonArray().asList() : List.of(ids)) {
+					Identifier identifier = Identifier.of(id.getAsString());
+					ctx.assertTrue(kind.equals("entity") ? Registries.ENTITY_TYPE.containsId(identifier) : Registries.ITEM.containsId(identifier),
+							path.getFileName() + " names " + identifier + ", which exists");
+					named.add(kind + " " + identifier);
+				}
+				JsonElement luminance = light.get("luminance");
+				ctx.assertTrue(luminance.isJsonObject() ? luminance.getAsJsonObject().has("type")
+						: luminance.getAsInt() >= 0 && luminance.getAsInt() <= 15, path.getFileName() + " gives a light of 0 to 15 or a kind of light");
+			}
+		} catch (java.io.IOException e) {
+			throw new RuntimeException(e);
+		}
+		EternalReturn.LOGGER.info("[compat] LambDynamicLights light for {}", named);
+		DYNAMIC_LIGHT_SOURCES.forEach(source -> ctx.assertTrue(named.contains(source), source + " has a LambDynamicLights light"));
+		ctx.complete();
+	}
+
+	/**
+	 * A falling lantern (LanternFallMixin) is vanilla's falling block, which LambDynamicLights lights by the block it
+	 * carries: the lantern it carries still gives a lantern's light (15, a soul lantern 10), so it lights its way down.
+	 */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "compat", tickLimit = 60)
+	public void fallingLanternsCarryTheirLight(TestContext ctx) {
+		Map<Block, Integer> lanterns = Map.of(Blocks.LANTERN, 15, Blocks.SOUL_LANTERN, 10);
+		int x = 1;
+		for (Block lantern : lanterns.keySet()) {
+			ctx.setBlockState(new BlockPos(x, 8, 1), Blocks.STONE.getDefaultState());
+			ctx.setBlockState(new BlockPos(x, 7, 1), lantern.getDefaultState().with(LanternBlock.HANGING, true));
+			x += 3;
+		}
+		ctx.runAtTick(2, () -> {
+			ctx.setBlockState(new BlockPos(1, 8, 1), Blocks.AIR.getDefaultState());
+			ctx.setBlockState(new BlockPos(4, 8, 1), Blocks.AIR.getDefaultState());
+		});
+		Map<Block, Integer> seen = new LinkedHashMap<>();
+		ctx.runAtEveryTick(() -> ctx.getWorld().getEntitiesByClass(FallingBlockEntity.class, new Box(ctx.getAbsolutePos(BlockPos.ORIGIN)).expand(8.0),
+				falling -> true).forEach(falling -> seen.put(falling.getBlockState().getBlock(), falling.getBlockState().getLuminance())));
+		ctx.waitAndRun(40, () -> {
+			lanterns.forEach((lantern, light) -> ctx.assertTrue(light.equals(seen.get(lantern)),
+					"a falling " + lantern + " gives light " + seen.get(lantern) + "; expected " + light));
+			ctx.killAllEntities();
+			ctx.complete();
+		});
 	}
 }

@@ -115,7 +115,7 @@ tasks.matching { it.name == "runGametestNoModernerBeta" }.configureEach {
 	classpath = classpath.filter { !it.name.contains("moderner-beta") && !it.name.contains("moderner_beta") }
 }
 
-// A client with Sodium, Nostalgic Tweaks and ColorLight (and Architectury, which Nostalgic Tweaks needs), to check this mod
+// A client with Sodium, Nostalgic Tweaks, ColorLight and LambDynamicLights (and Architectury, which Nostalgic Tweaks needs), to check this mod
 // alongside them: ./gradlew runClientCompat. It runs as a player's game does, from this mod's released jar and the
 // mods' own jars (Sodium can't run in the development setup, whose names differ from the released game's), in the
 // usual run folder; -PquickPlay=<save> opens a world straight away. Nothing else (runClient, the tests) loads them.
@@ -126,7 +126,7 @@ configurations {
 }
 tasks.register("runClientCompat", net.fabricmc.loom.task.prod.ClientProductionRunTask) {
 	group = "fabric"
-	description = "Runs the released jar in a client with Sodium, Nostalgic Tweaks, ColorLight and Moderner Beta."
+	description = "Runs the released jar in a client with Sodium, Nostalgic Tweaks, ColorLight, LambDynamicLights and Moderner Beta."
 	mods.from(configurations.compatMods)
 	mods.from(tasks.named("remapJar"))
 	runDir = file("run")
@@ -196,12 +196,16 @@ dependencies {
 	// the client code that gives each dyed lamp its own light colour (ColorLightLamps) runs only when it's installed.
 	modCompileOnly "maven.modrinth:colorlight:${project.colorlight_version}"
 	modLocalRuntime "maven.modrinth:colorlight:${project.colorlight_version}"
+	// Dynamic lights, an optional client mod players may add: dev runs and runClientCompat, for compatibility checks.
+	// Nothing in this mod depends on it; the light it gives this mod's things is resource files it reads if present.
+	modLocalRuntime "maven.modrinth:lambdynamiclights:${project.lambdynamiclights_version}"
 	// runClientCompat only, as released (see above).
 	compatMods "maven.modrinth:sodium:${project.sodium_version}"
 	compatMods "maven.modrinth:nostalgic-tweaks:${project.nostalgic_tweaks_version}"
 	compatMods "maven.modrinth:architectury-api:${project.architectury_version}"
 	compatMods "maven.modrinth:moderner-beta:${project.moderner_beta_version}"
 	compatMods "maven.modrinth:colorlight:${project.colorlight_version}"
+	compatMods "maven.modrinth:lambdynamiclights:${project.lambdynamiclights_version}"
 	compatMods "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 }
 
