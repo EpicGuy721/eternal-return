@@ -115,7 +115,7 @@ tasks.matching { it.name == "runGametestNoModernerBeta" }.configureEach {
 	classpath = classpath.filter { !it.name.contains("moderner-beta") && !it.name.contains("moderner_beta") }
 }
 
-// A client with Sodium and Nostalgic Tweaks (and Architectury, which Nostalgic Tweaks needs), to check this mod
+// A client with Sodium, Nostalgic Tweaks and ColorLight (and Architectury, which Nostalgic Tweaks needs), to check this mod
 // alongside them: ./gradlew runClientCompat. It runs as a player's game does, from this mod's released jar and the
 // mods' own jars (Sodium can't run in the development setup, whose names differ from the released game's), in the
 // usual run folder; -PquickPlay=<save> opens a world straight away. Nothing else (runClient, the tests) loads them.
@@ -126,7 +126,7 @@ configurations {
 }
 tasks.register("runClientCompat", net.fabricmc.loom.task.prod.ClientProductionRunTask) {
 	group = "fabric"
-	description = "Runs the released jar in a client with Sodium, Nostalgic Tweaks and Moderner Beta."
+	description = "Runs the released jar in a client with Sodium, Nostalgic Tweaks, ColorLight and Moderner Beta."
 	mods.from(configurations.compatMods)
 	mods.from(tasks.named("remapJar"))
 	runDir = file("run")
@@ -160,7 +160,7 @@ tasks.register("generateWorldMaps") {
 }
 
 repositories {
-	// Modrinth's Maven, only for Moderner Beta below.
+	// Modrinth's Maven, for Moderner Beta and the compatibility-check mods below.
 	exclusiveContent {
 		forRepository {
 			maven {
@@ -183,11 +183,15 @@ dependencies {
 	// Dev runs only (runClient, runServer, tests): the worldgen this mod is built to sit on top of.
 	// Not on the compile classpath, and not a dependency of the released jar.
 	modLocalRuntime "maven.modrinth:moderner-beta:${project.moderner_beta_version}"
+	// Coloured lighting, an optional client mod players may add: dev runs and runClientCompat, for compatibility checks.
+	// Nothing in this mod depends on it; its colours for this mod's blocks are a resource file it reads if present.
+	modLocalRuntime "maven.modrinth:colorlight:${project.colorlight_version}"
 	// runClientCompat only, as released (see above).
 	compatMods "maven.modrinth:sodium:${project.sodium_version}"
 	compatMods "maven.modrinth:nostalgic-tweaks:${project.nostalgic_tweaks_version}"
 	compatMods "maven.modrinth:architectury-api:${project.architectury_version}"
 	compatMods "maven.modrinth:moderner-beta:${project.moderner_beta_version}"
+	compatMods "maven.modrinth:colorlight:${project.colorlight_version}"
 	compatMods "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 }
 

@@ -1,0 +1,5 @@
+{
+  "_comment": "Light colours for ColorLight (an optional client mod), read only when it's installed. Every block of this mod that gives light is named here (CompatTests checks it). Redstone ore in every host stone glows red as vanilla's does (ColorLight's texture guess picks the stone's colour for the pale hosts). A dyed lamp can be any colour, kept per lamp, which a block-wide entry can't follow: it keeps a warm white near the guess for its grey glass.",
+  "eternalreturn:*_redstone_ore": {"color": [255, 0, 0]},
+  "eternalreturn:dyed_redstone_lamp": {"color": [255, 216, 156]}
+}
