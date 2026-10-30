@@ -184,7 +184,9 @@ dependencies {
 	// Not on the compile classpath, and not a dependency of the released jar.
 	modLocalRuntime "maven.modrinth:moderner-beta:${project.moderner_beta_version}"
 	// Coloured lighting, an optional client mod players may add: dev runs and runClientCompat, for compatibility checks.
-	// Nothing in this mod depends on it; its colours for this mod's blocks are a resource file it reads if present.
+	// Nothing in this mod depends on it; its colours for this mod's blocks are a resource file it reads if present, and
+	// the client code that gives each dyed lamp its own light colour (ColorLightLamps) runs only when it's installed.
+	modCompileOnly "maven.modrinth:colorlight:${project.colorlight_version}"
 	modLocalRuntime "maven.modrinth:colorlight:${project.colorlight_version}"
 	// runClientCompat only, as released (see above).
 	compatMods "maven.modrinth:sodium:${project.sodium_version}"

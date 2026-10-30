@@ -55,6 +55,10 @@ public class EternalReturnClient implements ClientModInitializer {
 		}, com.eternalreturn.blocks.Dyeing.DYED_WATER_CAULDRON, com.eternalreturn.blocks.Dyeing.DYED_REDSTONE_LAMP);
 		net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap.INSTANCE.putBlock(com.eternalreturn.blocks.Dyeing.DYED_REDSTONE_LAMP,
 				net.minecraft.client.render.RenderLayer.getCutout());
+		// With ColorLight (optional), each dyed lamp's light its own colour.
+		if (net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("colorlight")) {
+			ColorLightLamps.register();
+		}
 		net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry.ITEM.register((stack, tintIndex) ->
 				tintIndex == 0 ? net.minecraft.component.type.DyedColorComponent.getColor(stack, -1) : -1, net.minecraft.item.Items.REDSTONE_LAMP);
 		net.minecraft.client.item.ModelPredicateProviderRegistry.register(net.minecraft.item.Items.REDSTONE_LAMP, com.eternalreturn.EternalReturn.id("dyed"),
