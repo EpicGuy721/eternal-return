@@ -18,6 +18,10 @@
 		{
 			"config": "eternalreturn.client.mixins.json",
 			"environment": "client"
+		},
+		{
+			"config": "eternalreturn.colorlight.mixins.json",
+			"environment": "client"
 		}
 	],
 	"depends": {

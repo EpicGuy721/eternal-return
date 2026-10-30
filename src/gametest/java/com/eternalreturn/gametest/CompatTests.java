@@ -26,6 +26,11 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.MethodNode;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -54,6 +59,8 @@ public class CompatTests implements FabricGameTest {
 	/** The moving light LambDynamicLights (an optional client mod) gives this mod's things when it's installed. */
 	private static final String DYNAMIC_LIGHTS = "assets/eternalreturn/dynamiclights";
 	/** What gives moving light: entity types and items, each named by one of the files. */
+	/** ColorLight's hook into LambDynamicLights, which halves moving light (undone by ColorLightMovingLightMixin). */
+	private static final String COLORLIGHT_MOVING_LIGHT = "/me/mrhikmen/colorlight/client/compat/lambdynlights/ColorLightEntityLightTicker.class";
 	private static final List<String> DYNAMIC_LIGHT_SOURCES = List.of("entity eternalreturn:glass_item_frame",
 			"entity eternalreturn:glowing_glass_item_frame", "entity eternalreturn:laser_bolt", "entity eternalreturn:dynamite", "item eternalreturn:glowdine");
 
@@ -229,5 +236,34 @@ public class CompatTests implements FabricGameTest {
 			ctx.killAllEntities();
 			ctx.complete();
 		});
+	}
+
+	/**
+	 * ColorLight 0.2.6 hands every moving light to its engine at half its level (a held torch lit as a level 7 block);
+	 * this mod's client mixin turns that "/ 2" in ColorLightEntityLightTicker.apply into "/ 1", and its plugin applies it
+	 * only while there is exactly one such halving. ColorLight is in the dev runs, so its class can be read here: when
+	 * an update moves or drops the halving, this fails, rather than the fix quietly switching itself off.
+	 */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "compat")
+	public void colorLightStillHalvesMovingLight(TestContext ctx) {
+		ClassNode node = new ClassNode();
+		try (InputStream in = CompatTests.class.getResourceAsStream(COLORLIGHT_MOVING_LIGHT)) {
+			ctx.assertTrue(in != null, "ColorLight's moving-light hook is on the classpath");
+			new ClassReader(in).accept(node, 0);
+		} catch (java.io.IOException e) {
+			throw new RuntimeException(e);
+		}
+		int halvings = 0;
+		for (MethodNode method : node.methods) {
+			if (method.name.equals("apply")) {
+				for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+					if (insn.getOpcode() == Opcodes.ICONST_2 && insn.getNext() != null && insn.getNext().getOpcode() == Opcodes.IDIV) {
+						halvings++;
+					}
+				}
+			}
+		}
+		ctx.assertTrue(halvings == 1, "ColorLight's apply halves moving light once (found " + halvings + "), as the mixin expects");
+		ctx.complete();
 	}
 }

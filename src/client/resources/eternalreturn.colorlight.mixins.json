@@ -1,0 +1,12 @@
+{
+	"required": false,
+	"package": "com.eternalreturn.mixin.colorlight",
+	"plugin": "com.eternalreturn.mixin.colorlight.ColorLightMixinPlugin",
+	"compatibilityLevel": "JAVA_21",
+	"client": [
+		"ColorLightMovingLightMixin"
+	],
+	"injectors": {
+		"defaultRequire": 0
+	}
+}
