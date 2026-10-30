@@ -64,8 +64,6 @@ public class CompatTests implements FabricGameTest {
 	private static final String COLORLIGHT_SHADER = "/assets/colorlight/shaders/include/colorlight_light.glsl";
 	private static final String COLORLIGHT_DAYLIGHT_LINE =
 			"float blockShare = (fullPeak > 0.0001) ? clamp(1.0 - skyPeak / fullPeak, 0.0, 1.0) * 10.0 : 1.0;";
-	/** ColorLight's GPU light volume, whose header ColorLightHeaderMixin writes slot 10 of. */
-	private static final String COLORLIGHT_VOLUME = "/me/mrhikmen/colorlight/client/core/render/gpu/GpuLightVolume.class";
 	/** What gives moving light: entity types and items, each named by one of the files. */
 	private static final List<String> DYNAMIC_LIGHT_SOURCES = List.of("entity eternalreturn:glass_item_frame",
 			"entity eternalreturn:glowing_glass_item_frame", "entity eternalreturn:laser_bolt", "entity eternalreturn:dynamite", "item eternalreturn:glowdine");
@@ -274,14 +272,13 @@ public class CompatTests implements FabricGameTest {
 	}
 
 	/**
-	 * By day ColorLight colours light in hard-edged patches (a block one sky level short of full daylight gets all the
-	 * colour); this mod's client sends ColorLight's shader one daylight value for the whole view in slot 10 of its header
-	 * and rewrites the shader's daylight line to use it. Both are ColorLight's: its shader still has that line once, and
-	 * its header still has 16 numbers of which writeHeader fills only the first 10, so slot 10 is free. When an update
-	 * changes either, this fails, rather than the fix quietly switching itself off.
+	 * By day ColorLight coloured light only where it outshone daylight, counted ten times over: a torch in the open lit
+	 * white, one a sky level into shade fully coloured beside it. This mod's client rewrites that line of ColorLight's
+	 * shader so light is coloured day and night alike. ColorLight's shader must still have the line once: when an update
+	 * changes it, this fails, rather than the fix quietly switching itself off.
 	 */
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "compat")
-	public void colorLightDaylightLineAndHeaderSlot(TestContext ctx) {
+	public void colorLightDaylightLine(TestContext ctx) {
 		String shader;
 		try (InputStream in = CompatTests.class.getResourceAsStream(COLORLIGHT_SHADER)) {
 			ctx.assertTrue(in != null, "ColorLight's shader is on the classpath");
@@ -291,34 +288,6 @@ public class CompatTests implements FabricGameTest {
 		}
 		int lines = shader.split(Pattern.quote(COLORLIGHT_DAYLIGHT_LINE), -1).length - 1;
 		ctx.assertTrue(lines == 1, "ColorLight's shader has its daylight line once (found " + lines + "), as the mixin expects");
-		ClassNode node = new ClassNode();
-		try (InputStream in = CompatTests.class.getResourceAsStream(COLORLIGHT_VOLUME)) {
-			ctx.assertTrue(in != null, "ColorLight's GPU light volume is on the classpath");
-			new ClassReader(in).accept(node, 0);
-		} catch (java.io.IOException e) {
-			throw new RuntimeException(e);
-		}
-		ctx.assertTrue(node.fields.stream().anyMatch(field -> field.name.equals("HEADER_INTS") && Integer.valueOf(16).equals(field.value)),
-				"ColorLight's header has 16 numbers");
-		int highest = -1;
-		boolean written = false;
-		for (MethodNode method : node.methods) {
-			if (method.name.equals("writeHeader")) {
-				written = true;
-				for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
-					if (insn instanceof org.objectweb.asm.tree.FieldInsnNode field && field.name.equals("header") && insn.getNext() != null) {
-						AbstractInsnNode slot = insn.getNext();
-						if (slot.getOpcode() >= Opcodes.ICONST_0 && slot.getOpcode() <= Opcodes.ICONST_5) {
-							highest = Math.max(highest, slot.getOpcode() - Opcodes.ICONST_0);
-						} else if (slot instanceof org.objectweb.asm.tree.IntInsnNode push && slot.getOpcode() == Opcodes.BIPUSH) {
-							highest = Math.max(highest, push.operand);
-						}
-					}
-				}
-			}
-		}
-		ctx.assertTrue(written, "ColorLight still writes its header in writeHeader");
-		ctx.assertTrue(highest == 9, "ColorLight fills header slots up to " + highest + ", leaving slot 10 free (expected up to 9)");
 		ctx.complete();
 	}
 }
