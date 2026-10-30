@@ -4,6 +4,8 @@
 	"plugin": "com.eternalreturn.mixin.colorlight.ColorLightMixinPlugin",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
+		"ColorLightDaylightTintMixin",
+		"ColorLightHeaderMixin",
 		"ColorLightMovingLightMixin"
 	],
 	"injectors": {
