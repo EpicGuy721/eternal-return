@@ -245,7 +245,8 @@ public class CompatTests implements FabricGameTest {
 	/**
 	 * ColorLight 0.2.6 hands every moving light to its engine at half its level (a held torch lit as a level 7 block);
 	 * this mod's client mixin turns that "/ 2" in ColorLightEntityLightTicker.apply into "/ 1", and its plugin applies it
-	 * only while there is exactly one such halving. ColorLight is in the dev runs, so its class can be read here: when
+	 * only while there is exactly one such halving. Another gives a held block item the level of the block it places
+	 * (effectiveStrength), where ColorLight used the block's brightest (an unlit candle as four lit ones). ColorLight is in the dev runs, so its class can be read here: when
 	 * an update moves or drops the halving, this fails, rather than the fix quietly switching itself off.
 	 */
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "compat")
@@ -268,6 +269,10 @@ public class CompatTests implements FabricGameTest {
 			}
 		}
 		ctx.assertTrue(halvings == 1, "ColorLight's apply halves moving light once (found " + halvings + "), as the mixin expects");
+		// ColorLightHeldLevelMixin: the step that picks a held or dropped block item's light level.
+		ctx.assertTrue(node.methods.stream().anyMatch(method -> method.name.equals("effectiveStrength")
+						&& org.objectweb.asm.Type.getArgumentTypes(method.desc).length == 2 && method.desc.endsWith(")I")),
+				"ColorLight still picks a held item's light level in effectiveStrength, as the mixin expects");
 		ctx.complete();
 	}
 

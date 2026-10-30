@@ -40,6 +40,9 @@ public class ColorLightMixinPlugin implements IMixinConfigPlugin {
 		if (mixinClassName.endsWith("ColorLightDaylightTintMixin")) {
 			return FabricLoader.getInstance().isModLoaded("sodium");
 		}
+		if (mixinClassName.endsWith("ColorLightHeldLevelMixin")) {
+			return hasMethod(targetClassName, "effectiveStrength", 2, "I");
+		}
 		boolean found = false;
 		try {
 			ClassNode node = MixinService.getService().getBytecodeProvider().getClassNode(targetClassName);
@@ -54,6 +57,24 @@ public class ColorLightMixinPlugin implements IMixinConfigPlugin {
 		if (!found) {
 			LOGGER.warn("Eternal Return: ColorLight has changed ({} no longer halves moving light as 0.2.6 did), so held and dropped "
 					+ "light sources keep ColorLight's own strength.", targetClassName);
+		}
+		return found;
+	}
+
+	/** Whether the class still has this method, with this many arguments and this return type. */
+	private static boolean hasMethod(String targetClassName, String name, int arguments, String returns) {
+		boolean found;
+		try {
+			ClassNode node = MixinService.getService().getBytecodeProvider().getClassNode(targetClassName);
+			found = node.methods.stream().anyMatch(method -> method.name.equals(name)
+					&& org.objectweb.asm.Type.getArgumentTypes(method.desc).length == arguments
+					&& org.objectweb.asm.Type.getReturnType(method.desc).getDescriptor().equals(returns));
+		} catch (Exception e) {
+			found = false;
+		}
+		if (!found) {
+			LOGGER.warn("Eternal Return: ColorLight has changed ({} has no {}), so held and dropped block items keep ColorLight's light level for them.",
+					targetClassName, name);
 		}
 		return found;
 	}
