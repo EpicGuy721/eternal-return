@@ -28,7 +28,6 @@ IRON = ramp('#111113', '#1c1d20', '#2a2b2f', '#3b3d42', '#53565c', '#6f7278')
 
 # Light by face: tops lit, undersides dark, sides a little darker than the front.
 LIGHT = {'up': 0.8, 'north': 0.0, 'south': -0.2, 'east': -0.4, 'west': -0.4, 'down': -1.5}
-BAYER = [[0, 2], [3, 1]]
 
 
 def faces(off, size):
@@ -41,9 +40,18 @@ def faces(off, size):
     }
 
 
+STEPS = 3
+SCATTER = 2.5   # noise is widened this much, so neighbouring pixels usually differ
+
+
+
+
 def pick(colours, t, x, y):
-    i = int(t + (BAYER[y % 2][x % 2] + 0.5) / 4.0)
-    return colours[max(0, min(len(colours) - 1, i))]
+    """Scatters pixel by pixel between close shades: each ramp step is split into STEPS in-between shades."""
+    f = max(0, min((len(colours) - 1) * STEPS, int(t * STEPS + rng.random())))
+    a, b = colours[f // STEPS], colours[min(len(colours) - 1, f // STEPS + 1)]
+    k = (f % STEPS) / STEPS
+    return tuple(round(a[i] + (b[i] - a[i]) * k) for i in range(3)) + (255,)
 
 
 def paint(rect, face, colours, base, pattern=None, grad=0.9, noise=0.4):
@@ -56,7 +64,7 @@ def paint(rect, face, colours, base, pattern=None, grad=0.9, noise=0.4):
                 t += grad * (0.5 - (fy + 0.5) / fh)
             if pattern:
                 t += pattern(fx, fy, fw, fh)
-            t += (rng.random() - 0.5) * noise
+            t += (rng.random() - 0.5) * noise * SCATTER
             px[x0 + fx, y0 + fy] = pick(colours, t, x0 + fx, y0 + fy)
 
 
