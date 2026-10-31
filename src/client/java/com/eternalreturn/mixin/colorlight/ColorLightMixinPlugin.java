@@ -18,7 +18,7 @@ import java.util.Set;
  * Applies the ColorLight fixes only when ColorLight is installed, each checked against ColorLight's classes before they
  * load, with a warning instead of a failed start if ColorLight has changed. ColorLightMovingLightMixin: its moving-light
  * hook still halves the light level as 0.2.6 does (one "level / 2" in ColorLightEntityLightTicker.apply). The daylight
- * fix (ColorLightDaylightTintMixin) needs Sodium, whose loader reads ColorLight's shader; it checks its own line. The
+ * fix (ColorLightShaderMixin) needs Sodium, whose loader reads ColorLight's shader; it checks its own line. The
  * held level (ColorLightHeldLevelMixin) and the brighter scan (ColorLightScanMixin) need their method still there.
  */
 public class ColorLightMixinPlugin implements IMixinConfigPlugin {
@@ -38,7 +38,7 @@ public class ColorLightMixinPlugin implements IMixinConfigPlugin {
 		if (!FabricLoader.getInstance().isModLoaded("colorlight")) {
 			return false;
 		}
-		if (mixinClassName.endsWith("ColorLightDaylightTintMixin")) {
+		if (mixinClassName.endsWith("ColorLightShaderMixin")) {
 			return FabricLoader.getInstance().isModLoaded("sodium");
 		}
 		if (mixinClassName.endsWith("ColorLightBlockChangeMixin")) {

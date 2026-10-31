@@ -5,7 +5,7 @@
 	"compatibilityLevel": "JAVA_21",
 	"client": [
 		"ColorLightBlockChangeMixin",
-		"ColorLightDaylightTintMixin",
+		"ColorLightShaderMixin",
 		"ColorLightHeldLevelMixin",
 		"ColorLightMovingLightMixin",
 		"ColorLightScanMixin"

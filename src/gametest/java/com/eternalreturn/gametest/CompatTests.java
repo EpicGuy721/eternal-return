@@ -60,10 +60,11 @@ public class CompatTests implements FabricGameTest {
 	private static final String DYNAMIC_LIGHTS = "assets/eternalreturn/dynamiclights";
 	/** ColorLight's hook into LambDynamicLights, which halves moving light (undone by ColorLightMovingLightMixin). */
 	private static final String COLORLIGHT_MOVING_LIGHT = "/me/mrhikmen/colorlight/client/compat/lambdynlights/ColorLightEntityLightTicker.class";
-	/** ColorLight's shader maths, whose daylight line ColorLightDaylightTintMixin rewrites. */
+	/** ColorLight's shader maths, whose daylight and no-light lines ColorLightShaderMixin rewrites. */
 	private static final String COLORLIGHT_SHADER = "/assets/colorlight/shaders/include/colorlight_light.glsl";
 	private static final String COLORLIGHT_DAYLIGHT_LINE =
 			"float blockShare = (fullPeak > 0.0001) ? clamp(1.0 - skyPeak / fullPeak, 0.0, 1.0) * 10.0 : 1.0;";
+	private static final String COLORLIGHT_NO_LIGHT_LINE = "float blockLevel = max(lvl, fullBright);";
 	/** ColorLight's chunk scan, whose reading of a block's light ColorLightScanMixin makes brighter for soul lights and candles. */
 	private static final String COLORLIGHT_SCANNER = "/me/mrhikmen/colorlight/client/core/light/scan/ColorLightChunkScanner.class";
 	/** This mod's raised ColorLight caps for those blocks. */
@@ -283,8 +284,9 @@ public class CompatTests implements FabricGameTest {
 	/**
 	 * By day ColorLight coloured light only where it outshone daylight, counted ten times over: a torch in the open lit
 	 * white, one a sky level into shade fully coloured beside it. This mod's client rewrites that line of ColorLight's
-	 * shader so light is coloured day and night alike. ColorLight's shader must still have the line once: when an update
-	 * changes it, this fails, rather than the fix quietly switching itself off.
+	 * shader so light is coloured day and night alike, and the one that drew a face ColorLight has no light for pitch
+	 * black (the sliver above flowing lava) so such a face takes the game's light. ColorLight's shader must still have
+	 * each line once: when an update changes one, this fails, rather than the fix quietly switching itself off.
 	 */
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "compat")
 	public void colorLightDaylightLine(TestContext ctx) {
@@ -297,6 +299,8 @@ public class CompatTests implements FabricGameTest {
 		}
 		int lines = shader.split(Pattern.quote(COLORLIGHT_DAYLIGHT_LINE), -1).length - 1;
 		ctx.assertTrue(lines == 1, "ColorLight's shader has its daylight line once (found " + lines + "), as the mixin expects");
+		int noLight = shader.split(Pattern.quote(COLORLIGHT_NO_LIGHT_LINE), -1).length - 1;
+		ctx.assertTrue(noLight == 1, "ColorLight's shader has its no-light line once (found " + noLight + "), as the mixin expects");
 		ctx.complete();
 	}
 
