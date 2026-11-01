@@ -18,22 +18,6 @@
           "tree": "eternalreturn:tree/japanese_maple"
         }
       ]
-    },
-    "eternalreturn:pale_oak_sapling": {
-      "trees": [
-        {
-          "weight": 3,
-          "tree": "vanilla"
-        },
-        {
-          "weight": 2,
-          "tree": "eternalreturn:tree/pale_aspen"
-        },
-        {
-          "weight": 1,
-          "tree": "eternalreturn:tree/spreading_pale_oak"
-        }
-      ]
     }
   }
 }

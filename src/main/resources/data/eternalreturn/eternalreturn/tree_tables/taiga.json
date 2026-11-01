@@ -11,7 +11,11 @@
         },
         {
           "weight": 2,
-          "tree": "eternalreturn:tree/larch"
+          "template": "eternalreturn:tree/larch"
+        },
+        {
+          "weight": 1,
+          "template": "eternalreturn:tree/larch_young"
         },
         {
           "weight": 2,

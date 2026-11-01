@@ -189,13 +189,14 @@ write_json(f'data/{NS}/worldgen/placed_feature/maple_checked.json', {
     'feature': f'{NS}:maple',
     'placement': [{'type': 'minecraft:block_predicate_filter', 'predicate': {
         'type': 'minecraft:would_survive', 'state': {'Name': f'{NS}:maple_sapling', 'Properties': {'stage': '0'}}}}]})
-# The forest: a dense mix, three maples to two pale oaks, about as thick as a forest.
+# The forest: maples only, about as thick as a forest (pale oak was here at first; it will get biomes of its own,
+# worldgen expansion phase 6). The selector stays, so the biome's feature list doesn't change.
 # Azalea: vanilla's azalea tree, on an azalea trunk (AzaleaTrees puts it in place of some oaks in Eternal Return worlds).
 azalea = json.loads(read('data/minecraft/worldgen/configured_feature/azalea_tree.json'))
 azalea['config']['trunk_provider'] = provider(f'{NS}:azalea_log')
 write_json(f'data/{NS}/worldgen/configured_feature/azalea_tree.json', azalea)
 write_json(f'data/{NS}/worldgen/configured_feature/trees_autumnal_forest.json', {'type': 'minecraft:random_selector', 'config': {
-    'features': [{'chance': 0.4, 'feature': {'feature': f'{NS}:pale_oak', 'placement': []}}],
+    'features': [],
     'default': f'{NS}:maple_checked'}})
 trees = {'feature': f'{NS}:trees_autumnal_forest', 'placement': [
     {'type': 'minecraft:count', 'count': {'type': 'minecraft:weighted_list', 'distribution': [

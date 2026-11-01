@@ -25,8 +25,8 @@ import java.util.Optional;
 /**
  * Trees from structure templates (a "template" entry in a tree table): the trunk is at the middle of the template's
  * bottom layer and lands on the sapling. The template is turned and mirrored at random. Like a sapling's own tree, it
- * only grows if it fits: the ground under the trunk must be dirt, grass or the like, and every block of the template's
- * box must be air, leaves or a plant a tree may replace. Its leaves are then set as a tree's own (not persistent, each
+ * only grows if it fits: the ground under the trunk must be dirt, grass or the like, and every spot the template fills
+ * must be air, leaves or a plant a tree may replace. Its leaves are then set as a tree's own (not persistent, each
  * its real distance from a log), so they decay when the tree is cut, and logs keep their direction when turned.
  */
 public final class TreeTemplates {
@@ -52,7 +52,13 @@ public final class TreeTemplates {
 		if (!world.getBlockState(pos.down()).isIn(BlockTags.DIRT) || box.getMaxY() >= world.getTopY()) {
 			return false;
 		}
-		for (BlockPos p : BlockPos.iterate(box.getMinX(), box.getMinY(), box.getMinZ(), box.getMaxX(), box.getMaxY(), box.getMaxZ())) {
+		// Only the spots the tree fills: each must be air, leaves or a plant a tree may replace (or the sapling itself).
+		var lists = ((com.eternalreturn.mixin.worldgen.StructureTemplateAccessor) template).eternalreturn$blockInfoLists();
+		if (lists.isEmpty()) {
+			return false;
+		}
+		for (StructureTemplate.StructureBlockInfo info : data.getRandomBlockInfos(lists, origin).getAll()) {
+			BlockPos p = StructureTemplate.transform(data, info.pos()).add(origin);
 			if (!TreeFeature.canReplace(world, p) && !p.equals(pos)) {
 				return false;
 			}

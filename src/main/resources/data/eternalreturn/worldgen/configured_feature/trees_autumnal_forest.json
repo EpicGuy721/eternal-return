@@ -1,15 +1,7 @@
 {
   "type": "minecraft:random_selector",
   "config": {
-    "features": [
-      {
-        "chance": 0.4,
-        "feature": {
-          "feature": "eternalreturn:pale_oak",
-          "placement": []
-        }
-      }
-    ],
+    "features": [],
     "default": "eternalreturn:maple_checked"
   }
 }

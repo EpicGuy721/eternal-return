@@ -233,6 +233,7 @@
 		"worldgen.StructureWeightSamplerMixin",
 		"worldgen.SurfaceBuilderMixin",
 		"worldgen.SaplingGeneratorMixin",
+		"worldgen.StructureTemplateAccessor",
 		"worldgen.TreeFeatureAzaleaMixin",
 		"worldgen.TreeFeatureBiomeMixin"
 	],

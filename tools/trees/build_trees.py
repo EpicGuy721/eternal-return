@@ -137,12 +137,10 @@ SPECIES = {
                      tree(*OAK, straight(10, 3, 2), spruce_foliage(uniform(1, 2), uniform(0, 1), uniform(4, 6)), size(2, 0, 2),
                           decorators=[{'type': 'minecraft:leave_vine', 'probability': 0.3}])),
     'scrub_oak': ('Scrub oak: a low, crooked oak of dry hills, as wide as it is tall',
-                  tree(*OAK, bending(2, 1, 1, 2, 1), blob(2, 2), size(1, 0, 1))),
+                  tree(*OAK, bending(2, 1, 1, 2, 1), blob(2, 3, 1), size(1, 0, 1))),
     'shrub_oak': ('Shrub oak: a knee-high thicket of oak on a single short stem',
                   tree(*OAK, straight(1), bush(2), size(0, 0, 0))),
     # Spruce
-    'larch': ('Larch: a tall, slim trunk with short, sparse, upturned branches all the way up',
-              tree(*SPRUCE, straight(9, 3, 1), spruce_foliage(uniform(1, 2), uniform(0, 1), uniform(2, 3)), size(2, 0, 2))),
     'grand_fir': ('Grand fir: a tall, dense, broad cone of a tree',
                   tree(*SPRUCE, straight(10, 3, 2), spruce_foliage(uniform(3, 4), uniform(0, 1), uniform(1, 2)), size(2, 0, 3))),
     'black_spruce': ('Black spruce: a thin spire of a tree, needles close to a spindly trunk, a tuft at the top',
@@ -167,8 +165,6 @@ SPECIES = {
     'teak': ('Teak: a tall, clean, straight trunk with a round crown on top',
              tree(*JUNGLE, straight(13, 4), blob(3, 3), size(1, 0, 1),
                   decorators=[{'type': 'minecraft:cocoa', 'probability': 0.2}])),
-    'jungle_palm': ('Palm: a leaning, curving trunk with a flat tuft of leaves',
-                    tree(*JUNGLE, bending(5, 3, 2, 3, 4), acacia_foliage(2), size(1, 0, 1))),
     # Acacia
     'umbrella_thorn': ('Umbrella thorn acacia: a wide, flat crown on a forked trunk',
                        tree(*ACACIA, forking(4, 2, 1), acacia_foliage(3), size(1, 0, 2))),
@@ -201,6 +197,61 @@ SPECIES = {
     'azalea_shrub': ('Azalea shrub: a rounded bush of leaves and blossom on a stub of trunk',
                      tree(*AZALEA, straight(1), bush(2), size(0, 0, 0), dirt='minecraft:rooted_dirt', force_dirt=True)),
 }
+
+def mangrove(base, rand_b, steps, branch_chance, radius, height, attempts, roots_lo, roots_hi):
+    config = json.loads(json.dumps(VANILLA_MANGROVE))
+    trunk = config['config']['trunk_placer']
+    trunk['base_height'] = base
+    trunk['height_rand_b'] = rand_b
+    trunk['extra_branch_steps'] = uniform(*steps)
+    trunk['place_branch_per_log_probability'] = branch_chance
+    config['config']['foliage_placer'] = random_spread(radius, height, attempts)
+    config['config']['root_placer']['trunk_offset_y'] = uniform(roots_lo, roots_hi)
+    return config
+
+
+# Vanilla 1.21.1's mangrove.json, trimmed of its bee nest decorator.
+VANILLA_MANGROVE = {'type': 'minecraft:tree', 'config': {
+    'decorators': [
+        {'type': 'minecraft:leave_vine', 'probability': 0.125},
+        {'type': 'minecraft:attached_to_leaves', 'block_provider': {
+            'type': 'minecraft:randomized_int_state_provider', 'property': 'age',
+            'source': {'type': 'minecraft:simple_state_provider', 'state': state('minecraft:mangrove_propagule', age='0', hanging='true', stage='0', waterlogged='false')},
+            'values': uniform(0, 4)},
+         'directions': ['down'], 'exclusion_radius_xz': 1, 'exclusion_radius_y': 0, 'probability': 0.14, 'required_empty_blocks': 2}],
+    'dirt_provider': {'type': 'minecraft:simple_state_provider', 'state': state('minecraft:dirt')},
+    'foliage_placer': random_spread(3, 2, 70),
+    'foliage_provider': leaves('minecraft:mangrove_leaves'),
+    'force_dirt': False,
+    'ignore_vines': True,
+    'minimum_size': size(2, 0, 2),
+    'root_placer': {
+        'type': 'minecraft:mangrove_root_placer',
+        'above_root_placement': {'above_root_placement_chance': 0.5,
+                                 'above_root_provider': {'type': 'minecraft:simple_state_provider', 'state': state('minecraft:moss_carpet')}},
+        'mangrove_root_placement': {
+            'can_grow_through': '#minecraft:mangrove_roots_can_grow_through', 'max_root_length': 15, 'max_root_width': 8,
+            'muddy_roots_in': ['minecraft:mud', 'minecraft:muddy_mangrove_roots'],
+            'muddy_roots_provider': {'type': 'minecraft:simple_state_provider', 'state': state('minecraft:muddy_mangrove_roots', axis='y')},
+            'random_skew_chance': 0.2},
+        'root_provider': {'type': 'minecraft:simple_state_provider', 'state': state('minecraft:mangrove_roots', waterlogged='false')},
+        'trunk_offset_y': uniform(1, 3)},
+    'trunk_placer': {'type': 'minecraft:upwards_branching_trunk_placer', 'base_height': 2,
+                     'can_grow_through': '#minecraft:mangrove_logs_can_grow_through',
+                     'extra_branch_length': uniform(0, 1), 'extra_branch_steps': uniform(1, 4),
+                     'height_rand_a': 1, 'height_rand_b': 4, 'place_branch_per_log_probability': 0.5},
+    'trunk_provider': log('minecraft:mangrove_log'),
+}}
+
+SPECIES.update({
+    'red_mangrove': ('Red mangrove: a tall crown standing high on a tangle of arching stilt roots',
+                     mangrove(4, 4, (2, 5), 0.4, 3, 3, 80, 2, 3)),
+    'black_mangrove': ('Black mangrove: low and spreading, many branches under a wide flat crown',
+                       mangrove(1, 2, (2, 6), 0.75, 4, 2, 100, 1, 2)),
+    'dwarf_mangrove': ('Dwarf mangrove: a knee-high, bushy mangrove on short roots',
+                       mangrove(1, 1, (1, 2), 0.5, 2, 2, 40, 1, 1)),
+})
+
 
 # Pale oak shapes, each in the three leaf colours, one picked at random as the pale oak sapling does.
 PALE_OAK_SHAPES = {
@@ -292,7 +343,132 @@ def baobab():
     return b
 
 
+def connect(blocks, a, b, block):
+    """Fills a straight run from a to b one axis at a time (x, then z, then y), so every block touches the last by a face."""
+    x, y, z = a
+    blocks.setdefault((x, y, z), block)
+    for axis, target in ((0, b[0]), (2, b[2]), (1, b[1])):
+        while (x, y, z)[axis] != target:
+            step = 1 if target > (x, y, z)[axis] else -1
+            if axis == 0:
+                x += step
+            elif axis == 1:
+                y += step
+            else:
+                z += step
+            blocks.setdefault((x, y, z), block)
+
+
+def prune(blocks):
+    """Drops leaves more than 6 from a log (they would decay), and any left hanging by nothing."""
+    dist = leaf_distances(blocks)
+    return {p: b for p, b in blocks.items() if not b.endswith('_leaves') or dist.get(p, 99) <= 6}
+
+
+def larch(seed, height):
+    """Larch (spruce): a straight trunk with open tiers of short level branches, gaps of bare trunk between them,
+    the tiers shrinking upward to a thin spire; needles in loose tufts along each branch, the tips drooping."""
+    rng = random.Random(seed)
+    b = {}
+    for y in range(height):
+        b[(0, y, 0)] = 'minecraft:spruce_log'
+    tier = 3
+    while tier < height - 2:
+        reach = max(1, round(3.2 * (height - tier) / height + 0.4))
+        for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            if rng.random() < 0.15:
+                continue
+            length = max(1, reach - rng.randint(0, 1))
+            for k in range(1, length + 1):
+                b[(dx * k, tier, dz * k)] = 'minecraft:spruce_log'
+            for k in range(1, length + 2):
+                for side in (-1, 0, 1):
+                    px, pz = dx * k + dz * side, dz * k + dx * side
+                    if rng.random() < 0.8:
+                        b.setdefault((px, tier, pz), 'minecraft:spruce_leaves')
+                    if side == 0 or rng.random() < 0.4:
+                        b.setdefault((px, tier + 1, pz), 'minecraft:spruce_leaves')
+            b.setdefault((dx * (length + 1), tier - 1, dz * (length + 1)), 'minecraft:spruce_leaves')
+        tier += rng.choice((2, 3))
+    for y in range(height - 2, height + 2):
+        for dx, dz in ((0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)):
+            if (dx, dz) == (0, 0) or y < height:
+                b.setdefault((dx, y, dz), 'minecraft:spruce_leaves')
+    b[(0, height + 2, 0)] = 'minecraft:spruce_leaves'
+    return prune(b)
+
+
+def palm(seed, trunk, fronds=8, reach=5):
+    """A palm (jungle wood): the trunk follows the given column path. On top, a knob of log stubs (the frond bases,
+    two out in the main directions, one on the diagonals) under a dome of leaves, and fronds that run out from the
+    stubs and fall away in steps, the long ones in the main directions, shorter ones between. Every leaf stays within
+    6 of a log (the stubs carry the fronds), so a cut palm's leaves decay; reach trims the fronds (5 full, 4 short).
+    The crown is open, a tuft and separate fronds with sky between them; a solid dome over the knob looked like an umbrella."""
+    rng = random.Random(seed)
+    b = {}
+    for p in trunk:
+        b[p] = 'minecraft:jungle_log'
+    for prev, cur in zip(trunk, trunk[1:]):
+        connect(b, prev, cur, 'minecraft:jungle_log')
+    tx, ty, tz = trunk[-1]
+    for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+        b[(tx + dx, ty, tz + dz)] = 'minecraft:jungle_log'
+        b[(tx + 2 * dx, ty, tz + 2 * dz)] = 'minecraft:jungle_log'
+    for dx, dz in ((1, 1), (1, -1), (-1, 1), (-1, -1)):
+        b[(tx + dx, ty, tz + dz)] = 'minecraft:jungle_log'
+    # A small tuft over the knob: the young fronds pointing up.
+    for x, z in ((0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)):
+        b.setdefault((tx + x, ty + 1, tz + z), 'minecraft:jungle_leaves')
+    b.setdefault((tx, ty + 2, tz), 'minecraft:jungle_leaves')
+    # A frond, out along (dx, dz) and down: each step out, then a step down (face to face, so leaves stay attached).
+    main = [(2, 1), (3, 1), (3, 0), (4, 0), (4, -1), (5, -1), (5, -2), (6, -2), (6, -3)]
+    side = [(2, 0), (3, 0), (3, -1), (4, -1), (4, -2), (5, -2)]
+    for dx, dz in [(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)][:fronds]:
+        diagonal = dx != 0 and dz != 0
+        steps = side if diagonal else main
+        steps = steps[:len(steps) - (5 - reach) * 2 - rng.randint(0, 1)]
+        for k, (out, down) in enumerate(steps):
+            if diagonal:
+                # Along a diagonal, out means one block on each axis; fill the corner so the run stays face to face.
+                b.setdefault((tx + dx * out, ty + down, tz + dz * (out - 1)), 'minecraft:jungle_leaves')
+                b.setdefault((tx + dx * out, ty + down, tz + dz * out), 'minecraft:jungle_leaves')
+            else:
+                b.setdefault((tx + dx * out, ty + down, tz + dz * out), 'minecraft:jungle_leaves')
+                # Where it leaves the knob a main frond is three leaves wide, then one.
+                if k < 2:
+                    b.setdefault((tx + dx * out + dz, ty + down, tz + dz * out + dx), 'minecraft:jungle_leaves')
+                    b.setdefault((tx + dx * out - dz, ty + down, tz + dz * out - dx), 'minecraft:jungle_leaves')
+    return prune(b)
+
+
+def column(height, shifts=()):
+    """A trunk path: straight up, stepping one block sideways at each (y, dx, dz) in shifts."""
+    path = []
+    x = z = 0
+    moves = {y: (dx, dz) for y, dx, dz in shifts}
+    for y in range(height):
+        if y in moves:
+            x += moves[y][0]
+            z += moves[y][1]
+        path.append((x, y, z))
+    return path
+
+
 TEMPLATES = {
+    'larch': ('Larch (spruce): open tiers of short level branches with bare trunk between, drooping tips, a thin spire', lambda: larch(21, 15)),
+    'larch_young': ('Young larch (spruce): the same open tiers on a shorter trunk', lambda: larch(22, 11)),
+    'palm': ('Coconut palm (jungle): a tall straight trunk under a knob of frond bases and arching, drooping fronds',
+             lambda: palm(31, column(9))),
+    'palm_leaning': ('Leaning palm (jungle): a trunk slanting steadily to one side, as palms lean out over a beach',
+                     lambda: palm(32, column(10, [(2, 1, 0), (4, 1, 0), (6, 1, 0), (8, 1, 0)]))),
+    'palm_curved': ('Curved palm (jungle): upright at the foot, bending ever further over toward the top',
+                    lambda: palm(33, column(11, [(5, 1, 0), (7, 1, 0), (8, 1, 0), (9, 1, 0), (10, 1, 0)]))),
+    'palm_tall': ('Tall palm (jungle): a very tall trunk with two kinks in it, a small crown far up',
+                  lambda: palm(34, column(15, [(5, 1, 0), (10, -1, 0)]), reach=4)),
+    'palm_dwarf': ('Dwarf palm (jungle): a short trunk under a full, low crown',
+                   lambda: palm(35, column(4), reach=4)),
+    'palm_twin': ('Twin palm (jungle): two trunks from one foot, leaning apart, each with its own crown', lambda: twin_palm(36)),
+
     'willow': ('Weeping willow (oak): a dome of leaves with long curtains hanging from its rim, by water', willow),
     'baobab': ('Baobab (acacia): a fat bottle-shaped trunk with a ring of short branches and small leaf tufts', baobab),
 }
@@ -382,6 +558,15 @@ def write_template(name, blocks):
         f.write(buffer.getvalue())
     logs = sum(1 for b in blocks.values() if b.endswith('_log'))
     print(f'template {name}: {logs} logs, {len(blocks) - logs} leaves, {size[0]} x {size[1]} x {size[2]}')
+
+
+def twin_palm(seed):
+    a = palm(seed, column(9, [(3, 1, 0), (5, 1, 0), (7, 1, 0)]), reach=4)
+    b = palm(seed + 100, [(0, 0, 0)] + [(x, y, z) for x, y, z in column(8, [(2, -1, 0), (4, -1, 0), (6, -1, 0)]) if y > 0], reach=4)
+    for p, block in b.items():
+        if block.endswith('_log') or p not in a:
+            a[p] = block
+    return prune(a)
 
 
 def main():

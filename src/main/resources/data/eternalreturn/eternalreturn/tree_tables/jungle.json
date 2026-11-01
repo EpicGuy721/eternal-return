@@ -6,16 +6,36 @@
     "minecraft:jungle_sapling": {
       "trees": [
         {
-          "weight": 4,
+          "weight": 12,
           "tree": "vanilla"
         },
         {
-          "weight": 2,
+          "weight": 6,
           "tree": "eternalreturn:tree/teak"
         },
         {
-          "weight": 2,
-          "tree": "eternalreturn:tree/jungle_palm"
+          "weight": 1,
+          "template": "eternalreturn:tree/palm"
+        },
+        {
+          "weight": 1,
+          "template": "eternalreturn:tree/palm_leaning"
+        },
+        {
+          "weight": 1,
+          "template": "eternalreturn:tree/palm_curved"
+        },
+        {
+          "weight": 1,
+          "template": "eternalreturn:tree/palm_tall"
+        },
+        {
+          "weight": 1,
+          "template": "eternalreturn:tree/palm_dwarf"
+        },
+        {
+          "weight": 1,
+          "template": "eternalreturn:tree/palm_twin"
         }
       ],
       "mega_trees": [

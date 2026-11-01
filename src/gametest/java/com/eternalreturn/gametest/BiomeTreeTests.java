@@ -56,7 +56,7 @@ public class BiomeTreeTests implements FabricGameTest {
 	private static int[] count(ServerWorld world, BlockPos pos) {
 		int logs = 0;
 		int leaves = 0;
-		for (BlockPos p : BlockPos.iterate(pos.add(-12, 0, -12), pos.add(12, 50, 12))) {
+		for (BlockPos p : BlockPos.iterate(pos.add(-14, 0, -14), pos.add(14, 50, 14))) {
 			BlockState state = world.getBlockState(p);
 			if (state.isIn(BlockTags.LOGS)) {
 				logs++;
@@ -67,7 +67,7 @@ public class BiomeTreeTests implements FabricGameTest {
 		return new int[]{logs, leaves};
 	}
 
-	/** Each species and template, grown on a grass pad high in the sky, makes logs and leaves. */
+	/** Each species and template (palms, larches, willow, baobab), grown on a grass pad high in the sky, makes logs and leaves. */
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = BATCH, tickLimit = 400)
 	public void everySpeciesGrows(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
@@ -79,14 +79,16 @@ public class BiomeTreeTests implements FabricGameTest {
 				species.add(new BiomeTrees.Choice(1, Optional.of(id), Optional.empty()));
 			}
 		}
-		for (String template : List.of("willow", "baobab")) {
-			species.add(new BiomeTrees.Choice(1, Optional.empty(), Optional.of(EternalReturn.id("tree/" + template))));
+		List<Identifier> templates = world.getServer().getStructureTemplateManager().streamTemplates()
+				.filter(id -> id.getNamespace().equals(EternalReturn.MOD_ID) && id.getPath().startsWith("tree/")).sorted().toList();
+		for (Identifier template : templates) {
+			species.add(new BiomeTrees.Choice(1, Optional.empty(), Optional.of(template)));
 		}
-		ctx.assertTrue(species.size() >= 30, "only " + species.size() + " species");
+		ctx.assertTrue(species.size() >= 44 && templates.size() >= 10, species.size() + " species, " + templates.size() + " templates");
 		Map<String, String> grown = new TreeMap<>();
 		for (int i = 0; i < species.size(); i++) {
 			BiomeTrees.Choice choice = species.get(i);
-			BlockPos pos = base.add((i % 6) * 32, 0, (i / 6) * 32);
+			BlockPos pos = base.add((i % 6) * 40, 0, (i / 6) * 40);
 			world.getChunk(pos);
 			pad(world, pos);
 			String name = BiomeTrees.name(choice);
@@ -99,6 +101,28 @@ public class BiomeTreeTests implements FabricGameTest {
 			ctx.assertTrue(ok && blocks[0] > 0 && blocks[1] > 0, name + " didn't grow: " + blocks[0] + " logs, " + blocks[1] + " leaves");
 		}
 		EternalReturn.LOGGER.info("[trees] grown: {}", grown);
+		ctx.complete();
+	}
+
+	/** The scrub oak's crooked trunk never pokes out of its crown: over 20 trees, the top log always has leaves on it. */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = BATCH, tickLimit = 400)
+	public void scrubOakTrunkIsCovered(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		BiomeTrees.Choice scrub = new BiomeTrees.Choice(1, Optional.of(EternalReturn.id("tree/scrub_oak")), Optional.empty());
+		for (int i = 0; i < 20; i++) {
+			BlockPos pos = ctx.getAbsolutePos(BlockPos.ORIGIN).add((i % 5) * 16, 0, 600 + (i / 5) * 16).withY(200);
+			world.getChunk(pos);
+			pad(world, pos);
+			ctx.assertTrue(BiomeTrees.grow(scrub, world, world.getChunkManager().getChunkGenerator(), Random.create(i), pos), "scrub oak " + i + " didn't grow");
+			BlockPos top = null;
+			for (BlockPos p : BlockPos.iterate(pos.add(-6, 0, -6), pos.add(6, 12, 6))) {
+				if (world.getBlockState(p).isOf(Blocks.OAK_LOG) && (top == null || p.getY() > top.getY())) {
+					top = p.toImmutable();
+				}
+			}
+			ctx.assertTrue(top != null && world.getBlockState(top.up()).getBlock() instanceof LeavesBlock,
+					"scrub oak " + i + ": the top log at " + top + " has " + (top == null ? "nothing" : world.getBlockState(top.up())) + " on it");
+		}
 		ctx.complete();
 	}
 
@@ -148,7 +172,7 @@ public class BiomeTreeTests implements FabricGameTest {
 	}
 
 	/**
-	 * Template trees (the willow and the baobab) grow with every leaf not persistent and set to its true distance from
+	 * Template trees (the willow, the baobab, a curved palm, a larch) grow with every leaf not persistent and set to its true distance from
 	 * a log, counted through leaves as the game counts it, so a cut tree's leaves decay as a vanilla tree's do. (Watching
 	 * them decay doesn't work here: the test world doesn't run block ticks up in the sky.)
 	 */
@@ -156,15 +180,15 @@ public class BiomeTreeTests implements FabricGameTest {
 	public void templateTreeLeavesDecay(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
 		int i = 0;
-		for (String template : List.of("willow", "baobab")) {
-			BlockPos pos = ctx.getAbsolutePos(BlockPos.ORIGIN).add(i++ * 32, 0, -200).withY(200);
+		for (String template : List.of("willow", "baobab", "palm_curved", "larch")) {
+			BlockPos pos = ctx.getAbsolutePos(BlockPos.ORIGIN).add(i++ * 40, 0, -200).withY(200);
 			world.getChunk(pos);
 			pad(world, pos);
 			BiomeTrees.Choice choice = new BiomeTrees.Choice(1, Optional.empty(), Optional.of(EternalReturn.id("tree/" + template)));
 			ctx.assertTrue(BiomeTrees.grow(choice, world, world.getChunkManager().getChunkGenerator(), Random.create(5), pos), template + " didn't grow");
 			Map<BlockPos, Integer> distance = new java.util.HashMap<>();
 			java.util.ArrayDeque<BlockPos> queue = new java.util.ArrayDeque<>();
-			for (BlockPos p : BlockPos.iterate(pos.add(-8, 0, -8), pos.add(8, 14, 8))) {
+			for (BlockPos p : BlockPos.iterate(pos.add(-12, 0, -12), pos.add(12, 20, 12))) {
 				if (world.getBlockState(p).isIn(BlockTags.LOGS)) {
 					distance.put(p.toImmutable(), 0);
 					queue.add(p.toImmutable());
@@ -181,7 +205,7 @@ public class BiomeTreeTests implements FabricGameTest {
 				}
 			}
 			int leaves = 0;
-			for (BlockPos p : BlockPos.iterate(pos.add(-8, 0, -8), pos.add(8, 14, 8))) {
+			for (BlockPos p : BlockPos.iterate(pos.add(-12, 0, -12), pos.add(12, 20, 12))) {
 				BlockState state = world.getBlockState(p);
 				if (state.getBlock() instanceof LeavesBlock) {
 					leaves++;
@@ -190,7 +214,7 @@ public class BiomeTreeTests implements FabricGameTest {
 							template + ": leaf at " + p.toShortString() + " is " + state + ", " + expected + " from a log");
 				}
 			}
-			ctx.assertTrue(leaves > 100, template + ": only " + leaves + " leaves");
+			ctx.assertTrue(leaves > 40, template + ": only " + leaves + " leaves");
 		}
 		ctx.complete();
 	}
