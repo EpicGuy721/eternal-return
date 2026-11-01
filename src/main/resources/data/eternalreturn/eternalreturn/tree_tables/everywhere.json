@@ -1,0 +1,47 @@
+{
+  "biomes": [
+    "*"
+  ],
+  "saplings": {
+    "minecraft:azalea": {
+      "trees": [
+        {
+          "weight": 2,
+          "tree": "vanilla"
+        },
+        {
+          "weight": 2,
+          "tree": "eternalreturn:tree/tall_azalea"
+        },
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/azalea_shrub"
+        }
+      ]
+    },
+    "minecraft:flowering_azalea": {
+      "trees": [
+        {
+          "weight": 2,
+          "tree": "vanilla"
+        },
+        {
+          "weight": 2,
+          "tree": "eternalreturn:tree/tall_azalea"
+        },
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/azalea_shrub"
+        }
+      ]
+    },
+    "minecraft:dark_oak_sapling": {
+      "trees": [
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/hornbeam"
+        }
+      ]
+    }
+  }
+}

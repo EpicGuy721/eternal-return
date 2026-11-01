@@ -232,7 +232,9 @@
 		"worldgen.StructureStartMixin",
 		"worldgen.StructureWeightSamplerMixin",
 		"worldgen.SurfaceBuilderMixin",
-		"worldgen.TreeFeatureAzaleaMixin"
+		"worldgen.SaplingGeneratorMixin",
+		"worldgen.TreeFeatureAzaleaMixin",
+		"worldgen.TreeFeatureBiomeMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

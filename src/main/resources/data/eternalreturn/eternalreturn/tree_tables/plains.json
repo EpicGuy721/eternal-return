@@ -1,0 +1,35 @@
+{
+  "biomes": [
+    "moderner_beta:late_beta_plains"
+  ],
+  "saplings": {
+    "minecraft:oak_sapling": {
+      "trees": [
+        {
+          "weight": 3,
+          "tree": "vanilla"
+        },
+        {
+          "weight": 3,
+          "tree": "eternalreturn:tree/bur_oak"
+        },
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/white_oak"
+        }
+      ]
+    },
+    "minecraft:birch_sapling": {
+      "trees": [
+        {
+          "weight": 2,
+          "tree": "vanilla"
+        },
+        {
+          "weight": 2,
+          "tree": "eternalreturn:tree/poplar"
+        }
+      ]
+    }
+  }
+}

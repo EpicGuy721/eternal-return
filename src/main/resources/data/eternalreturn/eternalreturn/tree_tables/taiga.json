@@ -1,0 +1,37 @@
+{
+  "biomes": [
+    "moderner_beta:early_release_taiga"
+  ],
+  "saplings": {
+    "minecraft:spruce_sapling": {
+      "trees": [
+        {
+          "weight": 5,
+          "tree": "vanilla"
+        },
+        {
+          "weight": 2,
+          "tree": "eternalreturn:tree/larch"
+        },
+        {
+          "weight": 2,
+          "tree": "eternalreturn:tree/grand_fir"
+        },
+        {
+          "weight": 2,
+          "tree": "eternalreturn:tree/black_spruce"
+        }
+      ],
+      "mega_trees": [
+        {
+          "weight": 2,
+          "tree": "vanilla"
+        },
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/redwood"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "biomes": [
+    "moderner_beta:early_release_ice_plains",
+    "moderner_beta:late_beta_ice_plains",
+    "minecraft:snowy_plains"
+  ],
+  "saplings": {
+    "minecraft:oak_sapling": {
+      "trees": [
+        {
+          "weight": 3,
+          "tree": "vanilla"
+        },
+        {
+          "weight": 2,
+          "tree": "eternalreturn:tree/shrub_oak"
+        },
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/scrub_oak"
+        }
+      ]
+    },
+    "minecraft:spruce_sapling": {
+      "trees": [
+        {
+          "weight": 1,
+          "tree": "vanilla"
+        },
+        {
+          "weight": 3,
+          "tree": "eternalreturn:tree/black_spruce"
+        }
+      ]
+    },
+    "minecraft:birch_sapling": {
+      "trees": [
+        {
+          "weight": 1,
+          "tree": "vanilla"
+        },
+        {
+          "weight": 2,
+          "tree": "eternalreturn:tree/river_birch"
+        }
+      ]
+    }
+  }
+}

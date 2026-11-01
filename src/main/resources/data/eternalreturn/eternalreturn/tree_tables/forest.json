@@ -1,0 +1,43 @@
+{
+  "biomes": [
+    "minecraft:forest"
+  ],
+  "saplings": {
+    "minecraft:oak_sapling": {
+      "trees": [
+        {
+          "weight": 6,
+          "tree": "vanilla"
+        },
+        {
+          "weight": 2,
+          "tree": "eternalreturn:tree/white_oak"
+        },
+        {
+          "weight": 2,
+          "tree": "eternalreturn:tree/bur_oak"
+        }
+      ]
+    },
+    "minecraft:birch_sapling": {
+      "trees": [
+        {
+          "weight": 4,
+          "tree": "vanilla"
+        },
+        {
+          "weight": 2,
+          "tree": "eternalreturn:tree/weeping_birch"
+        },
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/river_birch"
+        },
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/poplar"
+        }
+      ]
+    }
+  }
+}

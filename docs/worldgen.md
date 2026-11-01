@@ -58,7 +58,7 @@ The preset is all data. Without Moderner Beta installed, the world type and its 
 - Phase 4, part 1 (biome stone): done. Each biome's stone from under the topsoil to bedrock, and two hardened blocks.
 - Phase 4, part 2 (ore variants): done. Every ore in every host stone, with old-style textures.
 - Terrain features: done. Deep oceans that fall in steps, rare sinkholes (mostly in the sea, about 100 blocks across), rare floating islands, old growth taigas, extremely rare monoliths, mushrooms in caves (see Terrain features).
-- Worldgen expansion (the owner's brief of 2026-11-01, seven phases, each checked in game before the next): phase 1 (clutter: boulders) done, see Clutter. Next: biome-dependent saplings.
+- Worldgen expansion (the owner's brief of 2026-11-01, seven phases, each checked in game before the next): phase 1 (clutter: boulders) done, see Clutter; phase 2 (biome trees) done, see Biome trees. Next: biome variants (peak, edge, river).
 - Phase 4, part 3 (biomes and mineshafts): done. Cherry groves, every modern ocean, and mineshafts built from their biome's wood. Ocean monuments and Moderner Beta's ocean shrines were later removed from Eternal Return worlds; guardians spawn in the open sea instead (README, Mobs and Fishing).
 
 ## The Eternal Return preset
@@ -379,6 +379,63 @@ Checked in game (a new Eternal Return world on the test seed, one boulder looked
 `ClutterTests`:
 - `bouldersStandOnTheLand` (batch `clutter`, Eternal Return run): around up to eight land spots on the test seed (from a grid every 512 blocks out to 1,536), 5 x 5 chunks each generated in full. A boulder block is stone or a host stone straight on topsoil (grass, sand, red sand, podzol, mycelium, coarse dirt, snow block), which the terrain never makes on its own. Boulders are those blocks grouped by touching (same stone). Fails if any boulder is not a boulder stone, or unless boulders are in at least a fifth of the land chunks whose biome gets them (density above 0 in the middle of the chunk), and nine boulders in ten are the ground's own stone somewhere under them (plain stone over ground that isn't a boulder stone). On the test seed: 8 land spots, 146 land chunks of boulder biomes, boulders seen in 35 of them, 50 boulders (34 stone, most of them on the ice plains, 10 andesite, 3 diorite, 3 granite), all 50 on their own stone. Boulders whose upper layers sit only on their own lowest layer aren't seen, so the count is a floor.
 - `noBouldersInOtherWorlds` (batch `clutter_other_worlds`, flat runs): the boulder placed feature places nothing in a world that isn't Eternal Return.
+
+## Biome trees (expansion phase 2)
+
+In Eternal Return worlds a sapling grows a tree picked from the table of the biome it is planted in, by bone meal or on its own, and the trees the world generates with come from the same tables, so the trees found in a biome are the ones its saplings grow into. A player learns it by planting: the same oak sapling grows a bald cypress or a willow in the swampland and a scrub oak in the savanna. Other worlds keep vanilla's saplings and trees (the owner's call), and so does any biome or sapling without a list. Setting `worldgen.biomeTrees` (on).
+
+**Species.** Every wood that grows in Eternal Return worlds has new shapes, each after a real tree, built by `tools/trees/build_trees.py` from vanilla's trunk and foliage placers (`worldgen/configured_feature/tree/`), plus two templates no placer can make (`structure/tree/`):
+
+| Wood | Species |
+|---|---|
+| oak | white oak (great spreading crown), bur oak (short trunk, wide low crown), bald cypress (tall, narrow, hung with vines), scrub oak (low, crooked, as wide as tall), shrub oak (knee-high thicket), weeping willow (template: dome with hanging curtains) |
+| spruce | larch (slim, sparse), grand fir (tall broad cone), black spruce (thin spire), coast redwood (mega: colossal bare trunk, small crown far up) |
+| birch | Lombardy poplar (tall narrow column), silver birch (hanging twigs), river birch (two or three leaning stems) |
+| jungle | kapok (mega: emergent, flat crown above the canopy), teak (tall clean trunk, cocoa), palm (curving trunk, flat tuft) |
+| acacia | umbrella thorn (wide flat crown), whistling thorn (low bush), baobab (template: fat bottle trunk, short branches) |
+| dark oak | ancient dark oak (mega: taller, heavier), hornbeam (a single dark oak sapling grows it, anywhere) |
+| cherry | weeping cherry (long curtains of blossom), mountain cherry (small, upright) |
+| maple | sugar maple (big round crown), Japanese maple (low, wide, airy) |
+| pale oak | aspen (slim, narrow crown), spreading pale oak (broad, branching); each in red, orange or yellow at random, like the pale oak sapling's own tree |
+| azalea | tall azalea, azalea shrub (from a bone-mealed azalea bush, anywhere) |
+
+Mega trees grow from four saplings in a square, as vanilla's big spruces do.
+
+**Tables.** `data/eternalreturn/eternalreturn/tree_tables/*.json`, hand-written (tune freely). Each names its `biomes` (ids, `#tags`, or `"*"` for any) and, per sapling block, `trees` (one sapling) and `mega_trees` (four in a square), each a weighted list of entries: `{"weight": 3, "tree": "vanilla"}` (what vanilla would grow, fancy oaks and bee nests included), `{"weight": 2, "tree": "<configured feature>"}`, or `{"weight": 1, "template": "<structure template>"}`. For a biome, a table naming it by id wins over one naming a tag, which wins over `"*"`; among those, the first by file name with a list for that sapling. `sapling_trunks.json` maps each sapling to its log, so a generated tree's trunk tells which sapling's list to use. Four saplings in a square use the biome's mega list, or grow as vanilla if it has none; a single sapling uses the one-sapling list.
+
+| Table | Biomes | Lists (weights; v = vanilla) |
+|---|---|---|
+| forest | forest | oak: v 6, white oak 2, bur oak 2; birch: v 4, silver birch 2, river birch 1, poplar 1 |
+| birch_forest | birch forest | birch: v 4, poplar 3, silver birch 2, river birch 1; oak: v 3, white oak 1 |
+| plains | plains | oak: v 3, bur oak 3, white oak 1; birch: v 2, poplar 2 |
+| taiga | taiga | spruce: v 5, larch 2, grand fir 2, black spruce 2; mega: v 2, redwood 1 |
+| old_growth_taiga | old growth pine and spruce taiga | spruce: v 3, grand fir 2, larch 1; mega: v 2, redwood 2 |
+| extreme_hills | extreme hills | oak: v 4, scrub oak 3, bur oak 1; spruce: v 2, black spruce 1, larch 1 |
+| ice_plains | ice plains, snowy plains | oak: v 3, shrub oak 2, scrub oak 1; spruce: v 1, black spruce 3; birch: v 1, river birch 2 |
+| swampland | swampland | oak: v 3, bald cypress 3, willow 2 |
+| savanna | savanna | acacia: v 3, umbrella thorn 3, baobab 1, whistling thorn 2; oak: v 2, scrub oak 2, shrub oak 1 |
+| jungle | jungle | jungle: v 4, teak 2, palm 2; mega: v 3, kapok 2; oak: v 2, white oak 1 |
+| dark_forest | dark forest | dark oak mega: v 3, ancient dark oak 2; birch: v 2, river birch 1; oak: v 3, white oak 1 |
+| cherry_grove | cherry grove | cherry: v 3, weeping cherry 2, mountain cherry 2 |
+| autumnal_forest | autumnal forest | maple: v 3, sugar maple 2, Japanese maple 2; pale oak: v 3, aspen 2, spreading pale oak 1 |
+| everywhere | `*` | azalea and flowering azalea: v 2, tall azalea 2, azalea shrub 1; dark oak (one sapling): hornbeam |
+
+**Worldgen.** As an Eternal Return chunk decorates, each tree a biome's features place (`TreeFeatureBiomeMixin`) is looked up by its trunk: oak logs use the oak sapling's list, a giant, mega jungle or dark oak trunk the mega list. The pick uses the chunk's own random numbers, so a world comes out the same each time it generates. Bushes (bush foliage, such as the jungle bushes) are left alone, and a tree a table picked is never looked up again. On the test seed, around 8 land spots: taiga 140 vanilla spruces, 66 grand firs, 63 larches, 42 black spruces; forest 298 vanilla, 90 bur oaks, 86 white oaks, 36 silver birches, 15 river birches, 10 poplars; old growth spruce taiga 37 vanilla, 14 grand firs, 13 redwoods, 8 larches; autumnal forest 64 vanilla, 33 sugar maples, 31 Japanese maples, 31 aspens, 15 spreading pale oaks; dark forest 192 vanilla, 70 ancient dark oaks.
+
+**Templates.** A template tree's trunk is the middle of its bottom layer and lands on the sapling, whatever the turn and mirror (the game mirrors a template across its corner, so the placement shifts it back). It grows only if it fits, like a sapling's own tree: dirt or grass under the trunk, and every block of its box air, leaves or a plant a tree may replace. Its leaves are then set as a tree's own (not persistent, each at its true distance from a log), so a cut template tree's leaves decay as vanilla's do; logs keep their direction when turned. The script checks every template leaf is within 6 blocks of a log. Hand-built templates (structure blocks) can be named in a table too.
+
+**Greenhouses.** `BiomeTrees.setGrowthBiome` is the extension point: a greenhouse can answer which biome's table a sapling grows from. Nothing uses it yet.
+
+Checked in game (a new Eternal Return world on the test seed): every species grown in a row in the sky, and the taiga, old growth spruce taiga, forest, birch forest, autumnal forest, dark forest, savanna, jungle, cherry grove and swampland seen from above. The first poplar came out as a cone with its trunk poking out of the top (blob and pine crowns widen downward or at random); it is now a spruce-style crown of radius 1, a narrow column.
+
+### Tests
+
+`BiomeTreeTests` (batch `biome_trees`, Eternal Return run):
+- `everySpeciesGrows`: each of the 35 tree features (the pale oak shapes in all three colours) and both templates grows on a grass pad in the sky with logs and leaves.
+- `saplingsFollowTheBiome`: 18 oak saplings grown as if in the swampland give only vanilla, bald cypress and willow, 18 as if in the savanna only vanilla, scrub oak and shrub oak, each with some that aren't vanilla; spruce saplings in the plains (no spruce list) grow vanilla spruces. It chooses the biome through the greenhouse hook.
+- `templateTreeLeavesDecay`: the willow and the baobab grow with every leaf not persistent and at its true distance from a log (below 7). Watching leaves decay after cutting doesn't work in the test world, which runs no block ticks up in the sky.
+- `generatedTreesComeFromTheTables`: around up to eight land spots, 5 x 5 chunks each are generated; every tree a table picked must be on that biome's lists, and at least four species must turn up. (Run with -PgametestRepeat it fails on the second copy, whose chunks were already generated by the first.)
+- `otherWorldsGrowVanillaSaplings` (batch `biome_trees_other_worlds`, flat runs): an oak sapling grows a vanilla oak, no table asked.
 
 ## The cave engine (phase 3)
 

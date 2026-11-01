@@ -1,0 +1,23 @@
+{
+  "biomes": [
+    "moderner_beta:early_release_swampland"
+  ],
+  "saplings": {
+    "minecraft:oak_sapling": {
+      "trees": [
+        {
+          "weight": 3,
+          "tree": "vanilla"
+        },
+        {
+          "weight": 3,
+          "tree": "eternalreturn:tree/bald_cypress"
+        },
+        {
+          "weight": 2,
+          "template": "eternalreturn:tree/willow"
+        }
+      ]
+    }
+  }
+}

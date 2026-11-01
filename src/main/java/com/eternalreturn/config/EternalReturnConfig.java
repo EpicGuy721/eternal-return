@@ -645,6 +645,12 @@ public final class EternalReturnConfig {
 		 */
 		public boolean boulders = true;
 		/**
+		 * Biome trees: in Eternal Return worlds a sapling grows a tree picked from its biome's tree table, and the world's
+		 * own trees come from the same tables (data/eternalreturn/eternalreturn/tree_tables, docs/worldgen.md). Off: vanilla
+		 * saplings and trees. Other worlds never change.
+		 */
+		public boolean biomeTrees = true;
+		/**
 		 * Snow on trees at chunk borders (MC-119599), as Simple Snowy Fix: a tree placed after its neighbour chunk was
 		 * snowed on gets snow on its top leaves, and the snow under it goes, as for any other tree. Every world.
 		 */

@@ -1,0 +1,45 @@
+{
+  "biomes": [
+    "minecraft:jungle"
+  ],
+  "saplings": {
+    "minecraft:jungle_sapling": {
+      "trees": [
+        {
+          "weight": 4,
+          "tree": "vanilla"
+        },
+        {
+          "weight": 2,
+          "tree": "eternalreturn:tree/teak"
+        },
+        {
+          "weight": 2,
+          "tree": "eternalreturn:tree/jungle_palm"
+        }
+      ],
+      "mega_trees": [
+        {
+          "weight": 3,
+          "tree": "vanilla"
+        },
+        {
+          "weight": 2,
+          "tree": "eternalreturn:tree/kapok"
+        }
+      ]
+    },
+    "minecraft:oak_sapling": {
+      "trees": [
+        {
+          "weight": 2,
+          "tree": "vanilla"
+        },
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/white_oak"
+        }
+      ]
+    }
+  }
+}

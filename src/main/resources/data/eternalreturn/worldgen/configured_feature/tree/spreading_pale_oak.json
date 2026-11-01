@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:random_selector",
+  "config": {
+    "features": [
+      {
+        "chance": 0.3333333333333333,
+        "feature": {
+          "feature": "eternalreturn:tree/red_spreading_pale_oak",
+          "placement": []
+        }
+      },
+      {
+        "chance": 0.5,
+        "feature": {
+          "feature": "eternalreturn:tree/orange_spreading_pale_oak",
+          "placement": []
+        }
+      }
+    ],
+    "default": {
+      "feature": "eternalreturn:tree/yellow_spreading_pale_oak",
+      "placement": []
+    }
+  }
+}

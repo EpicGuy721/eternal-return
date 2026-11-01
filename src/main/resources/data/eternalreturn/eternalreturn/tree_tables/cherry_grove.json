@@ -1,0 +1,23 @@
+{
+  "biomes": [
+    "minecraft:cherry_grove"
+  ],
+  "saplings": {
+    "minecraft:cherry_sapling": {
+      "trees": [
+        {
+          "weight": 3,
+          "tree": "vanilla"
+        },
+        {
+          "weight": 2,
+          "tree": "eternalreturn:tree/weeping_cherry"
+        },
+        {
+          "weight": 2,
+          "tree": "eternalreturn:tree/mountain_cherry"
+        }
+      ]
+    }
+  }
+}

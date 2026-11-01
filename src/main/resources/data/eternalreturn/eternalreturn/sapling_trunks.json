@@ -1,0 +1,14 @@
+{
+  "minecraft:oak_sapling": "minecraft:oak_log",
+  "minecraft:spruce_sapling": "minecraft:spruce_log",
+  "minecraft:birch_sapling": "minecraft:birch_log",
+  "minecraft:jungle_sapling": "minecraft:jungle_log",
+  "minecraft:acacia_sapling": "minecraft:acacia_log",
+  "minecraft:dark_oak_sapling": "minecraft:dark_oak_log",
+  "minecraft:cherry_sapling": "minecraft:cherry_log",
+  "minecraft:mangrove_propagule": "minecraft:mangrove_log",
+  "eternalreturn:maple_sapling": "eternalreturn:maple_log",
+  "eternalreturn:pale_oak_sapling": "eternalreturn:pale_oak_log",
+  "minecraft:azalea": "eternalreturn:azalea_log",
+  "minecraft:flowering_azalea": "eternalreturn:azalea_log"
+}

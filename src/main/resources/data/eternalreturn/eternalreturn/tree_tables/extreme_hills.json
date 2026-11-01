@@ -1,0 +1,39 @@
+{
+  "biomes": [
+    "moderner_beta:early_release_extreme_hills"
+  ],
+  "saplings": {
+    "minecraft:oak_sapling": {
+      "trees": [
+        {
+          "weight": 4,
+          "tree": "vanilla"
+        },
+        {
+          "weight": 3,
+          "tree": "eternalreturn:tree/scrub_oak"
+        },
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/bur_oak"
+        }
+      ]
+    },
+    "minecraft:spruce_sapling": {
+      "trees": [
+        {
+          "weight": 2,
+          "tree": "vanilla"
+        },
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/black_spruce"
+        },
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/larch"
+        }
+      ]
+    }
+  }
+}
