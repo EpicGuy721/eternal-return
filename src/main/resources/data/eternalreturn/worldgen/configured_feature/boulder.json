@@ -1,0 +1,8 @@
+{
+  "type": "eternalreturn:boulder",
+  "config": {
+    "folder": "eternalreturn:boulder",
+    "sink": 1,
+    "max_slope": 4
+  }
+}

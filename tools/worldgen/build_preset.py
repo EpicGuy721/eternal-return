@@ -292,6 +292,12 @@ stone_rules = [{'type': 'minecraft:condition',
 # The host stones, for Moderner Beta's own surface pass (BiomeStoneSurface): it must take them for stone.
 write(f'data/{NS}/tags/block/biome_host_stones.json',
       {'values': [block for block, biomes in KNOBS['biome_stone'].items() if block != 'minecraft:stone' and biomes]})
+# Each host stone's biomes as a biome tag, eternalreturn:biome_stone/<block path>, for blocks placed after the
+# surface (boulders, BiomeStoneProcessor). Optional entries, so the tags load without Moderner Beta.
+for block, biomes in KNOBS['biome_stone'].items():
+    if block != 'minecraft:stone' and biomes:
+        write(f'data/{NS}/tags/worldgen/biome/biome_stone/{block.split(":")[1]}.json',
+              {'values': [{'id': biome, 'required': False} for biome in biomes]})
 if stone_rules:
     noise['surface_rule']['sequence'].append({'type': 'minecraft:condition',
                                               'if_true': {'type': f'{NS}:biome_stone_enabled'},

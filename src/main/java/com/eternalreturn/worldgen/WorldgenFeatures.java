@@ -54,6 +54,8 @@ public final class WorldgenFeatures {
 			BiomeModifications.addFeature(overworld().and(context -> EternalReturnConfig.get().worldgen.caveMushrooms),
 					GenerationStep.Feature.VEGETAL_DECORATION, RegistryKey.of(RegistryKeys.PLACED_FEATURE, EternalReturn.id(mushroom)));
 		}
+		// Clutter: boulders (Eternal Return worlds only).
+		com.eternalreturn.worldgen.clutter.Clutter.register();
 		// The outer End: islands, megastructures, chorus on the islands (Eternal Return's End only).
 		com.eternalreturn.worldgen.end.OuterEnd.register();
 	}
@@ -63,7 +65,7 @@ public final class WorldgenFeatures {
 	 * cold, deep frozen and deep lukewarm oceans its ocean climate step makes (Eternal Return has them), so
 	 * those are named outright; they are vanilla overworld biomes anyway, so nothing changes elsewhere.
 	 */
-	private static java.util.function.Predicate<net.fabricmc.fabric.api.biome.v1.BiomeSelectionContext> overworld() {
+	public static java.util.function.Predicate<net.fabricmc.fabric.api.biome.v1.BiomeSelectionContext> overworld() {
 		return BiomeSelectors.foundInOverworld().or(BiomeSelectors.includeByKey(
 				net.minecraft.world.biome.BiomeKeys.DEEP_COLD_OCEAN, net.minecraft.world.biome.BiomeKeys.DEEP_FROZEN_OCEAN,
 				net.minecraft.world.biome.BiomeKeys.DEEP_LUKEWARM_OCEAN));

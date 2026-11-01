@@ -1,0 +1,12 @@
+{
+  "values": [
+    {
+      "id": "minecraft:jungle",
+      "required": false
+    },
+    {
+      "id": "minecraft:savanna",
+      "required": false
+    }
+  ]
+}

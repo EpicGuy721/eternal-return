@@ -58,6 +58,7 @@ The preset is all data. Without Moderner Beta installed, the world type and its 
 - Phase 4, part 1 (biome stone): done. Each biome's stone from under the topsoil to bedrock, and two hardened blocks.
 - Phase 4, part 2 (ore variants): done. Every ore in every host stone, with old-style textures.
 - Terrain features: done. Deep oceans that fall in steps, rare sinkholes (mostly in the sea, about 100 blocks across), rare floating islands, old growth taigas, extremely rare monoliths, mushrooms in caves (see Terrain features).
+- Worldgen expansion (the owner's brief of 2026-11-01, seven phases, each checked in game before the next): phase 1 (clutter: boulders) done, see Clutter. Next: biome-dependent saplings.
 - Phase 4, part 3 (biomes and mineshafts): done. Cherry groves, every modern ocean, and mineshafts built from their biome's wood. Ocean monuments and Moderner Beta's ocean shrines were later removed from Eternal Return worlds; guardians spawn in the open sea instead (README, Mobs and Fishing).
 
 ## The Eternal Return preset
@@ -331,6 +332,53 @@ Old growth pine taiga and old growth spruce taiga (vanilla's, with their giant s
 The Eternal Return baselines were recorded again, once for this batch and the gem and bonus-ore batch together. The old-caves carving fingerprint changed in 24 of its 27 chunks: the deeper sea floors and the lower bottom slide. The ore census moved almost only from the bonus ores: badlands gold 981 to 1,893, jungle coal 1,630 to 3,762, desert lapis 310 to 509, ice plains diamond 425 to 527, taiga iron 1,322 to 1,462, extreme hills emeralds 0 to 18 (emerald survey 442 to 671); every other ore moved by 1 to 3 blocks, spots the new gem ores took first. Every control world still matches its fingerprints. Two tests needed updating: the forced-type cave tests (`CaveTests`) measured squares at chunk 3000, 3000 and east, which now lie over the deep sea floor with too little rock above the lava level for a spiral or toroidal room, so each test now takes the first square from there northward that is all land (and the spiral and toroidal shape checks skip a cave whose footprint overlaps another's, since on land, at the forced rate, neighbours cut through each other's middle); and the old-caves run's "no block of this mod" check now allows this mod's own features in Eternal Return worlds (ruby and sapphire ore, azalea trees), still failing on any ore variant or hardened block.
 
 The map tool draws `island.png` and `sinkhole.png` (Eternal Return only): the nearest island at least 28 blocks across over land (side view and from above), and the nearest sinkhole at least 36 blocks across that reaches y -30 (side view).
+
+## Clutter (expansion phase 1)
+
+Small objects on the ground, each biome its own, in Eternal Return worlds only (other worlds never change; the flat runs check the feature places nothing there). So far boulders; later phases add more kinds through the same pieces.
+
+**Boulders.** Lumps of rock half sunk in the ground of every land biome, made of that biome's stone (the biome stone table above). How many per chunk is set per biome in `data/eternalreturn/worldgen/placed_feature/boulder.json`, which can be tuned without touching code:
+
+| Biome | Boulders per chunk |
+|---|---|
+| extreme hills | 1.5 |
+| old growth pine and spruce taiga | 1.0 |
+| taiga | 0.8 |
+| badlands, savanna | 0.6 |
+| forest, birch forest, autumnal forest | 0.5 |
+| cherry grove, ice plains (and snowy plains) | 0.4 |
+| dark forest, jungle | 0.3 |
+| plains, desert | 0.25 |
+| swampland | 0.15 |
+| mushroom fields | 0.1 |
+| any other land biome (`default`) | 0.3 |
+| oceans, rivers, beaches (`#minecraft:is_ocean`, `is_river`, `is_beach`) | none |
+
+The placement `eternalreturn:biome_density` makes `max_per_chunk` (4) tries at random columns of the chunk and keeps each with chance density / `max_per_chunk`, using the biome on that column's surface, so a chunk across a border gets each side's share. In `density`, a key is a biome id or a biome tag written `#namespace:path`; an id wins over a tag, tags are tried in the order written, and ids and tags of mods that aren't installed never match. Any biome in none takes `default`.
+
+**Templates.** The feature `eternalreturn:boulder` (`configured_feature/boulder.json`) places one structure template from the folder `eternalreturn:boulder` (`data/eternalreturn/structure/boulder/`), picked at random, turned to one of four directions and mirrored half the time. It is centred on the spot, set on the lowest ground under its footprint, and sunk 1 block (`sink`; at 2, the flat shape disappeared into the ground). Nothing is placed if any column under it is water or not solid ground, or the ground under it differs by more than 4 blocks (`max_slope`). (The first version checked only the four corners and the middle, and the in-game check found a boulder standing in a small pool.) The five starter shapes come from `tools/clutter/build_boulders.py` (lumps of one to three overlapping ellipsoids with a ragged surface, from fixed seeds):
+
+| Template | Blocks | Size (x by y by z) |
+|---|---|---|
+| small | 16 | 3 x 3 x 3 |
+| round | 48 | 5 x 4 x 5 |
+| flat | 41 | 6 x 2 x 4 |
+| standing | 34 | 3 x 5 x 3 |
+| pair | 50 | 7 x 4 x 4 |
+
+Any other template saved into that folder (with a structure block in game, then copied into `data/eternalreturn/structure/boulder/`, or in a datapack) is placed alongside them. Build it from plain stone and save it without air (structure void round it), so it doesn't cut into the ground; the list is read once per server start.
+
+**Stone.** The processor `eternalreturn:biome_stone` (`BiomeStoneProcessor`) turns a template's plain stone into the stone of the ground it stands on: the first stone or host stone (block tag `eternalreturn:biome_host_stones`) straight down from the middle of the boulder's footprint. So a boulder is all one stone and matches the rock beneath it, even on a biome border, where the ground's stone wanders a block or two from column to column (Moderner Beta's per-block biome, which the F3 biome doesn't always agree with; the first version used the F3 biome and got about one boulder block in six on a border wrong). Where no stone lies within 32 blocks below, it takes the biome's: each host stone's biomes are the biome tag `eternalreturn:biome_stone/<block path>` (`andesite`, `diorite`, `granite`, `hardened_sandstone`, `red_sandstone`, `hardened_packed_ice`), written by `build_preset.py` from the table in the knobs. With `worldgen.biomeStone` off the ground is plain stone, and so are the boulders. Later phases (ruins, landmarks) can use the same processor.
+
+**Timing.** Boulders are in every overworld biome's feature list, last of the underground decoration step, so no other feature's place in the decoration order moves. That is after the lakes, the ores and the dirt, gravel and stone blobs, and before the trees, plants and snow, so trees and grass grow round them and snow settles on them. The first version placed them with vanilla's forest rocks (local modifications), before the ores, and the in-game check found a plains boulder with dirt patches and coal ore in it. `worldgen.boulders` (on by default) takes them out of the lists (next start, newly generated chunks).
+
+Checked in game (a new Eternal Return world on the test seed, one boulder looked at in each of forest, birch forest, autumnal forest, desert border, badlands, taiga, ice plains, savanna and plains): diorite in the birch forest, andesite in the autumnal forest, granite in the savanna, red sandstone in the badlands, packed ice in the snow, plain stone in the plains; grass and trees round them.
+
+### Tests
+
+`ClutterTests`:
+- `bouldersStandOnTheLand` (batch `clutter`, Eternal Return run): around up to eight land spots on the test seed (from a grid every 512 blocks out to 1,536), 5 x 5 chunks each generated in full. A boulder block is stone or a host stone straight on topsoil (grass, sand, red sand, podzol, mycelium, coarse dirt, snow block), which the terrain never makes on its own. Boulders are those blocks grouped by touching (same stone). Fails unless boulders are in at least a fifth of the land chunks, and nine boulders in ten are the ground's own stone somewhere under them. On the test seed: 8 land spots, 197 land chunks, boulders seen in 44 of them, 61 boulders (33 packed ice, 14 andesite, 7 sandstone, 3 diorite, 3 granite, 1 stone), all 61 on their own stone (56 the stone of the biome F3 shows at them; the rest are on borders). Boulders whose upper layers sit only on their own lowest layer aren't seen, so the count is a floor.
+- `noBouldersInOtherWorlds` (batch `clutter_other_worlds`, flat runs): the boulder placed feature places nothing in a world that isn't Eternal Return.
 
 ## The cave engine (phase 3)
 

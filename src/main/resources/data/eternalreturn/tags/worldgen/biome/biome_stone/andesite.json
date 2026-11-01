@@ -1,0 +1,28 @@
+{
+  "values": [
+    {
+      "id": "minecraft:forest",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:early_release_taiga",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:early_release_extreme_hills",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:autumnal_forest",
+      "required": false
+    },
+    {
+      "id": "minecraft:old_growth_pine_taiga",
+      "required": false
+    },
+    {
+      "id": "minecraft:old_growth_spruce_taiga",
+      "required": false
+    }
+  ]
+}

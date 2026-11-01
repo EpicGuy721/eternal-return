@@ -1,0 +1,37 @@
+{
+  "feature": "eternalreturn:boulder",
+  "placement": [
+    {
+      "type": "eternalreturn:eternal_return_only"
+    },
+    {
+      "type": "eternalreturn:biome_density",
+      "max_per_chunk": 4,
+      "default": 0.3,
+      "density": {
+        "#minecraft:is_ocean": 0,
+        "#minecraft:is_river": 0,
+        "#minecraft:is_beach": 0,
+        "moderner_beta:early_release_extreme_hills": 1.5,
+        "moderner_beta:early_release_taiga": 0.8,
+        "minecraft:old_growth_pine_taiga": 1.0,
+        "minecraft:old_growth_spruce_taiga": 1.0,
+        "minecraft:forest": 0.5,
+        "minecraft:birch_forest": 0.5,
+        "eternalreturn:autumnal_forest": 0.5,
+        "minecraft:dark_forest": 0.3,
+        "minecraft:cherry_grove": 0.4,
+        "moderner_beta:late_beta_plains": 0.25,
+        "moderner_beta:early_release_swampland": 0.15,
+        "minecraft:mushroom_fields": 0.1,
+        "minecraft:desert": 0.25,
+        "minecraft:badlands": 0.6,
+        "minecraft:savanna": 0.6,
+        "minecraft:jungle": 0.3,
+        "moderner_beta:early_release_ice_plains": 0.4,
+        "moderner_beta:late_beta_ice_plains": 0.4,
+        "minecraft:snowy_plains": 0.4
+      }
+    }
+  ]
+}

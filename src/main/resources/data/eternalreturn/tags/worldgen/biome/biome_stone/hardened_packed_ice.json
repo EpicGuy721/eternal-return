@@ -1,0 +1,28 @@
+{
+  "values": [
+    {
+      "id": "moderner_beta:early_release_ice_plains",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:late_beta_ice_plains",
+      "required": false
+    },
+    {
+      "id": "minecraft:snowy_plains",
+      "required": false
+    },
+    {
+      "id": "minecraft:frozen_ocean",
+      "required": false
+    },
+    {
+      "id": "minecraft:frozen_river",
+      "required": false
+    },
+    {
+      "id": "minecraft:deep_frozen_ocean",
+      "required": false
+    }
+  ]
+}

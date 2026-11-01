@@ -639,6 +639,12 @@ public final class EternalReturnConfig {
 		 */
 		public boolean caveMushrooms = true;
 		/**
+		 * Boulders: lumps of rock on the ground in every land biome, made of the biome's stone, more in the hills and
+		 * taigas, few in plains and swamps (how many per biome: data/eternalreturn/worldgen/placed_feature/boulder.json).
+		 * Eternal Return worlds only.
+		 */
+		public boolean boulders = true;
+		/**
 		 * Snow on trees at chunk borders (MC-119599), as Simple Snowy Fix: a tree placed after its neighbour chunk was
 		 * snowed on gets snow on its top leaves, and the snow under it goes, as for any other tree. Every world.
 		 */
