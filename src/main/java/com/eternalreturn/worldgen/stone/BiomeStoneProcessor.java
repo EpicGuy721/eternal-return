@@ -3,6 +3,7 @@ package com.eternalreturn.worldgen.stone;
 import com.eternalreturn.EternalReturn;
 import com.eternalreturn.config.EternalReturnConfig;
 import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -20,21 +21,29 @@ import net.minecraft.world.WorldView;
 import net.minecraft.world.biome.Biome;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+
 /**
  * A template's plain stone becomes the stone of the ground it stands on (processor eternalreturn:biome_stone): the
  * first stone or host stone (block tag eternalreturn:biome_host_stones) straight down from the placement's pivot,
  * so one placement is all one stone and always matches the rock beneath, even across a biome border. Where no stone
  * lies within 32 blocks below, the biome's: each host stone's biomes are the biome tag
  * eternalreturn:biome_stone/&lt;block path&gt;. Both tags are written by build_preset.py from the biome stone table.
- * With worldgen.biomeStone off the ground is plain stone, and so is the template.
+ * With worldgen.biomeStone off the ground is plain stone, and so is the template. "stones" (a block tag, optional)
+ * limits what it may become: a ground stone outside the tag gives plain stone (boulders: eternalreturn:boulder_stones).
  */
 public final class BiomeStoneProcessor extends StructureProcessor {
-	public static final BiomeStoneProcessor INSTANCE = new BiomeStoneProcessor();
-	public static final MapCodec<BiomeStoneProcessor> CODEC = MapCodec.unit(() -> INSTANCE);
+	public static final BiomeStoneProcessor INSTANCE = new BiomeStoneProcessor(Optional.empty());
+	public static final MapCodec<BiomeStoneProcessor> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+			TagKey.unprefixedCodec(RegistryKeys.BLOCK).optionalFieldOf("stones").forGetter(processor -> processor.stones))
+			.apply(instance, BiomeStoneProcessor::new));
 	public static final StructureProcessorType<BiomeStoneProcessor> TYPE = Registry.register(Registries.STRUCTURE_PROCESSOR,
 			EternalReturn.id("biome_stone"), () -> CODEC);
 
-	private BiomeStoneProcessor() {
+	private final Optional<TagKey<Block>> stones;
+
+	public BiomeStoneProcessor(Optional<TagKey<Block>> stones) {
+		this.stones = stones;
 	}
 
 	/** The stone of this biome: its host stone, or plain stone. */
@@ -70,6 +79,9 @@ public final class BiomeStoneProcessor extends StructureProcessor {
 			return current;
 		}
 		Block stone = groundStone(world, pivot);
+		if (this.stones.isPresent() && !stone.getDefaultState().isIn(this.stones.get())) {
+			stone = Blocks.STONE;
+		}
 		return stone == Blocks.STONE ? current : new StructureTemplate.StructureBlockInfo(current.pos(), stone.getDefaultState(), current.nbt());
 	}
 

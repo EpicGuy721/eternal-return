@@ -639,8 +639,8 @@ public final class EternalReturnConfig {
 		 */
 		public boolean caveMushrooms = true;
 		/**
-		 * Boulders: lumps of rock on the ground in every land biome, made of the biome's stone, more in the hills and
-		 * taigas, few in plains and swamps (how many per biome: data/eternalreturn/worldgen/placed_feature/boulder.json).
+		 * Boulders: lumps of rock on the ground in most land biomes, of the ground's stone where that is granite, diorite
+		 * or andesite and plain stone elsewhere, more in the hills and taigas, few in plains, none in deserts and swamps (how many per biome: data/eternalreturn/worldgen/placed_feature/boulder.json).
 		 * Eternal Return worlds only.
 		 */
 		public boolean boulders = true;

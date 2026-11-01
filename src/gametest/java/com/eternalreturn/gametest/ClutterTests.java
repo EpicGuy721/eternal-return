@@ -1,6 +1,7 @@
 package com.eternalreturn.gametest;
 
 import com.eternalreturn.EternalReturn;
+import com.eternalreturn.worldgen.clutter.Clutter;
 import com.eternalreturn.worldgen.stone.BiomeStoneProcessor;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.block.Block;
@@ -34,6 +35,7 @@ import java.util.TreeMap;
  */
 public class ClutterTests implements FabricGameTest {
 	public static final String CLUTTER_BATCH = "clutter";
+	private static final net.minecraft.registry.tag.TagKey<Block> BOULDER_STONES = net.minecraft.registry.tag.TagKey.of(RegistryKeys.BLOCK, EternalReturn.id("boulder_stones"));
 	private static final RegistryKey<PlacedFeature> BOULDER = RegistryKey.of(RegistryKeys.PLACED_FEATURE, EternalReturn.id("boulder"));
 	/** Ground a boulder can rest on; stone straight on top of these is never the terrain's own. */
 	private static final Set<Block> TOPSOIL = Set.of(Blocks.GRASS_BLOCK, Blocks.SAND, Blocks.RED_SAND, Blocks.PODZOL, Blocks.MYCELIUM,
@@ -46,8 +48,10 @@ public class ClutterTests implements FabricGameTest {
 	/**
 	 * Around eight land spots on the test seed (sampled from a grid out to 1,536 blocks), 5 x 5 chunks each are
 	 * generated in full. A boulder block is stone or a host stone resting straight on topsoil (grass, sand, podzol and
-	 * so on). Boulders must turn up in at least a fifth of the land chunks, and nine boulders in ten must be the ground's
-	 * own stone somewhere under them (BiomeStoneProcessor reads it under each boulder's middle). How many are the stone
+	 * so on). Boulders must turn up in at least a fifth of the land chunks whose biome gets them; every boulder must be one of the boulder
+	 * stones (eternalreturn:boulder_stones: stone, granite, diorite, andesite), and nine in ten the ground's own stone
+	 * somewhere under them, or plain stone where the ground's is not a boulder stone (BiomeStoneProcessor reads it under
+	 * each boulder's middle). How many are the stone
 	 * of the biome they are in is logged.
 	 */
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = CLUTTER_BATCH, tickLimit = 2_000_000)
@@ -68,6 +72,9 @@ public class ClutterTests implements FabricGameTest {
 			}
 		}
 		ctx.assertTrue(centres.size() >= 4, "only " + centres.size() + " land spots found");
+		// Land chunks count only where the biome in the middle gets boulders (its density in placed_feature/boulder.json).
+		Clutter.BiomeDensity density = world.getRegistryManager().get(RegistryKeys.PLACED_FEATURE).getOrThrow(BOULDER).placementModifiers().stream()
+				.filter(Clutter.BiomeDensity.class::isInstance).map(Clutter.BiomeDensity.class::cast).findFirst().orElseThrow();
 		int landChunks = 0;
 		Set<ChunkPos> withBoulders = new HashSet<>();
 		// Each boulder block on topsoil, with the ground's stone under it (the first stone or host stone below the topsoil).
@@ -103,7 +110,8 @@ public class ClutterTests implements FabricGameTest {
 							}
 						}
 					}
-					if (land) {
+					BlockPos middle = new BlockPos(cx * 16 + 8, world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, cx * 16 + 8, cz * 16 + 8), cz * 16 + 8);
+					if (land && density.densityOf(world.getBiome(middle)) > 0) {
 						landChunks++;
 					}
 				}
@@ -126,7 +134,8 @@ public class ClutterTests implements FabricGameTest {
 			java.util.ArrayDeque<BlockPos> queue = new java.util.ArrayDeque<>(List.of(start));
 			while (!queue.isEmpty()) {
 				BlockPos block = queue.poll();
-				matches |= found.get(block)[1] == stone;
+				Block ground = found.get(block)[1];
+				matches |= (ground != null && ground.getDefaultState().isIn(BOULDER_STONES) ? ground : Blocks.STONE) == stone;
 				for (BlockPos near : BlockPos.iterate(block.add(-1, -2, -1), block.add(1, 2, 1))) {
 					Block[] other = found.get(near);
 					if (other != null && other[0] == stone && seen.add(near.toImmutable())) {
@@ -135,6 +144,7 @@ public class ClutterTests implements FabricGameTest {
 				}
 			}
 			boulders++;
+			ctx.assertTrue(stone.getDefaultState().isIn(BOULDER_STONES), "a boulder at " + start.toShortString() + " is " + stone);
 			byStone.merge(stone.getTranslationKey(), 1, Integer::sum);
 			if (matches) {
 				matching++;

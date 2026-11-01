@@ -4,6 +4,8 @@ import com.eternalreturn.worldgen.stone.BiomeStoneProcessor;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.block.Block;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.structure.StructurePlacementData;
 import net.minecraft.structure.StructureTemplate;
 import net.minecraft.structure.StructureTemplateManager;
@@ -29,13 +31,15 @@ import java.util.WeakHashMap;
  * Places one template from a folder of structure templates (feature eternalreturn:boulder): any template whose id
  * starts with the folder, so hand-built ones saved there join the starter set from tools/clutter/build_boulders.py.
  * It is turned and mirrored at random, centred on the spot, set on the lowest ground under it and sunk (sink), and
- * its plain stone becomes the stone of the ground under its middle (BiomeStoneProcessor). Nothing is placed where any
+ * its plain stone becomes the stone of the ground under its middle (BiomeStoneProcessor), if that stone is in the
+ * "stones" tag, else stays plain stone. Nothing is placed where any
  * column under it is water or not solid ground, or where the ground under it falls more than max_slope blocks.
  */
 public final class BoulderFeature extends Feature<BoulderFeature.Config> {
-	public record Config(Identifier folder, IntProvider sink, int maxSlope) implements FeatureConfig {
+	public record Config(Identifier folder, TagKey<Block> stones, IntProvider sink, int maxSlope) implements FeatureConfig {
 		public static final Codec<Config> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 				Identifier.CODEC.fieldOf("folder").forGetter(Config::folder),
+				TagKey.unprefixedCodec(RegistryKeys.BLOCK).fieldOf("stones").forGetter(Config::stones),
 				IntProvider.createValidatingCodec(0, 8).fieldOf("sink").forGetter(Config::sink),
 				Codec.intRange(0, 32).fieldOf("max_slope").forGetter(Config::maxSlope)).apply(instance, Config::new));
 	}
@@ -71,7 +75,7 @@ public final class BoulderFeature extends Feature<BoulderFeature.Config> {
 				.setBoundingBox(new BlockBox(chunk.getStartX() - 16, world.getBottomY(), chunk.getStartZ() - 16,
 						chunk.getEndX() + 16, world.getTopY(), chunk.getEndZ() + 16))
 				.setRandom(random)
-				.addProcessor(BiomeStoneProcessor.INSTANCE);
+				.addProcessor(new BiomeStoneProcessor(java.util.Optional.of(context.getConfig().stones())));
 		BlockBox box = template.calculateBoundingBox(data, BlockPos.ORIGIN);
 		int startX = origin.getX() - box.getBlockCountX() / 2;
 		int startZ = origin.getZ() - box.getBlockCountZ() / 2;

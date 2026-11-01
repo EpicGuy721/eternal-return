@@ -2,6 +2,7 @@
   "type": "eternalreturn:boulder",
   "config": {
     "folder": "eternalreturn:boulder",
+    "stones": "eternalreturn:boulder_stones",
     "sink": 1,
     "max_slope": 4
   }
