@@ -183,13 +183,13 @@ public class NewItemTests implements FabricGameTest {
 		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(8, 2, 6));
 		try {
 			BlockPos leaves = ctx.getAbsolutePos(new BlockPos(8, 2, 10));
-			world.setBlockState(leaves, Blocks.OAK_LEAVES.getDefaultState().with(LeavesBlock.PERSISTENT, true).with(LeavesBlock.DISTANCE, 7));
+			world.setBlockState(leaves, Blocks.OAK_LEAVES.getDefaultState().with(LeavesBlock.PERSISTENT, true).with(LeavesBlock.DISTANCE, com.eternalreturn.blocks.LeafDistance.MAX));
 			useOn(player, new ItemStack(BlockTools.HAMMER), leaves);
 			ctx.assertTrue(!world.getBlockState(leaves).get(LeavesBlock.PERSISTENT), "hammered to decaying leaves");
 			world.getBlockState(leaves).randomTick(world, leaves, world.getRandom());
 			ctx.assertTrue(world.getBlockState(leaves).isOf(Blocks.OAK_LEAVES), "but they don't decay");
 			BlockPos free = ctx.getAbsolutePos(new BlockPos(10, 2, 10));
-			world.setBlockState(free, Blocks.OAK_LEAVES.getDefaultState().with(LeavesBlock.DISTANCE, 7), 18);
+			world.setBlockState(free, Blocks.OAK_LEAVES.getDefaultState().with(LeavesBlock.DISTANCE, com.eternalreturn.blocks.LeafDistance.MAX), 18);
 			world.getBlockState(free).randomTick(world, free, world.getRandom());
 			ctx.assertTrue(world.getBlockState(free).isAir(), "unlocked ones do");
 		} finally {

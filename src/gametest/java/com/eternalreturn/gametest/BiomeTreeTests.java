@@ -104,6 +104,86 @@ public class BiomeTreeTests implements FabricGameTest {
 		ctx.complete();
 	}
 
+	/**
+	 * No new tree drops leaves on its own: each species and template, grown 6 times (different random numbers), may have
+	 * no leaf at the decay distance (LeafDistance.MAX, not persistent), as such a leaf decays at the next random tick. Vanilla's own
+	 * trees are counted too, for comparison (logged, not checked).
+	 */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "tree_leaves", tickLimit = 2_000)
+	public void newTreesKeepTheirLeaves(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		ChunkGenerator generator = world.getChunkManager().getChunkGenerator();
+		BlockPos base = ctx.getAbsolutePos(BlockPos.ORIGIN).add(0, 0, 1200).withY(200);
+		List<BiomeTrees.Choice> species = new ArrayList<>();
+		for (Identifier id : new TreeSet<>(world.getRegistryManager().get(RegistryKeys.CONFIGURED_FEATURE).getIds())) {
+			if (id.getNamespace().equals(EternalReturn.MOD_ID) && id.getPath().startsWith("tree/")) {
+				species.add(new BiomeTrees.Choice(1, Optional.of(id), Optional.empty()));
+			}
+		}
+		world.getServer().getStructureTemplateManager().streamTemplates()
+				.filter(id -> id.getNamespace().equals(EternalReturn.MOD_ID) && id.getPath().startsWith("tree/")).sorted()
+				.forEach(id -> species.add(new BiomeTrees.Choice(1, Optional.empty(), Optional.of(id))));
+		for (String vanilla : List.of("oak", "fancy_oak", "spruce", "birch", "jungle_tree", "acacia", "cherry", "mangrove", "azalea_tree", "dark_oak", "mega_jungle_tree")) {
+			species.add(new BiomeTrees.Choice(1, Optional.of(Identifier.ofVanilla(vanilla)), Optional.empty()));
+		}
+		Map<String, String> decaying = new TreeMap<>();
+		Map<String, String> vanillaDecaying = new TreeMap<>();
+		int i = 0;
+		for (BiomeTrees.Choice choice : species) {
+			int loose = 0;
+			int total = 0;
+			int cut = 0;
+			int far = 0;
+			for (int seed = 0; seed < 6; seed++, i++) {
+				BlockPos pos = base.add((i % 12) * 40, 0, (i / 12) * 40);
+				world.getChunk(pos);
+				pad(world, pos);
+				BiomeTrees.grow(choice, world, generator, Random.create(seed * 977L + i), pos);
+				// The true distance of every leaf from a log, through leaves, with no limit (to see how far the loose ones are).
+				Map<BlockPos, Integer> dist = new java.util.HashMap<>();
+				java.util.ArrayDeque<BlockPos> queue = new java.util.ArrayDeque<>();
+				for (BlockPos p : BlockPos.iterate(pos.add(-14, 0, -14), pos.add(14, 50, 14))) {
+					if (world.getBlockState(p).isIn(BlockTags.LOGS)) {
+						dist.put(p.toImmutable(), 0);
+						queue.add(p.toImmutable());
+					}
+				}
+				while (!queue.isEmpty()) {
+					BlockPos p = queue.poll();
+					for (net.minecraft.util.math.Direction d : net.minecraft.util.math.Direction.values()) {
+						BlockPos next = p.offset(d);
+						if (!dist.containsKey(next) && world.getBlockState(next).getBlock() instanceof LeavesBlock) {
+							dist.put(next, dist.get(p) + 1);
+							queue.add(next);
+						}
+					}
+				}
+				for (BlockPos p : BlockPos.iterate(pos.add(-14, 0, -14), pos.add(14, 50, 14))) {
+					BlockState state = world.getBlockState(p);
+					if (state.getBlock() instanceof LeavesBlock) {
+						total++;
+						if (state.get(LeavesBlock.DISTANCE) >= com.eternalreturn.blocks.LeafDistance.MAX && !state.get(LeavesBlock.PERSISTENT)) {
+							loose++;
+							Integer d = dist.get(p.toImmutable());
+							if (d == null) {
+								cut++;
+							} else {
+								far = Math.max(far, d);
+							}
+						}
+					}
+				}
+			}
+			String name = BiomeTrees.name(choice);
+			if (loose > 0) {
+				(name.startsWith("minecraft:") ? vanillaDecaying : decaying).put(name, loose + " of " + total + " (farthest " + far + ", cut off " + cut + ")");
+			}
+		}
+		EternalReturn.LOGGER.info("[leaves] decaying leaves over 6 trees each: new {}; vanilla {}", decaying, vanillaDecaying);
+		ctx.assertTrue(decaying.isEmpty(), "new trees with leaves that decay: " + decaying);
+		ctx.complete();
+	}
+
 	/** The scrub oak's crooked trunk never pokes out of its crown: over 20 trees, the top log always has leaves on it. */
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = BATCH, tickLimit = 400)
 	public void scrubOakTrunkIsCovered(TestContext ctx) {
@@ -209,8 +289,8 @@ public class BiomeTreeTests implements FabricGameTest {
 				BlockState state = world.getBlockState(p);
 				if (state.getBlock() instanceof LeavesBlock) {
 					leaves++;
-					int expected = Math.min(distance.getOrDefault(p.toImmutable(), 7), 7);
-					ctx.assertTrue(!state.get(LeavesBlock.PERSISTENT) && state.get(LeavesBlock.DISTANCE) == expected && expected < 7,
+					int expected = Math.min(distance.getOrDefault(p.toImmutable(), com.eternalreturn.blocks.LeafDistance.MAX), com.eternalreturn.blocks.LeafDistance.MAX);
+					ctx.assertTrue(!state.get(LeavesBlock.PERSISTENT) && state.get(LeavesBlock.DISTANCE) == expected && expected < com.eternalreturn.blocks.LeafDistance.MAX,
 							template + ": leaf at " + p.toShortString() + " is " + state + ", " + expected + " from a log");
 				}
 			}
@@ -278,6 +358,35 @@ public class BiomeTreeTests implements FabricGameTest {
 		}
 		ctx.assertTrue(spots >= 4 && species.size() >= 4, spots + " land spots, species " + species);
 		ctx.complete();
+	}
+
+	/**
+	 * Leaves reach 10 from a log (LeafDistance): beside an oak log, a row of 11 oak leaves counts 1 to 10, so the first 9
+	 * stay and only the 10th and 11th would decay; once the log goes, every leaf counts 10 and decays. Every world (flat runs).
+	 */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "leaf_distance", tickLimit = 200)
+	public void leavesReachTenFromALog(TestContext ctx) {
+		BlockPos log = new BlockPos(0, 2, 0);
+		ctx.setBlockState(log, Blocks.OAK_LOG);
+		for (int x = 1; x <= 11; x++) {
+			ctx.setBlockState(log.east(x), Blocks.OAK_LEAVES.getDefaultState());
+		}
+		ctx.waitAndRun(40, () -> {
+			for (int x = 1; x <= 11; x++) {
+				int expected = Math.min(x, com.eternalreturn.blocks.LeafDistance.MAX);
+				BlockState state = ctx.getBlockState(log.east(x));
+				ctx.assertTrue(state.get(LeavesBlock.DISTANCE) == expected, "leaf " + x + " from the log counts " + state.get(LeavesBlock.DISTANCE) + ", not " + expected);
+			}
+			ctx.setBlockState(log, Blocks.AIR);
+			ctx.waitAndRun(40, () -> {
+				for (int x = 1; x <= 11; x++) {
+					BlockState state = ctx.getBlockState(log.east(x));
+					ctx.assertTrue(!(state.getBlock() instanceof LeavesBlock) || state.get(LeavesBlock.DISTANCE) == com.eternalreturn.blocks.LeafDistance.MAX,
+							"leaf " + x + " still counts " + state.get(LeavesBlock.DISTANCE) + " with the log gone");
+				}
+				ctx.complete();
+			});
+		});
 	}
 
 	/** In a world that isn't Eternal Return an oak sapling grows as vanilla: no table is asked. */

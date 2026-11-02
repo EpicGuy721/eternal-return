@@ -222,9 +222,30 @@ public final class BiomeTrees {
 		boolean outer = REPLACING.get();
 		REPLACING.set(true);
 		try {
-			return feature.get().generate(world, generator, random, pos);
+			boolean grown = feature.get().generate(world, generator, random, pos);
+			if (grown && feature.get().config() instanceof TreeFeatureConfig config
+					&& config.foliagePlacer instanceof net.minecraft.world.gen.foliage.RandomSpreadFoliagePlacer) {
+				dropLooseLeaves(world, pos);
+			}
+			return grown;
 		} finally {
 			REPLACING.set(outer);
+		}
+	}
+
+	/**
+	 * A scattered crown (random spread foliage: Japanese maple, tall azalea, the mangroves) leaves a few leaves touching
+	 * no other leaf, which decay at any distance limit; they go as the tree grows, so they never drop in front of the
+	 * player.
+	 */
+	private static void dropLooseLeaves(StructureWorldAccess world, BlockPos pos) {
+		for (BlockPos p : BlockPos.iterate(pos.add(-6, 0, -6), pos.add(6, 20, 6))) {
+			BlockState state = world.getBlockState(p);
+			if (state.getBlock() instanceof net.minecraft.block.LeavesBlock && state.contains(net.minecraft.block.LeavesBlock.DISTANCE)
+					&& !state.get(net.minecraft.block.LeavesBlock.PERSISTENT)
+					&& state.get(net.minecraft.block.LeavesBlock.DISTANCE) >= com.eternalreturn.blocks.LeafDistance.MAX) {
+				world.setBlockState(p, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS | Block.FORCE_STATE);
+			}
 		}
 	}
 

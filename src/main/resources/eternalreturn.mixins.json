@@ -116,6 +116,8 @@
 		"scrolls.EnchantBookFactoryMixin",
 		"scrolls.ServerPlayNetworkHandlerMixin",
 		"survival.AbstractBlockSnowMixin",
+		"survival.LeafDistanceMixin",
+		"survival.LeafDistancePropertyMixin",
 		"enchantments.AttractionMixin",
 		"enchantments.BackstabMixin",
 		"enchantments.EnchantCommandMixin",
@@ -235,7 +237,8 @@
 		"worldgen.SaplingGeneratorMixin",
 		"worldgen.StructureTemplateAccessor",
 		"worldgen.TreeFeatureAzaleaMixin",
-		"worldgen.TreeFeatureBiomeMixin"
+		"worldgen.TreeFeatureBiomeMixin",
+		"worldgen.TreeFeatureLeafDistanceMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

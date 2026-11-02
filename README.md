@@ -449,6 +449,8 @@ A chore they can't reach in 30 seconds is given up.
 
 ### Survival
 
+**Leaves hold on further.** Leaves now stay up to 9 blocks from a log (counting through leaves) before they decay, instead of vanilla's 6, so the wide crowns of the new tree kinds (kapok, sugar maple, hornbeam, white oak...) keep every leaf. Every world; a cut tree's leaves still decay, a little further out. Leaves that were already waiting to decay in a world from before this change stay put until something next to them changes.
+
 **Beds in the Nether and the End** don't explode: they just can't be slept in ("You can only sleep in the Overworld").
 
 **Death.** What you drop when you die never despawns: it lies there until someone picks it up.

@@ -70,7 +70,7 @@ public final class TreeTemplates {
 		return true;
 	}
 
-	/** Every leaf in the box: not persistent, and its distance counted from the logs as the game counts it (up to 7). */
+	/** Every leaf in the box: not persistent, and its distance counted from the logs as the game counts it (up to LeafDistance.MAX). */
 	private static void fixLeaves(StructureWorldAccess world, BlockBox box) {
 		Map<BlockPos, Integer> distance = new HashMap<>();
 		ArrayDeque<BlockPos> queue = new ArrayDeque<>();
@@ -84,7 +84,7 @@ public final class TreeTemplates {
 		while (!queue.isEmpty()) {
 			BlockPos p = queue.poll();
 			int d = distance.get(p);
-			if (d >= LeavesBlock.MAX_DISTANCE) {
+			if (d >= com.eternalreturn.blocks.LeafDistance.MAX) {
 				continue;
 			}
 			for (Direction direction : Direction.values()) {
@@ -98,7 +98,7 @@ public final class TreeTemplates {
 		for (BlockPos p : BlockPos.iterate(box.getMinX(), box.getMinY(), box.getMinZ(), box.getMaxX(), box.getMaxY(), box.getMaxZ())) {
 			BlockState state = world.getBlockState(p);
 			if (state.getBlock() instanceof LeavesBlock && state.contains(LeavesBlock.DISTANCE)) {
-				int d = Math.min(distance.getOrDefault(p, LeavesBlock.MAX_DISTANCE), LeavesBlock.MAX_DISTANCE);
+				int d = Math.min(distance.getOrDefault(p, com.eternalreturn.blocks.LeafDistance.MAX), com.eternalreturn.blocks.LeafDistance.MAX);
 				world.setBlockState(p, state.with(LeavesBlock.DISTANCE, d).with(LeavesBlock.PERSISTENT, false), Block.NOTIFY_LISTENERS | Block.FORCE_STATE);
 			}
 		}
