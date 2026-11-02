@@ -58,7 +58,7 @@ The preset is all data. Without Moderner Beta installed, the world type and its 
 - Phase 4, part 1 (biome stone): done. Each biome's stone from under the topsoil to bedrock, and two hardened blocks.
 - Phase 4, part 2 (ore variants): done. Every ore in every host stone, with old-style textures.
 - Terrain features: done. Deep oceans that fall in steps, rare sinkholes (mostly in the sea, about 100 blocks across), rare floating islands, old growth taigas, extremely rare monoliths, mushrooms in caves (see Terrain features).
-- Worldgen expansion (the owner's brief of 2026-11-01, seven phases, each checked in game before the next): phase 1 (clutter: boulders) done, see Clutter; phase 2 (biome trees) done, see Biome trees; phase 3 (biome variants) done, see Biome variants. Next: terrain landmarks.
+- Worldgen expansion (the owner's brief of 2026-11-01, seven phases, each checked in game before the next): phase 1 (clutter: boulders) done, see Clutter; phase 2 (biome trees) done, see Biome trees; phase 3 (biome variants) done, see Biome variants; phase 4 (terrain landmarks) done, see Terrain landmarks. Next: climate rules.
 - Phase 4, part 3 (biomes and mineshafts): done. Cherry groves, every modern ocean, and mineshafts built from their biome's wood. Ocean monuments and Moderner Beta's ocean shrines were later removed from Eternal Return worlds; guardians spawn in the open sea instead (README, Mobs and Fishing).
 
 ## The Eternal Return preset
@@ -488,6 +488,39 @@ The ice plains keep the frozen river; the mushroom fields keep their shore.
 - The tests that already knew every biome learnt the variants: `presetBiomesHeightAndUnderground` accepts them, and `mineshaftsUseTheirBiomesWood` expects a variant's base's wood. The ore census (`src/gametest/resources/ores/eternal_return.json`) was recorded again: counts moved a few percent where part of a biome's sample square became its peak or edge (badlands gold 1,839 to 1,724, ice plains coal 2,090 to 1,990; all ores 18,566 to 18,173 coal).
 - Checked in game (a new world on the test seed): the dry forest edge thinning into the desert, the taiga, jungle and swampland edges, the desert scrub (first grass, now sand), and the four rivers (podzol banks on the leafy river, boulders round the rocky one).
 - `variantsFollowTheirBase`: every variant exists, edges and rivers have their base's height in the preset, the forest peak is a forest, the sandy river a river, the dry forest edge has andesite, the jungle peak grows the jungle's trees and the dry forest edge its own.
+
+## Terrain landmarks (expansion phase 4)
+
+Rare big shapes on the land, in Eternal Return worlds only: arches, spires, tropical pillars, craters, lava flows, volcanoes, glaciers and ice walls. Each is a structure (type `eternalreturn:landmark`, `com.eternalreturn.worldgen.landmarks`), so `/locate structure eternalreturn:volcano` finds them and they build a chunk at a time, the same whatever order chunks come in: every block comes from the landmark's kind, centre, size, seed and stone (`LandmarkShapes`, column by column with simplex noise). They are laid on the terrain, never shaping it: Moderner Beta's ground is left as it is round them.
+
+**Where.** A landmark starts at a random spot of its chunk when the biome there is in its tag (`#eternalreturn:has_structure/<kind>`, the variants join through the built-in pack), no ocean lies within 24 blocks, and the ground is above sea level. The biome is checked before the height: near the coast the height costs about a third of a second (Moderner Beta works out the deep oceans' distance to land), far too slow for `/locate`. Its stone is its biome's (`BiomeStoneProcessor.stoneOf`), so a desert arch is hardened sandstone and a birch forest spire diorite. Other worlds: the structure gives no start (the flat runs check `/locate` finds none), and `worldgen.onlyEssentialStructures` keeps this mod's structure sets.
+
+| Landmark | Biomes | Size | Spacing (chunks) |
+|---|---|---|---|
+| Arch | dry biomes, extreme hills, plains, ice plains, taiga | 14 to 30 across | 38 (about one per 600 x 600 blocks) |
+| Spire | as the arch, and the old growth taigas | 20 to 40 tall | 38 |
+| Tropical pillars | jungle, cherry grove | 25 to 50 tall | 38 |
+| Crater | all land | 10 to 22 across | 38 |
+| Lava flow | all land but swampland and the mushroom fields | 30 to 80 steps | 62 (about one per 1,000) |
+| Volcano | as the lava flow | radius 60 to 100 | 125 (about one per 2,000) |
+| Glacier | ice plains, taiga, extreme hills | 60 to 150 long | 125 |
+| Ice wall | ice plains, taiga | 30 to 80 long | 38 |
+
+Rarity by size and "anywhere fitting" are the owner's answers (2026-11-02); the biome lists are my picks.
+
+**Shapes.**
+- Arch: a span on a sine curve, lumpy blobs along it, its feet filled down to the ground.
+- Spire: a tapering, leaning column.
+- Tropical pillars: three to six columns with grass and dirt on top, vines down the sides.
+- Crater: a bowl with a rubble rim (gravel, cobblestone, and ore variants of its stone, one block in 25).
+- Lava flow: real lava (the owner's answer) in a channel on a basalt bed with magma and basalt walls, a vent pool at its head, and a charred margin 3 to 6 blocks wide (coal blocks, basalt, gravel, coarse dirt with dead bushes, dark oak stumps). Its course wanders from the seed alone; steering it downhill asked the terrain's height hundreds of times a flow. Lava meeting water becomes obsidian.
+- Volcano: huge and rare (the owner's answer), a cone up to 80 tall with a crater and a lava lake, basalt and tuff streaks, basalt and magma near the top, coarse dirt on the middle slopes, grass lower down, and two or three lava flows down its sides. Its outer half eases down to the land round it (it stands on its centre's ground, and the first version stood as a wall where the land fell away).
+- Glacier: a tongue of hardened packed ice lying on the land, domed across so its sides taper, packed ice near its surface, blue ice veins, snow on top, crevasses.
+- Ice wall: a wandering wall of the same ice with a ragged top.
+
+### Tests
+
+`LandmarkTests` (Eternal Return run, batch `landmarks`): `everyLandmarkIsBuilt` takes each kind's nearest spacing cell whose start chunk holds one, builds it into finished chunks (the test world, vanilla's test level, has structures off, so the test starts them itself), checks what it holds (an arch's span over air, a spire's upper half, a crater's open bowl and ores, a lava flow's lava and charred blocks, a volcano's slope and lava lake, the ice of glaciers and walls) and logs a `/tp` for each. Checked in game (a new world on the test seed, screenshots): all eight; the volcano's foot and the glacier's sides were walls at first. `noLandmarksInOtherWorlds` (flat runs, batch `landmarks_other_worlds`) checks none is found elsewhere.
 
 ## The cave engine (phase 3)
 

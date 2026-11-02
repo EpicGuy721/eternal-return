@@ -1,0 +1,10 @@
+{
+  "type": "eternalreturn:landmark",
+  "landmark": "glacier",
+  "min_size": 60,
+  "max_size": 150,
+  "biomes": "#eternalreturn:has_structure/glacier",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

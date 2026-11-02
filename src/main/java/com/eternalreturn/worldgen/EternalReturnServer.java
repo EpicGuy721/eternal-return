@@ -1,5 +1,7 @@
 package com.eternalreturn.worldgen;
 
+import com.eternalreturn.EternalReturn;
+
 import com.eternalreturn.config.EternalReturnConfig;
 import com.eternalreturn.worldgen.caves.CaveWorlds;
 import net.minecraft.registry.Registry;
@@ -20,7 +22,7 @@ import java.util.Set;
  * Whether the running server's world is an Eternal Return world (its overworld uses this mod's noise
  * settings), worked out as the server creates its dimensions, so rules can apply to all three
  * dimensions of such a world. Used for the structures (worldgen.onlyEssentialStructures: only
- * strongholds, mineshafts, nether fossils and end cities are placed, in every dimension) and for blazes
+ * strongholds, mineshafts, nether fossils, end cities and this mod's own landmarks are placed, in every dimension) and for blazes
  * outside fortresses (Blazes).
  */
 public final class EternalReturnServer {
@@ -52,6 +54,8 @@ public final class EternalReturnServer {
 		if (!active || !EternalReturnConfig.get().worldgen.onlyEssentialStructures) {
 			return sets;
 		}
-		return sets.stream().filter(set -> set.value().structures().stream().anyMatch(entry -> KEPT.stream().anyMatch(entry.structure()::matchesKey))).toList();
+		// This mod's own structures (the terrain landmarks) are kept too.
+		return sets.stream().filter(set -> set.value().structures().stream().anyMatch(entry -> KEPT.stream().anyMatch(entry.structure()::matchesKey)
+				|| entry.structure().getKey().map(key -> key.getValue().getNamespace().equals(EternalReturn.MOD_ID)).orElse(false))).toList();
 	}
 }

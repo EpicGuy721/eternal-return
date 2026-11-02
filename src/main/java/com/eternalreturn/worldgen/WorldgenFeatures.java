@@ -56,6 +56,8 @@ public final class WorldgenFeatures {
 		}
 		// Clutter: boulders (Eternal Return worlds only).
 		com.eternalreturn.worldgen.clutter.Clutter.register();
+		// Terrain landmarks: arches, spires, pillars, craters, lava flows, volcanoes, glaciers, ice walls (structures).
+		com.eternalreturn.worldgen.landmarks.Landmarks.register();
 		// Biome variants: peaks, edges and rivers (the built-in pack that puts them in their bases' tags).
 		com.eternalreturn.worldgen.variants.BiomeVariants.register();
 		// Biome tree tables: saplings and generated trees by biome (Eternal Return worlds only).

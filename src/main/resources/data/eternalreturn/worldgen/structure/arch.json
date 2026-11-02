@@ -1,0 +1,10 @@
+{
+  "type": "eternalreturn:landmark",
+  "landmark": "arch",
+  "min_size": 14,
+  "max_size": 30,
+  "biomes": "#eternalreturn:has_structure/arch",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

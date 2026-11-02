@@ -1,0 +1,48 @@
+{
+  "values": [
+    {
+      "id": "minecraft:desert",
+      "required": false
+    },
+    {
+      "id": "minecraft:badlands",
+      "required": false
+    },
+    {
+      "id": "minecraft:savanna",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:early_release_extreme_hills",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:late_beta_plains",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:early_release_ice_plains",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:late_beta_ice_plains",
+      "required": false
+    },
+    {
+      "id": "minecraft:snowy_plains",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:early_release_taiga",
+      "required": false
+    },
+    {
+      "id": "minecraft:old_growth_pine_taiga",
+      "required": false
+    },
+    {
+      "id": "minecraft:old_growth_spruce_taiga",
+      "required": false
+    }
+  ]
+}

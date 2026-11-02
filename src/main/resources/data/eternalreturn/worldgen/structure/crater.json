@@ -1,0 +1,10 @@
+{
+  "type": "eternalreturn:landmark",
+  "landmark": "crater",
+  "min_size": 10,
+  "max_size": 22,
+  "biomes": "#eternalreturn:has_structure/crater",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

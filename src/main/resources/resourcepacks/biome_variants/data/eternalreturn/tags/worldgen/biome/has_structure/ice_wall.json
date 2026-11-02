@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "eternalreturn:ice_plains_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:taiga_edge",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:taiga_peak",
+      "required": false
+    }
+  ]
+}

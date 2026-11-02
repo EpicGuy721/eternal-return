@@ -1,0 +1,10 @@
+{
+  "type": "eternalreturn:landmark",
+  "landmark": "lava_flow",
+  "min_size": 30,
+  "max_size": 80,
+  "biomes": "#eternalreturn:has_structure/lava_flow",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

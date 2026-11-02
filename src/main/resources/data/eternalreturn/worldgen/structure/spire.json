@@ -1,0 +1,10 @@
+{
+  "type": "eternalreturn:landmark",
+  "landmark": "spire",
+  "min_size": 20,
+  "max_size": 40,
+  "biomes": "#eternalreturn:has_structure/spire",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

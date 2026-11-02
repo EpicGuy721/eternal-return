@@ -17,6 +17,7 @@
 			"com.eternalreturn.gametest.ClutterTests",
 			"com.eternalreturn.gametest.BiomeTreeTests",
 			"com.eternalreturn.gametest.BiomeVariantTests",
+			"com.eternalreturn.gametest.LandmarkTests",
 			"com.eternalreturn.gametest.OuterEndTests",
 			"com.eternalreturn.gametest.CompatTests",
 			"com.eternalreturn.gametest.WorldmapTests",

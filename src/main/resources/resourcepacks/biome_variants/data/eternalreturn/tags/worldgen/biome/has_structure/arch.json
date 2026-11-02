@@ -1,0 +1,41 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "eternalreturn:badlands_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:desert_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:desert_scrub_edge",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:extreme_hills_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:ice_plains_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:plains_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:savanna_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:taiga_edge",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:taiga_peak",
+      "required": false
+    }
+  ]
+}
