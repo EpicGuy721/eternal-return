@@ -160,13 +160,15 @@ public final class BiomeTrees {
 	}
 
 	/**
-	 * The list for this sapling in this biome: from a table naming the biome by id, else by tag, else "*"; the first
-	 * such table (by file name) with a list for this sapling and size wins. Null: none, so vanilla.
+	 * The list for this sapling in this biome: from a table naming the biome by id, else (for a biome variant) naming
+	 * its base by id, else by tag, else "*"; the first such table (by file name) with a list for this sapling and size
+	 * wins. So a variant grows its base's trees unless a table names the variant itself. Null: none, so vanilla.
 	 */
 	@Nullable
 	public static List<Choice> listFor(RegistryEntry<Biome> biome, Identifier sapling, boolean mega) {
 		String id = biome.getKey().map(key -> key.getValue().toString()).orElse("");
-		for (int precedence = 0; precedence < 3; precedence++) {
+		String base = biome.getKey().map(key -> com.eternalreturn.worldgen.variants.BiomeVariants.baseOf(key.getValue()).toString()).orElse("");
+		for (int precedence = 0; precedence < 4; precedence++) {
 			for (Table table : tables) {
 				List<Choice> list = (mega ? table.megaTrees : table.trees).get(sapling);
 				if (list == null || list.isEmpty()) {
@@ -175,7 +177,8 @@ public final class BiomeTrees {
 				for (String name : table.biomes) {
 					boolean matches = switch (precedence) {
 						case 0 -> name.equals(id);
-						case 1 -> name.startsWith("#") && Identifier.tryParse(name.substring(1)) != null
+						case 1 -> name.equals(base);
+						case 2 -> name.startsWith("#") && Identifier.tryParse(name.substring(1)) != null
 								&& biome.isIn(TagKey.of(RegistryKeys.BIOME, Identifier.of(name.substring(1))));
 						default -> name.equals("*");
 					};

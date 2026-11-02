@@ -1,0 +1,33 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "eternalreturn:clay_river",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:jungle_edge",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:jungle_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:leafy_river",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:rocky_river",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:sandy_river",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:swampland_edge",
+      "required": false
+    }
+  ]
+}

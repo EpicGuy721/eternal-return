@@ -1,0 +1,17 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "eternalreturn:jungle_edge",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:jungle_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:swampland_edge",
+      "required": false
+    }
+  ]
+}

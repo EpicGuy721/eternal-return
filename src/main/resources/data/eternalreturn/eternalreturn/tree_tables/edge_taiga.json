@@ -1,0 +1,23 @@
+{
+  "biomes": [
+    "eternalreturn:taiga_edge"
+  ],
+  "saplings": {
+    "minecraft:spruce_sapling": {
+      "trees": [
+        {
+          "weight": 2,
+          "tree": "vanilla"
+        },
+        {
+          "weight": 4,
+          "tree": "eternalreturn:tree/black_spruce"
+        },
+        {
+          "weight": 1,
+          "template": "eternalreturn:tree/larch_young"
+        }
+      ]
+    }
+  }
+}

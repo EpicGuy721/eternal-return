@@ -1,0 +1,35 @@
+{
+  "biomes": [
+    "eternalreturn:extreme_hills_peak"
+  ],
+  "saplings": {
+    "minecraft:oak_sapling": {
+      "trees": [
+        {
+          "weight": 1,
+          "tree": "vanilla"
+        },
+        {
+          "weight": 4,
+          "tree": "eternalreturn:tree/scrub_oak"
+        },
+        {
+          "weight": 2,
+          "tree": "eternalreturn:tree/shrub_oak"
+        }
+      ]
+    },
+    "minecraft:spruce_sapling": {
+      "trees": [
+        {
+          "weight": 1,
+          "tree": "vanilla"
+        },
+        {
+          "weight": 3,
+          "tree": "eternalreturn:tree/black_spruce"
+        }
+      ]
+    }
+  }
+}

@@ -23,6 +23,10 @@
     {
       "id": "minecraft:deep_frozen_ocean",
       "required": false
+    },
+    {
+      "id": "eternalreturn:ice_plains_peak",
+      "required": false
     }
   ]
 }

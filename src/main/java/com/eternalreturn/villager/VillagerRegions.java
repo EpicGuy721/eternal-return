@@ -33,8 +33,26 @@ public final class VillagerRegions {
 	private VillagerRegions() {
 	}
 
+	/** Vanilla's own regions for the vanilla biomes that have biome variants (any other is plains). */
+	private static final Map<String, VillagerType> VANILLA = Map.of("desert", VillagerType.DESERT, "badlands", VillagerType.DESERT,
+			"jungle", VillagerType.JUNGLE, "savanna", VillagerType.SAVANNA, "old_growth_pine_taiga", VillagerType.TAIGA,
+			"old_growth_spruce_taiga", VillagerType.TAIGA, "snowy_plains", VillagerType.SNOW);
+
 	public static void register() {
 		MODERNER_BETA.forEach((biome, type) ->
 				VillagerTypeHelper.addVillagerTypeToBiome(RegistryKey.of(RegistryKeys.BIOME, Identifier.of("moderner_beta", biome)), type));
+		// Biome variants: their base's region.
+		for (RegistryKey<net.minecraft.world.biome.Biome> variant : com.eternalreturn.worldgen.variants.BiomeVariants.variantsOf(baseIds())) {
+			Identifier base = com.eternalreturn.worldgen.variants.BiomeVariants.baseOf(variant.getValue());
+			VillagerTypeHelper.addVillagerTypeToBiome(variant,
+					base.getNamespace().equals("moderner_beta") ? MODERNER_BETA.get(base.getPath()) : VANILLA.get(base.getPath()));
+		}
+	}
+
+	private static java.util.Set<Identifier> baseIds() {
+		java.util.Set<Identifier> bases = new java.util.HashSet<>();
+		MODERNER_BETA.keySet().forEach(path -> bases.add(Identifier.of("moderner_beta", path)));
+		VANILLA.keySet().forEach(path -> bases.add(Identifier.ofVanilla(path)));
+		return bases;
 	}
 }

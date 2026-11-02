@@ -1,0 +1,37 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "eternalreturn:autumnal_forest_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:extreme_hills_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:forest_dry_edge",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:forest_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:old_growth_pine_taiga_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:old_growth_spruce_taiga_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:taiga_edge",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:taiga_peak",
+      "required": false
+    }
+  ]
+}

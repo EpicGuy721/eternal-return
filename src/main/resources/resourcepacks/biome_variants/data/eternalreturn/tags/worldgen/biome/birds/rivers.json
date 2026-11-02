@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "eternalreturn:clay_river",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:leafy_river",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:rocky_river",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:sandy_river",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "biomes": [
+    "eternalreturn:taiga_peak",
+    "eternalreturn:old_growth_pine_taiga_peak",
+    "eternalreturn:old_growth_spruce_taiga_peak",
+    "eternalreturn:ice_plains_peak"
+  ],
+  "saplings": {
+    "minecraft:spruce_sapling": {
+      "trees": [
+        {
+          "weight": 1,
+          "tree": "vanilla"
+        },
+        {
+          "weight": 4,
+          "tree": "eternalreturn:tree/black_spruce"
+        },
+        {
+          "weight": 2,
+          "template": "eternalreturn:tree/larch_young"
+        }
+      ]
+    }
+  }
+}

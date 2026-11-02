@@ -181,6 +181,60 @@ pipeline += [
      'applyCoasts': True, 'seed': 0},
 ]
 
+# ---------------------------------------------------------------- biome variants (tools/worldgen/variants.json)
+# Peaks: the biome on ground above its height is the peak variant, by Moderner Beta's biome injection, which
+# rewrites a chunk's biomes after its terrain (so the terrain doesn't change). Only cells near the ground count
+# (below_surface -8: no higher than 8 above the lowest ground around), so the sky and the floating islands keep
+# their biome. Edges: a 1.6.4-style layer, where a base biome touches one of its neighbours at the land_0 step
+# (cells of 32 blocks), so an edge band is about 32 blocks deep. Rivers: the river layer gives a river the
+# variant of the land it runs through. The world's 1.6.4 layers have no climate noise, so edges come from the
+# layers' own neighbour checks, as 1.6.4 makes beaches.
+VARIANTS = json.load(open(os.path.join(ROOT, 'tools', 'worldgen', 'variants.json'), encoding='utf-8'))
+WITH_HILLS_IDS = set(step(pipeline, 'hills', 'moderner_beta:biome_replacement')['targets'])
+
+
+def with_height_variants(biomes):
+    """The ids the layers use for these biomes: each with its hills (and the extreme hills' edge) variant."""
+    out = []
+    for b in biomes:
+        b = b if ':' in b else f'{NS}:{b}'
+        out.append(b)
+        if b in WITH_HILLS_IDS:
+            out.append(b + '*hills')
+        if b == 'moderner_beta:early_release_extreme_hills':
+            out.append(b + '*edge')
+    return out
+
+
+LAND_0_OCEANS = ['minecraft:ocean', 'minecraft:deep_ocean', 'minecraft:frozen_ocean']
+edge_targets = []
+for vid, spec in VARIANTS['edges'].items():
+    if spec['neighbours'] == ['*land']:
+        neighbour = {'condition': 'moderner_beta:all_of', 'terms': [
+            {'condition': 'moderner_beta:inverted', 'term': {'biomes': with_height_variants([spec['base']]), 'condition': 'moderner_beta:in_set'}},
+            {'condition': 'moderner_beta:inverted', 'term': {'biomes': LAND_0_OCEANS, 'condition': 'moderner_beta:in_set'}}]}
+    else:
+        neighbour = {'biomes': with_height_variants(spec['neighbours']), 'condition': 'moderner_beta:in_set'}
+    edge_targets.append({'type': 'biome', 'result': f'{NS}:{vid}', 'predicate': {'condition': 'moderner_beta:all_of', 'terms': [
+        {'biomes': with_height_variants([spec['base']]), 'condition': 'moderner_beta:in_set'},
+        {'condition': 'moderner_beta:neighbor_match', 'diagonal': False, 'neighborPredicate': neighbour, 'requiredCount': 1}]}})
+land_0 = next(i for i, s in enumerate(pipeline) if s['type'] == 'moderner_beta:add_land' and s.get('id') == 'land_0')
+pipeline.insert(land_0 + 1, {'type': 'moderner_beta:predicate_overlay', 'parent': 'land_0', 'id': 'land_0', 'seed': 0, 'targets': edge_targets})
+rivers = next(s for s in pipeline if s['type'] == 'moderner_beta:mix_river')
+for vid, spec in VARIANTS['rivers'].items():
+    for land in with_height_variants(spec['land']):
+        rivers['biomeSpecificRivers'].setdefault(land, f'{NS}:{vid}')
+preset['biomeSettings']['moderner_beta:biome_injection_rules'] = [
+    {'type': 'moderner_beta:predicate', 'step_for': 'before_surface',
+     'onMatch': {'type': 'moderner_beta:replace', 'replacements': {spec['base']: f'{NS}:{vid}'}},
+     'predicate': {'condition': 'moderner_beta:all_of', 'terms': [
+         {'condition': 'moderner_beta:biome_in_set', 'biomes': [spec['base']]},
+         {'condition': 'moderner_beta:y_above', 'anchor': {'absolute': spec['y']}},
+         {'condition': 'moderner_beta:below_surface', 'threshold': -8}]}}
+    for vid, spec in VARIANTS['peaks'].items()]
+VARIANT_BASES = {f'{NS}:{vid}': spec['base'] for kind in ('peaks', 'edges') for vid, spec in VARIANTS[kind].items()}
+VARIANT_BASES.update({f'{NS}:{vid}': 'minecraft:river' for vid in VARIANTS['rivers']})
+
 # ---------------------------------------------------------------- caves: no modern cave biomes
 preset['caveBiomeSettings'] = {'moderner_beta:provider': 'moderner_beta:none'}
 
@@ -257,6 +311,7 @@ def pipeline_biomes(node, found):
 # are; water_scale gives them a scale negative enough to cancel the scale noise, which would otherwise raise
 # islets out of the sea and bars across rivers. Beaches and mushroom island shores (the coast) keep their own.
 WATER = {b for b in forced['heightOverrides'] if 'ocean' in b} | {'minecraft:river', 'minecraft:frozen_river'}
+WATER |= {f'{NS}:{vid}' for vid in VARIANTS['rivers']}
 COAST = {'minecraft:beach', 'minecraft:snowy_beach', 'minecraft:stony_shore', 'minecraft:mushroom_fields*shore'}
 if KNOBS['water_scale'] is not None:
     for biome in sorted(WATER):
@@ -285,6 +340,8 @@ if KNOBS['aquifers'] is not None:
 # Biome stone: after every topsoil, beach and badlands-band rule, so it only reaches what would stay
 # stone. Switched by the config setting worldgen.biomeStone (the eternalreturn:biome_stone_enabled
 # condition). No blending: each block takes the stone of the biome it is in.
+for block, biomes in KNOBS['biome_stone'].items():
+    biomes += [v for v, base in VARIANT_BASES.items() if base in biomes and v not in biomes]
 stone_rules = [{'type': 'minecraft:condition',
                 'if_true': {'type': 'minecraft:biome', 'biome_is': biomes},
                 'then_run': {'type': 'minecraft:block', 'result_state': {'Name': block}}}
@@ -302,6 +359,59 @@ if stone_rules:
     noise['surface_rule']['sequence'].append({'type': 'minecraft:condition',
                                               'if_true': {'type': f'{NS}:biome_stone_enabled'},
                                               'then_run': {'type': 'minecraft:sequence', 'sequence': stone_rules}})
+# Variant ground (tools/worldgen/variants.json "surface"): river banks and beds, coarse dirt on dry edges. First in the
+# surface rules, so they win over the usual topsoil, and only on the ground surface (not cave floors).
+def block_rule(name):
+    return {'type': 'minecraft:block', 'result_state': {'Name': name}}
+
+
+TOP = {'type': 'minecraft:stone_depth', 'offset': 0, 'surface_type': 'floor', 'add_surface_depth': False, 'secondary_depth_range': 0}
+SHALLOW = {'type': 'minecraft:stone_depth', 'offset': 0, 'surface_type': 'floor', 'add_surface_depth': True, 'secondary_depth_range': 0}
+DRY = {'type': 'minecraft:water', 'offset': -1, 'surface_depth_multiplier': 0, 'add_stone_depth': False}
+
+
+def patches(threshold):
+    return {'type': 'minecraft:noise_threshold', 'noise': 'minecraft:surface', 'min_threshold': threshold, 'max_threshold': 1.0e6}
+
+
+def when(cond, then):
+    return {'type': 'minecraft:condition', 'if_true': cond, 'then_run': then}
+
+
+def unless(cond, then):
+    return when({'type': 'minecraft:not', 'invert': cond}, then)
+
+
+SURFACES = {
+    # Sand banks and bed, a few blocks deep.
+    'sand': when(SHALLOW, block_rule('minecraft:sand')),
+    # A gravel bed; on the banks, gravel in patches.
+    'gravel': {'type': 'minecraft:sequence', 'sequence': [
+        unless(DRY, when(SHALLOW, block_rule('minecraft:gravel'))),
+        when(DRY, when(TOP, when(patches(0.3), block_rule('minecraft:gravel'))))]},
+    # A clay bed; mud in patches on the banks.
+    'clay': {'type': 'minecraft:sequence', 'sequence': [
+        unless(DRY, when(SHALLOW, block_rule('minecraft:clay'))),
+        when(DRY, when(TOP, when(patches(0.3), block_rule('minecraft:mud'))))]},
+    # Podzol banks, most of the way along.
+    'podzol': when(DRY, when(TOP, when(patches(-0.4), block_rule('minecraft:podzol')))),
+    # Coarse dirt in patches (dry forest edges, desert scrub).
+    'coarse_dirt_patches': when(DRY, when(TOP, when(patches(0.4), block_rule('minecraft:coarse_dirt')))),
+    # Desert scrub: the desert's sand (its own surface rules name only the desert, so the scrub would be grass), with
+    # coarse dirt in patches on top, and sandstone under the sand as in the desert.
+    'scrub_sand': {'type': 'minecraft:sequence', 'sequence': [
+        when(DRY, when(TOP, when(patches(0.4), block_rule('minecraft:coarse_dirt')))),
+        when(SHALLOW, block_rule('minecraft:sand')),
+        when({'type': 'minecraft:stone_depth', 'offset': 0, 'surface_type': 'floor', 'add_surface_depth': True, 'secondary_depth_range': 6},
+             block_rule('minecraft:sandstone'))]},
+}
+variant_surfaces = []
+for kind in ('edges', 'rivers'):
+    for vid, spec in VARIANTS[kind].items():
+        if 'surface' in spec:
+            variant_surfaces.append(when({'type': 'minecraft:biome', 'biome_is': [f'{NS}:{vid}']}, SURFACES[spec['surface']]))
+noise['surface_rule']['sequence'][0:0] = [when({'type': 'minecraft:above_preliminary_surface'},
+                                               {'type': 'minecraft:sequence', 'sequence': variant_surfaces})]
 write(f'data/{NS}/worldgen/noise_settings/eternal_return.json', {'fabric:load_conditions': LOAD_IF_MB, **noise})
 
 # ---------------------------------------------------------------- the End

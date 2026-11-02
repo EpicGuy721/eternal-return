@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "eternalreturn:old_growth_pine_taiga_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:old_growth_spruce_taiga_peak",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+{
+  "biomes": [
+    "eternalreturn:forest_dry_edge",
+    "eternalreturn:birch_forest_dry_edge"
+  ],
+  "saplings": {
+    "minecraft:oak_sapling": {
+      "trees": [
+        {
+          "weight": 2,
+          "tree": "vanilla"
+        },
+        {
+          "weight": 2,
+          "tree": "eternalreturn:tree/scrub_oak"
+        },
+        {
+          "weight": 2,
+          "tree": "eternalreturn:tree/bur_oak"
+        }
+      ]
+    },
+    "minecraft:birch_sapling": {
+      "trees": [
+        {
+          "weight": 2,
+          "tree": "vanilla"
+        },
+        {
+          "weight": 2,
+          "tree": "eternalreturn:tree/river_birch"
+        }
+      ]
+    }
+  }
+}

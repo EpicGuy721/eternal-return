@@ -28,7 +28,7 @@ public final class Slimes {
 
 	public static void register() {
 		BiomeModifications.create(EternalReturn.id("rain_slimes")).add(ModificationPhase.ADDITIONS,
-				BiomeSelectors.foundInOverworld().and(context -> EternalReturnConfig.get().mobs.slimesInNightRain && context.getBiome().getSpawnSettings()
+				BiomeSelectors.foundInOverworld().or(com.eternalreturn.worldgen.variants.BiomeVariants.any()).and(context -> EternalReturnConfig.get().mobs.slimesInNightRain && context.getBiome().getSpawnSettings()
 						.getSpawnEntries(SpawnGroup.MONSTER).getEntries().stream().noneMatch(entry -> entry.type == EntityType.SLIME)),
 				context -> context.getSpawnSettings().addSpawn(SpawnGroup.MONSTER, new SpawnSettings.SpawnEntry(EntityType.SLIME, 100, 4, 4)));
 	}

@@ -1,0 +1,29 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "eternalreturn:birch_forest_dry_edge",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:birch_forest_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:cherry_grove_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:dark_forest_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:forest_dry_edge",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:forest_peak",
+      "required": false
+    }
+  ]
+}

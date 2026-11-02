@@ -39,8 +39,9 @@ public final class Clutter {
 	/**
 	 * Spots on the surface of the chunk, as many on average as the biome's density (placement eternalreturn:biome_density):
 	 * max_per_chunk tries at random columns, each kept with chance density / max_per_chunk, the density of the biome on
-	 * that column's surface. "density" maps a biome id, or a biome tag as "#namespace:path", to blocks per chunk; an id
-	 * wins over a tag, tags are tried in the order written, and a biome in none takes "default". Ids and tags of mods
+	 * that column's surface. "density" maps a biome id, or a biome tag as "#namespace:path", to boulders per chunk; an
+	 * id wins over a tag, tags are tried in the order written, and a biome in none takes "default". A biome variant
+	 * without its own id here takes its "boulders" from the variant table, else its base's id (BiomeVariants). Ids and tags of mods
 	 * that aren't installed simply never match.
 	 */
 	public static final class BiomeDensity extends PlacementModifier {
@@ -63,6 +64,17 @@ public final class Clutter {
 			Float exact = biome.getKey().map(key -> this.density.get(key.getValue().toString())).orElse(null);
 			if (exact != null) {
 				return exact;
+			}
+			// A biome variant: its own boulders (tools/worldgen/variants.json), else its base's by id.
+			com.eternalreturn.worldgen.variants.BiomeVariants.Variant variant = com.eternalreturn.worldgen.variants.BiomeVariants.get(biome);
+			if (variant != null) {
+				if (variant.boulders() != null) {
+					return variant.boulders();
+				}
+				Float base = this.density.get(variant.base().toString());
+				if (base != null) {
+					return base;
+				}
 			}
 			for (Map.Entry<String, Float> entry : this.density.entrySet()) {
 				if (entry.getKey().startsWith("#")) {

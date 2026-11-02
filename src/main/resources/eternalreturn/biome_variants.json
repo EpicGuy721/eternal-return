@@ -1,0 +1,120 @@
+{
+  "eternalreturn:forest_peak": {
+    "base": "minecraft:forest",
+    "kind": "peak",
+    "boulders": 1.0
+  },
+  "eternalreturn:birch_forest_peak": {
+    "base": "minecraft:birch_forest",
+    "kind": "peak",
+    "boulders": 1.0
+  },
+  "eternalreturn:taiga_peak": {
+    "base": "moderner_beta:early_release_taiga",
+    "kind": "peak",
+    "boulders": 1.5
+  },
+  "eternalreturn:old_growth_pine_taiga_peak": {
+    "base": "minecraft:old_growth_pine_taiga",
+    "kind": "peak",
+    "boulders": 1.5
+  },
+  "eternalreturn:old_growth_spruce_taiga_peak": {
+    "base": "minecraft:old_growth_spruce_taiga",
+    "kind": "peak",
+    "boulders": 1.5
+  },
+  "eternalreturn:extreme_hills_peak": {
+    "base": "moderner_beta:early_release_extreme_hills",
+    "kind": "peak",
+    "boulders": 2.5
+  },
+  "eternalreturn:ice_plains_peak": {
+    "base": "moderner_beta:early_release_ice_plains",
+    "kind": "peak",
+    "boulders": 0.8
+  },
+  "eternalreturn:desert_peak": {
+    "base": "minecraft:desert",
+    "kind": "peak"
+  },
+  "eternalreturn:savanna_peak": {
+    "base": "minecraft:savanna",
+    "kind": "peak",
+    "boulders": 1.2
+  },
+  "eternalreturn:jungle_peak": {
+    "base": "minecraft:jungle",
+    "kind": "peak",
+    "boulders": 0.6
+  },
+  "eternalreturn:badlands_peak": {
+    "base": "minecraft:badlands",
+    "kind": "peak"
+  },
+  "eternalreturn:dark_forest_peak": {
+    "base": "minecraft:dark_forest",
+    "kind": "peak",
+    "boulders": 0.8
+  },
+  "eternalreturn:plains_peak": {
+    "base": "moderner_beta:late_beta_plains",
+    "kind": "peak",
+    "boulders": 0.8
+  },
+  "eternalreturn:autumnal_forest_peak": {
+    "base": "eternalreturn:autumnal_forest",
+    "kind": "peak"
+  },
+  "eternalreturn:cherry_grove_peak": {
+    "base": "minecraft:cherry_grove",
+    "kind": "peak",
+    "boulders": 0.8
+  },
+  "eternalreturn:forest_dry_edge": {
+    "base": "minecraft:forest",
+    "kind": "edge",
+    "boulders": 0.6
+  },
+  "eternalreturn:birch_forest_dry_edge": {
+    "base": "minecraft:birch_forest",
+    "kind": "edge",
+    "boulders": 0.6
+  },
+  "eternalreturn:taiga_edge": {
+    "base": "moderner_beta:early_release_taiga",
+    "kind": "edge",
+    "boulders": 0.6
+  },
+  "eternalreturn:jungle_edge": {
+    "base": "minecraft:jungle",
+    "kind": "edge",
+    "boulders": 0.4
+  },
+  "eternalreturn:desert_scrub_edge": {
+    "base": "minecraft:desert",
+    "kind": "edge",
+    "boulders": 0.2
+  },
+  "eternalreturn:swampland_edge": {
+    "base": "moderner_beta:early_release_swampland",
+    "kind": "edge"
+  },
+  "eternalreturn:sandy_river": {
+    "base": "minecraft:river",
+    "kind": "river"
+  },
+  "eternalreturn:rocky_river": {
+    "base": "minecraft:river",
+    "kind": "river",
+    "boulders": 0.6
+  },
+  "eternalreturn:clay_river": {
+    "base": "minecraft:river",
+    "kind": "river"
+  },
+  "eternalreturn:leafy_river": {
+    "base": "minecraft:river",
+    "kind": "river"
+  }
+}

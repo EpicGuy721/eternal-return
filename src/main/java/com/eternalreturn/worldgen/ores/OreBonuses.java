@@ -90,16 +90,20 @@ public final class OreBonuses {
 		return RegistryKey.of(RegistryKeys.PLACED_FEATURE, EternalReturn.id(id));
 	}
 
+	/** Overworld biomes, the biome variants included (the bonus ores then pick their own by tag, which variants share). */
+	private static final java.util.function.Predicate<net.fabricmc.fabric.api.biome.v1.BiomeSelectionContext> OVERWORLD =
+			BiomeSelectors.foundInOverworld().or(com.eternalreturn.worldgen.variants.BiomeVariants.any());
+
 	public static void register() {
 		for (String ore : List.of("ore_ruby", "ore_ruby_buried", "ore_sapphire")) {
-			BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(), GenerationStep.Feature.UNDERGROUND_ORES, feature(ore));
+			BiomeModifications.addFeature(OVERWORLD, GenerationStep.Feature.UNDERGROUND_ORES, feature(ore));
 		}
 		BiomeModifications.addFeature(BiomeSelectors.foundInTheNether(), GenerationStep.Feature.UNDERGROUND_DECORATION, feature("ore_ruby_nether"));
 		// Every bonus goes into every biome of its dimension, filtered to its own biomes by tag (BiomeTagFilter): a feature
 		// in only some biomes' lists can land in a different place in the decoration order from one start to the next,
 		// and so place differently.
 		for (String ore : List.of("iron", "coal", "gold", "lapis", "emerald", "redstone", "copper", "diamond", "ruby", "sapphire")) {
-			BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(), GenerationStep.Feature.UNDERGROUND_ORES, feature("ore_bonus_" + ore));
+			BiomeModifications.addFeature(OVERWORLD, GenerationStep.Feature.UNDERGROUND_ORES, feature("ore_bonus_" + ore));
 		}
 		for (String ore : List.of("ancient_debris", "quartz")) {
 			BiomeModifications.addFeature(BiomeSelectors.foundInTheNether(), GenerationStep.Feature.UNDERGROUND_DECORATION, feature("ore_bonus_" + ore));

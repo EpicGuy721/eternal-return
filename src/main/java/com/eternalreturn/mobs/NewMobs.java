@@ -140,7 +140,8 @@ public final class NewMobs {
 				context -> context.getSpawnSettings().addSpawn(SpawnGroup.MONSTER, new SpawnSettings.SpawnEntry(BEHOLDER, 3, 1, 1)));
 		FullEnchant.register();
 		// Deep caves only (GrimlockEntity.canSpawn: below y 0), in small groups.
-		BiomeModifications.create(EternalReturn.id("grimlocks")).add(ModificationPhase.ADDITIONS, BiomeSelectors.foundInOverworld(),
+		BiomeModifications.create(EternalReturn.id("grimlocks")).add(ModificationPhase.ADDITIONS,
+				BiomeSelectors.foundInOverworld().or(com.eternalreturn.worldgen.variants.BiomeVariants.any()),
 				context -> context.getSpawnSettings().addSpawn(SpawnGroup.MONSTER, new SpawnSettings.SpawnEntry(GRIMLOCK, 30, 2, 3)));
 		// Rare: alone, a small weight beside endermen's 10 (in fours), and SandownEntity.canSpawn passes half of them.
 		BiomeModifications.create(EternalReturn.id("end_sandowns")).add(ModificationPhase.ADDITIONS, BiomeSelectors.foundInTheEnd(),
@@ -151,9 +152,10 @@ public final class NewMobs {
 		BiomeModifications.create(EternalReturn.id("nether_wolves")).add(ModificationPhase.ADDITIONS, BiomeSelectors.foundInTheNether(),
 				context -> context.getSpawnSettings().addSpawn(SpawnGroup.CREATURE, new SpawnSettings.SpawnEntry(EntityType.WOLF, 20, 1, 3)));
 		BiomeModifications.create(EternalReturn.id("mooblooms")).add(ModificationPhase.ADDITIONS,
-				BiomeSelectors.includeByKey(RegistryKey.of(RegistryKeys.BIOME, EternalReturn.id("autumnal_forest"))),
+				com.eternalreturn.worldgen.variants.BiomeVariants.withVariants(RegistryKey.of(RegistryKeys.BIOME, EternalReturn.id("autumnal_forest"))),
 				context -> context.getSpawnSettings().addSpawn(SpawnGroup.CREATURE, new SpawnSettings.SpawnEntry(MOOBLOOM, 8, 2, 4)));
-		BiomeModifications.create(EternalReturn.id("moolips")).add(ModificationPhase.ADDITIONS, BiomeSelectors.includeByKey(BiomeKeys.CHERRY_GROVE),
+		BiomeModifications.create(EternalReturn.id("moolips")).add(ModificationPhase.ADDITIONS,
+				com.eternalreturn.worldgen.variants.BiomeVariants.withVariants(BiomeKeys.CHERRY_GROVE),
 				context -> context.getSpawnSettings().addSpawn(SpawnGroup.CREATURE, new SpawnSettings.SpawnEntry(MOOLIP, 8, 2, 4)));
 
 		Item frostbite = egg("frostbite", FROSTBITE, 0x6E8E9A, 0xD8F3FF);

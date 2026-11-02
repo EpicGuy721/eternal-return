@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "eternalreturn:badlands_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:desert_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:desert_scrub_edge",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:savanna_peak",
+      "required": false
+    }
+  ]
+}

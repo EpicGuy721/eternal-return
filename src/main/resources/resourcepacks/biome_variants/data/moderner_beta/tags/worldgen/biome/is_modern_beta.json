@@ -1,0 +1,29 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "eternalreturn:extreme_hills_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:ice_plains_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:plains_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:swampland_edge",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:taiga_edge",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:taiga_peak",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "eternalreturn:cherry_grove_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:extreme_hills_peak",
+      "required": false
+    }
+  ]
+}

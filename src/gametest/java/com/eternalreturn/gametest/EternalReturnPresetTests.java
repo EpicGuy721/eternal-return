@@ -64,6 +64,8 @@ public class EternalReturnPresetTests implements FabricGameTest {
 		ctx.assertTrue(missing.isEmpty(), "biomes never generated: " + missing);
 		Set<String> unexpected = new TreeSet<>(found);
 		unexpected.removeAll(EXPECTED_BIOMES);
+		// Biome variants (edges and rivers come from the layers; BiomeVariantTests checks them) are their base's kin.
+		unexpected.removeIf(id -> com.eternalreturn.worldgen.variants.BiomeVariants.get(net.minecraft.util.Identifier.of(id)) != null);
 		ctx.assertTrue(unexpected.isEmpty(), "biomes outside the list: " + unexpected);
 
 		// Underground: solid down to the -64 floor, with no deepslate anywhere. Ores that land in the

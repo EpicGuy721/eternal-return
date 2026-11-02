@@ -1,0 +1,48 @@
+{
+  "_comment": "Biome variants (worldgen expansion phase 3), read by tools/worldgen/build_variants.py and build_preset.py. A variant copies its base biome and changes only what is listed: temperature, downfall, colours (any of the biome's effects), thin_trees (keeps one tree in N), add_features (step -> placed features), remove_features, boulders (per chunk; default: the base's), surface (river and edge ground, in build_preset.py). Peaks: the ground above y. Edges: where the base meets one of the neighbours, about 32 blocks in. Rivers: the river that runs through the listed land.",
+  "peaks": {
+    "forest_peak": {"base": "minecraft:forest", "name": "Forest Peak", "y": 95, "temperature": -0.3, "thin_trees": 2, "boulders": 1.0},
+    "birch_forest_peak": {"base": "minecraft:birch_forest", "name": "Birch Forest Peak", "y": 99, "temperature": -0.3, "thin_trees": 2, "boulders": 1.0},
+    "taiga_peak": {"base": "moderner_beta:early_release_taiga", "name": "Taiga Peak", "y": 94, "temperature": -0.3, "thin_trees": 2, "boulders": 1.5},
+    "old_growth_pine_taiga_peak": {"base": "minecraft:old_growth_pine_taiga", "name": "Old Growth Pine Taiga Peak", "y": 94, "temperature": -0.3, "thin_trees": 2, "boulders": 1.5},
+    "old_growth_spruce_taiga_peak": {"base": "minecraft:old_growth_spruce_taiga", "name": "Old Growth Spruce Taiga Peak", "y": 100, "temperature": -0.3, "thin_trees": 2, "boulders": 1.5},
+    "extreme_hills_peak": {"base": "moderner_beta:early_release_extreme_hills", "name": "Extreme Hills Peak", "y": 90, "temperature": -0.3, "thin_trees": 3, "boulders": 2.5},
+    "ice_plains_peak": {"base": "moderner_beta:early_release_ice_plains", "name": "Ice Plains Peak", "y": 94, "temperature": -0.3, "thin_trees": 2, "boulders": 0.8},
+    "desert_peak": {"base": "minecraft:desert", "name": "Desert Peak", "y": 92, "temperature": -0.3},
+    "savanna_peak": {"base": "minecraft:savanna", "name": "Savanna Peak", "y": 90, "temperature": -0.3, "thin_trees": 2, "boulders": 1.2},
+    "jungle_peak": {"base": "minecraft:jungle", "name": "Jungle Peak", "y": 92, "temperature": -0.3, "thin_trees": 2, "boulders": 0.6},
+    "badlands_peak": {"base": "minecraft:badlands", "name": "Badlands Peak", "y": 92, "temperature": -0.3},
+    "dark_forest_peak": {"base": "minecraft:dark_forest", "name": "Dark Forest Peak", "y": 93, "temperature": -0.3, "thin_trees": 2, "boulders": 0.8},
+    "plains_peak": {"base": "moderner_beta:late_beta_plains", "name": "Plains Peak", "y": 94, "temperature": -0.3, "boulders": 0.8},
+    "autumnal_forest_peak": {"base": "eternalreturn:autumnal_forest", "name": "Autumnal Forest Peak", "y": 97, "temperature": -0.3, "thin_trees": 2},
+    "cherry_grove_peak": {"base": "minecraft:cherry_grove", "name": "Cherry Grove Peak", "y": 93, "temperature": -0.3, "thin_trees": 2, "boulders": 0.8}
+  },
+  "edges": {
+    "forest_dry_edge": {"base": "minecraft:forest", "name": "Dry Forest Edge", "neighbours": ["minecraft:desert", "minecraft:savanna", "minecraft:badlands"],
+      "temperature": 1.2, "downfall": 0.3, "thin_trees": 3, "boulders": 0.6,
+      "add_features": {"vegetal_decoration": ["minecraft:patch_dead_bush_2", "minecraft:patch_grass_savanna"]}, "surface": "coarse_dirt_patches"},
+    "birch_forest_dry_edge": {"base": "minecraft:birch_forest", "name": "Dry Birch Forest Edge", "neighbours": ["minecraft:desert", "minecraft:savanna", "minecraft:badlands"],
+      "temperature": 1.1, "downfall": 0.3, "thin_trees": 3, "boulders": 0.6,
+      "add_features": {"vegetal_decoration": ["minecraft:patch_dead_bush_2", "minecraft:patch_grass_savanna"]}, "surface": "coarse_dirt_patches"},
+    "taiga_edge": {"base": "moderner_beta:early_release_taiga", "name": "Taiga Edge", "neighbours": ["moderner_beta:early_release_ice_plains", "moderner_beta:late_beta_ice_plains"],
+      "temperature": -0.2, "thin_trees": 2, "boulders": 0.6},
+    "jungle_edge": {"base": "minecraft:jungle", "name": "Jungle Edge", "neighbours": ["*land"],
+      "thin_trees": 3, "boulders": 0.4,
+      "add_features": {"vegetal_decoration": ["minecraft:patch_grass_jungle"]}},
+    "desert_scrub_edge": {"base": "minecraft:desert", "name": "Desert Scrub", "neighbours": ["minecraft:savanna", "minecraft:jungle"],
+      "temperature": 1.6, "downfall": 0.1, "boulders": 0.2,
+      "add_features": {"vegetal_decoration": ["minecraft:patch_dead_bush_2", "eternalreturn:scrub_thorn_bush", "minecraft:patch_grass_savanna"]}, "surface": "scrub_sand"},
+    "swampland_edge": {"base": "moderner_beta:early_release_swampland", "name": "Swampland Edge", "neighbours": ["minecraft:forest", "minecraft:birch_forest", "minecraft:dark_forest"],
+      "thin_trees": 2, "remove_features": ["minecraft:patch_waterlily"]}
+  },
+  "rivers": {
+    "sandy_river": {"name": "Sandy River", "land": ["minecraft:desert", "minecraft:savanna", "minecraft:badlands", "desert_scrub_edge"],
+      "add_features": {"vegetal_decoration": ["minecraft:patch_sugar_cane_desert"]}, "surface": "sand"},
+    "rocky_river": {"name": "Rocky River", "land": ["moderner_beta:early_release_taiga", "moderner_beta:early_release_extreme_hills", "minecraft:old_growth_pine_taiga", "minecraft:old_growth_spruce_taiga", "taiga_edge"],
+      "boulders": 0.6, "surface": "gravel"},
+    "clay_river": {"name": "Clay River", "land": ["moderner_beta:late_beta_plains", "moderner_beta:early_release_swampland", "swampland_edge"],
+      "add_features": {"underground_ores": ["minecraft:disk_clay"]}, "surface": "clay"},
+    "leafy_river": {"name": "Leafy River", "land": ["minecraft:forest", "minecraft:birch_forest", "minecraft:dark_forest", "minecraft:jungle", "minecraft:cherry_grove", "eternalreturn:autumnal_forest", "forest_dry_edge", "birch_forest_dry_edge", "jungle_edge"],
+      "add_features": {"vegetal_decoration": ["minecraft:patch_large_fern"]}, "surface": "podzol"}
+  }
+}

@@ -3,6 +3,10 @@
     {
       "id": "minecraft:badlands",
       "required": false
+    },
+    {
+      "id": "eternalreturn:badlands_peak",
+      "required": false
     }
   ]
 }

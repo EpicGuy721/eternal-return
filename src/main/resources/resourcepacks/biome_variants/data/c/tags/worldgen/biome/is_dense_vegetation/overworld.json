@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "eternalreturn:dark_forest_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:jungle_edge",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:jungle_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:old_growth_spruce_taiga_peak",
+      "required": false
+    }
+  ]
+}

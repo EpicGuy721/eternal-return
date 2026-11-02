@@ -454,6 +454,214 @@
           "seed": 3
         },
         {
+          "type": "moderner_beta:predicate_overlay",
+          "parent": "land_0",
+          "id": "land_0",
+          "seed": 0,
+          "targets": [
+            {
+              "type": "biome",
+              "result": "eternalreturn:forest_dry_edge",
+              "predicate": {
+                "condition": "moderner_beta:all_of",
+                "terms": [
+                  {
+                    "biomes": [
+                      "minecraft:forest",
+                      "minecraft:forest*hills"
+                    ],
+                    "condition": "moderner_beta:in_set"
+                  },
+                  {
+                    "condition": "moderner_beta:neighbor_match",
+                    "diagonal": false,
+                    "neighborPredicate": {
+                      "biomes": [
+                        "minecraft:desert",
+                        "minecraft:desert*hills",
+                        "minecraft:savanna",
+                        "minecraft:savanna*hills",
+                        "minecraft:badlands",
+                        "minecraft:badlands*hills"
+                      ],
+                      "condition": "moderner_beta:in_set"
+                    },
+                    "requiredCount": 1
+                  }
+                ]
+              }
+            },
+            {
+              "type": "biome",
+              "result": "eternalreturn:birch_forest_dry_edge",
+              "predicate": {
+                "condition": "moderner_beta:all_of",
+                "terms": [
+                  {
+                    "biomes": [
+                      "minecraft:birch_forest",
+                      "minecraft:birch_forest*hills"
+                    ],
+                    "condition": "moderner_beta:in_set"
+                  },
+                  {
+                    "condition": "moderner_beta:neighbor_match",
+                    "diagonal": false,
+                    "neighborPredicate": {
+                      "biomes": [
+                        "minecraft:desert",
+                        "minecraft:desert*hills",
+                        "minecraft:savanna",
+                        "minecraft:savanna*hills",
+                        "minecraft:badlands",
+                        "minecraft:badlands*hills"
+                      ],
+                      "condition": "moderner_beta:in_set"
+                    },
+                    "requiredCount": 1
+                  }
+                ]
+              }
+            },
+            {
+              "type": "biome",
+              "result": "eternalreturn:taiga_edge",
+              "predicate": {
+                "condition": "moderner_beta:all_of",
+                "terms": [
+                  {
+                    "biomes": [
+                      "moderner_beta:early_release_taiga",
+                      "moderner_beta:early_release_taiga*hills"
+                    ],
+                    "condition": "moderner_beta:in_set"
+                  },
+                  {
+                    "condition": "moderner_beta:neighbor_match",
+                    "diagonal": false,
+                    "neighborPredicate": {
+                      "biomes": [
+                        "moderner_beta:early_release_ice_plains",
+                        "moderner_beta:early_release_ice_plains*hills",
+                        "moderner_beta:late_beta_ice_plains"
+                      ],
+                      "condition": "moderner_beta:in_set"
+                    },
+                    "requiredCount": 1
+                  }
+                ]
+              }
+            },
+            {
+              "type": "biome",
+              "result": "eternalreturn:jungle_edge",
+              "predicate": {
+                "condition": "moderner_beta:all_of",
+                "terms": [
+                  {
+                    "biomes": [
+                      "minecraft:jungle",
+                      "minecraft:jungle*hills"
+                    ],
+                    "condition": "moderner_beta:in_set"
+                  },
+                  {
+                    "condition": "moderner_beta:neighbor_match",
+                    "diagonal": false,
+                    "neighborPredicate": {
+                      "condition": "moderner_beta:all_of",
+                      "terms": [
+                        {
+                          "condition": "moderner_beta:inverted",
+                          "term": {
+                            "biomes": [
+                              "minecraft:jungle",
+                              "minecraft:jungle*hills"
+                            ],
+                            "condition": "moderner_beta:in_set"
+                          }
+                        },
+                        {
+                          "condition": "moderner_beta:inverted",
+                          "term": {
+                            "biomes": [
+                              "minecraft:ocean",
+                              "minecraft:deep_ocean",
+                              "minecraft:frozen_ocean"
+                            ],
+                            "condition": "moderner_beta:in_set"
+                          }
+                        }
+                      ]
+                    },
+                    "requiredCount": 1
+                  }
+                ]
+              }
+            },
+            {
+              "type": "biome",
+              "result": "eternalreturn:desert_scrub_edge",
+              "predicate": {
+                "condition": "moderner_beta:all_of",
+                "terms": [
+                  {
+                    "biomes": [
+                      "minecraft:desert",
+                      "minecraft:desert*hills"
+                    ],
+                    "condition": "moderner_beta:in_set"
+                  },
+                  {
+                    "condition": "moderner_beta:neighbor_match",
+                    "diagonal": false,
+                    "neighborPredicate": {
+                      "biomes": [
+                        "minecraft:savanna",
+                        "minecraft:savanna*hills",
+                        "minecraft:jungle",
+                        "minecraft:jungle*hills"
+                      ],
+                      "condition": "moderner_beta:in_set"
+                    },
+                    "requiredCount": 1
+                  }
+                ]
+              }
+            },
+            {
+              "type": "biome",
+              "result": "eternalreturn:swampland_edge",
+              "predicate": {
+                "condition": "moderner_beta:all_of",
+                "terms": [
+                  {
+                    "biomes": [
+                      "moderner_beta:early_release_swampland"
+                    ],
+                    "condition": "moderner_beta:in_set"
+                  },
+                  {
+                    "condition": "moderner_beta:neighbor_match",
+                    "diagonal": false,
+                    "neighborPredicate": {
+                      "biomes": [
+                        "minecraft:forest",
+                        "minecraft:forest*hills",
+                        "minecraft:birch_forest",
+                        "minecraft:birch_forest*hills",
+                        "minecraft:dark_forest"
+                      ],
+                      "condition": "moderner_beta:in_set"
+                    },
+                    "requiredCount": 1
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
           "type": "moderner_beta:modal_zoom",
           "parent": "land_0",
           "id": "land_1",
@@ -635,7 +843,38 @@
             "minecraft:mushroom_fields": "minecraft:mushroom_fields*shore",
             "minecraft:mushroom_fields*shore": "minecraft:mushroom_fields*shore",
             "moderner_beta:early_release_ice_plains": "minecraft:frozen_river",
-            "moderner_beta:late_beta_ice_plains": "minecraft:frozen_river"
+            "moderner_beta:late_beta_ice_plains": "minecraft:frozen_river",
+            "minecraft:desert": "eternalreturn:sandy_river",
+            "minecraft:desert*hills": "eternalreturn:sandy_river",
+            "minecraft:savanna": "eternalreturn:sandy_river",
+            "minecraft:savanna*hills": "eternalreturn:sandy_river",
+            "minecraft:badlands": "eternalreturn:sandy_river",
+            "minecraft:badlands*hills": "eternalreturn:sandy_river",
+            "eternalreturn:desert_scrub_edge": "eternalreturn:sandy_river",
+            "moderner_beta:early_release_taiga": "eternalreturn:rocky_river",
+            "moderner_beta:early_release_taiga*hills": "eternalreturn:rocky_river",
+            "moderner_beta:early_release_extreme_hills": "eternalreturn:rocky_river",
+            "moderner_beta:early_release_extreme_hills*edge": "eternalreturn:rocky_river",
+            "minecraft:old_growth_pine_taiga": "eternalreturn:rocky_river",
+            "minecraft:old_growth_spruce_taiga": "eternalreturn:rocky_river",
+            "eternalreturn:taiga_edge": "eternalreturn:rocky_river",
+            "moderner_beta:late_beta_plains": "eternalreturn:clay_river",
+            "moderner_beta:late_beta_plains*hills": "eternalreturn:clay_river",
+            "moderner_beta:early_release_swampland": "eternalreturn:clay_river",
+            "eternalreturn:swampland_edge": "eternalreturn:clay_river",
+            "minecraft:forest": "eternalreturn:leafy_river",
+            "minecraft:forest*hills": "eternalreturn:leafy_river",
+            "minecraft:birch_forest": "eternalreturn:leafy_river",
+            "minecraft:birch_forest*hills": "eternalreturn:leafy_river",
+            "minecraft:dark_forest": "eternalreturn:leafy_river",
+            "minecraft:jungle": "eternalreturn:leafy_river",
+            "minecraft:jungle*hills": "eternalreturn:leafy_river",
+            "minecraft:cherry_grove": "eternalreturn:leafy_river",
+            "minecraft:cherry_grove*hills": "eternalreturn:leafy_river",
+            "eternalreturn:autumnal_forest": "eternalreturn:leafy_river",
+            "eternalreturn:forest_dry_edge": "eternalreturn:leafy_river",
+            "eternalreturn:birch_forest_dry_edge": "eternalreturn:leafy_river",
+            "eternalreturn:jungle_edge": "eternalreturn:leafy_river"
           },
           "id": "land",
           "ignoredBiomes": [
@@ -697,7 +936,474 @@
       ]
     },
     "moderner_beta:provider": "moderner_beta:fractal",
-    "moderner_beta:temperature_height_scaling": "none"
+    "moderner_beta:temperature_height_scaling": "none",
+    "moderner_beta:biome_injection_rules": [
+      {
+        "type": "moderner_beta:predicate",
+        "step_for": "before_surface",
+        "onMatch": {
+          "type": "moderner_beta:replace",
+          "replacements": {
+            "minecraft:forest": "eternalreturn:forest_peak"
+          }
+        },
+        "predicate": {
+          "condition": "moderner_beta:all_of",
+          "terms": [
+            {
+              "condition": "moderner_beta:biome_in_set",
+              "biomes": [
+                "minecraft:forest"
+              ]
+            },
+            {
+              "condition": "moderner_beta:y_above",
+              "anchor": {
+                "absolute": 95
+              }
+            },
+            {
+              "condition": "moderner_beta:below_surface",
+              "threshold": -8
+            }
+          ]
+        }
+      },
+      {
+        "type": "moderner_beta:predicate",
+        "step_for": "before_surface",
+        "onMatch": {
+          "type": "moderner_beta:replace",
+          "replacements": {
+            "minecraft:birch_forest": "eternalreturn:birch_forest_peak"
+          }
+        },
+        "predicate": {
+          "condition": "moderner_beta:all_of",
+          "terms": [
+            {
+              "condition": "moderner_beta:biome_in_set",
+              "biomes": [
+                "minecraft:birch_forest"
+              ]
+            },
+            {
+              "condition": "moderner_beta:y_above",
+              "anchor": {
+                "absolute": 99
+              }
+            },
+            {
+              "condition": "moderner_beta:below_surface",
+              "threshold": -8
+            }
+          ]
+        }
+      },
+      {
+        "type": "moderner_beta:predicate",
+        "step_for": "before_surface",
+        "onMatch": {
+          "type": "moderner_beta:replace",
+          "replacements": {
+            "moderner_beta:early_release_taiga": "eternalreturn:taiga_peak"
+          }
+        },
+        "predicate": {
+          "condition": "moderner_beta:all_of",
+          "terms": [
+            {
+              "condition": "moderner_beta:biome_in_set",
+              "biomes": [
+                "moderner_beta:early_release_taiga"
+              ]
+            },
+            {
+              "condition": "moderner_beta:y_above",
+              "anchor": {
+                "absolute": 94
+              }
+            },
+            {
+              "condition": "moderner_beta:below_surface",
+              "threshold": -8
+            }
+          ]
+        }
+      },
+      {
+        "type": "moderner_beta:predicate",
+        "step_for": "before_surface",
+        "onMatch": {
+          "type": "moderner_beta:replace",
+          "replacements": {
+            "minecraft:old_growth_pine_taiga": "eternalreturn:old_growth_pine_taiga_peak"
+          }
+        },
+        "predicate": {
+          "condition": "moderner_beta:all_of",
+          "terms": [
+            {
+              "condition": "moderner_beta:biome_in_set",
+              "biomes": [
+                "minecraft:old_growth_pine_taiga"
+              ]
+            },
+            {
+              "condition": "moderner_beta:y_above",
+              "anchor": {
+                "absolute": 94
+              }
+            },
+            {
+              "condition": "moderner_beta:below_surface",
+              "threshold": -8
+            }
+          ]
+        }
+      },
+      {
+        "type": "moderner_beta:predicate",
+        "step_for": "before_surface",
+        "onMatch": {
+          "type": "moderner_beta:replace",
+          "replacements": {
+            "minecraft:old_growth_spruce_taiga": "eternalreturn:old_growth_spruce_taiga_peak"
+          }
+        },
+        "predicate": {
+          "condition": "moderner_beta:all_of",
+          "terms": [
+            {
+              "condition": "moderner_beta:biome_in_set",
+              "biomes": [
+                "minecraft:old_growth_spruce_taiga"
+              ]
+            },
+            {
+              "condition": "moderner_beta:y_above",
+              "anchor": {
+                "absolute": 100
+              }
+            },
+            {
+              "condition": "moderner_beta:below_surface",
+              "threshold": -8
+            }
+          ]
+        }
+      },
+      {
+        "type": "moderner_beta:predicate",
+        "step_for": "before_surface",
+        "onMatch": {
+          "type": "moderner_beta:replace",
+          "replacements": {
+            "moderner_beta:early_release_extreme_hills": "eternalreturn:extreme_hills_peak"
+          }
+        },
+        "predicate": {
+          "condition": "moderner_beta:all_of",
+          "terms": [
+            {
+              "condition": "moderner_beta:biome_in_set",
+              "biomes": [
+                "moderner_beta:early_release_extreme_hills"
+              ]
+            },
+            {
+              "condition": "moderner_beta:y_above",
+              "anchor": {
+                "absolute": 90
+              }
+            },
+            {
+              "condition": "moderner_beta:below_surface",
+              "threshold": -8
+            }
+          ]
+        }
+      },
+      {
+        "type": "moderner_beta:predicate",
+        "step_for": "before_surface",
+        "onMatch": {
+          "type": "moderner_beta:replace",
+          "replacements": {
+            "moderner_beta:early_release_ice_plains": "eternalreturn:ice_plains_peak"
+          }
+        },
+        "predicate": {
+          "condition": "moderner_beta:all_of",
+          "terms": [
+            {
+              "condition": "moderner_beta:biome_in_set",
+              "biomes": [
+                "moderner_beta:early_release_ice_plains"
+              ]
+            },
+            {
+              "condition": "moderner_beta:y_above",
+              "anchor": {
+                "absolute": 94
+              }
+            },
+            {
+              "condition": "moderner_beta:below_surface",
+              "threshold": -8
+            }
+          ]
+        }
+      },
+      {
+        "type": "moderner_beta:predicate",
+        "step_for": "before_surface",
+        "onMatch": {
+          "type": "moderner_beta:replace",
+          "replacements": {
+            "minecraft:desert": "eternalreturn:desert_peak"
+          }
+        },
+        "predicate": {
+          "condition": "moderner_beta:all_of",
+          "terms": [
+            {
+              "condition": "moderner_beta:biome_in_set",
+              "biomes": [
+                "minecraft:desert"
+              ]
+            },
+            {
+              "condition": "moderner_beta:y_above",
+              "anchor": {
+                "absolute": 92
+              }
+            },
+            {
+              "condition": "moderner_beta:below_surface",
+              "threshold": -8
+            }
+          ]
+        }
+      },
+      {
+        "type": "moderner_beta:predicate",
+        "step_for": "before_surface",
+        "onMatch": {
+          "type": "moderner_beta:replace",
+          "replacements": {
+            "minecraft:savanna": "eternalreturn:savanna_peak"
+          }
+        },
+        "predicate": {
+          "condition": "moderner_beta:all_of",
+          "terms": [
+            {
+              "condition": "moderner_beta:biome_in_set",
+              "biomes": [
+                "minecraft:savanna"
+              ]
+            },
+            {
+              "condition": "moderner_beta:y_above",
+              "anchor": {
+                "absolute": 90
+              }
+            },
+            {
+              "condition": "moderner_beta:below_surface",
+              "threshold": -8
+            }
+          ]
+        }
+      },
+      {
+        "type": "moderner_beta:predicate",
+        "step_for": "before_surface",
+        "onMatch": {
+          "type": "moderner_beta:replace",
+          "replacements": {
+            "minecraft:jungle": "eternalreturn:jungle_peak"
+          }
+        },
+        "predicate": {
+          "condition": "moderner_beta:all_of",
+          "terms": [
+            {
+              "condition": "moderner_beta:biome_in_set",
+              "biomes": [
+                "minecraft:jungle"
+              ]
+            },
+            {
+              "condition": "moderner_beta:y_above",
+              "anchor": {
+                "absolute": 92
+              }
+            },
+            {
+              "condition": "moderner_beta:below_surface",
+              "threshold": -8
+            }
+          ]
+        }
+      },
+      {
+        "type": "moderner_beta:predicate",
+        "step_for": "before_surface",
+        "onMatch": {
+          "type": "moderner_beta:replace",
+          "replacements": {
+            "minecraft:badlands": "eternalreturn:badlands_peak"
+          }
+        },
+        "predicate": {
+          "condition": "moderner_beta:all_of",
+          "terms": [
+            {
+              "condition": "moderner_beta:biome_in_set",
+              "biomes": [
+                "minecraft:badlands"
+              ]
+            },
+            {
+              "condition": "moderner_beta:y_above",
+              "anchor": {
+                "absolute": 92
+              }
+            },
+            {
+              "condition": "moderner_beta:below_surface",
+              "threshold": -8
+            }
+          ]
+        }
+      },
+      {
+        "type": "moderner_beta:predicate",
+        "step_for": "before_surface",
+        "onMatch": {
+          "type": "moderner_beta:replace",
+          "replacements": {
+            "minecraft:dark_forest": "eternalreturn:dark_forest_peak"
+          }
+        },
+        "predicate": {
+          "condition": "moderner_beta:all_of",
+          "terms": [
+            {
+              "condition": "moderner_beta:biome_in_set",
+              "biomes": [
+                "minecraft:dark_forest"
+              ]
+            },
+            {
+              "condition": "moderner_beta:y_above",
+              "anchor": {
+                "absolute": 93
+              }
+            },
+            {
+              "condition": "moderner_beta:below_surface",
+              "threshold": -8
+            }
+          ]
+        }
+      },
+      {
+        "type": "moderner_beta:predicate",
+        "step_for": "before_surface",
+        "onMatch": {
+          "type": "moderner_beta:replace",
+          "replacements": {
+            "moderner_beta:late_beta_plains": "eternalreturn:plains_peak"
+          }
+        },
+        "predicate": {
+          "condition": "moderner_beta:all_of",
+          "terms": [
+            {
+              "condition": "moderner_beta:biome_in_set",
+              "biomes": [
+                "moderner_beta:late_beta_plains"
+              ]
+            },
+            {
+              "condition": "moderner_beta:y_above",
+              "anchor": {
+                "absolute": 94
+              }
+            },
+            {
+              "condition": "moderner_beta:below_surface",
+              "threshold": -8
+            }
+          ]
+        }
+      },
+      {
+        "type": "moderner_beta:predicate",
+        "step_for": "before_surface",
+        "onMatch": {
+          "type": "moderner_beta:replace",
+          "replacements": {
+            "eternalreturn:autumnal_forest": "eternalreturn:autumnal_forest_peak"
+          }
+        },
+        "predicate": {
+          "condition": "moderner_beta:all_of",
+          "terms": [
+            {
+              "condition": "moderner_beta:biome_in_set",
+              "biomes": [
+                "eternalreturn:autumnal_forest"
+              ]
+            },
+            {
+              "condition": "moderner_beta:y_above",
+              "anchor": {
+                "absolute": 97
+              }
+            },
+            {
+              "condition": "moderner_beta:below_surface",
+              "threshold": -8
+            }
+          ]
+        }
+      },
+      {
+        "type": "moderner_beta:predicate",
+        "step_for": "before_surface",
+        "onMatch": {
+          "type": "moderner_beta:replace",
+          "replacements": {
+            "minecraft:cherry_grove": "eternalreturn:cherry_grove_peak"
+          }
+        },
+        "predicate": {
+          "condition": "moderner_beta:all_of",
+          "terms": [
+            {
+              "condition": "moderner_beta:biome_in_set",
+              "biomes": [
+                "minecraft:cherry_grove"
+              ]
+            },
+            {
+              "condition": "moderner_beta:y_above",
+              "anchor": {
+                "absolute": 93
+              }
+            },
+            {
+              "condition": "moderner_beta:below_surface",
+              "threshold": -8
+            }
+          ]
+        }
+      }
+    ]
   },
   "caveBiomeSettings": {
     "moderner_beta:provider": "moderner_beta:none"
@@ -740,9 +1446,19 @@
         "minecraft:deep_lukewarm_ocean": "-1.8;-1.2",
         "minecraft:deep_frozen_ocean": "-1.8;-1.2",
         "minecraft:warm_ocean*deep": "-1.0;-1.2",
+        "eternalreturn:clay_river": "-0.5;-1.2",
+        "eternalreturn:leafy_river": "-0.5;-1.2",
+        "eternalreturn:rocky_river": "-0.5;-1.2",
+        "eternalreturn:sandy_river": "-0.5;-1.2",
         "minecraft:frozen_river": "-0.5;-1.2",
         "minecraft:river": "-0.5;-1.2",
         "eternalreturn:autumnal_forest": "0.1;0.05",
+        "eternalreturn:birch_forest_dry_edge": "0.1;0.05",
+        "eternalreturn:desert_scrub_edge": "0.1;0.05",
+        "eternalreturn:forest_dry_edge": "0.1;0.05",
+        "eternalreturn:jungle_edge": "0.1;0.05",
+        "eternalreturn:swampland_edge": "0.1;0.05",
+        "eternalreturn:taiga_edge": "0.1;0.05",
         "minecraft:badlands": "0.1;0.05",
         "minecraft:badlands*hills": "0.1;0.05",
         "minecraft:birch_forest": "0.1;0.05",
@@ -763,7 +1479,8 @@
         "moderner_beta:early_release_swampland": "0.1;0.05",
         "moderner_beta:early_release_taiga": "0.1;0.05",
         "moderner_beta:late_beta_ice_plains": "0.1;0.05",
-        "moderner_beta:late_beta_plains": "0.1;0.05"
+        "moderner_beta:late_beta_plains": "0.1;0.05",
+        "moderner_beta:late_beta_plains*hills": "0.1;0.05"
       },
       "modifyOnlyPositiveDepth": true,
       "scaleOffset": 0.0,

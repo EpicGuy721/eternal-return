@@ -74,7 +74,8 @@ public class MineshaftAndOceanTests implements FabricGameTest {
 		List<String> wrong = new ArrayList<>();
 		Map<String, Found> nearest = new LinkedHashMap<>();
 		for (Found found : mineshafts) {
-			String expected = SIGNATURE.getOrDefault(found.biome(), "oak");
+			// A biome variant builds with its base's wood (it shares its base's mineshaft_wood tag).
+			String expected = SIGNATURE.getOrDefault(com.eternalreturn.worldgen.variants.BiomeVariants.baseOf(net.minecraft.util.Identifier.of(found.biome())).toString(), "oak");
 			byBiome.merge(found.biome(), 1, Integer::sum);
 			for (StructurePiece piece : found.start().getChildren()) {
 				MineshaftWoods.Wood wood = ((MineshaftWoods.Holder) piece).eternalreturn$wood();

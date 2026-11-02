@@ -7,6 +7,18 @@
     {
       "id": "minecraft:savanna",
       "required": false
+    },
+    {
+      "id": "eternalreturn:savanna_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:jungle_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:jungle_edge",
+      "required": false
     }
   ]
 }

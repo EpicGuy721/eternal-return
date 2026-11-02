@@ -56,6 +56,8 @@ public final class WorldgenFeatures {
 		}
 		// Clutter: boulders (Eternal Return worlds only).
 		com.eternalreturn.worldgen.clutter.Clutter.register();
+		// Biome variants: peaks, edges and rivers (the built-in pack that puts them in their bases' tags).
+		com.eternalreturn.worldgen.variants.BiomeVariants.register();
 		// Biome tree tables: saplings and generated trees by biome (Eternal Return worlds only).
 		com.eternalreturn.worldgen.trees.BiomeTrees.register();
 		// The outer End: islands, megastructures, chorus on the islands (Eternal Return's End only).
@@ -63,12 +65,12 @@ public final class WorldgenFeatures {
 	}
 
 	/**
-	 * Every overworld biome. Moderner Beta's list of the biomes a world can produce misses the deep
+	 * Every overworld biome, the biome variants included. Moderner Beta's list of the biomes a world can produce misses the deep
 	 * cold, deep frozen and deep lukewarm oceans its ocean climate step makes (Eternal Return has them), so
 	 * those are named outright; they are vanilla overworld biomes anyway, so nothing changes elsewhere.
 	 */
 	public static java.util.function.Predicate<net.fabricmc.fabric.api.biome.v1.BiomeSelectionContext> overworld() {
-		return BiomeSelectors.foundInOverworld().or(BiomeSelectors.includeByKey(
+		return BiomeSelectors.foundInOverworld().or(com.eternalreturn.worldgen.variants.BiomeVariants.any()).or(BiomeSelectors.includeByKey(
 				net.minecraft.world.biome.BiomeKeys.DEEP_COLD_OCEAN, net.minecraft.world.biome.BiomeKeys.DEEP_FROZEN_OCEAN,
 				net.minecraft.world.biome.BiomeKeys.DEEP_LUKEWARM_OCEAN));
 	}

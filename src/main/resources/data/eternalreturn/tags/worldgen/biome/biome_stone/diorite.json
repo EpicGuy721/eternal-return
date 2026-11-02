@@ -3,6 +3,14 @@
     {
       "id": "minecraft:birch_forest",
       "required": false
+    },
+    {
+      "id": "eternalreturn:birch_forest_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:birch_forest_dry_edge",
+      "required": false
     }
   ]
 }

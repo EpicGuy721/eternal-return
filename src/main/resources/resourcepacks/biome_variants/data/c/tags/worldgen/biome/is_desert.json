@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "eternalreturn:desert_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:desert_scrub_edge",
+      "required": false
+    }
+  ]
+}
