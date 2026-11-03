@@ -18,11 +18,19 @@
       "required": false
     },
     {
+      "id": "eternalreturn:black_spruce_forest",
+      "required": false
+    },
+    {
       "id": "eternalreturn:cherry_grove_peak",
       "required": false
     },
     {
       "id": "eternalreturn:dark_forest_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:dark_meadow",
       "required": false
     },
     {
@@ -46,6 +54,14 @@
       "required": false
     },
     {
+      "id": "eternalreturn:grand_fir_forest",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:heathland",
+      "required": false
+    },
+    {
       "id": "eternalreturn:ice_plains_peak",
       "required": false
     },
@@ -55,6 +71,14 @@
     },
     {
       "id": "eternalreturn:jungle_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:larch_forest",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:meadow",
       "required": false
     },
     {
@@ -70,6 +94,18 @@
       "required": false
     },
     {
+      "id": "eternalreturn:poplar_grove",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:pumpkin_plains",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:redwood_forest",
+      "required": false
+    },
+    {
       "id": "eternalreturn:savanna_peak",
       "required": false
     },
@@ -79,6 +115,10 @@
     },
     {
       "id": "eternalreturn:taiga_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:webbed_forest",
       "required": false
     }
   ]

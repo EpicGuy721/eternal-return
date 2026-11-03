@@ -1,0 +1,23 @@
+{
+  "biomes": [
+    "eternalreturn:pumpkin_plains"
+  ],
+  "saplings": {
+    "minecraft:oak_sapling": {
+      "trees": [
+        {
+          "weight": 3,
+          "tree": "eternalreturn:tree/bur_oak"
+        },
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/white_oak"
+        },
+        {
+          "weight": 1,
+          "tree": "vanilla"
+        }
+      ]
+    }
+  }
+}

@@ -8,6 +8,10 @@
     {
       "id": "eternalreturn:birch_forest_peak",
       "required": false
+    },
+    {
+      "id": "eternalreturn:poplar_grove",
+      "required": false
     }
   ]
 }

@@ -656,6 +656,155 @@
                   }
                 }
               }
+            },
+            {
+              "type": "minecraft:condition",
+              "if_true": {
+                "type": "minecraft:biome",
+                "biome_is": [
+                  "eternalreturn:heathland"
+                ]
+              },
+              "then_run": {
+                "type": "minecraft:condition",
+                "if_true": {
+                  "type": "minecraft:water",
+                  "offset": -1,
+                  "surface_depth_multiplier": 0,
+                  "add_stone_depth": false
+                },
+                "then_run": {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:stone_depth",
+                    "offset": 0,
+                    "surface_type": "floor",
+                    "add_surface_depth": false,
+                    "secondary_depth_range": 0
+                  },
+                  "then_run": {
+                    "type": "minecraft:sequence",
+                    "sequence": [
+                      {
+                        "type": "minecraft:condition",
+                        "if_true": {
+                          "type": "minecraft:noise_threshold",
+                          "noise": "minecraft:surface",
+                          "min_threshold": 0.25,
+                          "max_threshold": 1000000.0
+                        },
+                        "then_run": {
+                          "type": "minecraft:block",
+                          "result_state": {
+                            "Name": "minecraft:podzol"
+                          }
+                        }
+                      },
+                      {
+                        "type": "minecraft:condition",
+                        "if_true": {
+                          "type": "minecraft:noise_threshold",
+                          "noise": "minecraft:surface",
+                          "min_threshold": -1000000.0,
+                          "max_threshold": -0.45
+                        },
+                        "then_run": {
+                          "type": "minecraft:block",
+                          "result_state": {
+                            "Name": "minecraft:coarse_dirt"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "type": "minecraft:condition",
+              "if_true": {
+                "type": "minecraft:biome",
+                "biome_is": [
+                  "eternalreturn:spooky_swamp"
+                ]
+              },
+              "then_run": {
+                "type": "minecraft:condition",
+                "if_true": {
+                  "type": "minecraft:water",
+                  "offset": -1,
+                  "surface_depth_multiplier": 0,
+                  "add_stone_depth": false
+                },
+                "then_run": {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:stone_depth",
+                    "offset": 0,
+                    "surface_type": "floor",
+                    "add_surface_depth": false,
+                    "secondary_depth_range": 0
+                  },
+                  "then_run": {
+                    "type": "minecraft:condition",
+                    "if_true": {
+                      "type": "minecraft:noise_threshold",
+                      "noise": "minecraft:surface",
+                      "min_threshold": 0.2,
+                      "max_threshold": 1000000.0
+                    },
+                    "then_run": {
+                      "type": "minecraft:block",
+                      "result_state": {
+                        "Name": "minecraft:mud"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "type": "minecraft:condition",
+              "if_true": {
+                "type": "minecraft:biome",
+                "biome_is": [
+                  "eternalreturn:redwood_forest"
+                ]
+              },
+              "then_run": {
+                "type": "minecraft:condition",
+                "if_true": {
+                  "type": "minecraft:water",
+                  "offset": -1,
+                  "surface_depth_multiplier": 0,
+                  "add_stone_depth": false
+                },
+                "then_run": {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:stone_depth",
+                    "offset": 0,
+                    "surface_type": "floor",
+                    "add_surface_depth": false,
+                    "secondary_depth_range": 0
+                  },
+                  "then_run": {
+                    "type": "minecraft:condition",
+                    "if_true": {
+                      "type": "minecraft:noise_threshold",
+                      "noise": "minecraft:surface",
+                      "min_threshold": -0.3,
+                      "max_threshold": 1000000.0
+                    },
+                    "then_run": {
+                      "type": "minecraft:block",
+                      "result_state": {
+                        "Name": "minecraft:podzol"
+                      }
+                    }
+                  }
+                }
+              }
             }
           ]
         }
@@ -2778,7 +2927,12 @@
                   "eternalreturn:extreme_hills_peak",
                   "eternalreturn:autumnal_forest_peak",
                   "eternalreturn:forest_dry_edge",
-                  "eternalreturn:taiga_edge"
+                  "eternalreturn:taiga_edge",
+                  "eternalreturn:heathland",
+                  "eternalreturn:webbed_forest",
+                  "eternalreturn:redwood_forest",
+                  "eternalreturn:larch_forest",
+                  "eternalreturn:grand_fir_forest"
                 ]
               },
               "then_run": {
@@ -2795,7 +2949,8 @@
                 "biome_is": [
                   "minecraft:birch_forest",
                   "eternalreturn:birch_forest_peak",
-                  "eternalreturn:birch_forest_dry_edge"
+                  "eternalreturn:birch_forest_dry_edge",
+                  "eternalreturn:poplar_grove"
                 ]
               },
               "then_run": {
@@ -2868,7 +3023,8 @@
                   "minecraft:frozen_ocean",
                   "minecraft:frozen_river",
                   "minecraft:deep_frozen_ocean",
-                  "eternalreturn:ice_plains_peak"
+                  "eternalreturn:ice_plains_peak",
+                  "eternalreturn:black_spruce_forest"
                 ]
               },
               "then_run": {

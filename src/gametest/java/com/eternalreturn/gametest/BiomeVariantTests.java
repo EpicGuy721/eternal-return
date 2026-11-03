@@ -43,7 +43,7 @@ public class BiomeVariantTests implements FabricGameTest {
 		return biomes.getEntry(RegistryKey.of(RegistryKeys.BIOME, Identifier.of(id))).orElseThrow();
 	}
 
-	private static JsonObject variantTable() {
+	static JsonObject variantTable() {
 		try (var in = BiomeVariantTests.class.getResourceAsStream("/eternalreturn/biome_variants.json")) {
 			return JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonObject();
 		} catch (Exception e) {
@@ -134,7 +134,8 @@ public class BiomeVariantTests implements FabricGameTest {
 			biome(world, id);
 			if (!variant.kind().equals("peak")) {
 				String base = variant.base().toString();
-				ctx.assertTrue(heights.has(id) && heights.get(id).equals(heights.get(base)),
+				// (Neither listed, as the beach and the palm beach: both take their height from Moderner Beta's height tags, which a variant joins.)
+				ctx.assertTrue(java.util.Objects.equals(heights.get(id), heights.get(base)),
 						id + " has height " + heights.get(id) + ", its base " + base + " " + heights.get(base));
 			}
 		}

@@ -2,6 +2,10 @@
   "replace": false,
   "values": [
     {
+      "id": "eternalreturn:bald_cypress_swamp",
+      "required": false
+    },
+    {
       "id": "eternalreturn:clay_river",
       "required": false
     },
@@ -18,11 +22,19 @@
       "required": false
     },
     {
+      "id": "eternalreturn:palm_beach",
+      "required": false
+    },
+    {
       "id": "eternalreturn:rocky_river",
       "required": false
     },
     {
       "id": "eternalreturn:sandy_river",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:spooky_swamp",
       "required": false
     },
     {

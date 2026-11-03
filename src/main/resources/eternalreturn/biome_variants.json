@@ -116,5 +116,61 @@
   "eternalreturn:leafy_river": {
     "base": "minecraft:river",
     "kind": "river"
+  },
+  "eternalreturn:pumpkin_plains": {
+    "base": "moderner_beta:late_beta_plains",
+    "kind": "sub"
+  },
+  "eternalreturn:meadow": {
+    "base": "moderner_beta:late_beta_plains",
+    "kind": "sub"
+  },
+  "eternalreturn:dark_meadow": {
+    "base": "minecraft:dark_forest",
+    "kind": "sub"
+  },
+  "eternalreturn:heathland": {
+    "base": "moderner_beta:early_release_extreme_hills",
+    "kind": "sub",
+    "boulders": 1.5
+  },
+  "eternalreturn:webbed_forest": {
+    "base": "minecraft:forest",
+    "kind": "sub"
+  },
+  "eternalreturn:spooky_swamp": {
+    "base": "moderner_beta:early_release_swampland",
+    "kind": "sub"
+  },
+  "eternalreturn:bald_cypress_swamp": {
+    "base": "moderner_beta:early_release_swampland",
+    "kind": "sub"
+  },
+  "eternalreturn:redwood_forest": {
+    "base": "moderner_beta:early_release_taiga",
+    "kind": "sub",
+    "boulders": 0.4
+  },
+  "eternalreturn:larch_forest": {
+    "base": "moderner_beta:early_release_taiga",
+    "kind": "sub"
+  },
+  "eternalreturn:grand_fir_forest": {
+    "base": "moderner_beta:early_release_extreme_hills",
+    "kind": "sub",
+    "boulders": 1.0
+  },
+  "eternalreturn:poplar_grove": {
+    "base": "minecraft:birch_forest",
+    "kind": "sub"
+  },
+  "eternalreturn:black_spruce_forest": {
+    "base": "moderner_beta:early_release_ice_plains",
+    "kind": "sub",
+    "boulders": 0.3
+  },
+  "eternalreturn:palm_beach": {
+    "base": "minecraft:beach",
+    "kind": "sub"
   }
 }

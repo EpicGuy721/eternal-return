@@ -8,6 +8,10 @@
     {
       "id": "eternalreturn:jungle_peak",
       "required": false
+    },
+    {
+      "id": "eternalreturn:palm_beach",
+      "required": false
     }
   ]
 }

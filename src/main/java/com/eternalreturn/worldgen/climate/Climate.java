@@ -130,9 +130,11 @@ public final class Climate extends Feature<Climate.Config> {
 		for (int[] offset : r > 0 ? new int[][]{{0, 0}, {r, 0}, {-r, 0}, {0, r}, {0, -r}} : new int[][]{{0, 0}}) {
 			int x = pos.getX() + offset[0];
 			int z = pos.getZ() + offset[1];
-			// A world being made can only be read round the chunk it makes: samples past it are left out. (The biome is
-			// read unblurred: vanilla's blur reads round the spot, past what may be read.)
-			if (world instanceof net.minecraft.world.ChunkRegion && !world.isChunkLoaded(x >> 4, z >> 4)) {
+			// A world being made can only be read round the chunk it makes: samples past it are left out. A chunk region
+			// holds more chunks than a feature may read (isChunkLoaded says yes to them, and reading one throws), so the
+			// test is the distance from the chunk being decorated: one chunk at most. (The biome is read unblurred:
+			// vanilla's blur reads round the spot, past what may be read.)
+			if (world instanceof net.minecraft.world.ChunkRegion region && region.getCenterPos().getChebyshevDistance(x >> 4, z >> 4) > 1) {
 				continue;
 			}
 			sum += world.getBiomeForNoiseGen(x >> 2, pos.getY() >> 2, z >> 2).value().getTemperature();

@@ -1,0 +1,43 @@
+{
+  "biomes": [
+    "eternalreturn:meadow"
+  ],
+  "saplings": {
+    "minecraft:oak_sapling": {
+      "trees": [
+        {
+          "weight": 2,
+          "tree": "vanilla"
+        },
+        {
+          "weight": 2,
+          "tree": "eternalreturn:tree/white_oak"
+        },
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/bur_oak"
+        }
+      ]
+    },
+    "eternalreturn:pale_oak_sapling": {
+      "trees": [
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/spreading_pale_oak"
+        },
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/red_spreading_pale_oak"
+        },
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/orange_spreading_pale_oak"
+        },
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/yellow_spreading_pale_oak"
+        }
+      ]
+    }
+  }
+}

@@ -12,6 +12,10 @@
     {
       "id": "eternalreturn:cherry_grove_peak",
       "required": false
+    },
+    {
+      "id": "eternalreturn:poplar_grove",
+      "required": false
     }
   ]
 }

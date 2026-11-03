@@ -6,6 +6,10 @@
       "required": false
     },
     {
+      "id": "eternalreturn:black_spruce_forest",
+      "required": false
+    },
+    {
       "id": "eternalreturn:desert_peak",
       "required": false
     },
@@ -18,11 +22,35 @@
       "required": false
     },
     {
+      "id": "eternalreturn:grand_fir_forest",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:heathland",
+      "required": false
+    },
+    {
       "id": "eternalreturn:ice_plains_peak",
       "required": false
     },
     {
+      "id": "eternalreturn:larch_forest",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:meadow",
+      "required": false
+    },
+    {
       "id": "eternalreturn:plains_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:pumpkin_plains",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:redwood_forest",
       "required": false
     },
     {

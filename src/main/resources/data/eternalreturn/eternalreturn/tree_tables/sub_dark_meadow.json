@@ -1,0 +1,25 @@
+{
+  "biomes": [
+    "eternalreturn:dark_meadow"
+  ],
+  "saplings": {
+    "minecraft:dark_oak_sapling": {
+      "trees": [
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/hornbeam"
+        }
+      ],
+      "mega_trees": [
+        {
+          "weight": 2,
+          "tree": "eternalreturn:tree/ancient_dark_oak"
+        },
+        {
+          "weight": 1,
+          "tree": "vanilla"
+        }
+      ]
+    }
+  }
+}

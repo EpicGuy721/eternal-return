@@ -328,7 +328,9 @@ public final class BiomeTrees {
 			return null;
 		}
 		TreeFeatureConfig config = context.getConfig();
-		if (config.foliagePlacer instanceof BushFoliagePlacer) {
+		// Bushes, and trees without leaves (the spooky swamp's dead trees), are left as they are. (Its own random, so the chunk's draws don't move.)
+		if (config.foliagePlacer instanceof BushFoliagePlacer
+				|| config.foliageProvider.get(net.minecraft.util.math.random.Random.create(0L), BlockPos.ORIGIN).isAir()) {
 			return null;
 		}
 		Identifier sapling = saplingOfLog.get(config.trunkProvider.get(context.getRandom(), context.getOrigin()).getBlock());

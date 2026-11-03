@@ -4,6 +4,14 @@
     {
       "id": "eternalreturn:extreme_hills_peak",
       "required": false
+    },
+    {
+      "id": "eternalreturn:grand_fir_forest",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:heathland",
+      "required": false
     }
   ]
 }

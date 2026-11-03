@@ -6,6 +6,10 @@
       "required": false
     },
     {
+      "id": "eternalreturn:dark_meadow",
+      "required": false
+    },
+    {
       "id": "eternalreturn:jungle_edge",
       "required": false
     },

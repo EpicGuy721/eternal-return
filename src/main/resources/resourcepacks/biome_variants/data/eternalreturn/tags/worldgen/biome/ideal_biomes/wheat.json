@@ -2,7 +2,15 @@
   "replace": false,
   "values": [
     {
+      "id": "eternalreturn:meadow",
+      "required": false
+    },
+    {
       "id": "eternalreturn:plains_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:pumpkin_plains",
       "required": false
     },
     {

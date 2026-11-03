@@ -11,6 +11,10 @@
     {
       "id": "eternalreturn:birch_forest_dry_edge",
       "required": false
+    },
+    {
+      "id": "eternalreturn:poplar_grove",
+      "required": false
     }
   ]
 }

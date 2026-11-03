@@ -10,6 +10,10 @@
       "required": false
     },
     {
+      "id": "eternalreturn:dark_meadow",
+      "required": false
+    },
+    {
       "id": "eternalreturn:forest_dry_edge",
       "required": false
     },
@@ -18,7 +22,15 @@
       "required": false
     },
     {
+      "id": "eternalreturn:larch_forest",
+      "required": false
+    },
+    {
       "id": "eternalreturn:old_growth_spruce_taiga_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:redwood_forest",
       "required": false
     },
     {
@@ -27,6 +39,10 @@
     },
     {
       "id": "eternalreturn:taiga_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:webbed_forest",
       "required": false
     }
   ]

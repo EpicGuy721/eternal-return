@@ -1,0 +1,19 @@
+{
+  "biomes": [
+    "eternalreturn:bald_cypress_swamp"
+  ],
+  "saplings": {
+    "minecraft:oak_sapling": {
+      "trees": [
+        {
+          "weight": 6,
+          "tree": "eternalreturn:tree/bald_cypress"
+        },
+        {
+          "weight": 1,
+          "template": "eternalreturn:tree/willow"
+        }
+      ]
+    }
+  }
+}

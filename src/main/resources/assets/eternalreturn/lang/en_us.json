@@ -533,5 +533,18 @@
 	"biome.eternalreturn.sandy_river": "Sandy River",
 	"biome.eternalreturn.rocky_river": "Rocky River",
 	"biome.eternalreturn.clay_river": "Clay River",
-	"biome.eternalreturn.leafy_river": "Leafy River"
+	"biome.eternalreturn.leafy_river": "Leafy River",
+	"biome.eternalreturn.pumpkin_plains": "Pumpkin Plains",
+	"biome.eternalreturn.meadow": "Meadow",
+	"biome.eternalreturn.dark_meadow": "Dark Meadow",
+	"biome.eternalreturn.heathland": "Heathland",
+	"biome.eternalreturn.webbed_forest": "Webbed Forest",
+	"biome.eternalreturn.spooky_swamp": "Spooky Swamp",
+	"biome.eternalreturn.bald_cypress_swamp": "Bald Cypress Swamp",
+	"biome.eternalreturn.redwood_forest": "Redwood Forest",
+	"biome.eternalreturn.larch_forest": "Larch Forest",
+	"biome.eternalreturn.grand_fir_forest": "Grand Fir Forest",
+	"biome.eternalreturn.poplar_grove": "Poplar Grove",
+	"biome.eternalreturn.black_spruce_forest": "Black Spruce Forest",
+	"biome.eternalreturn.palm_beach": "Palm Beach"
 }

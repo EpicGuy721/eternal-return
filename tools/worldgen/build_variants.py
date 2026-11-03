@@ -116,6 +116,20 @@ def variant_biome(vid, base, spec):
     for step, added in spec.get('add_features', {}).items():
         features[STEPS.index(step)] += [own_copy(f) for f in added]
     biome['features'] = features
+    # Sub-biomes: mob spawns changed by type (a weight, or weight and group size; weight 0 removes the mob).
+    for group, changes in spec.get('spawns', {}).items():
+        spawners = biome.setdefault('spawners', {}).setdefault(group, [])
+        for mob, change in changes.items():
+            change = change if isinstance(change, dict) else {'weight': change}
+            entries = [e for e in spawners if e['type'] == mob]
+            if not entries:
+                if change['weight'] > 0:
+                    spawners.append({'type': mob, 'weight': change['weight'], 'minCount': change.get('minCount', 1), 'maxCount': change.get('maxCount', 4)})
+                continue
+            # A mob listed twice (the swampland's slimes) becomes one line with the new weight.
+            first = entries[0]
+            first.update(change)
+            spawners[:] = [e for e in spawners if e['type'] != mob or (e is first and change['weight'] > 0)]
     write_json(os.path.join(RES, 'data', NS, 'worldgen', 'biome', vid + '.json'), {'fabric:load_conditions': LOAD_IF_MB, **biome})
 
 
@@ -128,7 +142,83 @@ def all_variants():
         out[vid] = (spec['base'], 'edge', spec)
     for vid, spec in TABLE['rivers'].items():
         out[vid] = ('minecraft:river', 'river', spec)
+    for vid, spec in TABLE.get('subs', {}).items():
+        if vid.startswith('_'):
+            continue
+        out[vid] = (spec['base'], 'sub', spec)
     return out
+
+
+def write_sub_features():
+    """The sub-biomes' own features (variants.json "features"): configured and placed features under sub/, so each can be
+    tuned in the table. A placed feature names its configured feature ("feature": an id, or the name of one here)."""
+    for old in glob.glob(os.path.join(RES, 'data', NS, 'worldgen', '*_feature', 'sub', '*.json')):
+        os.remove(old)
+    for name, spec in TABLE.get('features', {}).items():
+        if name.startswith('_'):
+            continue
+        feature = spec['feature']
+        if isinstance(feature, dict):
+            write_json(os.path.join(RES, 'data', NS, 'worldgen', 'configured_feature', 'sub', name + '.json'), feature)
+            feature = f'{NS}:sub/{name}'
+        write_json(os.path.join(RES, 'data', NS, 'worldgen', 'placed_feature', 'sub', name + '.json'),
+                   {'feature': feature, 'placement': placement(spec['placement'])})
+
+
+def how_many(n):
+    """A count per chunk: a whole number, or {"chance": k} for one in k chunks."""
+    return [{'type': 'minecraft:rarity_filter', 'chance': n['chance']}] if isinstance(n, dict) else [{'type': 'minecraft:count', 'count': n}]
+
+
+def placement(p):
+    """A placement list, or a shorthand: {"trees": n, "water": depth, "on": block} (trees on the ground, or in water up to
+    that depth, on that block if given), {"patch": n, "heightmap": ...} (a patch of plants at the surface), or
+    {"scatter": n, "under": [lowest, highest], "near": [block tags]} (spots in the canopy and among the trunks: from the
+    top of the leaves down, in air next to one of those blocks)."""
+    if isinstance(p, list):
+        return p
+    if 'trees' in p:
+        out = how_many(p['trees']) + [{'type': 'minecraft:in_square'},
+                                      {'type': 'minecraft:surface_water_depth_filter', 'max_water_depth': p.get('water', 0)},
+                                      {'type': 'minecraft:heightmap', 'heightmap': 'OCEAN_FLOOR'}]
+        if 'on' in p:
+            out.append({'type': 'minecraft:block_predicate_filter', 'predicate': {
+                'type': 'minecraft:matching_blocks', 'blocks': p['on'], 'offset': [0, -1, 0]}})
+        elif p.get('water', 0) == 0 and 'sapling' in p:
+            out.append({'type': 'minecraft:block_predicate_filter', 'predicate': {
+                'type': 'minecraft:would_survive', 'state': {'Name': p['sapling'], 'Properties': {'stage': '0'}}}})
+        return out + [{'type': 'minecraft:biome'}]
+    if 'patch' in p:
+        return how_many(p['patch']) + [{'type': 'minecraft:in_square'},
+                                       {'type': 'minecraft:heightmap', 'heightmap': p.get('heightmap', 'WORLD_SURFACE_WG')},
+                                       {'type': 'minecraft:biome'}]
+    if 'scatter' in p:
+        lowest, highest = p['under']
+        near = {'type': 'minecraft:any_of', 'predicates': [
+            {'type': 'minecraft:matching_block_tag', 'tag': tag, 'offset': offset}
+            for tag in p['near'] for offset in ([0, 1, 0], [1, 0, 0], [-1, 0, 0], [0, 0, 1], [0, 0, -1])]}
+        return how_many(p['scatter']) + [
+            {'type': 'minecraft:in_square'}, {'type': 'minecraft:heightmap', 'heightmap': 'MOTION_BLOCKING'},
+            {'type': 'minecraft:random_offset', 'xz_spread': 0,
+             'y_spread': {'type': 'minecraft:uniform', 'min_inclusive': -highest, 'max_inclusive': -lowest}},
+            {'type': 'minecraft:block_predicate_filter', 'predicate': {'type': 'minecraft:all_of', 'predicates': [
+                {'type': 'minecraft:matching_blocks', 'blocks': 'minecraft:air'}, near]}},
+            {'type': 'minecraft:biome'}]
+    raise ValueError(p)
+
+
+def check_feature_order(variants):
+    """The game refuses features listed in two orders by two biomes ("Feature order cycle"); the added ones are checked here."""
+    after = {}
+    for vid, (base, kind, spec) in variants.items():
+        for added in spec.get('add_features', {}).values():
+            for i, a in enumerate(added):
+                for b in added[i + 1:]:
+                    after.setdefault(a, set()).add(b)
+    for a, bs in after.items():
+        for b in bs:
+            if a in after.get(b, set()):
+                raise SystemExit(f'feature order cycle between {a} and {b}: list them in the same order in every biome')
 
 
 def tag_files():
@@ -150,6 +240,8 @@ def tag_files():
 
 def main():
     variants = all_variants()
+    check_feature_order(variants)
+    write_sub_features()
     for vid, (base, kind, spec) in variants.items():
         variant_biome(vid, base, spec)
     # The desert scrub's thorn bushes: a couple of tries a chunk, where an acacia sapling could grow (coarse dirt).
@@ -190,7 +282,8 @@ def main():
         lang[f'biome.{NS}.{vid}'] = spec['name']
     write_json(lang_file, lang, indent='\t')
     print(f'{len(variants)} variants ({sum(1 for v in variants.values() if v[1] == "peak")} peaks, '
-          f'{sum(1 for v in variants.values() if v[1] == "edge")} edges, {sum(1 for v in variants.values() if v[1] == "river")} rivers), '
+          f'{sum(1 for v in variants.values() if v[1] == "edge")} edges, {sum(1 for v in variants.values() if v[1] == "river")} rivers, '
+          f'{sum(1 for v in variants.values() if v[1] == "sub")} sub-biomes), '
           f'{count} tags extended')
 
 

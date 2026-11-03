@@ -18,6 +18,18 @@
       "required": false
     },
     {
+      "id": "eternalreturn:grand_fir_forest",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:heathland",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:larch_forest",
+      "required": false
+    },
+    {
       "id": "eternalreturn:old_growth_pine_taiga_peak",
       "required": false
     },
@@ -26,11 +38,19 @@
       "required": false
     },
     {
+      "id": "eternalreturn:redwood_forest",
+      "required": false
+    },
+    {
       "id": "eternalreturn:taiga_edge",
       "required": false
     },
     {
       "id": "eternalreturn:taiga_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:webbed_forest",
       "required": false
     }
   ]

@@ -14,11 +14,23 @@
       "required": false
     },
     {
+      "id": "eternalreturn:dark_meadow",
+      "required": false
+    },
+    {
       "id": "eternalreturn:forest_dry_edge",
       "required": false
     },
     {
       "id": "eternalreturn:forest_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:poplar_grove",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:webbed_forest",
       "required": false
     }
   ]

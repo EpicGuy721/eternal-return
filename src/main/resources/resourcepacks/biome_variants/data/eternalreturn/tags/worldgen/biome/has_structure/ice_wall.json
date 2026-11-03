@@ -2,7 +2,19 @@
   "replace": false,
   "values": [
     {
+      "id": "eternalreturn:black_spruce_forest",
+      "required": false
+    },
+    {
       "id": "eternalreturn:ice_plains_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:larch_forest",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:redwood_forest",
       "required": false
     },
     {

@@ -232,8 +232,105 @@ preset['biomeSettings']['moderner_beta:biome_injection_rules'] = [
          {'condition': 'moderner_beta:y_above', 'anchor': {'absolute': spec['y']}},
          {'condition': 'moderner_beta:below_surface', 'threshold': -8}]}}
     for vid, spec in VARIANTS['peaks'].items()]
-VARIANT_BASES = {f'{NS}:{vid}': spec['base'] for kind in ('peaks', 'edges') for vid, spec in VARIANTS[kind].items()}
+VARIANT_BASES = {f'{NS}:{vid}': spec['base'] for kind in ('peaks', 'edges', 'subs') for vid, spec in VARIANTS[kind].items() if not vid.startswith('_')}
 VARIANT_BASES.update({f'{NS}:{vid}': 'minecraft:river' for vid in VARIANTS['rivers']})
+
+# ---------------------------------------------------------------- sub-biomes (worldgen expansion phase 6)
+# A sub-biome takes over part of its parent's land: right after the 1.6.4 biome pool is laid out (cells of 256 blocks),
+# a replacement step gives each cell of the parent a pick from a pool of its sub-biomes, with "nothing" (Moderner Beta's
+# the_void*null, which keeps the parent) for the rest, so "share": 4 turns about one parent cell in four. The pool draws
+# from its own seed per cell, so the parents, and every coordinate in them, stay where they were. Shore sub-biomes
+# ("shore_of") replace the beach where one of those lands meets the sea. In the later layers a sub-biome acts as its
+# parent (beaches or none, swamp lakes, frozen seas, rivers, its parent's edge, and as a neighbour for edges), except that
+# it gets no hills, old growth or peak.
+SUBS = {f'{NS}:{sid}': spec for sid, spec in VARIANTS['subs'].items() if not sid.startswith('_')}
+LAND_SUBS = {sid: spec for sid, spec in SUBS.items() if 'share' in spec}
+SHORE_SUBS = {sid: spec for sid, spec in SUBS.items() if 'shore_of' in spec}
+subs_of = {}
+for sid, spec in SUBS.items():
+    subs_of.setdefault(spec['base'], []).append(sid)
+pools = []
+replacements = {}
+for parent_index, parent in enumerate(sorted({spec['base'] for spec in LAND_SUBS.values()})):
+    mine = {sid: spec for sid, spec in LAND_SUBS.items() if spec['base'] == parent}
+    whole = 1
+    for spec in mine.values():
+        whole = whole * spec['share'] // __import__('math').gcd(whole, spec['share'])
+    targets = [{'data': {'type': 'biome', 'value': sid}, 'weight': whole // spec['share']} for sid, spec in mine.items()]
+    rest = whole - sum(t['weight'] for t in targets)
+    if rest > 0:
+        targets.append({'data': {'type': 'biome', 'value': 'minecraft:the_void*null'}, 'weight': rest})
+    pool_id = 'sub_' + parent.split(':')[1]
+    pools.append({'type': 'moderner_beta:weighted_pool', 'id': pool_id, 'seed': 3001 + parent_index, 'targets': targets})
+    replacements[parent] = {'type': 'layer', 'value': pool_id}
+if replacements:
+    laid_out = next(i for i, s in enumerate(pipeline) if s['type'] == 'moderner_beta:biome_replacement'
+                    and s.get('targets', {}).get('minecraft:plains', {}).get('value') == 'biome_pool')
+    pipeline[laid_out + 1:laid_out + 1] = pools + [
+        {'type': 'moderner_beta:biome_replacement', 'parent': 'land', 'id': 'land', 'seed': 0, 'targets': replacements}]
+    after_subs = laid_out + len(pools) + 2
+
+
+def with_subs(biomes):
+    """These biome ids with the sub-biomes of each (height variants such as '*hills' count as their biome)."""
+    out = list(biomes)
+    for b in biomes:
+        for sid in subs_of.get(b.lstrip('~').split('*')[0], []):
+            if sid not in out and sid not in SHORE_SUBS:
+                out.append(sid)
+    return out
+
+
+def subs_act_as_parent(node, in_neighbour=False):
+    if isinstance(node, dict):
+        for key, value in list(node.items()):
+            if key == 'neighborPredicate':
+                subs_act_as_parent(value, True)
+            elif key == 'biomes' and isinstance(value, list) and in_neighbour:
+                node[key] = with_subs(value)
+            elif key in ('biomeSpecificRivers', 'biomeSpecificOceans') and isinstance(value, dict):
+                for b, target in list(value.items()):
+                    for sid in with_subs([b])[1:]:
+                        value.setdefault(sid, target)
+            else:
+                subs_act_as_parent(value, in_neighbour)
+    elif isinstance(node, list):
+        for value in node:
+            subs_act_as_parent(value, in_neighbour)
+
+
+if SUBS:
+    for s in pipeline[after_subs if replacements else 0:]:
+        if s['type'] == 'moderner_beta:predicate_overlay':
+            for target in s['targets']:
+                subs_act_as_parent(target['predicate'].get('terms', []) if target['predicate'].get('condition') == 'moderner_beta:all_of' else [])
+                terms = target['predicate'].get('terms', [])
+                # Edges: where a sub-biome meets one of its parent's edge neighbours, it turns into the parent's edge, as the parent does.
+                if target.get('result', '').removeprefix(f'{NS}:') in VARIANTS['edges'] and terms and terms[0].get('condition') == 'moderner_beta:in_set':
+                    terms[0]['biomes'] = with_subs(terms[0]['biomes'])
+                # The beach rule leaves out some lands (the extreme hills, swampland): their sub-biomes too.
+                for term in terms:
+                    if term.get('condition') == 'moderner_beta:inverted' and 'biomes' in term['term'] and target.get('result') == 'minecraft:beach':
+                        term['term']['biomes'] = with_subs(term['term']['biomes'])
+            # Swamp and jungle lakes: the parent's single match, for its sub-biomes too.
+            extra = []
+            for target in s['targets']:
+                pred = target['predicate']
+                if pred.get('condition') == 'moderner_beta:single_match' and target['type'] == 'layer':
+                    for sid in with_subs([pred['biome']])[1:]:
+                        extra.append({**target, 'predicate': {'biome': sid, 'condition': 'moderner_beta:single_match'}})
+            s['targets'] += extra
+        elif s['type'] in ('moderner_beta:mix_river', 'moderner_beta:add_land'):
+            subs_act_as_parent(s)
+    # Shore sub-biomes: before the beach rule, a cell of one of their lands next to the sea becomes the shore sub-biome.
+    shore_step = next(s for s in pipeline if s['type'] == 'moderner_beta:predicate_overlay'
+                      and any(t.get('result') == 'minecraft:beach' for t in s['targets']))
+    beach_at = next(i for i, t in enumerate(shore_step['targets']) if t.get('result') == 'minecraft:beach')
+    sea = next(t for t in shore_step['targets'][beach_at]['predicate']['terms'] if t.get('condition') == 'moderner_beta:neighbor_match')
+    shore_step['targets'][beach_at:beach_at] = [
+        {'type': 'biome', 'result': sid, 'predicate': {'condition': 'moderner_beta:all_of', 'terms': [
+            {'biomes': with_subs(with_height_variants(spec['shore_of'])), 'condition': 'moderner_beta:in_set'}, copy.deepcopy(sea)]}}
+        for sid, spec in SHORE_SUBS.items()]
 
 # ---------------------------------------------------------------- caves: no modern cave biomes
 preset['caveBiomeSettings'] = {'moderner_beta:provider': 'moderner_beta:none'}
@@ -312,7 +409,7 @@ def pipeline_biomes(node, found):
 # islets out of the sea and bars across rivers. Beaches and mushroom island shores (the coast) keep their own.
 WATER = {b for b in forced['heightOverrides'] if 'ocean' in b} | {'minecraft:river', 'minecraft:frozen_river'}
 WATER |= {f'{NS}:{vid}' for vid in VARIANTS['rivers']}
-COAST = {'minecraft:beach', 'minecraft:snowy_beach', 'minecraft:stony_shore', 'minecraft:mushroom_fields*shore'}
+COAST = {'minecraft:beach', 'minecraft:snowy_beach', 'minecraft:stony_shore', 'minecraft:mushroom_fields*shore'} | set(SHORE_SUBS)
 if KNOBS['water_scale'] is not None:
     for biome in sorted(WATER):
         depth = forced['heightOverrides'].get(biome, '-0.5;0.0').split(';')[0]
@@ -404,11 +501,20 @@ SURFACES = {
         when(SHALLOW, block_rule('minecraft:sand')),
         when({'type': 'minecraft:stone_depth', 'offset': 0, 'surface_type': 'floor', 'add_surface_depth': True, 'secondary_depth_range': 6},
              block_rule('minecraft:sandstone'))]},
+    # Heathland: podzol and coarse dirt in patches between the grass.
+    'heath': when(DRY, when(TOP, {'type': 'minecraft:sequence', 'sequence': [
+        when(patches(0.25), block_rule('minecraft:podzol')),
+        when({'type': 'minecraft:noise_threshold', 'noise': 'minecraft:surface', 'min_threshold': -1.0e6, 'max_threshold': -0.45},
+             block_rule('minecraft:coarse_dirt'))]})),
+    # Redwood forest: podzol over most of the floor.
+    'podzol_floor': when(DRY, when(TOP, when(patches(-0.3), block_rule('minecraft:podzol')))),
+    # Spooky swamp: mud in patches on the dry ground.
+    'mud_patches': when(DRY, when(TOP, when(patches(0.2), block_rule('minecraft:mud')))),
 }
 variant_surfaces = []
-for kind in ('edges', 'rivers'):
+for kind in ('edges', 'rivers', 'subs'):
     for vid, spec in VARIANTS[kind].items():
-        if 'surface' in spec:
+        if not vid.startswith('_') and 'surface' in spec:
             variant_surfaces.append(when({'type': 'minecraft:biome', 'biome_is': [f'{NS}:{vid}']}, SURFACES[spec['surface']]))
 noise['surface_rule']['sequence'][0:0] = [when({'type': 'minecraft:above_preliminary_surface'},
                                                {'type': 'minecraft:sequence', 'sequence': variant_surfaces})]

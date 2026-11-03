@@ -2,6 +2,14 @@
   "replace": false,
   "values": [
     {
+      "id": "eternalreturn:bald_cypress_swamp",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:spooky_swamp",
+      "required": false
+    },
+    {
       "id": "eternalreturn:swampland_edge",
       "required": false
     }

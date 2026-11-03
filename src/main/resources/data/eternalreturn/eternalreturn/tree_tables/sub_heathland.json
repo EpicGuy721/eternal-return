@@ -1,0 +1,19 @@
+{
+  "biomes": [
+    "eternalreturn:heathland"
+  ],
+  "saplings": {
+    "minecraft:oak_sapling": {
+      "trees": [
+        {
+          "weight": 4,
+          "tree": "eternalreturn:tree/shrub_oak"
+        },
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/scrub_oak"
+        }
+      ]
+    }
+  }
+}

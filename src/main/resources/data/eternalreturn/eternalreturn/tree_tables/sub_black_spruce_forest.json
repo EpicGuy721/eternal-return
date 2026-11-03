@@ -1,0 +1,19 @@
+{
+  "biomes": [
+    "eternalreturn:black_spruce_forest"
+  ],
+  "saplings": {
+    "minecraft:spruce_sapling": {
+      "trees": [
+        {
+          "weight": 5,
+          "tree": "eternalreturn:tree/black_spruce"
+        },
+        {
+          "weight": 1,
+          "tree": "vanilla"
+        }
+      ]
+    }
+  }
+}

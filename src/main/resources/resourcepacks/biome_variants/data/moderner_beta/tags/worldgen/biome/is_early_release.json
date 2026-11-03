@@ -2,11 +2,39 @@
   "replace": false,
   "values": [
     {
+      "id": "eternalreturn:bald_cypress_swamp",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:black_spruce_forest",
+      "required": false
+    },
+    {
       "id": "eternalreturn:extreme_hills_peak",
       "required": false
     },
     {
+      "id": "eternalreturn:grand_fir_forest",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:heathland",
+      "required": false
+    },
+    {
       "id": "eternalreturn:ice_plains_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:larch_forest",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:redwood_forest",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:spooky_swamp",
       "required": false
     },
     {

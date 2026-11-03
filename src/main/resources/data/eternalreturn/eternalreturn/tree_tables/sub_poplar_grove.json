@@ -1,0 +1,39 @@
+{
+  "biomes": [
+    "eternalreturn:poplar_grove"
+  ],
+  "saplings": {
+    "minecraft:birch_sapling": {
+      "trees": [
+        {
+          "weight": 4,
+          "tree": "eternalreturn:tree/poplar"
+        },
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/weeping_birch"
+        }
+      ]
+    },
+    "eternalreturn:pale_oak_sapling": {
+      "trees": [
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/pale_aspen"
+        },
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/red_pale_aspen"
+        },
+        {
+          "weight": 2,
+          "tree": "eternalreturn:tree/orange_pale_aspen"
+        },
+        {
+          "weight": 2,
+          "tree": "eternalreturn:tree/yellow_pale_aspen"
+        }
+      ]
+    }
+  }
+}

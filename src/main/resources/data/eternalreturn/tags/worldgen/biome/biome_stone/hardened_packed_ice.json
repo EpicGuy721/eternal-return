@@ -27,6 +27,10 @@
     {
       "id": "eternalreturn:ice_plains_peak",
       "required": false
+    },
+    {
+      "id": "eternalreturn:black_spruce_forest",
+      "required": false
     }
   ]
 }

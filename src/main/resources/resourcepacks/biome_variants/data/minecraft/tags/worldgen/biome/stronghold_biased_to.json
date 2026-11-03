@@ -22,6 +22,10 @@
       "required": false
     },
     {
+      "id": "eternalreturn:dark_meadow",
+      "required": false
+    },
+    {
       "id": "eternalreturn:desert_peak",
       "required": false
     },
@@ -54,7 +58,15 @@
       "required": false
     },
     {
+      "id": "eternalreturn:poplar_grove",
+      "required": false
+    },
+    {
       "id": "eternalreturn:savanna_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:webbed_forest",
       "required": false
     }
   ]

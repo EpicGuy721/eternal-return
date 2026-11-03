@@ -18,7 +18,23 @@
       "required": false
     },
     {
+      "id": "eternalreturn:larch_forest",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:meadow",
+      "required": false
+    },
+    {
       "id": "eternalreturn:plains_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:pumpkin_plains",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:redwood_forest",
       "required": false
     },
     {
@@ -27,6 +43,10 @@
     },
     {
       "id": "eternalreturn:taiga_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:webbed_forest",
       "required": false
     }
   ]

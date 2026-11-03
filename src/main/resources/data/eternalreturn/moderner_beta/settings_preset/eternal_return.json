@@ -279,6 +279,242 @@
           }
         },
         {
+          "type": "moderner_beta:weighted_pool",
+          "id": "sub_birch_forest",
+          "seed": 3001,
+          "targets": [
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:poplar_grove"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "minecraft:the_void*null"
+              },
+              "weight": 3
+            }
+          ]
+        },
+        {
+          "type": "moderner_beta:weighted_pool",
+          "id": "sub_dark_forest",
+          "seed": 3002,
+          "targets": [
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:dark_meadow"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "minecraft:the_void*null"
+              },
+              "weight": 3
+            }
+          ]
+        },
+        {
+          "type": "moderner_beta:weighted_pool",
+          "id": "sub_forest",
+          "seed": 3003,
+          "targets": [
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:webbed_forest"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "minecraft:the_void*null"
+              },
+              "weight": 7
+            }
+          ]
+        },
+        {
+          "type": "moderner_beta:weighted_pool",
+          "id": "sub_early_release_extreme_hills",
+          "seed": 3004,
+          "targets": [
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:heathland"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:grand_fir_forest"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "minecraft:the_void*null"
+              },
+              "weight": 2
+            }
+          ]
+        },
+        {
+          "type": "moderner_beta:weighted_pool",
+          "id": "sub_early_release_ice_plains",
+          "seed": 3005,
+          "targets": [
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:black_spruce_forest"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "minecraft:the_void*null"
+              },
+              "weight": 3
+            }
+          ]
+        },
+        {
+          "type": "moderner_beta:weighted_pool",
+          "id": "sub_early_release_swampland",
+          "seed": 3006,
+          "targets": [
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:spooky_swamp"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:bald_cypress_swamp"
+              },
+              "weight": 2
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "minecraft:the_void*null"
+              },
+              "weight": 5
+            }
+          ]
+        },
+        {
+          "type": "moderner_beta:weighted_pool",
+          "id": "sub_early_release_taiga",
+          "seed": 3007,
+          "targets": [
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:redwood_forest"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:larch_forest"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "minecraft:the_void*null"
+              },
+              "weight": 2
+            }
+          ]
+        },
+        {
+          "type": "moderner_beta:weighted_pool",
+          "id": "sub_late_beta_plains",
+          "seed": 3008,
+          "targets": [
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:pumpkin_plains"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:meadow"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "minecraft:the_void*null"
+              },
+              "weight": 2
+            }
+          ]
+        },
+        {
+          "type": "moderner_beta:biome_replacement",
+          "parent": "land",
+          "id": "land",
+          "seed": 0,
+          "targets": {
+            "minecraft:birch_forest": {
+              "type": "layer",
+              "value": "sub_birch_forest"
+            },
+            "minecraft:dark_forest": {
+              "type": "layer",
+              "value": "sub_dark_forest"
+            },
+            "minecraft:forest": {
+              "type": "layer",
+              "value": "sub_forest"
+            },
+            "moderner_beta:early_release_extreme_hills": {
+              "type": "layer",
+              "value": "sub_early_release_extreme_hills"
+            },
+            "moderner_beta:early_release_ice_plains": {
+              "type": "layer",
+              "value": "sub_early_release_ice_plains"
+            },
+            "moderner_beta:early_release_swampland": {
+              "type": "layer",
+              "value": "sub_early_release_swampland"
+            },
+            "moderner_beta:early_release_taiga": {
+              "type": "layer",
+              "value": "sub_early_release_taiga"
+            },
+            "moderner_beta:late_beta_plains": {
+              "type": "layer",
+              "value": "sub_late_beta_plains"
+            }
+          }
+        },
+        {
           "type": "moderner_beta:stacked_zoom",
           "parent": "land",
           "id": "land",
@@ -444,7 +680,8 @@
           "parent": "land_0",
           "betaShape": false,
           "biomeSpecificOceans": {
-            "moderner_beta:early_release_ice_plains": "minecraft:frozen_ocean"
+            "moderner_beta:early_release_ice_plains": "minecraft:frozen_ocean",
+            "eternalreturn:black_spruce_forest": "minecraft:frozen_ocean"
           },
           "id": "land_0",
           "land": "moderner_beta:late_beta_plains",
@@ -468,7 +705,8 @@
                   {
                     "biomes": [
                       "minecraft:forest",
-                      "minecraft:forest*hills"
+                      "minecraft:forest*hills",
+                      "eternalreturn:webbed_forest"
                     ],
                     "condition": "moderner_beta:in_set"
                   },
@@ -500,7 +738,8 @@
                   {
                     "biomes": [
                       "minecraft:birch_forest",
-                      "minecraft:birch_forest*hills"
+                      "minecraft:birch_forest*hills",
+                      "eternalreturn:poplar_grove"
                     ],
                     "condition": "moderner_beta:in_set"
                   },
@@ -532,7 +771,9 @@
                   {
                     "biomes": [
                       "moderner_beta:early_release_taiga",
-                      "moderner_beta:early_release_taiga*hills"
+                      "moderner_beta:early_release_taiga*hills",
+                      "eternalreturn:redwood_forest",
+                      "eternalreturn:larch_forest"
                     ],
                     "condition": "moderner_beta:in_set"
                   },
@@ -543,7 +784,8 @@
                       "biomes": [
                         "moderner_beta:early_release_ice_plains",
                         "moderner_beta:early_release_ice_plains*hills",
-                        "moderner_beta:late_beta_ice_plains"
+                        "moderner_beta:late_beta_ice_plains",
+                        "eternalreturn:black_spruce_forest"
                       ],
                       "condition": "moderner_beta:in_set"
                     },
@@ -637,7 +879,9 @@
                 "terms": [
                   {
                     "biomes": [
-                      "moderner_beta:early_release_swampland"
+                      "moderner_beta:early_release_swampland",
+                      "eternalreturn:spooky_swamp",
+                      "eternalreturn:bald_cypress_swamp"
                     ],
                     "condition": "moderner_beta:in_set"
                   },
@@ -650,7 +894,10 @@
                         "minecraft:forest*hills",
                         "minecraft:birch_forest",
                         "minecraft:birch_forest*hills",
-                        "minecraft:dark_forest"
+                        "minecraft:dark_forest",
+                        "eternalreturn:webbed_forest",
+                        "eternalreturn:poplar_grove",
+                        "eternalreturn:dark_meadow"
                       ],
                       "condition": "moderner_beta:in_set"
                     },
@@ -700,6 +947,40 @@
             },
             {
               "type": "biome",
+              "result": "eternalreturn:palm_beach",
+              "predicate": {
+                "condition": "moderner_beta:all_of",
+                "terms": [
+                  {
+                    "biomes": [
+                      "minecraft:jungle",
+                      "minecraft:jungle*hills",
+                      "eternalreturn:jungle_edge",
+                      "minecraft:savanna",
+                      "minecraft:savanna*hills",
+                      "minecraft:desert",
+                      "minecraft:desert*hills",
+                      "eternalreturn:desert_scrub_edge"
+                    ],
+                    "condition": "moderner_beta:in_set"
+                  },
+                  {
+                    "condition": "moderner_beta:neighbor_match",
+                    "diagonal": false,
+                    "neighborPredicate": {
+                      "biomes": [
+                        "minecraft:ocean",
+                        "minecraft:deep_ocean"
+                      ],
+                      "condition": "moderner_beta:in_set"
+                    },
+                    "requiredCount": 1
+                  }
+                ]
+              }
+            },
+            {
+              "type": "biome",
               "predicate": {
                 "condition": "moderner_beta:all_of",
                 "terms": [
@@ -711,7 +992,11 @@
                         "minecraft:river",
                         "minecraft:ocean",
                         "moderner_beta:early_release_swampland",
-                        "minecraft:deep_ocean"
+                        "minecraft:deep_ocean",
+                        "eternalreturn:heathland",
+                        "eternalreturn:grand_fir_forest",
+                        "eternalreturn:spooky_swamp",
+                        "eternalreturn:bald_cypress_swamp"
                       ],
                       "condition": "moderner_beta:in_set"
                     }
@@ -815,6 +1100,22 @@
                 "condition": "moderner_beta:single_match"
               },
               "result": "jungle_lakes"
+            },
+            {
+              "type": "layer",
+              "predicate": {
+                "biome": "eternalreturn:spooky_swamp",
+                "condition": "moderner_beta:single_match"
+              },
+              "result": "swamp_lakes"
+            },
+            {
+              "type": "layer",
+              "predicate": {
+                "biome": "eternalreturn:bald_cypress_swamp",
+                "condition": "moderner_beta:single_match"
+              },
+              "result": "swamp_lakes"
             }
           ]
         },
@@ -874,7 +1175,19 @@
             "eternalreturn:autumnal_forest": "eternalreturn:leafy_river",
             "eternalreturn:forest_dry_edge": "eternalreturn:leafy_river",
             "eternalreturn:birch_forest_dry_edge": "eternalreturn:leafy_river",
-            "eternalreturn:jungle_edge": "eternalreturn:leafy_river"
+            "eternalreturn:jungle_edge": "eternalreturn:leafy_river",
+            "eternalreturn:black_spruce_forest": "minecraft:frozen_river",
+            "eternalreturn:redwood_forest": "eternalreturn:rocky_river",
+            "eternalreturn:larch_forest": "eternalreturn:rocky_river",
+            "eternalreturn:heathland": "eternalreturn:rocky_river",
+            "eternalreturn:grand_fir_forest": "eternalreturn:rocky_river",
+            "eternalreturn:pumpkin_plains": "eternalreturn:clay_river",
+            "eternalreturn:meadow": "eternalreturn:clay_river",
+            "eternalreturn:spooky_swamp": "eternalreturn:clay_river",
+            "eternalreturn:bald_cypress_swamp": "eternalreturn:clay_river",
+            "eternalreturn:webbed_forest": "eternalreturn:leafy_river",
+            "eternalreturn:poplar_grove": "eternalreturn:leafy_river",
+            "eternalreturn:dark_meadow": "eternalreturn:leafy_river"
           },
           "id": "land",
           "ignoredBiomes": [
@@ -1453,12 +1766,24 @@
         "minecraft:frozen_river": "-0.5;-1.2",
         "minecraft:river": "-0.5;-1.2",
         "eternalreturn:autumnal_forest": "0.1;0.05",
+        "eternalreturn:bald_cypress_swamp": "0.1;0.05",
         "eternalreturn:birch_forest_dry_edge": "0.1;0.05",
+        "eternalreturn:black_spruce_forest": "0.1;0.05",
+        "eternalreturn:dark_meadow": "0.1;0.05",
         "eternalreturn:desert_scrub_edge": "0.1;0.05",
         "eternalreturn:forest_dry_edge": "0.1;0.05",
+        "eternalreturn:grand_fir_forest": "0.1;0.05",
+        "eternalreturn:heathland": "0.1;0.05",
         "eternalreturn:jungle_edge": "0.1;0.05",
+        "eternalreturn:larch_forest": "0.1;0.05",
+        "eternalreturn:meadow": "0.1;0.05",
+        "eternalreturn:poplar_grove": "0.1;0.05",
+        "eternalreturn:pumpkin_plains": "0.1;0.05",
+        "eternalreturn:redwood_forest": "0.1;0.05",
+        "eternalreturn:spooky_swamp": "0.1;0.05",
         "eternalreturn:swampland_edge": "0.1;0.05",
         "eternalreturn:taiga_edge": "0.1;0.05",
+        "eternalreturn:webbed_forest": "0.1;0.05",
         "minecraft:badlands": "0.1;0.05",
         "minecraft:badlands*hills": "0.1;0.05",
         "minecraft:birch_forest": "0.1;0.05",

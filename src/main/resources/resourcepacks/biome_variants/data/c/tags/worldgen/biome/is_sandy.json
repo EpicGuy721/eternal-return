@@ -12,6 +12,10 @@
     {
       "id": "eternalreturn:desert_scrub_edge",
       "required": false
+    },
+    {
+      "id": "eternalreturn:palm_beach",
+      "required": false
     }
   ]
 }

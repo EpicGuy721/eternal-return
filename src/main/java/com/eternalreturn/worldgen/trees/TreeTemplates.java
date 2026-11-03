@@ -25,7 +25,7 @@ import java.util.Optional;
 /**
  * Trees from structure templates (a "template" entry in a tree table): the trunk is at the middle of the template's
  * bottom layer and lands on the sapling. The template is turned and mirrored at random. Like a sapling's own tree, it
- * only grows if it fits: the ground under the trunk must be dirt, grass or the like, and every spot the template fills
+ * only grows if it fits: the ground under the trunk must be dirt, grass or the like (or sand, as the world generates), and every spot the template fills
  * must be air, leaves or a plant a tree may replace. Its leaves are then set as a tree's own (not persistent, each
  * its real distance from a log), so they decay when the tree is cut, and logs keep their direction when turned.
  */
@@ -49,7 +49,10 @@ public final class TreeTemplates {
 		BlockPos trunk = StructureTemplate.transform(data, new BlockPos(size.getX() / 2, 0, size.getZ() / 2));
 		BlockPos origin = pos.subtract(trunk);
 		BlockBox box = template.calculateBoundingBox(data, origin);
-		if (!world.getBlockState(pos.down()).isIn(BlockTags.DIRT) || box.getMaxY() >= world.getTopY()) {
+		// As the world generates, sand will do too (palms on palm beaches); a sapling can't be planted on sand anyway.
+		BlockState ground = world.getBlockState(pos.down());
+		boolean soil = ground.isIn(BlockTags.DIRT) || (world instanceof net.minecraft.world.ChunkRegion && ground.isIn(BlockTags.SAND));
+		if (!soil || box.getMaxY() >= world.getTopY()) {
 			return false;
 		}
 		// Only the spots the tree fills: each must be air, leaves or a plant a tree may replace (or the sapling itself).

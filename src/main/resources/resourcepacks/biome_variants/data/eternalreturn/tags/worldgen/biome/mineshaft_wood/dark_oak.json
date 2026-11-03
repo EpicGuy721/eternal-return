@@ -4,6 +4,10 @@
     {
       "id": "eternalreturn:dark_forest_peak",
       "required": false
+    },
+    {
+      "id": "eternalreturn:dark_meadow",
+      "required": false
     }
   ]
 }

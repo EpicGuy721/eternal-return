@@ -2,11 +2,19 @@
   "replace": false,
   "values": [
     {
+      "id": "eternalreturn:bald_cypress_swamp",
+      "required": false
+    },
+    {
       "id": "eternalreturn:jungle_edge",
       "required": false
     },
     {
       "id": "eternalreturn:jungle_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:spooky_swamp",
       "required": false
     },
     {

@@ -2,6 +2,14 @@
   "replace": false,
   "values": [
     {
+      "id": "eternalreturn:larch_forest",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:redwood_forest",
+      "required": false
+    },
+    {
       "id": "eternalreturn:taiga_edge",
       "required": false
     },

@@ -1,6 +1,8 @@
 {
   "_comment": "Fog colours by biome in Eternal Return worlds (FogTints). A key is a biome id or a biome tag (#namespace:path); an id wins over a tag, tags are tried in this order, and a biome in none keeps its own fog. day is the fog colour at noon (the game dims it toward dusk), night the colour at midnight; between them it fades. Variants (peaks, edges, rivers) are in their bases' fog tags.",
   "tints": {
+    "eternalreturn:spooky_swamp": {"day": "#7E8571", "night": "#11150F"},
+    "eternalreturn:webbed_forest": {"day": "#A3A8A2", "night": "#0F1111"},
     "#eternalreturn:fog/icy": {"day": "#DDE9F7", "night": "#0D1426"},
     "#eternalreturn:fog/taiga": {"day": "#BDD0E4", "night": "#0B121E"},
     "#eternalreturn:fog/mountains": {"day": "#C8D2DE", "night": "#0D1118"},
