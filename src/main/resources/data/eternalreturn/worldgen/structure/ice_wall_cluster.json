@@ -1,0 +1,10 @@
+{
+  "type": "eternalreturn:landmark",
+  "landmark": "ice_wall",
+  "min_size": 30,
+  "max_size": 70,
+  "biomes": "#eternalreturn:has_structure/ice_wall_cluster",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

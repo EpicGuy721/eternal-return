@@ -42,6 +42,8 @@ public class SubBiomeTests implements FabricGameTest {
 	/** One spot well inside each sub-biome (its sampled neighbours 32 blocks away the same), nearest 0, 0; shared by the tests. */
 	private static Map<String, BlockPos> spots;
 	private static Map<String, Integer> samples;
+	/** Chunks these tests generated (they may be unloaded again, and then look new to the chunk manager). */
+	private static final Set<Long> MADE = java.util.concurrent.ConcurrentHashMap.newKeySet();
 
 	private static Set<String> subBiomes() {
 		return BiomeVariantTests.variantTable().keySet().stream().filter(id -> BiomeVariants.get(Identifier.of(id)).kind().equals("sub"))
@@ -130,7 +132,9 @@ public class SubBiomeTests implements FabricGameTest {
 			Map.entry("eternalreturn:grand_fir_forest", 4), Map.entry("eternalreturn:poplar_grove", 4), Map.entry("eternalreturn:black_spruce_forest", 4),
 			Map.entry("eternalreturn:desert_oasis", 8), Map.entry("eternalreturn:desert_baobabs", 4), Map.entry("eternalreturn:drylands", 4),
 			Map.entry("eternalreturn:pinyon_woodland", 4), Map.entry("eternalreturn:monument_valley", 8), Map.entry("eternalreturn:mesa_verde", 8),
-			Map.entry("eternalreturn:bryce_mesa", 8), Map.entry("eternalreturn:painted_canyon", 8), Map.entry("eternalreturn:white_mesa", 8));
+			Map.entry("eternalreturn:bryce_mesa", 8), Map.entry("eternalreturn:painted_canyon", 8), Map.entry("eternalreturn:white_mesa", 8),
+			Map.entry("eternalreturn:tundra", 4), Map.entry("eternalreturn:arctic", 8), Map.entry("eternalreturn:snowy_mesa", 8),
+			Map.entry("eternalreturn:alps", 8), Map.entry("eternalreturn:icy_mountains", 8), Map.entry("eternalreturn:glacier_field", 8));
 
 	/** What each sub-biome must show in 5 x 5 generated chunks round its spot: a block (or block tag) and how many at least. */
 	private record Sign(String what, int atLeast) {
@@ -159,7 +163,13 @@ public class SubBiomeTests implements FabricGameTest {
 			Map.entry("eternalreturn:mesa_verde", List.of(new Sign("minecraft:grass_block", 200), new Sign("minecraft:brown_terracotta", 100), new Sign("minecraft:spruce_log", 10))),
 			Map.entry("eternalreturn:bryce_mesa", List.of(new Sign("minecraft:pink_terracotta", 100))),
 			Map.entry("eternalreturn:painted_canyon", List.of(new Sign("minecraft:purple_terracotta", 100), new Sign("minecraft:light_blue_terracotta", 30))),
-			Map.entry("eternalreturn:white_mesa", List.of(new Sign("minecraft:calcite", 100), new Sign("minecraft:white_terracotta", 100))));
+			Map.entry("eternalreturn:white_mesa", List.of(new Sign("minecraft:calcite", 100), new Sign("minecraft:white_terracotta", 100))),
+			Map.entry("eternalreturn:tundra", List.of(new Sign("minecraft:birch_log", 20), new Sign("minecraft:gravel", 30), new Sign("minecraft:moss_block", 20))),
+			Map.entry("eternalreturn:arctic", List.of(new Sign("minecraft:snow_block", 300), new Sign("minecraft:packed_ice", 50))),
+			Map.entry("eternalreturn:snowy_mesa", List.of(new Sign("minecraft:light_blue_terracotta", 100), new Sign("minecraft:snow", 100))),
+			Map.entry("eternalreturn:alps", List.of(new Sign("minecraft:grass_block", 200), new Sign("minecraft:spruce_log", 10), new Sign("#minecraft:small_flowers", 20))),
+			Map.entry("eternalreturn:icy_mountains", List.of(new Sign("minecraft:snow_block", 300), new Sign("minecraft:packed_ice", 50))),
+			Map.entry("eternalreturn:glacier_field", List.of(new Sign("minecraft:gravel", 50), new Sign("minecraft:packed_ice", 30))));
 
 	/**
 	 * Round each sub-biome's spot, 5 x 5 chunks are generated in full. Each must show its signs (pumpkins, cobwebs, heath
@@ -184,12 +194,14 @@ public class SubBiomeTests implements FabricGameTest {
 			boolean madeBefore = false;
 			for (int cx = cx0 - 2; cx <= cx0 + 2; cx++) {
 				for (int cz = cz0 - 2; cz <= cz0 + 2; cz++) {
-					madeBefore |= world.getChunkManager().getChunk(cx, cz, ChunkStatus.FEATURES, false) != null;
+					madeBefore |= MADE.contains(net.minecraft.util.math.ChunkPos.toLong(cx, cz))
+							|| world.getChunkManager().getChunk(cx, cz, ChunkStatus.FEATURES, false) != null;
 				}
 			}
 			for (int cx = cx0 - 3; cx <= cx0 + 3; cx++) {
 				for (int cz = cz0 - 3; cz <= cz0 + 3; cz++) {
 					world.getChunk(cx, cz, ChunkStatus.FULL, true);
+					MADE.add(net.minecraft.util.math.ChunkPos.toLong(cx, cz));
 				}
 			}
 			Map<String, Integer> found = new TreeMap<>();
@@ -266,6 +278,7 @@ public class SubBiomeTests implements FabricGameTest {
 			for (int cx = cx0 - 3; cx <= cx0 + 3; cx++) {
 				for (int cz = cz0 - 3; cz <= cz0 + 3; cz++) {
 					world.getChunk(cx, cz, ChunkStatus.FULL, true);
+					MADE.add(net.minecraft.util.math.ChunkPos.toLong(cx, cz));
 				}
 			}
 			int onLeaves = 0;
@@ -274,10 +287,14 @@ public class SubBiomeTests implements FabricGameTest {
 				for (int z = (cz0 - 2) * 16; z < (cz0 + 3) * 16; z++) {
 					int top = world.getTopY(Heightmap.Type.MOTION_BLOCKING, x, z);
 					for (int y = world.getSeaLevel() - 4; y <= top; y++) {
-						if (world.getBlockState(pos.set(x, y, z)).isIn(BlockTags.DIRT) && world.getBlockState(pos.set(x, y - 1, z)).isIn(BlockTags.LEAVES)) {
+						// A lone block of dirt (no ground beside it) on leaves: what a tree leaves when it starts on another
+						// tree. Dirt on leaves at the edge of the land (a tree's leaves grown in under an overhang) isn't counted.
+						if (world.getBlockState(pos.set(x, y, z)).isIn(BlockTags.DIRT) && world.getBlockState(pos.set(x, y - 1, z)).isIn(BlockTags.LEAVES)
+								&& loneDirt(world, new BlockPos(x, y, z))) {
 							onLeaves++;
 							if (onLeaves <= 3) {
-								EternalReturn.LOGGER.info("[sub-biomes] dirt on leaves at {} {} {} ({})", x, y, z, id);
+								EternalReturn.LOGGER.info("[sub-biomes] dirt on leaves at {} {} {} ({}), above it {}", x, y, z, id,
+										Registries.BLOCK.getId(world.getBlockState(pos.set(x, y + 1, z)).getBlock()));
 							}
 						}
 					}
@@ -295,7 +312,21 @@ public class SubBiomeTests implements FabricGameTest {
 	 * trees (Bryce), or none (Monument Valley, Painted Canyon, White Mesa).
 	 */
 	private static final Set<String> BUSHES_ONLY = Set.of("eternalreturn:heathland", "eternalreturn:drylands", "eternalreturn:bryce_mesa",
-			"eternalreturn:monument_valley", "eternalreturn:painted_canyon", "eternalreturn:white_mesa");
+			"eternalreturn:monument_valley", "eternalreturn:painted_canyon", "eternalreturn:white_mesa",
+			// Batch C: dwarf birches are bushes; the arctic and icy mountains have no trees; the snowy mesa and glacier field few.
+			"eternalreturn:tundra", "eternalreturn:arctic", "eternalreturn:icy_mountains", "eternalreturn:snowy_mesa", "eternalreturn:glacier_field",
+			// Lone trees, a few in 25 chunks (Moderner Beta's decoration varies a little from run to run).
+			"eternalreturn:meadow", "eternalreturn:pumpkin_plains");
+
+	private static boolean loneDirt(ServerWorld world, BlockPos dirt) {
+		for (net.minecraft.util.math.Direction d : net.minecraft.util.math.Direction.Type.HORIZONTAL) {
+			BlockState side = world.getBlockState(dirt.offset(d));
+			if (side.isOpaqueFullCube(world, dirt.offset(d)) && !side.isIn(BlockTags.LEAVES) && !side.isIn(BlockTags.LOGS)) {
+				return false;
+			}
+		}
+		return true;
+	}
 
 	private static boolean noLeavesNear(ServerWorld world, BlockPos log) {
 		for (BlockPos p : BlockPos.iterate(log.add(-2, -2, -2), log.add(2, 2, 2))) {

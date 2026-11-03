@@ -22,6 +22,10 @@
       "required": false
     },
     {
+      "id": "eternalreturn:glacier_field",
+      "required": false
+    },
+    {
       "id": "eternalreturn:larch_forest",
       "required": false
     },

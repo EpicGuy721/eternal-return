@@ -1,0 +1,23 @@
+{
+  "biomes": [
+    "eternalreturn:tundra"
+  ],
+  "saplings": {
+    "minecraft:birch_sapling": {
+      "trees": [
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/dwarf_birch"
+        }
+      ]
+    },
+    "minecraft:oak_sapling": {
+      "trees": [
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/shrub_oak"
+        }
+      ]
+    }
+  }
+}

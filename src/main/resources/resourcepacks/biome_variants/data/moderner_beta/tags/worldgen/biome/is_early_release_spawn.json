@@ -10,6 +10,10 @@
       "required": false
     },
     {
+      "id": "eternalreturn:glacier_field",
+      "required": false
+    },
+    {
       "id": "eternalreturn:jungle_edge",
       "required": false
     },

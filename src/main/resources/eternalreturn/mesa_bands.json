@@ -180,6 +180,39 @@
         ]
       ],
       "cap": "minecraft:smooth_sandstone"
+    },
+    "eternalreturn:snowy_mesa": {
+      "bands": [
+        [
+          "minecraft:white_terracotta",
+          3
+        ],
+        [
+          "minecraft:light_blue_terracotta",
+          2
+        ],
+        [
+          "minecraft:light_gray_terracotta",
+          2
+        ],
+        [
+          "minecraft:packed_ice",
+          1
+        ],
+        [
+          "minecraft:cyan_terracotta",
+          1
+        ],
+        [
+          "minecraft:white_terracotta",
+          2
+        ],
+        [
+          "minecraft:light_gray_terracotta",
+          1
+        ]
+      ],
+      "cap": "minecraft:snow_block"
     }
   }
 }

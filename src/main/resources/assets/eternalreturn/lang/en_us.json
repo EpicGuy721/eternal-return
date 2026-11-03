@@ -576,5 +576,11 @@
 	"biome.eternalreturn.mesa_verde": "Mesa Verde",
 	"biome.eternalreturn.bryce_mesa": "Bryce Mesa",
 	"biome.eternalreturn.painted_canyon": "Painted Canyon",
-	"biome.eternalreturn.white_mesa": "White Mesa"
+	"biome.eternalreturn.white_mesa": "White Mesa",
+	"biome.eternalreturn.tundra": "Tundra",
+	"biome.eternalreturn.arctic": "Arctic",
+	"biome.eternalreturn.snowy_mesa": "Snowy Mesa",
+	"biome.eternalreturn.alps": "Alps",
+	"biome.eternalreturn.icy_mountains": "Icy Mountains",
+	"biome.eternalreturn.glacier_field": "Glacier Field"
 }

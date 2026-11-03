@@ -31,6 +31,18 @@
     {
       "id": "eternalreturn:black_spruce_forest",
       "required": false
+    },
+    {
+      "id": "eternalreturn:tundra",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:arctic",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:snowy_mesa",
+      "required": false
     }
   ]
 }

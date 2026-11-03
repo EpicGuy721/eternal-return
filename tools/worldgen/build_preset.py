@@ -250,26 +250,37 @@ subs_of = {}
 for sid, spec in SUBS.items():
     subs_of.setdefault(spec['base'], []).append(sid)
 pools = []
-replacements = {}
+rounds = {}
+# Rounds: a later batch's sub-biomes of a parent that already has some (variants.json "round": 2) are picked in a later
+# replacement step, among the cells the earlier rounds left to the parent, so the earlier sub-biomes stay exactly where
+# they were. Each one still takes its "share" of the whole parent: its weight is its share of what the earlier rounds left.
+from fractions import Fraction
 for parent in sorted({spec['base'] for spec in LAND_SUBS.values()}):
     mine = {sid: spec for sid, spec in LAND_SUBS.items() if spec['base'] == parent}
-    whole = 1
-    for spec in mine.values():
-        whole = whole * spec['share'] // __import__('math').gcd(whole, spec['share'])
-    targets = [{'data': {'type': 'biome', 'value': sid}, 'weight': whole // spec['share']} for sid, spec in mine.items()]
-    rest = whole - sum(t['weight'] for t in targets)
-    if rest > 0:
-        targets.append({'data': {'type': 'biome', 'value': 'minecraft:the_void*null'}, 'weight': rest})
-    pool_id = 'sub_' + parent.split(':')[1]
-    # Fixed per parent (variants.json "pool_seeds"), so adding a parent never moves another's sub-biomes.
-    pools.append({'type': 'moderner_beta:weighted_pool', 'id': pool_id, 'seed': VARIANTS['pool_seeds'][parent], 'targets': targets})
-    replacements[parent] = {'type': 'layer', 'value': pool_id}
+    left = Fraction(1)
+    for rnd in sorted({spec.get('round', 1) for spec in mine.values()}):
+        these = {sid: spec for sid, spec in mine.items() if spec.get('round', 1) == rnd}
+        chances = {sid: Fraction(1, spec['share']) / left for sid, spec in these.items()}
+        whole = 1
+        for c in chances.values():
+            whole = whole * c.denominator // __import__('math').gcd(whole, c.denominator)
+        targets = [{'data': {'type': 'biome', 'value': sid}, 'weight': int(c * whole)} for sid, c in chances.items()]
+        rest = whole - sum(t['weight'] for t in targets)
+        if rest > 0:
+            targets.append({'data': {'type': 'biome', 'value': 'minecraft:the_void*null'}, 'weight': rest})
+        pool_id = 'sub_' + parent.split(':')[1] + ('' if rnd == 1 else f'_{rnd}')
+        # Fixed per parent and round (variants.json "pool_seeds"), so adding a parent never moves another's sub-biomes.
+        seed = VARIANTS['pool_seeds'][parent if rnd == 1 else f'{parent}#{rnd}']
+        pools.append({'type': 'moderner_beta:weighted_pool', 'id': pool_id, 'seed': seed, 'targets': targets})
+        rounds.setdefault(rnd, {})[parent] = {'type': 'layer', 'value': pool_id}
+        left -= sum(Fraction(1, spec['share']) for spec in these.values())
+replacements = rounds.get(1, {})
 if replacements:
     laid_out = next(i for i, s in enumerate(pipeline) if s['type'] == 'moderner_beta:biome_replacement'
                     and s.get('targets', {}).get('minecraft:plains', {}).get('value') == 'biome_pool')
-    pipeline[laid_out + 1:laid_out + 1] = pools + [
-        {'type': 'moderner_beta:biome_replacement', 'parent': 'land', 'id': 'land', 'seed': 0, 'targets': replacements}]
-    after_subs = laid_out + len(pools) + 2
+    steps = [{'type': 'moderner_beta:biome_replacement', 'parent': 'land', 'id': 'land', 'seed': 0, 'targets': rounds[r]} for r in sorted(rounds)]
+    pipeline[laid_out + 1:laid_out + 1] = pools + steps
+    after_subs = laid_out + len(pools) + len(steps) + 1
 
 
 def with_subs(biomes):
@@ -531,6 +542,27 @@ SURFACES = {
     # Mesa Verde: grass on top, coarse dirt in patches.
     'green_top': when(DRY, when(TOP, {'type': 'minecraft:sequence', 'sequence': [
         when(patches(0.35), block_rule('minecraft:coarse_dirt')), block_rule('minecraft:grass_block')]})),
+    # Tundra: gravel, coarse dirt and moss in patches through the grass (under thin snow).
+    'tundra': when(DRY, when(TOP, {'type': 'minecraft:sequence', 'sequence': [
+        when(patches(0.35), block_rule('minecraft:gravel')),
+        when(patches(0.1), block_rule('minecraft:coarse_dirt')),
+        when(patches(-0.2), block_rule('minecraft:moss_block'))]})),
+    # Arctic: snow blocks (the ice spikes stand on them), packed ice in patches.
+    'arctic': when(DRY, when(TOP, {'type': 'minecraft:sequence', 'sequence': [
+        when(patches(0.4), block_rule('minecraft:packed_ice')), block_rule('minecraft:snow_block')]})),
+    # Alps: bare grey rock and scree in patches on the meadows.
+    'alpine': when(DRY, when(TOP, {'type': 'minecraft:sequence', 'sequence': [
+        when(patches(0.35), block_rule('minecraft:stone')),
+        when(below(-0.5), block_rule('minecraft:gravel'))]})),
+    # Icy mountains: snow blocks, packed ice and bare rock.
+    'icy': when(DRY, when(TOP, {'type': 'minecraft:sequence', 'sequence': [
+        when(patches(0.2), block_rule('minecraft:packed_ice')),
+        when(below(-0.5), block_rule('minecraft:stone')), block_rule('minecraft:snow_block')]})),
+    # Glacier field: moraine gravel, coarse dirt and packed ice.
+    'moraine': when(DRY, when(TOP, {'type': 'minecraft:sequence', 'sequence': [
+        when(patches(0.25), block_rule('minecraft:gravel')),
+        when(below(-0.3), block_rule('minecraft:packed_ice')),
+        when(patches(-0.05), block_rule('minecraft:coarse_dirt'))]})),
     # Bryce Mesa: red sand in patches, coarse dirt where pines take hold.
     'bryce_floor': when(DRY, when(TOP, {'type': 'minecraft:sequence', 'sequence': [
         when(patches(0.25), block_rule('minecraft:red_sand')),

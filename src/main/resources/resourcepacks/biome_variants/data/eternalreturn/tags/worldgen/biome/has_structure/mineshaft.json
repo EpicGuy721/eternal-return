@@ -2,6 +2,14 @@
   "replace": false,
   "values": [
     {
+      "id": "eternalreturn:alps",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:arctic",
+      "required": false
+    },
+    {
       "id": "eternalreturn:bald_cypress_swamp",
       "required": false
     },
@@ -26,6 +34,10 @@
       "required": false
     },
     {
+      "id": "eternalreturn:icy_mountains",
+      "required": false
+    },
+    {
       "id": "eternalreturn:meadow",
       "required": false
     },
@@ -38,11 +50,19 @@
       "required": false
     },
     {
+      "id": "eternalreturn:snowy_mesa",
+      "required": false
+    },
+    {
       "id": "eternalreturn:spooky_swamp",
       "required": false
     },
     {
       "id": "eternalreturn:swampland_edge",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:tundra",
       "required": false
     }
   ]

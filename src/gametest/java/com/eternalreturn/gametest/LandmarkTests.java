@@ -55,7 +55,9 @@ public class LandmarkTests implements FabricGameTest {
 		Object[][] kinds = {{"arch", 5, 3}, {"spire", 5, 2}, {"tropical_pillars", 5, 3}, {"crater", 5, 3}, {"lava_flow", 3, 6},
 				{"volcano", 3, 7}, {"glacier", 3, 6}, {"ice_wall", 5, 4},
 				// The mesa styles' rock forms (phase 6): only in their sub-biomes, so searched further, in more cells.
-				{"butte", 45, 2}, {"table", 35, 3}, {"hoodoos", 90, 2}, {"hoodoo_cluster", 40, 1}};
+				{"butte", 45, 2}, {"table", 35, 3}, {"hoodoos", 90, 2}, {"hoodoo_cluster", 40, 1},
+				// Batch C: glaciers and ice walls crowded in the glacier field and icy mountains.
+				{"glacier_cluster", 25, 6}, {"ice_wall_cluster", 45, 4}};
 		var calculator = world.getChunkManager().getStructurePlacementCalculator();
 		var generator = world.getChunkManager().getChunkGenerator();
 		for (Object[] k : kinds) {
@@ -162,7 +164,7 @@ public class LandmarkTests implements FabricGameTest {
 					what = "slope 20 out at " + (top - centre.getY()) + " above the base, " + lava + " lava up top, radius " + piece.size;
 					ok = top >= centre.getY() + 15 && lava >= 10;
 				}
-				case "glacier", "ice_wall" -> {
+				case "glacier", "ice_wall", "glacier_cluster", "ice_wall_cluster" -> {
 					Block hardened = net.minecraft.registry.Registries.BLOCK.get(EternalReturn.id("hardened_packed_ice"));
 					int ice = count(world, centre, half, 10, 40, s -> s.isOf(hardened) || s.isOf(Blocks.PACKED_ICE) || s.isOf(Blocks.BLUE_ICE));
 					what = ice + " ice blocks";
