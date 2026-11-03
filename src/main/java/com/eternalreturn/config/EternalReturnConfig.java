@@ -406,6 +406,11 @@ public final class EternalReturnConfig {
 		public double minecartSpeedMultiplier = 3.0;
 		/** Right-click a minecart with a chain, then another, to chain the second behind the first (Minecarts). */
 		public boolean minecartChains = true;
+		/**
+		 * A piston pushing a row of blocks into obsidian or crying obsidian crushes the block against it (Crushing):
+		 * stone to cobblestone, cobblestone to gravel, gravel to sand, anything else dropping as mined by an iron pickaxe.
+		 */
+		public boolean pistonsCrush = true;
 	}
 
 	/** Beds, beacons, animals and a few mob rules (com.eternalreturn.survival). */
@@ -432,6 +437,20 @@ public final class EternalReturnConfig {
 		 * food heals instead, each kind its own way (Meals; the table is eternalreturn/foods.json).
 		 */
 		public boolean removeHunger = true;
+		/** A player blocking with a sword (Nostalgic Tweaks' sword blocking) can't attack (SwordBlocking). */
+		public boolean noAttackWhileBlocking = true;
+		/**
+		 * Coordinates are hidden in survival and adventure: those players get the game's reduced debug info (no position,
+		 * chunk, targeted block, light or biome lines in F3), as the reducedDebugInfo game rule gives everyone (HiddenCoordinates).
+		 */
+		public boolean hideCoordinatesInSurvival = true;
+		/**
+		 * In Eternal Return worlds a player's first spawn, and every respawn after a death without a bed, is a random
+		 * spot on land within this many blocks of 0, 0 (RandomSpawns). 0: vanilla's spawn by the world spawn point.
+		 */
+		public int randomSpawnRadius = 5000;
+		/** An amethyst shard in a brewing stand makes a potion subtle: no particles from its effects (SubtlePotions). */
+		public boolean subtlePotions = true;
 		/**
 		 * Beacons need no pyramid and give one effect; the payment sets their range (iron 32 to netherite 512 blocks)
 		 * and how much effect time builds up (30 seconds to 4 minutes) (BeaconPower).

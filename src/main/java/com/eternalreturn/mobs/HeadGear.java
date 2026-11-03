@@ -27,7 +27,7 @@ import net.minecraft.world.biome.Biome;
  * <ul>
  * <li>in birch forests and cherry groves (biome tag eternalreturn:beehive_mob_biomes), 10% wear a beehive
  * (mobs.beehiveHeadChance); when one dies, the hive breaks open and 3 angry bees come out after its
- * killer (or the nearest player);</li>
+ * killer (or the nearest player). Brown, black and sun bears hunt them for the honey (BearEntity);</li>
  * <li>anywhere, very rarely (0.1%, mobs.tntHeadChance), one wears TNT, and explodes like TNT when it dies.</li>
  * </ul>
  * Neither is ever dropped, and like any helmet they keep the mob from burning in daylight.
@@ -69,6 +69,9 @@ public final class HeadGear {
 		if (head.isOf(Items.BEEHIVE)) {
 			mob.equipStack(EquipmentSlot.HEAD, ItemStack.EMPTY);
 			LivingEntity target = source.getAttacker() instanceof LivingEntity attacker ? attacker : world.getClosestPlayer(mob, 16.0);
+			if (target instanceof com.eternalreturn.mobs.entity.BearEntity bear) {
+				bear.ateHiveHoney();
+			}
 			world.playSound(null, mob.getBlockPos(), SoundEvents.BLOCK_BEEHIVE_DRIP, SoundCategory.HOSTILE, 1.0F, 1.0F);
 			for (int i = 0; i < 3; i++) {
 				BeeEntity bee = EntityType.BEE.create(world);

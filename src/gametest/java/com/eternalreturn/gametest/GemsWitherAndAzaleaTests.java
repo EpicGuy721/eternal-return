@@ -253,9 +253,12 @@ public class GemsWitherAndAzaleaTests implements FabricGameTest {
 			InherentEnchantments.apply(plain, world.getRegistryManager());
 			var sharpness = enchantment(world, "minecraft:sharpness");
 			ItemStack sharp = null;
-			for (int seed = 0; seed < 200 && sharp == null; seed++) {
+			// One random source for all the tries: the first draws of Random.create(0), (1), (2)... are nearly alike, and
+			// with a longer list of enchantments they never reached Sharpness.
+			Random random = Random.create(173164L);
+			for (int attempt = 0; attempt < 200 && sharp == null; attempt++) {
 				ItemStack tried = Gems.withRuby(plain, world.getRegistryManager());
-				Gems.finishReroll(tried, world.getRegistryManager(), Random.create(seed));
+				Gems.finishReroll(tried, world.getRegistryManager(), random);
 				if (EnchantmentHelper.getLevel(sharpness, tried) > 0) {
 					sharp = tried;
 				}

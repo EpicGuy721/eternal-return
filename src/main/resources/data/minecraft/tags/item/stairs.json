@@ -32,6 +32,9 @@
     "eternalreturn:blue_concrete_stairs",
     "eternalreturn:purple_concrete_stairs",
     "eternalreturn:magenta_concrete_stairs",
-    "eternalreturn:pink_concrete_stairs"
+    "eternalreturn:pink_concrete_stairs",
+    "eternalreturn:smooth_stone_stairs",
+    "eternalreturn:cut_sandstone_stairs",
+    "eternalreturn:cut_red_sandstone_stairs"
   ]
 }

@@ -1,0 +1,6 @@
+{
+  "type": "eternalreturn:shipwreck_treasure",
+  "biomes": "#eternalreturn:has_structure/shipwreck_treasure",
+  "spawn_overrides": {},
+  "step": "underground_structures"
+}

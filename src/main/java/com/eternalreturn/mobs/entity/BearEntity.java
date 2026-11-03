@@ -2,6 +2,7 @@ package com.eternalreturn.mobs.entity;
 
 import com.eternalreturn.config.EternalReturnConfig;
 import com.eternalreturn.fishing.Overfishing;
+import com.eternalreturn.mobs.HeadGear;
 import com.eternalreturn.mobs.ai.Reach;
 import net.minecraft.block.BeehiveBlock;
 import net.minecraft.block.Block;
@@ -12,12 +13,15 @@ import net.minecraft.block.entity.BeehiveBlockEntity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.goal.ActiveTargetGoal;
 import net.minecraft.entity.ai.goal.AnimalMateGoal;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.MoveToTargetPosGoal;
 import net.minecraft.entity.ai.goal.TemptGoal;
 import net.minecraft.entity.ai.goal.TrackTargetGoal;
 import net.minecraft.entity.ai.TargetPredicate;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.BeeEntity;
 import net.minecraft.entity.passive.PassiveEntity;
@@ -70,7 +74,8 @@ import java.util.UUID;
  * into a river and swipes fish out onto the bank, as many as a fisherman would catch there (the spot gets overfished
  * for both: Overfishing). Honeycomb (or honey) lures a bear; a honey bottle breeds two (the bottle given back), and a
  * cub of a pair bred so trusts the player who bred them, as a fox does: it never turns on them, and goes for whatever
- * hurts them. A wild bear never trusts anyone.
+ * hurts them. A wild bear never trusts anyone. A grown bear also goes for any zombie or skeleton wearing a beehive
+ * (HeadGear), fights it to the death for the honey and eats it, the hive's bees coming out after the bear.
  */
 public class BearEntity extends PolarBearEntity {
 	public static final int HIVE_RANGE = 24;
@@ -100,6 +105,21 @@ public class BearEntity extends PolarBearEntity {
 		this.goalSelector.add(4, new FishGoal());
 		this.goalSelector.add(5, new EatBerriesGoal());
 		this.targetSelector.add(1, new DefendTrustedGoal());
+		// A zombie or skeleton wearing a beehive (HeadGear): the bear goes for it, for the honey.
+		this.targetSelector.add(4, new ActiveTargetGoal<>(this, MobEntity.class, 10, true, false,
+				mob -> habits() && !this.isBaby() && wearsBeehive(mob)));
+	}
+
+	/** A mob with a beehive on its head (HeadGear). */
+	public static boolean wearsBeehive(LivingEntity mob) {
+		return HeadGear.wears(mob) && mob.getEquippedStack(EquipmentSlot.HEAD).isOf(Items.BEEHIVE);
+	}
+
+	/** It killed a mob wearing a beehive (HeadGear.died): it eats the honey, as from a hive it breaks open. */
+	public void ateHiveHoney() {
+		this.heal(4.0F);
+		this.playSound(SoundEvents.BLOCK_BEEHIVE_DRIP, 1.0F, 1.0F);
+		this.playSound(SoundEvents.ENTITY_GENERIC_EAT, 1.0F, 0.8F);
 	}
 
 	/** A cub is a bear of its parents' kind. */

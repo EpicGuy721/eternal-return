@@ -95,8 +95,8 @@ public class StructureTests implements FabricGameTest {
 	}
 
 	/**
-	 * Eternal Return worlds place only strongholds, mineshafts, nether fossils and end cities, in every
-	 * dimension, and let blazes spawn outside fortresses; other worlds keep villages and fortresses.
+	 * Eternal Return worlds place only strongholds, mineshafts, nether fossils and end cities (and this mod's own, and the
+	 * rare shipwrecks), in every dimension, and let blazes spawn outside fortresses; other worlds keep villages and fortresses.
 	 */
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = GameTestWorld.WORLDGEN_BATCH, tickLimit = 200)
 	public void onlyEssentialStructuresInEternalReturn(TestContext ctx) {
@@ -111,7 +111,10 @@ public class StructureTests implements FabricGameTest {
 		EternalReturn.LOGGER.info("[structure-test] preset={} structures placed per dimension {}", GameTestWorld.presetProperty(), placed);
 		java.util.Set<String> kept = java.util.Set.of("minecraft:stronghold", "minecraft:mineshaft", "minecraft:mineshaft_mesa", "minecraft:nether_fossil", "minecraft:end_city");
 		if (GameTestWorld.ETERNAL_RETURN_PRESET.equals(GameTestWorld.presetProperty())) {
-			java.util.List<String> extra = placed.values().stream().flatMap(java.util.List::stream).filter(id -> !kept.contains(id)).distinct().toList();
+			// Besides: this mod's own (the landmarks, the shipwrecks' treasure) and the rare shipwrecks (ShipwreckTreasure).
+			java.util.Set<String> alsoKept = java.util.Set.of("minecraft:shipwreck", "minecraft:shipwreck_beached");
+			java.util.List<String> extra = placed.values().stream().flatMap(java.util.List::stream)
+					.filter(id -> !kept.contains(id) && !alsoKept.contains(id) && !id.startsWith(EternalReturn.MOD_ID + ":")).distinct().toList();
 			ctx.assertTrue(extra.isEmpty(), "Eternal Return world places " + extra);
 			ctx.assertTrue(placed.getOrDefault("minecraft:overworld", java.util.List.of()).contains("minecraft:stronghold"), "strongholds stay");
 			ctx.assertTrue(placed.getOrDefault("minecraft:the_nether", java.util.List.of()).contains("minecraft:nether_fossil"), "nether fossils stay");

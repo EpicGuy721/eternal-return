@@ -9,6 +9,9 @@
 	"entrypoints": {
 		"fabric-gametest": [
 			"com.eternalreturn.gametest.MobFeatureTests",
+			"com.eternalreturn.gametest.CombatRulesTests",
+			"com.eternalreturn.gametest.CraftRulesTests",
+			"com.eternalreturn.gametest.ShipwreckTests",
 			"com.eternalreturn.gametest.FishingTests",
 			"com.eternalreturn.gametest.FishingFixTests",
 			"com.eternalreturn.gametest.WorldgenTests",

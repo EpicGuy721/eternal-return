@@ -22,7 +22,8 @@ import java.util.Set;
  * Whether the running server's world is an Eternal Return world (its overworld uses this mod's noise
  * settings), worked out as the server creates its dimensions, so rules can apply to all three
  * dimensions of such a world. Used for the structures (worldgen.onlyEssentialStructures: only
- * strongholds, mineshafts, nether fossils, end cities and this mod's own landmarks are placed, in every dimension) and for blazes
+ * strongholds, mineshafts, nether fossils, end cities, this mod's own landmarks, and shipwrecks at 1% of vanilla's rate
+ * with buried treasure beside each (ShipwreckTreasure) are placed, in every dimension) and for blazes
  * outside fortresses (Blazes).
  */
 public final class EternalReturnServer {
@@ -45,17 +46,32 @@ public final class EternalReturnServer {
 				.ifPresent(settings -> CaveWorlds.rememberRouter(settings.noiseRouter()));
 	}
 
+	private static boolean essentialOnly(RegistryEntry<StructureSet> set) {
+		return set.getKey().map(ESSENTIAL_ONLY_SETS::contains).orElse(false);
+	}
+
 	public static boolean active() {
 		return active;
 	}
 
+	/**
+	 * Sets standing in for vanilla's in Eternal Return worlds with only the essential structures: the rare shipwrecks
+	 * and their treasure (ShipwreckTreasure). Placed nowhere else.
+	 */
+	private static final Set<RegistryKey<StructureSet>> ESSENTIAL_ONLY_SETS = Set.of(
+			RegistryKey.of(RegistryKeys.STRUCTURE_SET, EternalReturn.id("shipwrecks")),
+			RegistryKey.of(RegistryKeys.STRUCTURE_SET, EternalReturn.id("shipwreck_treasure")));
+
 	/** The structure sets a dimension places: in Eternal Return worlds only those holding a kept structure. */
 	public static List<RegistryEntry<StructureSet>> filter(List<RegistryEntry<StructureSet>> sets) {
 		if (!active || !EternalReturnConfig.get().worldgen.onlyEssentialStructures) {
-			return sets;
+			if (sets.stream().noneMatch(EternalReturnServer::essentialOnly)) {
+				return sets;
+			}
+			return sets.stream().filter(set -> !essentialOnly(set)).toList();
 		}
 		// This mod's own structures (the terrain landmarks) are kept too.
-		return sets.stream().filter(set -> set.value().structures().stream().anyMatch(entry -> KEPT.stream().anyMatch(entry.structure()::matchesKey)
+		return sets.stream().filter(set -> essentialOnly(set) || set.value().structures().stream().anyMatch(entry -> KEPT.stream().anyMatch(entry.structure()::matchesKey)
 				|| entry.structure().getKey().map(key -> key.getValue().getNamespace().equals(EternalReturn.MOD_ID)).orElse(false))).toList();
 	}
 }

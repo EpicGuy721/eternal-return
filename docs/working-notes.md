@@ -43,3 +43,11 @@ How the owner wants work on this repo done, and pitfalls that each cost a failed
 - Shape methods that read the world deadlock at shutdown (the lighting thread); overlay quads z-fight unless they have the face's exact corners; pull UVs in from sprite edges; CUTOUT, not CUTOUT_MIPPED, for overlays.
 - Fabric attachment sync gives the client no redraw signal: send your own payload and call `worldRenderer.scheduleBlockRenders`.
 - The owner plays with Nostalgic Tweaks' old lighting (no smooth light, round-robin relight) and "Full Block Outlines" on some blocks; ColorLight colours light per block id from its own thread.
+
+## Notes from feature batch 11 (cloud session)
+
+- Loom 1.18-SNAPSHOT now resolves to a build that needs Gradle to run on Java 25 ("Dependency requires at least JVM runtime version 25"). A cloud container with only Java 21 can download Temurin 25 (api.adoptium.net) and run `JAVA_HOME=<jdk25> bash ./gradlew ...`; the mod itself still compiles for Java 21.
+- A test player just joined (FishingTests.survivalPlayer) can't be hurt for 60 ticks (ServerPlayerEntity.joinInvulnerabilityTicks), except by damage that bypasses invulnerability: use `getDamageSources().outOfWorld()` to measure damage at once.
+- Items dropped beside a working piston get flung and pushed along by the moving blocks: look for them over the whole test area, not next to where they dropped.
+- Game test runs set `-Dfabric-api.gametest`; RandomSpawns is off there unless a test turns it on (every test player would otherwise be sent thousands of blocks off on joining).
+- Nostalgic Tweaks is reached by reflection (SwordBlocking): its SwordBlockingHelper.isBlocking and GameplayTweak.SWORD_BLOCK_DAMAGE_REDUCTION (2.0.0-beta.922). If a newer version renames them, Defense quietly does nothing; the log says so once.
