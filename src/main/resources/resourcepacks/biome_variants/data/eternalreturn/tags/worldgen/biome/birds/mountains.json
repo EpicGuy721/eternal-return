@@ -2,6 +2,10 @@
   "replace": false,
   "values": [
     {
+      "id": "eternalreturn:alps",
+      "required": false
+    },
+    {
       "id": "eternalreturn:cherry_grove_peak",
       "required": false
     },
@@ -15,6 +19,10 @@
     },
     {
       "id": "eternalreturn:heathland",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:icy_mountains",
       "required": false
     }
   ]

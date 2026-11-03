@@ -209,5 +209,35 @@
   "eternalreturn:white_mesa": {
     "base": "minecraft:badlands",
     "kind": "sub"
+  },
+  "eternalreturn:tundra": {
+    "base": "moderner_beta:early_release_ice_plains",
+    "kind": "sub",
+    "boulders": 0.8
+  },
+  "eternalreturn:arctic": {
+    "base": "moderner_beta:early_release_ice_plains",
+    "kind": "sub",
+    "boulders": 0.3
+  },
+  "eternalreturn:snowy_mesa": {
+    "base": "moderner_beta:early_release_ice_plains",
+    "kind": "sub",
+    "boulders": 0
+  },
+  "eternalreturn:alps": {
+    "base": "moderner_beta:early_release_extreme_hills",
+    "kind": "sub",
+    "boulders": 2.0
+  },
+  "eternalreturn:icy_mountains": {
+    "base": "moderner_beta:early_release_extreme_hills",
+    "kind": "sub",
+    "boulders": 1.0
+  },
+  "eternalreturn:glacier_field": {
+    "base": "moderner_beta:early_release_taiga",
+    "kind": "sub",
+    "boulders": 1.5
   }
 }

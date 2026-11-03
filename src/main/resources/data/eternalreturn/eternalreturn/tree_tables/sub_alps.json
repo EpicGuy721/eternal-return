@@ -1,0 +1,23 @@
+{
+  "biomes": [
+    "eternalreturn:alps"
+  ],
+  "saplings": {
+    "minecraft:spruce_sapling": {
+      "trees": [
+        {
+          "weight": 2,
+          "template": "eternalreturn:tree/larch"
+        },
+        {
+          "weight": 1,
+          "template": "eternalreturn:tree/larch_young"
+        },
+        {
+          "weight": 2,
+          "tree": "eternalreturn:tree/grand_fir"
+        }
+      ]
+    }
+  }
+}

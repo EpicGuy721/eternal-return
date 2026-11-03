@@ -2,7 +2,15 @@
   "replace": false,
   "values": [
     {
+      "id": "eternalreturn:arctic",
+      "required": false
+    },
+    {
       "id": "eternalreturn:black_spruce_forest",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:glacier_field",
       "required": false
     },
     {
@@ -18,11 +26,19 @@
       "required": false
     },
     {
+      "id": "eternalreturn:snowy_mesa",
+      "required": false
+    },
+    {
       "id": "eternalreturn:taiga_edge",
       "required": false
     },
     {
       "id": "eternalreturn:taiga_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:tundra",
       "required": false
     }
   ]

@@ -39,7 +39,10 @@ public class ClutterTests implements FabricGameTest {
 	private static final RegistryKey<PlacedFeature> BOULDER = RegistryKey.of(RegistryKeys.PLACED_FEATURE, EternalReturn.id("boulder"));
 	/** Ground a boulder can rest on; stone straight on top of these is never the terrain's own. */
 	private static final Set<Block> TOPSOIL = Set.of(Blocks.GRASS_BLOCK, Blocks.SAND, Blocks.RED_SAND, Blocks.PODZOL, Blocks.MYCELIUM,
-			Blocks.COARSE_DIRT, Blocks.SNOW_BLOCK);
+			Blocks.COARSE_DIRT, Blocks.SNOW_BLOCK,
+			// The new biomes' grounds (phase 6): tundra moss, packed mud in the drylands. (Not packed ice or gravel: the ice
+			// plains' hardened packed ice jutting over them at a step looked like a boulder.)
+			Blocks.MOSS_BLOCK, Blocks.PACKED_MUD);
 
 	private static boolean isStone(BlockState state) {
 		return state.isOf(Blocks.STONE) || state.isIn(com.eternalreturn.worldgen.stone.BiomeStoneSurface.HOST_STONES);
@@ -77,6 +80,9 @@ public class ClutterTests implements FabricGameTest {
 				.filter(Clutter.BiomeDensity.class::isInstance).map(Clutter.BiomeDensity.class::cast).findFirst().orElseThrow();
 		int landChunks = 0;
 		Set<ChunkPos> withBoulders = new HashSet<>();
+		// Land chunks and chunks with boulders by the biome in their middle (logged).
+		Map<String, int[]> byBiome = new TreeMap<>();
+		Map<ChunkPos, String> lastLand = new java.util.HashMap<>();
 		// Each boulder block on topsoil, with the ground's stone under it (the first stone or host stone below the topsoil).
 		Map<BlockPos, Block[]> found = new java.util.HashMap<>();
 		BlockPos.Mutable pos = new BlockPos.Mutable();
@@ -113,6 +119,8 @@ public class ClutterTests implements FabricGameTest {
 					BlockPos middle = new BlockPos(cx * 16 + 8, world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, cx * 16 + 8, cz * 16 + 8), cz * 16 + 8);
 					if (land && density.densityOf(world.getBiome(middle)) > 0) {
 						landChunks++;
+						byBiome.computeIfAbsent(BiomeStoneTests.id(world.getBiome(middle)), k -> new int[2])[0]++;
+						lastLand.put(new ChunkPos(cx, cz), BiomeStoneTests.id(world.getBiome(middle)));
 					}
 				}
 			}
@@ -157,6 +165,13 @@ public class ClutterTests implements FabricGameTest {
 		}
 		EternalReturn.LOGGER.info("[clutter] {} land spots, {} land chunks, boulders in {} of them; {} boulders ({} on their own stone, {} of the biome they are in), by stone {}",
 				centres.size(), landChunks, withBoulders.size(), boulders, matching, ofBiome, byStone);
+		withBoulders.forEach(c -> {
+			if (lastLand.containsKey(c)) {
+				byBiome.get(lastLand.get(c))[1]++;
+			}
+		});
+		EternalReturn.LOGGER.info("[clutter] land chunks / with boulders by biome: {}", byBiome.entrySet().stream()
+				.map(e -> e.getKey() + " " + e.getValue()[0] + "/" + e.getValue()[1]).collect(java.util.stream.Collectors.joining(", ")));
 		ctx.assertTrue(withBoulders.size() * 5 >= landChunks, "boulders in only " + withBoulders.size() + " of " + landChunks + " land chunks");
 		ctx.assertTrue(matching * 10 >= boulders * 9, "only " + matching + " of " + boulders + " boulders are the ground's stone");
 		ctx.complete();

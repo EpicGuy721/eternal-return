@@ -160,6 +160,8 @@ SPECIES = {
                tree(*BIRCH, straight(9, 3), spruce_foliage(1, uniform(0, 1), uniform(2, 3)), size(2, 0, 1))),
     'weeping_birch': ('Silver birch: a light crown with long hanging twigs',
                       tree(*BIRCH, straight(6, 2), cherry_foliage(3, 5, 0.45, 0.5), size(1, 0, 2))),
+    'dwarf_birch': ('Dwarf birch: a knee-high, spreading birch shrub of the tundra',
+                    tree(*BIRCH, straight(1), bush(2), size(0, 0, 0))),
     'river_birch': ('River birch: two or three leaning stems from one root, each with its own crown',
                     tree(*BIRCH, forking(5, 2, 1), blob(2, 3), size(1, 0, 2))),
     # Jungle

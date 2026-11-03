@@ -2,6 +2,14 @@
   "replace": false,
   "values": [
     {
+      "id": "eternalreturn:alps",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:arctic",
+      "required": false
+    },
+    {
       "id": "eternalreturn:autumnal_forest_peak",
       "required": false
     },
@@ -74,6 +82,10 @@
       "required": false
     },
     {
+      "id": "eternalreturn:glacier_field",
+      "required": false
+    },
+    {
       "id": "eternalreturn:grand_fir_forest",
       "required": false
     },
@@ -83,6 +95,10 @@
     },
     {
       "id": "eternalreturn:ice_plains_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:icy_mountains",
       "required": false
     },
     {
@@ -146,6 +162,10 @@
       "required": false
     },
     {
+      "id": "eternalreturn:snowy_mesa",
+      "required": false
+    },
+    {
       "id": "eternalreturn:spooky_swamp",
       "required": false
     },
@@ -159,6 +179,10 @@
     },
     {
       "id": "eternalreturn:taiga_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:tundra",
       "required": false
     },
     {

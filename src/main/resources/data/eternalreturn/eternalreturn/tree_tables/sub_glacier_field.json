@@ -1,0 +1,19 @@
+{
+  "biomes": [
+    "eternalreturn:glacier_field"
+  ],
+  "saplings": {
+    "minecraft:spruce_sapling": {
+      "trees": [
+        {
+          "weight": 3,
+          "tree": "eternalreturn:tree/black_spruce"
+        },
+        {
+          "weight": 1,
+          "template": "eternalreturn:tree/larch_young"
+        }
+      ]
+    }
+  }
+}

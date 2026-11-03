@@ -1,0 +1,12 @@
+{
+  "values": [
+    {
+      "id": "eternalreturn:glacier_field",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:icy_mountains",
+      "required": false
+    }
+  ]
+}
