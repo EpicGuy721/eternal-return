@@ -73,6 +73,8 @@ public final class BiomeTrees {
 	/** The last table choice a sapling grew on this thread (null: vanilla grew it), for the tests. */
 	public static final ThreadLocal<Choice> LAST_SAPLING_CHOICE = new ThreadLocal<>();
 	/** How often each "biome tree" pair was picked as the world generated (vanilla included), for the tests and logs. */
+	/** Trees kept from starting on another tree's leaves or logs as the world generates (counted for the tests). */
+	public static final java.util.concurrent.atomic.AtomicInteger STOPPED_ON_LEAVES = new java.util.concurrent.atomic.AtomicInteger();
 	public static final Map<String, java.util.concurrent.atomic.AtomicInteger> GENERATED = new java.util.concurrent.ConcurrentHashMap<>();
 
 	private BiomeTrees() {
@@ -328,6 +330,19 @@ public final class BiomeTrees {
 			return null;
 		}
 		TreeFeatureConfig config = context.getConfig();
+		boolean mega = config.trunkPlacer instanceof GiantTrunkPlacer || config.trunkPlacer instanceof DarkOakTrunkPlacer;
+		// No tree starts on another tree: some placements (vanilla's jungle trees) don't check the ground, so a tree (or a bush) could
+		// stand on another's leaves, put dirt under itself there and later carry another tree on that dirt.
+		BlockPos origin = context.getOrigin();
+		for (int dx = 0; dx <= (mega ? 1 : 0); dx++) {
+			for (int dz = 0; dz <= (mega ? 1 : 0); dz++) {
+				net.minecraft.block.BlockState ground = context.getWorld().getBlockState(origin.add(dx, -1, dz));
+				if (ground.isIn(net.minecraft.registry.tag.BlockTags.LEAVES) || ground.isIn(net.minecraft.registry.tag.BlockTags.LOGS)) {
+					STOPPED_ON_LEAVES.incrementAndGet();
+					return false;
+				}
+			}
+		}
 		// Bushes, and trees without leaves (the spooky swamp's dead trees), are left as they are. (Its own random, so the chunk's draws don't move.)
 		if (config.foliagePlacer instanceof BushFoliagePlacer
 				|| config.foliageProvider.get(net.minecraft.util.math.random.Random.create(0L), BlockPos.ORIGIN).isAir()) {
@@ -337,7 +352,6 @@ public final class BiomeTrees {
 		if (sapling == null) {
 			return null;
 		}
-		boolean mega = config.trunkPlacer instanceof GiantTrunkPlacer || config.trunkPlacer instanceof DarkOakTrunkPlacer;
 		RegistryEntry<Biome> biome = context.getWorld().getBiome(context.getOrigin());
 		List<Choice> list = listFor(biome, sapling, mega);
 		if (list == null) {

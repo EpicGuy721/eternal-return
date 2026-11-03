@@ -19,6 +19,10 @@
     {
       "id": "eternalreturn:jungle_edge",
       "required": false
+    },
+    {
+      "id": "eternalreturn:pinyon_woodland",
+      "required": false
     }
   ]
 }

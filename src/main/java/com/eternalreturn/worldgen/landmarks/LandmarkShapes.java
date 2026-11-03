@@ -66,6 +66,99 @@ final class LandmarkShapes {
 			case VOLCANO -> this.volcano();
 			case GLACIER -> this.glacier();
 			case ICE_WALL -> this.iceWall();
+			case BUTTE -> this.butte(1.6, false);
+			case TABLE -> this.butte(0.45, true);
+			case HOODOOS -> this.hoodoos();
+		}
+	}
+
+	// ------------------------------------------------------------------ mesa rock forms (phase 6)
+
+	/** The block at this height: the mesa style's band (MesaBands), or the landmark's stone outside a mesa style. */
+	private BlockState band(int y) {
+		MesaBands.Style style = MesaBands.of(this.piece.style);
+		return style == null ? this.stone : style.at(y);
+	}
+
+	/**
+	 * A butte (size: its radius; its height is the radius times tall) or, flat and wide, a table: steep
+	 * sides of banded rock, a ragged outline that narrows a little upward, a flat top (a table's top is the style's "top",
+	 * grass on Mesa Verde) and a slope of fallen rock round its foot.
+	 */
+	private void butte(double tall, boolean table) {
+		MesaBands.Style style = MesaBands.of(this.piece.style);
+		double radius = this.piece.size;
+		int height = (int) Math.round(radius * tall) + 4;
+		int topY = this.cy + height;
+		double talus = 3 + radius * 0.25;
+		for (int x = this.box.getMinX(); x <= this.box.getMaxX(); x++) {
+			for (int z = this.box.getMinZ(); z <= this.box.getMaxZ(); z++) {
+				double dx = x + 0.5 - this.cx;
+				double dz = z + 0.5 - this.cz;
+				double d = Math.sqrt(dx * dx + dz * dz);
+				double angle = Math.atan2(dz, dx);
+				double edge = radius * (1 + 0.18 * this.n2(Math.cos(angle) * 1.7, Math.sin(angle) * 1.7) + 0.08 * this.n2(x * 0.15, z * 0.15));
+				int top;
+				if (d <= edge) {
+					// Narrowing upward: the rim is pulled in by up to a tenth near the top.
+					top = topY - (d > edge * 0.9 ? (int) ((d - edge * 0.9) / (edge * 0.1) * height * 0.15) : 0);
+				} else if (d <= edge + talus) {
+					top = this.cy + (int) (height * 0.3 * (1 - (d - edge) / talus) * (0.8 + 0.2 * this.n2(x * 0.3, z * 0.3)));
+				} else {
+					continue;
+				}
+				int bottom = Math.min(this.ground(x, z) - 1, this.cy - 2);
+				for (int y = bottom; y < top; y++) {
+					this.set(x, y, z, this.band(y));
+				}
+				if (table && d <= edge && top >= topY - 1 && style != null && style.top() != null) {
+					this.set(x, top - 1, z, style.top());
+				}
+			}
+		}
+	}
+
+	/**
+	 * A field of hoodoos (size: the field's radius): thin banded spires, 5 to 18 tall, waisted, each under a wider cap of
+	 * the style's cap rock, standing on their own ground.
+	 */
+	private void hoodoos() {
+		MesaBands.Style style = MesaBands.of(this.piece.style);
+		BlockState cap = style != null && style.cap() != null ? style.cap() : this.stone;
+		int count = 4 + this.piece.size / 2;
+		for (int i = 0; i < count; i++) {
+			double angle = this.random.nextDouble() * Math.PI * 2;
+			double dist = Math.sqrt(this.random.nextDouble()) * this.piece.size;
+			double hx = this.cx + Math.cos(angle) * dist;
+			double hz = this.cz + Math.sin(angle) * dist;
+			double r = 1.1 + this.random.nextDouble() * 1.4;
+			int height = 5 + this.random.nextInt(14);
+			for (int x = (int) Math.floor(hx - r - 2); x <= (int) Math.ceil(hx + r + 2); x++) {
+				for (int z = (int) Math.floor(hz - r - 2); z <= (int) Math.ceil(hz + r + 2); z++) {
+					if (!this.box.contains(x, this.box.getMinY(), z)) {
+						continue;
+					}
+					double dx = x + 0.5 - hx;
+					double dz = z + 0.5 - hz;
+					double d2 = dx * dx + dz * dz;
+					int ground = this.ground(x, z);
+					for (int y = ground - 2; y < ground + height; y++) {
+						double t = (y - ground) / (double) height;
+						// Wide at the foot, waisted two thirds up.
+						double rr = r * (1.25 - 0.45 * Math.sin(Math.PI * Math.min(1, t * 1.2))) + 0.35 * this.n3(x * 0.4, y * 0.3, z * 0.4);
+						if (d2 < rr * rr) {
+							this.set(x, y, z, this.band(y));
+						}
+					}
+					double cr = r + 0.6;
+					if (d2 < cr * cr) {
+						this.set(x, ground + height, z, cap);
+						if (d2 < r * r) {
+							this.set(x, ground + height + 1, z, cap);
+						}
+					}
+				}
+			}
 		}
 	}
 

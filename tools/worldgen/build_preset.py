@@ -251,7 +251,7 @@ for sid, spec in SUBS.items():
     subs_of.setdefault(spec['base'], []).append(sid)
 pools = []
 replacements = {}
-for parent_index, parent in enumerate(sorted({spec['base'] for spec in LAND_SUBS.values()})):
+for parent in sorted({spec['base'] for spec in LAND_SUBS.values()}):
     mine = {sid: spec for sid, spec in LAND_SUBS.items() if spec['base'] == parent}
     whole = 1
     for spec in mine.values():
@@ -261,7 +261,8 @@ for parent_index, parent in enumerate(sorted({spec['base'] for spec in LAND_SUBS
     if rest > 0:
         targets.append({'data': {'type': 'biome', 'value': 'minecraft:the_void*null'}, 'weight': rest})
     pool_id = 'sub_' + parent.split(':')[1]
-    pools.append({'type': 'moderner_beta:weighted_pool', 'id': pool_id, 'seed': 3001 + parent_index, 'targets': targets})
+    # Fixed per parent (variants.json "pool_seeds"), so adding a parent never moves another's sub-biomes.
+    pools.append({'type': 'moderner_beta:weighted_pool', 'id': pool_id, 'seed': VARIANTS['pool_seeds'][parent], 'targets': targets})
     replacements[parent] = {'type': 'layer', 'value': pool_id}
 if replacements:
     laid_out = next(i for i, s in enumerate(pipeline) if s['type'] == 'moderner_beta:biome_replacement'
@@ -475,6 +476,10 @@ def when(cond, then):
     return {'type': 'minecraft:condition', 'if_true': cond, 'then_run': then}
 
 
+def below(threshold):
+    return {'type': 'minecraft:noise_threshold', 'noise': 'minecraft:surface', 'min_threshold': -1.0e6, 'max_threshold': threshold}
+
+
 def unless(cond, then):
     return when({'type': 'minecraft:not', 'invert': cond}, then)
 
@@ -510,14 +515,67 @@ SURFACES = {
     'podzol_floor': when(DRY, when(TOP, when(patches(-0.3), block_rule('minecraft:podzol')))),
     # Spooky swamp: mud in patches on the dry ground.
     'mud_patches': when(DRY, when(TOP, when(patches(0.2), block_rule('minecraft:mud')))),
+    # Desert oasis: grass over most of the sand, the desert's sand under it.
+    'oasis': when(DRY, when(TOP, when(patches(-0.3), block_rule('minecraft:grass_block')))),
+    # Desert baobabs: coarse dirt and grass in patches on the sand.
+    'baobab_ground': when(DRY, when(TOP, {'type': 'minecraft:sequence', 'sequence': [
+        when(patches(0.3), block_rule('minecraft:coarse_dirt')),
+        when(below(-0.45), block_rule('minecraft:grass_block'))]})),
+    # Drylands: cracked ground, coarse dirt, packed mud and red sand over the sand.
+    'drylands': when(DRY, when(TOP, {'type': 'minecraft:sequence', 'sequence': [
+        when(patches(0.1), block_rule('minecraft:coarse_dirt')),
+        when(below(-0.4), block_rule('minecraft:packed_mud')),
+        when(below(-0.15), block_rule('minecraft:red_sand'))]})),
+    # Monument Valley: red sand on the flats.
+    'red_sand_floor': when(DRY, when(TOP, block_rule('minecraft:red_sand'))),
+    # Mesa Verde: grass on top, coarse dirt in patches.
+    'green_top': when(DRY, when(TOP, {'type': 'minecraft:sequence', 'sequence': [
+        when(patches(0.35), block_rule('minecraft:coarse_dirt')), block_rule('minecraft:grass_block')]})),
+    # Bryce Mesa: red sand in patches, coarse dirt where pines take hold.
+    'bryce_floor': when(DRY, when(TOP, {'type': 'minecraft:sequence', 'sequence': [
+        when(patches(0.25), block_rule('minecraft:red_sand')),
+        when(below(-0.35), block_rule('minecraft:coarse_dirt'))]})),
 }
 variant_surfaces = []
 for kind in ('edges', 'rivers', 'subs'):
     for vid, spec in VARIANTS[kind].items():
         if not vid.startswith('_') and 'surface' in spec:
             variant_surfaces.append(when({'type': 'minecraft:biome', 'biome_is': [f'{NS}:{vid}']}, SURFACES[spec['surface']]))
+# Sub-biomes take their parent's ground (the desert's sand, the badlands' red sand and terracotta, the beach's sand): each
+# biome condition naming a parent names its sub-biomes too. Their own ground rules, below, come first.
+
+
+def parents_ground(node):
+    if isinstance(node, dict):
+        if node.get('type') == 'minecraft:biome':
+            node['biome_is'] = node['biome_is'] + [sid for b in node['biome_is'] for sid in subs_of.get(b, []) if sid not in node['biome_is']]
+        for value in node.values():
+            parents_ground(value)
+    elif isinstance(node, list):
+        for value in node:
+            parents_ground(value)
+
+
+parents_ground(noise['surface_rule'])
+# Mesa styles: every block of ground above mesa_base_y is the style's band for its height (repeating upward), as the
+# badlands' terracotta is; the buttes, tables and hoodoos built on it use the same bands (MesaBands), so their stripes
+# line up with the land's.
+band_rules = []
+for sid, spec in SUBS.items():
+    if 'bands' not in spec:
+        continue
+    layers = [block for block, thick in spec['bands'] for _ in range(thick)]
+    runs = []
+    for y in range(VARIANTS['mesa_base_y'], KNOBS['noise_top']):
+        block = layers[(y - VARIANTS['mesa_base_y']) % len(layers)]
+        if runs and runs[-1][1] == block:
+            continue
+        runs.append((y, block))
+    band_rules.append(when({'type': 'minecraft:biome', 'biome_is': [sid]}, {'type': 'minecraft:sequence', 'sequence': [
+        when({'type': 'minecraft:y_above', 'anchor': {'absolute': y}, 'surface_depth_multiplier': 0, 'add_stone_depth': False}, block_rule(block))
+        for y, block in reversed(runs)]}))
 noise['surface_rule']['sequence'][0:0] = [when({'type': 'minecraft:above_preliminary_surface'},
-                                               {'type': 'minecraft:sequence', 'sequence': variant_surfaces})]
+                                               {'type': 'minecraft:sequence', 'sequence': variant_surfaces})] + band_rules
 write(f'data/{NS}/worldgen/noise_settings/eternal_return.json', {'fabric:load_conditions': LOAD_IF_MB, **noise})
 
 # ---------------------------------------------------------------- the End

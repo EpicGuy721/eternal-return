@@ -1,0 +1,23 @@
+{
+  "biomes": [
+    "eternalreturn:desert_baobabs"
+  ],
+  "saplings": {
+    "minecraft:acacia_sapling": {
+      "trees": [
+        {
+          "weight": 4,
+          "template": "eternalreturn:tree/baobab"
+        },
+        {
+          "weight": 2,
+          "tree": "eternalreturn:tree/umbrella_thorn"
+        },
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/thorn_bush"
+        }
+      ]
+    }
+  }
+}

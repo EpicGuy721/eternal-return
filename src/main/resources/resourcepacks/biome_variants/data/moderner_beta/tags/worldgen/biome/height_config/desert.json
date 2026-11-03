@@ -6,11 +6,43 @@
       "required": false
     },
     {
+      "id": "eternalreturn:bryce_mesa",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:desert_baobabs",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:desert_oasis",
+      "required": false
+    },
+    {
       "id": "eternalreturn:desert_peak",
       "required": false
     },
     {
       "id": "eternalreturn:desert_scrub_edge",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:drylands",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:mesa_verde",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:monument_valley",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:painted_canyon",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:white_mesa",
       "required": false
     }
   ]

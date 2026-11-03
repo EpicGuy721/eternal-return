@@ -53,7 +53,9 @@ public class LandmarkTests implements FabricGameTest {
 		// kind, search radius in spacing cells (about 3,000 blocks for the small ones, 6,000 for the big ones), chunks to
 		// generate round the centre
 		Object[][] kinds = {{"arch", 5, 3}, {"spire", 5, 2}, {"tropical_pillars", 5, 3}, {"crater", 5, 3}, {"lava_flow", 3, 6},
-				{"volcano", 3, 7}, {"glacier", 3, 6}, {"ice_wall", 5, 4}};
+				{"volcano", 3, 7}, {"glacier", 3, 6}, {"ice_wall", 5, 4},
+				// The mesa styles' rock forms (phase 6): only in their sub-biomes, so searched further, in more cells.
+				{"butte", 45, 2}, {"table", 35, 3}, {"hoodoos", 90, 2}, {"hoodoo_cluster", 40, 1}};
 		var calculator = world.getChunkManager().getStructurePlacementCalculator();
 		var generator = world.getChunkManager().getChunkGenerator();
 		for (Object[] k : kinds) {
@@ -165,6 +167,19 @@ public class LandmarkTests implements FabricGameTest {
 					int ice = count(world, centre, half, 10, 40, s -> s.isOf(hardened) || s.isOf(Blocks.PACKED_ICE) || s.isOf(Blocks.BLUE_ICE));
 					what = ice + " ice blocks";
 					ok = ice >= 100;
+				}
+				case "butte", "table", "hoodoos", "hoodoo_cluster" -> {
+					// Banded rock of its mesa style standing well above the old ground (the bands repeat by height, as the ground's).
+					com.eternalreturn.worldgen.landmarks.MesaBands.Style style = com.eternalreturn.worldgen.landmarks.MesaBands.of(piece.style);
+					java.util.Set<BlockState> bands = style == null ? java.util.Set.of() : java.util.Set.copyOf(style.layers());
+					int risen = count(world, centre, Math.min(piece.size + 4, half), -4, 40, bands::contains);
+					int needed = switch (kind) {
+						case "butte", "table" -> 200;
+						case "hoodoos" -> 40;
+						default -> 15;
+					};
+					what = risen + " banded blocks above the ground (" + piece.style + ", size " + piece.size + ")";
+					ok = style != null && risen >= needed;
 				}
 				default -> throw new IllegalStateException(kind);
 			}

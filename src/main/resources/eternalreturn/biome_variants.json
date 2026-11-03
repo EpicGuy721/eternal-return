@@ -172,5 +172,42 @@
   "eternalreturn:palm_beach": {
     "base": "minecraft:beach",
     "kind": "sub"
+  },
+  "eternalreturn:desert_oasis": {
+    "base": "minecraft:desert",
+    "kind": "sub"
+  },
+  "eternalreturn:desert_baobabs": {
+    "base": "minecraft:desert",
+    "kind": "sub"
+  },
+  "eternalreturn:drylands": {
+    "base": "minecraft:desert",
+    "kind": "sub"
+  },
+  "eternalreturn:pinyon_woodland": {
+    "base": "minecraft:savanna",
+    "kind": "sub",
+    "boulders": 0.8
+  },
+  "eternalreturn:monument_valley": {
+    "base": "minecraft:badlands",
+    "kind": "sub"
+  },
+  "eternalreturn:mesa_verde": {
+    "base": "minecraft:badlands",
+    "kind": "sub"
+  },
+  "eternalreturn:bryce_mesa": {
+    "base": "minecraft:badlands",
+    "kind": "sub"
+  },
+  "eternalreturn:painted_canyon": {
+    "base": "minecraft:badlands",
+    "kind": "sub"
+  },
+  "eternalreturn:white_mesa": {
+    "base": "minecraft:badlands",
+    "kind": "sub"
   }
 }

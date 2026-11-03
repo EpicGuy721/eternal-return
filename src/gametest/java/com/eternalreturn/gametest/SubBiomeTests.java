@@ -91,7 +91,7 @@ public class SubBiomeTests implements FabricGameTest {
 
 	/**
 	 * Every sub-biome is in the layers within 6,144 blocks of 0, 0; land sub-biomes take between half and twice their share
-	 * of their parent (with its other sub-biomes). Logs each one's share and a /tp.
+	 * of their parent (with its other sub-biomes; a third to three times for the 1-in-8 ones). Logs each one's share and a /tp.
 	 */
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = BATCH, tickLimit = 2_000_000)
 	public void subBiomesTurnUp(TestContext ctx) {
@@ -111,7 +111,10 @@ public class SubBiomeTests implements FabricGameTest {
 			report.put(id, String.format("/tp @s %d %d %d (%.1f%% of %s and its sub-biomes)", spot.getX(), y + 1, spot.getZ(), share * 100, parent));
 			Integer expected = TABLE_SHARES.get(id);
 			if (expected != null) {
-				ctx.assertTrue(share >= 0.5 / expected && share <= 2.0 / expected,
+				// Half to twice the share; a third to three times for the 1-in-8 ones, whose parents (badlands, swampland,
+				// forest) have few 256-block cells in the sample, so a few cells either way move the share a lot.
+				double slack = expected >= 8 ? 3 : 2;
+				ctx.assertTrue(share >= 1 / slack / expected && share <= slack / expected,
 						String.format("%s takes %.1f%% of its parent, expected about 1 in %d", id, share * 100, expected));
 			}
 		}
@@ -124,7 +127,10 @@ public class SubBiomeTests implements FabricGameTest {
 			Map.entry("eternalreturn:pumpkin_plains", 4), Map.entry("eternalreturn:meadow", 4), Map.entry("eternalreturn:dark_meadow", 4),
 			Map.entry("eternalreturn:heathland", 4), Map.entry("eternalreturn:webbed_forest", 8), Map.entry("eternalreturn:spooky_swamp", 8),
 			Map.entry("eternalreturn:bald_cypress_swamp", 4), Map.entry("eternalreturn:redwood_forest", 4), Map.entry("eternalreturn:larch_forest", 4),
-			Map.entry("eternalreturn:grand_fir_forest", 4), Map.entry("eternalreturn:poplar_grove", 4), Map.entry("eternalreturn:black_spruce_forest", 4));
+			Map.entry("eternalreturn:grand_fir_forest", 4), Map.entry("eternalreturn:poplar_grove", 4), Map.entry("eternalreturn:black_spruce_forest", 4),
+			Map.entry("eternalreturn:desert_oasis", 8), Map.entry("eternalreturn:desert_baobabs", 4), Map.entry("eternalreturn:drylands", 4),
+			Map.entry("eternalreturn:pinyon_woodland", 4), Map.entry("eternalreturn:monument_valley", 8), Map.entry("eternalreturn:mesa_verde", 8),
+			Map.entry("eternalreturn:bryce_mesa", 8), Map.entry("eternalreturn:painted_canyon", 8), Map.entry("eternalreturn:white_mesa", 8));
 
 	/** What each sub-biome must show in 5 x 5 generated chunks round its spot: a block (or block tag) and how many at least. */
 	private record Sign(String what, int atLeast) {
@@ -144,7 +150,16 @@ public class SubBiomeTests implements FabricGameTest {
 			Map.entry("eternalreturn:grand_fir_forest", List.of(new Sign("minecraft:spruce_log", 60))),
 			Map.entry("eternalreturn:poplar_grove", List.of(new Sign("minecraft:birch_log", 40), new Sign("eternalreturn:pale_oak_log", 10))),
 			Map.entry("eternalreturn:black_spruce_forest", List.of(new Sign("minecraft:spruce_log", 30))),
-			Map.entry("eternalreturn:palm_beach", List.of(new Sign("minecraft:jungle_log", 4))));
+			Map.entry("eternalreturn:palm_beach", List.of(new Sign("minecraft:jungle_log", 4))),
+			Map.entry("eternalreturn:desert_oasis", List.of(new Sign("minecraft:grass_block", 200), new Sign("minecraft:water", 30), new Sign("minecraft:jungle_log", 8))),
+			Map.entry("eternalreturn:desert_baobabs", List.of(new Sign("minecraft:acacia_log", 30), new Sign("minecraft:coarse_dirt", 50))),
+			Map.entry("eternalreturn:drylands", List.of(new Sign("minecraft:coarse_dirt", 150), new Sign("minecraft:packed_mud", 50), new Sign("minecraft:dead_bush", 10))),
+			Map.entry("eternalreturn:pinyon_woodland", List.of(new Sign("minecraft:spruce_log", 20))),
+			Map.entry("eternalreturn:monument_valley", List.of(new Sign("minecraft:red_sand", 300), new Sign("minecraft:red_terracotta", 300))),
+			Map.entry("eternalreturn:mesa_verde", List.of(new Sign("minecraft:grass_block", 200), new Sign("minecraft:brown_terracotta", 100), new Sign("minecraft:spruce_log", 10))),
+			Map.entry("eternalreturn:bryce_mesa", List.of(new Sign("minecraft:pink_terracotta", 100))),
+			Map.entry("eternalreturn:painted_canyon", List.of(new Sign("minecraft:purple_terracotta", 100), new Sign("minecraft:light_blue_terracotta", 30))),
+			Map.entry("eternalreturn:white_mesa", List.of(new Sign("minecraft:calcite", 100), new Sign("minecraft:white_terracotta", 100))));
 
 	/**
 	 * Round each sub-biome's spot, 5 x 5 chunks are generated in full. Each must show its signs (pumpkins, cobwebs, heath
@@ -234,7 +249,53 @@ public class SubBiomeTests implements FabricGameTest {
 		ctx.complete();
 	}
 
-	private static final Set<String> BUSHES_ONLY = Set.of("eternalreturn:heathland");
+	/**
+	 * Round a jungle and the swamps (5 x 5 chunks each, generated in full), no dirt rests on leaves: a tree that started on
+	 * another tree's leaves put dirt there, and the owner saw trees growing out of that dirt.
+	 */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = BATCH, tickLimit = 2_000_000)
+	public void noTreesGrowOnLeaves(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		survey(world);
+		Map<String, Integer> found = new TreeMap<>();
+		for (String id : List.of("minecraft:jungle", "moderner_beta:early_release_swampland", "eternalreturn:spooky_swamp", "eternalreturn:bald_cypress_swamp")) {
+			BlockPos spot = spots.get(id);
+			ctx.assertTrue(spot != null, id + " not found");
+			int cx0 = spot.getX() >> 4;
+			int cz0 = spot.getZ() >> 4;
+			for (int cx = cx0 - 3; cx <= cx0 + 3; cx++) {
+				for (int cz = cz0 - 3; cz <= cz0 + 3; cz++) {
+					world.getChunk(cx, cz, ChunkStatus.FULL, true);
+				}
+			}
+			int onLeaves = 0;
+			BlockPos.Mutable pos = new BlockPos.Mutable();
+			for (int x = (cx0 - 2) * 16; x < (cx0 + 3) * 16; x++) {
+				for (int z = (cz0 - 2) * 16; z < (cz0 + 3) * 16; z++) {
+					int top = world.getTopY(Heightmap.Type.MOTION_BLOCKING, x, z);
+					for (int y = world.getSeaLevel() - 4; y <= top; y++) {
+						if (world.getBlockState(pos.set(x, y, z)).isIn(BlockTags.DIRT) && world.getBlockState(pos.set(x, y - 1, z)).isIn(BlockTags.LEAVES)) {
+							onLeaves++;
+							if (onLeaves <= 3) {
+								EternalReturn.LOGGER.info("[sub-biomes] dirt on leaves at {} {} {} ({})", x, y, z, id);
+							}
+						}
+					}
+				}
+			}
+			found.put(id, onLeaves);
+		}
+		EternalReturn.LOGGER.info("[sub-biomes] dirt on leaves: {}; trees kept from starting on leaves so far: {}", found, BiomeTrees.STOPPED_ON_LEAVES.get());
+		ctx.assertTrue(found.values().stream().allMatch(n -> n == 0), "dirt on leaves: " + found);
+		ctx.complete();
+	}
+
+	/**
+	 * Sub-biomes whose own trees may not show in 5 x 5 chunks: bushes, which no table looks up (heathland, drylands), few
+	 * trees (Bryce), or none (Monument Valley, Painted Canyon, White Mesa).
+	 */
+	private static final Set<String> BUSHES_ONLY = Set.of("eternalreturn:heathland", "eternalreturn:drylands", "eternalreturn:bryce_mesa",
+			"eternalreturn:monument_valley", "eternalreturn:painted_canyon", "eternalreturn:white_mesa");
 
 	private static boolean noLeavesNear(ServerWorld world, BlockPos log) {
 		for (BlockPos p : BlockPos.iterate(log.add(-2, -2, -2), log.add(2, 2, 2))) {

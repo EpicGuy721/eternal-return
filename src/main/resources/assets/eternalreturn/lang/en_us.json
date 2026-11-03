@@ -546,5 +546,14 @@
 	"biome.eternalreturn.grand_fir_forest": "Grand Fir Forest",
 	"biome.eternalreturn.poplar_grove": "Poplar Grove",
 	"biome.eternalreturn.black_spruce_forest": "Black Spruce Forest",
-	"biome.eternalreturn.palm_beach": "Palm Beach"
+	"biome.eternalreturn.palm_beach": "Palm Beach",
+	"biome.eternalreturn.desert_oasis": "Desert Oasis",
+	"biome.eternalreturn.desert_baobabs": "Desert Baobabs",
+	"biome.eternalreturn.drylands": "Drylands",
+	"biome.eternalreturn.pinyon_woodland": "Pinyon Woodland",
+	"biome.eternalreturn.monument_valley": "Monument Valley",
+	"biome.eternalreturn.mesa_verde": "Mesa Verde",
+	"biome.eternalreturn.bryce_mesa": "Bryce Mesa",
+	"biome.eternalreturn.painted_canyon": "Painted Canyon",
+	"biome.eternalreturn.white_mesa": "White Mesa"
 }

@@ -1,0 +1,10 @@
+{
+  "type": "eternalreturn:landmark",
+  "landmark": "butte",
+  "min_size": 8,
+  "max_size": 16,
+  "biomes": "#eternalreturn:has_structure/butte",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

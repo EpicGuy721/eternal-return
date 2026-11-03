@@ -93,7 +93,9 @@ public class BiomeTreeTests implements FabricGameTest {
 			pad(world, pos);
 			String name = BiomeTrees.name(choice);
 			boolean ok = false;
-			for (int attempt = 0; attempt < 5 && !ok; attempt++) {
+			// Several tries: a red mangrove's stilt roots must reach ground within 15 blocks, and on this small pad in the sky
+			// a root that skews off it finds none (adding two species gave the mangrove new random numbers and five tries failed).
+			for (int attempt = 0; attempt < 12 && !ok; attempt++) {
 				ok = BiomeTrees.grow(choice, world, generator, Random.create(i * 31L + attempt), pos);
 			}
 			int[] blocks = count(world, pos);

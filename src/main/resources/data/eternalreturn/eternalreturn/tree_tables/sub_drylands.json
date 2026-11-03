@@ -1,0 +1,19 @@
+{
+  "biomes": [
+    "eternalreturn:drylands"
+  ],
+  "saplings": {
+    "minecraft:acacia_sapling": {
+      "trees": [
+        {
+          "weight": 3,
+          "tree": "eternalreturn:tree/thorn_bush"
+        },
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/umbrella_thorn"
+        }
+      ]
+    }
+  }
+}

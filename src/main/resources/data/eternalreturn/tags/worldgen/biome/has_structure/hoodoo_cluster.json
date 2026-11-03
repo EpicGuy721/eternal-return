@@ -1,0 +1,12 @@
+{
+  "values": [
+    {
+      "id": "eternalreturn:painted_canyon",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:white_mesa",
+      "required": false
+    }
+  ]
+}
