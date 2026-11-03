@@ -237,8 +237,8 @@ The plan, status, terrain settings and maps are in [docs/worldgen.md](docs/world
 | Random spawns within 5,000 blocks of 0, 0 (first join, and deaths with no bed; Eternal Return worlds) | `survival.RandomSpawns`; `RandomSpawnMixin`, `RandomFirstSpawnMixin` |
 | Coordinates hidden in survival and adventure (reduced debug info) | `survival.HiddenCoordinates`; `HiddenCoordinatesMixin`, `EntityStatusPacketMixin`, `RandomSpawnMixin` (game mode changes) |
 | No attacking while blocking with a sword (Nostalgic Tweaks' sword blocking) | `logic.SwordBlocking`; `combat.SwordBlockingMixin`; client `SwordBlockingClientMixin` |
-| Swinging at a block while eating or drinking (arm swing and hit particles, nothing breaks) | client `SwordBlockingClientMixin` |
-| Subtle potions (amethyst shard in the brewing stand: no particles) | `items.SubtlePotions`; mixins in `mixin/potions` |
+| Swinging at a block while eating or drinking (arm swing and hit particles, nothing breaks) | client `SwordBlockingClientMixin`, `EatingSwingRenderMixin` (the swing drawn on the eating hand) |
+| Subtle potions (amethyst shard in the brewing stand: no particles) | `items.SubtlePotions`; mixins in `mixin/potions`; client `SubtleCloudHitboxMixin` |
 | Defense (swords: +5% blocked per level, on top of Nostalgic Tweaks' blocking) | `defense.json`; `SwordBlocking`, `combat.DefenseMixin` |
 | Swiftness (melee weapons: +10% attack speed per level) | `swiftness.json` (vanilla attribute effect); item tag `eternalreturn:enchantable/melee` |
 | Curse of Homing (armor: projectiles within 1 block per cursed piece turn toward the wearer) | `homing_curse.json`; `logic.Homing`, `combat.HomingMixin`, `PersistentProjectileAccessor` |
@@ -742,9 +742,9 @@ Creatures keep their gear and name. The stone works before a creature's own righ
 
 **Curse of Homing** (armor, I only; found like the other curses, never from the table): any projectile someone else shot (arrows, tridents, fireballs, snowballs, potions, bullets, webs, other players' shots; not fishing lines) that comes within 1 block of the wearer per cursed piece worn (all four: 4 blocks) turns straight toward them at the speed it had. The wearer's own shots fly true.
 
-**Eating swing.** Holding attack on a block while eating or drinking swings the arm and knocks the block's hit particles off it, as in 1.7.10. Nothing cracks or breaks and the eating goes on; other players see the swing.
+**Eating swing.** Holding attack on a block while eating or drinking swings the arm and knocks the block's hit particles off it, as in 1.7.10: in first person the eating hand swings on top of its eating bob. Nothing cracks or breaks and the eating goes on; other players see the swing.
 
-**Subtle potions.** An amethyst shard in a brewing stand makes potions, splash potions and lingering potions with effects subtle: "Subtle Potion of Swiftness". Their effects show no particles on whoever has them, a subtle splash potion breaks without the coloured burst, a subtle lingering cloud is invisible, and tipped arrows made from it fly without a trail and stay subtle. Brew redstone or glowstone first: a subtle potion can't be lengthened or strengthened. Gunpowder and dragon's breath still work on it. (`survival.subtlePotions`.)
+**Subtle potions.** An amethyst shard in a brewing stand makes potions, splash potions and lingering potions with effects subtle: "Subtle Potion of Swiftness". Their effects show no particles on whoever has them, a subtle splash potion breaks without the coloured burst, a subtle lingering cloud is invisible (F3+B shows no hitbox for it to survival and adventure players), and tipped arrows made from it fly without a trail and stay subtle. Brew redstone or glowstone first: a subtle potion can't be lengthened or strengthened. Gunpowder and dragon's breath still work on it. (`survival.subtlePotions`.)
 
 **Piston crushing.** A piston pushing a row of blocks (no slime or honey in it) into obsidian or crying obsidian crushes the block against the obsidian, and the rest of the row moves up. Stone, granite, diorite, andesite, tuff, calcite, deepslate, smooth stone and stone bricks give cobblestone; cobblestone (and mossy and deepslate) gives gravel; gravel gives sand (block tags `eternalreturn:crushes_to/*`). Anything else drops what an iron pickaxe would mine (ores their ore, no Fortune or Silk Touch). A chest spills its contents. Pulling never crushes; bedrock and other unmovable blocks still stop the push. (`redstone.pistonsCrush`.)
 

@@ -7,6 +7,8 @@
 		"BeaconLevelTwoButtonMixin",
 		"BeaconScreenMixin",
 		"BlizzardFogMixin",
+		"EatingSwingRenderMixin",
+		"SubtleCloudHitboxMixin",
 		"SwordBlockingClientMixin",
 		"FogTintMixin",
 		"EnchantmentScreenMixin",
