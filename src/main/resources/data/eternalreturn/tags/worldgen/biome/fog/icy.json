@@ -1,0 +1,10 @@
+{
+  "values": [
+    "minecraft:snowy_plains",
+    {"id": "moderner_beta:early_release_ice_plains", "required": false},
+    {"id": "moderner_beta:late_beta_ice_plains", "required": false},
+    "minecraft:frozen_river",
+    "minecraft:frozen_ocean",
+    "minecraft:deep_frozen_ocean"
+  ]
+}

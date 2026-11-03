@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "eternalreturn:ice_plains_peak",
+      "required": false
+    }
+  ]
+}

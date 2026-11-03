@@ -58,7 +58,7 @@ The preset is all data. Without Moderner Beta installed, the world type and its 
 - Phase 4, part 1 (biome stone): done. Each biome's stone from under the topsoil to bedrock, and two hardened blocks.
 - Phase 4, part 2 (ore variants): done. Every ore in every host stone, with old-style textures.
 - Terrain features: done. Deep oceans that fall in steps, rare sinkholes (mostly in the sea, about 100 blocks across), rare floating islands, old growth taigas, extremely rare monoliths, mushrooms in caves (see Terrain features).
-- Worldgen expansion (the owner's brief of 2026-11-01, seven phases, each checked in game before the next): phase 1 (clutter: boulders) done, see Clutter; phase 2 (biome trees) done, see Biome trees; phase 3 (biome variants) done, see Biome variants; phase 4 (terrain landmarks) done, see Terrain landmarks. Next: climate rules.
+- Worldgen expansion (the owner's brief of 2026-11-01, seven phases, each checked in game before the next): phase 1 (clutter: boulders) done, see Clutter; phase 2 (biome trees) done, see Biome trees; phase 3 (biome variants) done, see Biome variants; phase 4 (terrain landmarks) done, see Terrain landmarks; phase 5 (climate rules) built, see Climate rules, waiting for the owner's in-game check. Next: new biomes.
 - Phase 4, part 3 (biomes and mineshafts): done. Cherry groves, every modern ocean, and mineshafts built from their biome's wood. Ocean monuments and Moderner Beta's ocean shrines were later removed from Eternal Return worlds; guardians spawn in the open sea instead (README, Mobs and Fishing).
 
 ## The Eternal Return preset
@@ -521,6 +521,47 @@ Rarity by size and "anywhere fitting" are the owner's answers (2026-11-02); the 
 ### Tests
 
 `LandmarkTests` (Eternal Return run, batch `landmarks`): `everyLandmarkIsBuilt` takes each kind's nearest spacing cell whose start chunk holds one, builds it into finished chunks (the test world, vanilla's test level, has structures off, so the test starts them itself), checks what it holds (an arch's span over air, a spire's upper half, a crater's open bowl and ores, a lava flow's lava and charred blocks, a volcano's slope and lava lake, the ice of glaciers and walls) and logs a `/tp` for each. Checked in game (a new world on the test seed, screenshots): all eight; the volcano's foot and the glacier's sides were walls at first. `noLandmarksInOtherWorlds` (flat runs, batch `landmarks_other_worlds`) checks none is found elsewhere.
+
+## Climate rules (expansion phase 5)
+
+Rules for cold and warmth, in Eternal Return worlds only (the owner's answer: other worlds don't change; the flat runs check the feature places nothing there, storms keep the game rule and no fog tints are sent). The numbers are in `data/eternalreturn/worldgen/configured_feature/climate.json` and `data/eternalreturn/eternalreturn/fog_tints.json`, tunable without code. Each rule has its own setting under `worldgen` (all on): `deepSnow`, `snowThroughLeaves`, `thickLakeIce`, `coldLavaCrust`, `fogTints`; the first four affect newly generated chunks (and storms).
+
+**How it hooks in (Moderner Beta's source read first).** In these worlds Moderner Beta's chunk generator (3D noise with surface rules) cancels vanilla's `freeze_top_layer` and runs its own snow-and-freeze step for every biome (`SnowAndFreezeFeatureMixin` calls `BetaSnowAndFreezeFeature.setFreezeTopLayer`; the ice plains, extreme hills and swampland list its `moderner_beta:freeze_top_layer` directly, which does the same). That step lays one snow layer where it is cold enough (below 0.15) and freezes the top block of open water, nothing more. The Release 1.6.4 biome provider has no climate sampler, so the temperature is the biome's own (Moderner Beta's height scaling is `none` in the preset; biomes on vanilla's freeze step get its Release-style cooling with height). So phase 5 doesn't touch Moderner Beta's code: a new feature, `eternalreturn:climate` (`com.eternalreturn.worldgen.climate.Climate`), runs right after it, last of every overworld biome's last decoration step (no other feature's place in the decoration order moves; the placed feature carries `eternalreturn:eternal_return_only`), and builds on what the freezing left.
+
+**Temperature.** The biome's temperature (the value in its biome JSON), averaged with the biomes 6 blocks away on four sides (`blend_radius`) so the snow doesn't step at a border, and cooled by 0.00125 a block above y 80 (`height_cooling`, vanilla's rate), so mountains are colder than the valleys below them. Below the snow line (0.15) it snows. The taiga is 0.05 (cool), the ice plains 0, the taiga edge -0.2, the taiga peak -0.25, the ice plains peak -0.3.
+
+**Snow depth by temperature.** Where the freezing laid a snow layer on the ground, the climate deepens it from the `snow_layers` curve (straight between its points), plus a slow drift noise of up to 0.8 layers (`drift_layers`; `drift_size` 24 blocks), rounded and kept between 1 and 8 (a full block):
+
+| Temperature | Layers (before drift) | Where |
+|---|---|---|
+| 0.15 | 1 | the snow line |
+| 0.05 | 1.4 | taiga (cool): 1 or 2 |
+| 0 | 2.6 | ice plains, frozen rivers (cold): 2 to 3, now and then 4 |
+| -0.2 | 5 | taiga edges |
+| -0.35 or colder | 8 | the coldest peaks |
+
+**Snow through leaves.** Moderner Beta (like vanilla) puts snow on a tree's top leaves and none under it. Now the climate follows the snow down through each crown from its top: on leaves inside the crown with room above them, a layer one time in three (`canopy_gap_chance` 0.3), and on the ground under the crown half the open ground's depth (`canopy_share` 0.5, at least 1 layer), with snowy grass under it. A trunk stops it (the ground right under a log stays bare). Trees reaching over from a chunk decorated later (the border fix, `SnowyTrees`) do the same: in these worlds the ground under them keeps the thinner snow instead of losing it.
+
+**Thick ice, open water below.** The owner's answer: the temperature decides how thick, and the bottom of the water never freezes. Where the freezing put ice on water, the climate freezes more layers under it from the `ice_layers` curve (1 at 0.05, 2 at 0, 3 at -0.3 or colder), always leaving the bottom 2 blocks (`water_kept`) water: a lake 3 deep in the ice plains gets one more layer of ice and keeps 2 of water; one 2 deep or less keeps the single layer Moderner Beta gave it. Frozen rivers and the frozen seas freeze the same way.
+
+**Obsidian on cold lava lakes.** A lava lake (vanilla's lake feature) whose top lies open to the sky (48 blocks of air over it) in a cold spot gets an obsidian crust as it is made (`LakeFeatureMixin` calls `Climate.afterLake`): `lava_crust` layers (1 at the snow line, 2 at -0.2 or colder), keeping at least one layer of lava under it (`lava_kept`), so digging through the crust finds real lava. Where the lake is only one block deep the crust takes it all. The landmarks' lava (flows, volcanoes) is not a lake and stays open, so it still warms the cold.
+
+**Storms.** The owner's answer: storms build the snow back up too. In a snow storm, snow piles up to the climate's depth for the spot instead of the snow-piling game rule's 1 layer (whichever is more; a rule of 0 still stops all piling, and on leaves it stays the rule), so cleared ground and dug paths fill back in to the natural depth. Storm snow landing on a tree also sifts through it, a layer at a time, to the same places as at generation (`ClimateStormMixin`). Ice doesn't thicken in storms.
+
+**Fog tints by biome.** The owner's answer: per biome, a day and a night colour. `fog_tints.json` maps a biome id or a biome tag (`#namespace:path`; an id wins over a tag, tags are tried in the order written) to a `day` colour (vanilla dims it toward dusk, as it dims all fog) and a `night` colour (the fog at midnight); between them it fades. The table uses one tag per group, `eternalreturn:fog/<group>` (icy, taiga, mountains, desert, badlands, savanna, jungle, swamp, dark_forest, cherry, autumnal, mushroom, warm_ocean, cold_ocean), and the variants join their bases' tags through the built-in pack (rerun `build_variants.py` after changing them). Biomes in no group (plains, forest, birch forest, the rivers, the plain oceans) keep vanilla's fog. The server works out each biome's tint and sends the list to each player as they join and after `/reload` (`FogTints`); the player's game blends it across biome borders exactly as vanilla blends biome fog (client `ClientFog`, `FogTintMixin`). Rain and blizzards still darken and pale it on top. Nostalgic Tweaks' old fog colours, if turned on, may override it.
+
+### Tests
+
+`ClimateTests` (Eternal Return run, batch `climate`):
+- `coldBiomesHaveDeeperSnow`: up to three taiga spots and three spots at 0 or colder on the test seed, 5 x 5 chunks each generated in full; the open ground's snow must average at least half a layer more in the cold spots, which must have some snow of 4 layers or more; none past 8; snow on the ground under crowns, never deeper than the open ground's there; some snow on leaves inside crowns.
+- `frozenLakesKeepWaterBelow`: around up to four cold spots, 7 x 7 chunks each: every column of ice two or more thick has at least 2 blocks of water under it, and more than 20 such columns turn up.
+- `coldLavaLakesCrustOver`: a lava pit 5 x 5 and 3 deep built at the surface of the ice plains crusts over with lava kept under it; the same pit in a warm biome stays lava.
+- `stormsPileSnowToTheClimateDepth`: at a spot of -0.2 or colder the storm limit is the climate's depth (2 or more), 0 with the game rule at 0, and 1 on leaves; storm snow on a crown sifts down to the crown's share on the ground under it.
+- `biomesHaveFogTints`: the ice plains get the icy tint, the taiga peak its base's, the plains none.
+
+`noClimateInOtherWorlds` (batch `climate_other_worlds`, flat runs): the climate feature places nothing, storms keep the game rule, and no fog tints are sent.
+
+On the test seed (cloud session, 2026-11-03; no display, so not yet checked in game): the taiga's open ground averaged 1.5 layers (about 8,300 columns: 4,900 of 1, 2,900 of 2, a few up to 6 on hills), the cold spots (ice plains round -320, -320) 2.8 (about 16,000 columns: 5,600 of 2, 8,700 of 3, 1,100 of 5, up to 7 near -330, 96, -297); about 5,600 columns of snow on the ground under taiga crowns (1 layer) and 600 under the colder trees (2.2 layers), and 1,900 and 100 layers on leaves inside crowns. Around the frozen water near -500, -500: 1,900 iced columns, 550 of them with 2 blocks of ice, every one over at least 2 blocks of water (e.g. -304, 62, -520); 900 one-deep puddles keep a single layer over 1 water. The lava pit at -312, 92, -312 crusted with one layer of obsidian over two of lava; the warm one (968, 88, 328) stayed lava. The flat runs pass (`runGametestNoModernerBeta` needed a second try: one run failed `beaconsBuildUpOneEffect`, the next `flocksTakeOffTogether` and `shunsTheLight`, mob timing tests that passed on the run after; none touch the climate).
 
 ## The cave engine (phase 3)
 

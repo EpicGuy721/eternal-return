@@ -1,0 +1,19 @@
+{
+  "_comment": "Fog colours by biome in Eternal Return worlds (FogTints). A key is a biome id or a biome tag (#namespace:path); an id wins over a tag, tags are tried in this order, and a biome in none keeps its own fog. day is the fog colour at noon (the game dims it toward dusk), night the colour at midnight; between them it fades. Variants (peaks, edges, rivers) are in their bases' fog tags.",
+  "tints": {
+    "#eternalreturn:fog/icy": {"day": "#DDE9F7", "night": "#0D1426"},
+    "#eternalreturn:fog/taiga": {"day": "#BDD0E4", "night": "#0B121E"},
+    "#eternalreturn:fog/mountains": {"day": "#C8D2DE", "night": "#0D1118"},
+    "#eternalreturn:fog/desert": {"day": "#EBDDB6", "night": "#17130D"},
+    "#eternalreturn:fog/badlands": {"day": "#E9C6A2", "night": "#1A0F0B"},
+    "#eternalreturn:fog/savanna": {"day": "#E3DAAE", "night": "#15130B"},
+    "#eternalreturn:fog/jungle": {"day": "#BEE3C4", "night": "#07140C"},
+    "#eternalreturn:fog/swamp": {"day": "#AEBC9C", "night": "#0B1009"},
+    "#eternalreturn:fog/dark_forest": {"day": "#A2B2A8", "night": "#070C0A"},
+    "#eternalreturn:fog/cherry": {"day": "#F2D4E4", "night": "#150C15"},
+    "#eternalreturn:fog/autumnal": {"day": "#EAD3B2", "night": "#150E0A"},
+    "#eternalreturn:fog/mushroom": {"day": "#D4C4E4", "night": "#100B17"},
+    "#eternalreturn:fog/warm_ocean": {"day": "#BCE8F2", "night": "#08141A"},
+    "#eternalreturn:fog/cold_ocean": {"day": "#BCCDE2", "night": "#0A1220"}
+  }
+}

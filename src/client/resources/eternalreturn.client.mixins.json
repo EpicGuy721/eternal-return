@@ -7,6 +7,7 @@
 		"BeaconLevelTwoButtonMixin",
 		"BeaconScreenMixin",
 		"BlizzardFogMixin",
+		"FogTintMixin",
 		"EnchantmentScreenMixin",
 		"HiddenWindowMixin",
 		"HungerBarMixin",

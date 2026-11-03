@@ -62,6 +62,8 @@ public final class WorldgenFeatures {
 		com.eternalreturn.worldgen.variants.BiomeVariants.register();
 		// Biome tree tables: saplings and generated trees by biome (Eternal Return worlds only).
 		com.eternalreturn.worldgen.trees.BiomeTrees.register();
+		// Climate rules: deep snow, snow through leaves, thick ice, cold lava crusts, fog tints (Eternal Return worlds only).
+		com.eternalreturn.worldgen.climate.Climate.register();
 		// The outer End: islands, megastructures, chorus on the islands (Eternal Return's End only).
 		com.eternalreturn.worldgen.end.OuterEnd.register();
 	}

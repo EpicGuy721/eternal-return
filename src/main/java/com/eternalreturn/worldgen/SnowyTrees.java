@@ -1,6 +1,9 @@
 package com.eternalreturn.worldgen;
 
+import com.eternalreturn.config.EternalReturnConfig;
+import com.eternalreturn.worldgen.climate.Climate;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.SnowBlock;
 import net.minecraft.block.Blocks;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.state.property.Properties;
@@ -15,7 +18,8 @@ import net.minecraft.world.biome.Biome;
  * neighbour lands on snowy ground with bare leaves. After each tree grows in the world's generation (TreeSnowMixin),
  * every column it may cover gets what vanilla gives a tree within one chunk: snow on its top leaves where the biome
  * snows, and no snow (nor snowy grass) on the ground under them. Columns not yet snowed on are left to vanilla, which
- * does the same when their turn comes.
+ * does the same when their turn comes. In Eternal Return worlds the ground under them keeps the thinner snow that falls
+ * through leaves (Climate) instead.
  */
 public final class SnowyTrees {
 	/** How far a tree's leaves can reach from where it grows. */
@@ -27,6 +31,8 @@ public final class SnowyTrees {
 	public static void afterTree(StructureWorldAccess world, BlockPos origin) {
 		BlockPos.Mutable top = new BlockPos.Mutable();
 		BlockPos.Mutable below = new BlockPos.Mutable();
+		Climate.Config canopy = EternalReturnConfig.get().worldgen.snowThroughLeaves && Climate.inEternalReturn(world)
+				? Climate.config(world.getRegistryManager()) : null;
 		for (int dx = -REACH; dx <= REACH; dx++) {
 			for (int dz = -REACH; dz <= REACH; dz++) {
 				int x = origin.getX() + dx;
@@ -49,7 +55,13 @@ public final class SnowyTrees {
 						|| world.getBlockState(below).isIn(BlockTags.LOGS))) {
 					below.move(0, -1, 0);
 				}
-				if (world.getBlockState(below).isOf(Blocks.SNOW)) {
+				if (world.getBlockState(below).isOf(Blocks.SNOW) && canopy != null) {
+					// Eternal Return worlds (Climate): the ground keeps the thinner snow that falls through leaves.
+					int depth = Climate.canopyDepth(canopy, Climate.snowDepth(world, world.getSeed(), canopy, below));
+					if (depth > 0) {
+						world.setBlockState(below, Blocks.SNOW.getDefaultState().with(SnowBlock.LAYERS, depth), 2);
+					}
+				} else if (world.getBlockState(below).isOf(Blocks.SNOW)) {
 					world.setBlockState(below, Blocks.AIR.getDefaultState(), 2);
 					BlockState ground = world.getBlockState(below.move(0, -1, 0));
 					if (ground.contains(Properties.SNOWY)) {

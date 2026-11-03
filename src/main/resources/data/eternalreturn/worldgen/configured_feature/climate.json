@@ -1,0 +1,30 @@
+{
+  "type": "eternalreturn:climate",
+  "config": {
+    "snow_line": 0.15,
+    "height_cooling": 0.00125,
+    "blend_radius": 6,
+    "snow_layers": [
+      {"temperature": 0.15, "value": 1.0},
+      {"temperature": 0.05, "value": 1.4},
+      {"temperature": 0.0, "value": 2.6},
+      {"temperature": -0.2, "value": 5.0},
+      {"temperature": -0.35, "value": 8.0}
+    ],
+    "drift_layers": 0.8,
+    "drift_size": 24.0,
+    "canopy_share": 0.5,
+    "canopy_gap_chance": 0.3,
+    "ice_layers": [
+      {"temperature": 0.05, "value": 1.0},
+      {"temperature": 0.0, "value": 2.0},
+      {"temperature": -0.3, "value": 3.0}
+    ],
+    "water_kept": 2,
+    "lava_crust": [
+      {"temperature": 0.15, "value": 1.0},
+      {"temperature": -0.2, "value": 2.0}
+    ],
+    "lava_kept": 1
+  }
+}

@@ -656,6 +656,20 @@ public final class EternalReturnConfig {
 		 */
 		public boolean snowOnBorderTrees = true;
 		/**
+		 * Climate rules, Eternal Return worlds only (newly generated chunks; numbers in
+		 * data/eternalreturn/worldgen/configured_feature/climate.json). Snow deepens with the cold, up to a full block,
+		 * at generation and in snow storms.
+		 */
+		public boolean deepSnow = true;
+		/** Snow falls through tree leaves: a little on leaves inside the crown, thinner snow on the ground under it. */
+		public boolean snowThroughLeaves = true;
+		/** Cold water freezes thicker the colder it is, always keeping open water at the bottom. */
+		public boolean thickLakeIce = true;
+		/** Lava lakes open to the sky in cold spots get an obsidian crust over their lava. */
+		public boolean coldLavaCrust = true;
+		/** Each biome's own day and night fog colour (data/eternalreturn/eternalreturn/fog_tints.json). */
+		public boolean fogTints = true;
+		/**
 		 * In Eternal Return worlds only strongholds, mineshafts, nether fossils and end cities are placed, in
 		 * every dimension (structure-like features such as geodes and dungeons stay). Blazes spawn in soul
 		 * sand valleys and basalt deltas there instead of fortresses. Other worlds never change.

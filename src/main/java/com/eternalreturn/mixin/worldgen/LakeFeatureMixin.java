@@ -1,5 +1,6 @@
 package com.eternalreturn.mixin.worldgen;
 
+import com.eternalreturn.worldgen.climate.Climate;
 import com.eternalreturn.worldgen.ores.OrePlacement;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -13,7 +14,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** Lakes keep host stone where they would line themselves with plain stone (see OrePlacement.keepsHost). */
+/**
+ * Lakes keep host stone where they would line themselves with plain stone (see OrePlacement.keepsHost); lava lakes in
+ * cold spots of Eternal Return worlds get an obsidian crust (Climate.afterLake).
+ */
 @SuppressWarnings("deprecation")
 @Mixin(LakeFeature.class)
 public abstract class LakeFeatureMixin {
@@ -25,6 +29,9 @@ public abstract class LakeFeatureMixin {
 	@Inject(method = "generate", at = @At("RETURN"))
 	private void eternalreturn$exitLake(FeatureContext<LakeFeature.Config> context, CallbackInfoReturnable<Boolean> cir) {
 		OrePlacement.exit();
+		if (cir.getReturnValueZ()) {
+			Climate.afterLake(context);
+		}
 	}
 
 	@WrapOperation(method = "generate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/StructureWorldAccess;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;I)Z"))
