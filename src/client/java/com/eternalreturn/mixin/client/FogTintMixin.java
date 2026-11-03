@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.At;
 public abstract class FogTintMixin {
 	@WrapOperation(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/CubicSampler;sampleColor(Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/CubicSampler$RgbFetcher;)Lnet/minecraft/util/math/Vec3d;"))
 	private static Vec3d eternalreturn$tint(Vec3d pos, CubicSampler.RgbFetcher fetcher, Operation<Vec3d> original,
-			@Local(argsOnly = true) ClientWorld world, @Local(argsOnly = true) float tickDelta) {
+			@Local(argsOnly = true) ClientWorld world, @Local(argsOnly = true, ordinal = 0) float tickDelta) {
 		if (!ClientFog.active(world)) {
 			return original.call(pos, fetcher);
 		}
