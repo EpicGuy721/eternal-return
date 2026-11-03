@@ -246,5 +246,17 @@
   "eternalreturn:marking": [
     "minecraft:glowstone_dust",
     "minecraft:spectral_arrow"
+  ],
+  "eternalreturn:defense": [
+    "minecraft:shield",
+    "minecraft:iron_sword"
+  ],
+  "eternalreturn:swiftness": [
+    "minecraft:sugar",
+    "minecraft:feather"
+  ],
+  "eternalreturn:homing_curse": [
+    "minecraft:lodestone",
+    "minecraft:arrow"
   ]
 }

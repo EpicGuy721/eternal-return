@@ -1,0 +1,21 @@
+{
+  "values": [
+    "eternalreturn:stone_wall",
+    "eternalreturn:smooth_stone_wall",
+    "eternalreturn:polished_granite_wall",
+    "eternalreturn:polished_diorite_wall",
+    "eternalreturn:polished_andesite_wall",
+    "eternalreturn:cut_sandstone_wall",
+    "eternalreturn:smooth_sandstone_wall",
+    "eternalreturn:cut_red_sandstone_wall",
+    "eternalreturn:smooth_red_sandstone_wall",
+    "eternalreturn:quartz_wall",
+    "eternalreturn:smooth_quartz_wall",
+    "eternalreturn:purpur_wall",
+    "eternalreturn:prismarine_brick_wall",
+    "eternalreturn:dark_prismarine_wall",
+    "eternalreturn:smooth_stone_stairs",
+    "eternalreturn:cut_sandstone_stairs",
+    "eternalreturn:cut_red_sandstone_stairs"
+  ]
+}
