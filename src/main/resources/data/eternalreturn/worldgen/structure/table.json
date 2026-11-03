@@ -1,0 +1,10 @@
+{
+  "type": "eternalreturn:landmark",
+  "landmark": "table",
+  "min_size": 16,
+  "max_size": 28,
+  "biomes": "#eternalreturn:has_structure/table",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

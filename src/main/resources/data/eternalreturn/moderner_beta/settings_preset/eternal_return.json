@@ -280,6 +280,55 @@
         },
         {
           "type": "moderner_beta:weighted_pool",
+          "id": "sub_badlands",
+          "seed": 3011,
+          "targets": [
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:monument_valley"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:mesa_verde"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:bryce_mesa"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:painted_canyon"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:white_mesa"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "minecraft:the_void*null"
+              },
+              "weight": 3
+            }
+          ]
+        },
+        {
+          "type": "moderner_beta:weighted_pool",
           "id": "sub_birch_forest",
           "seed": 3001,
           "targets": [
@@ -322,6 +371,41 @@
         },
         {
           "type": "moderner_beta:weighted_pool",
+          "id": "sub_desert",
+          "seed": 3009,
+          "targets": [
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:desert_oasis"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:desert_baobabs"
+              },
+              "weight": 2
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:drylands"
+              },
+              "weight": 2
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "minecraft:the_void*null"
+              },
+              "weight": 3
+            }
+          ]
+        },
+        {
+          "type": "moderner_beta:weighted_pool",
           "id": "sub_forest",
           "seed": 3003,
           "targets": [
@@ -338,6 +422,27 @@
                 "value": "minecraft:the_void*null"
               },
               "weight": 7
+            }
+          ]
+        },
+        {
+          "type": "moderner_beta:weighted_pool",
+          "id": "sub_savanna",
+          "seed": 3010,
+          "targets": [
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:pinyon_woodland"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "minecraft:the_void*null"
+              },
+              "weight": 3
             }
           ]
         },
@@ -480,6 +585,10 @@
           "id": "land",
           "seed": 0,
           "targets": {
+            "minecraft:badlands": {
+              "type": "layer",
+              "value": "sub_badlands"
+            },
             "minecraft:birch_forest": {
               "type": "layer",
               "value": "sub_birch_forest"
@@ -488,9 +597,17 @@
               "type": "layer",
               "value": "sub_dark_forest"
             },
+            "minecraft:desert": {
+              "type": "layer",
+              "value": "sub_desert"
+            },
             "minecraft:forest": {
               "type": "layer",
               "value": "sub_forest"
+            },
+            "minecraft:savanna": {
+              "type": "layer",
+              "value": "sub_savanna"
             },
             "moderner_beta:early_release_extreme_hills": {
               "type": "layer",
@@ -720,7 +837,16 @@
                         "minecraft:savanna",
                         "minecraft:savanna*hills",
                         "minecraft:badlands",
-                        "minecraft:badlands*hills"
+                        "minecraft:badlands*hills",
+                        "eternalreturn:desert_oasis",
+                        "eternalreturn:desert_baobabs",
+                        "eternalreturn:drylands",
+                        "eternalreturn:pinyon_woodland",
+                        "eternalreturn:monument_valley",
+                        "eternalreturn:mesa_verde",
+                        "eternalreturn:bryce_mesa",
+                        "eternalreturn:painted_canyon",
+                        "eternalreturn:white_mesa"
                       ],
                       "condition": "moderner_beta:in_set"
                     },
@@ -753,7 +879,16 @@
                         "minecraft:savanna",
                         "minecraft:savanna*hills",
                         "minecraft:badlands",
-                        "minecraft:badlands*hills"
+                        "minecraft:badlands*hills",
+                        "eternalreturn:desert_oasis",
+                        "eternalreturn:desert_baobabs",
+                        "eternalreturn:drylands",
+                        "eternalreturn:pinyon_woodland",
+                        "eternalreturn:monument_valley",
+                        "eternalreturn:mesa_verde",
+                        "eternalreturn:bryce_mesa",
+                        "eternalreturn:painted_canyon",
+                        "eternalreturn:white_mesa"
                       ],
                       "condition": "moderner_beta:in_set"
                     },
@@ -850,7 +985,10 @@
                   {
                     "biomes": [
                       "minecraft:desert",
-                      "minecraft:desert*hills"
+                      "minecraft:desert*hills",
+                      "eternalreturn:desert_oasis",
+                      "eternalreturn:desert_baobabs",
+                      "eternalreturn:drylands"
                     ],
                     "condition": "moderner_beta:in_set"
                   },
@@ -862,7 +1000,8 @@
                         "minecraft:savanna",
                         "minecraft:savanna*hills",
                         "minecraft:jungle",
-                        "minecraft:jungle*hills"
+                        "minecraft:jungle*hills",
+                        "eternalreturn:pinyon_woodland"
                       ],
                       "condition": "moderner_beta:in_set"
                     },
@@ -960,7 +1099,11 @@
                       "minecraft:savanna*hills",
                       "minecraft:desert",
                       "minecraft:desert*hills",
-                      "eternalreturn:desert_scrub_edge"
+                      "eternalreturn:desert_scrub_edge",
+                      "eternalreturn:pinyon_woodland",
+                      "eternalreturn:desert_oasis",
+                      "eternalreturn:desert_baobabs",
+                      "eternalreturn:drylands"
                     ],
                     "condition": "moderner_beta:in_set"
                   },
@@ -1177,6 +1320,15 @@
             "eternalreturn:birch_forest_dry_edge": "eternalreturn:leafy_river",
             "eternalreturn:jungle_edge": "eternalreturn:leafy_river",
             "eternalreturn:black_spruce_forest": "minecraft:frozen_river",
+            "eternalreturn:desert_oasis": "eternalreturn:sandy_river",
+            "eternalreturn:desert_baobabs": "eternalreturn:sandy_river",
+            "eternalreturn:drylands": "eternalreturn:sandy_river",
+            "eternalreturn:pinyon_woodland": "eternalreturn:sandy_river",
+            "eternalreturn:monument_valley": "eternalreturn:sandy_river",
+            "eternalreturn:mesa_verde": "eternalreturn:sandy_river",
+            "eternalreturn:bryce_mesa": "eternalreturn:sandy_river",
+            "eternalreturn:painted_canyon": "eternalreturn:sandy_river",
+            "eternalreturn:white_mesa": "eternalreturn:sandy_river",
             "eternalreturn:redwood_forest": "eternalreturn:rocky_river",
             "eternalreturn:larch_forest": "eternalreturn:rocky_river",
             "eternalreturn:heathland": "eternalreturn:rocky_river",
@@ -1769,14 +1921,22 @@
         "eternalreturn:bald_cypress_swamp": "0.1;0.05",
         "eternalreturn:birch_forest_dry_edge": "0.1;0.05",
         "eternalreturn:black_spruce_forest": "0.1;0.05",
+        "eternalreturn:bryce_mesa": "0.1;0.05",
         "eternalreturn:dark_meadow": "0.1;0.05",
+        "eternalreturn:desert_baobabs": "0.1;0.05",
+        "eternalreturn:desert_oasis": "0.1;0.05",
         "eternalreturn:desert_scrub_edge": "0.1;0.05",
+        "eternalreturn:drylands": "0.1;0.05",
         "eternalreturn:forest_dry_edge": "0.1;0.05",
         "eternalreturn:grand_fir_forest": "0.1;0.05",
         "eternalreturn:heathland": "0.1;0.05",
         "eternalreturn:jungle_edge": "0.1;0.05",
         "eternalreturn:larch_forest": "0.1;0.05",
         "eternalreturn:meadow": "0.1;0.05",
+        "eternalreturn:mesa_verde": "0.1;0.05",
+        "eternalreturn:monument_valley": "0.1;0.05",
+        "eternalreturn:painted_canyon": "0.1;0.05",
+        "eternalreturn:pinyon_woodland": "0.1;0.05",
         "eternalreturn:poplar_grove": "0.1;0.05",
         "eternalreturn:pumpkin_plains": "0.1;0.05",
         "eternalreturn:redwood_forest": "0.1;0.05",
@@ -1784,6 +1944,7 @@
         "eternalreturn:swampland_edge": "0.1;0.05",
         "eternalreturn:taiga_edge": "0.1;0.05",
         "eternalreturn:webbed_forest": "0.1;0.05",
+        "eternalreturn:white_mesa": "0.1;0.05",
         "minecraft:badlands": "0.1;0.05",
         "minecraft:badlands*hills": "0.1;0.05",
         "minecraft:birch_forest": "0.1;0.05",

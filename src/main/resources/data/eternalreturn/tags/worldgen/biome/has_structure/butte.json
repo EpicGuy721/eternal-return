@@ -1,0 +1,12 @@
+{
+  "values": [
+    {
+      "id": "eternalreturn:monument_valley",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:white_mesa",
+      "required": false
+    }
+  ]
+}

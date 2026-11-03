@@ -1,13 +1,13 @@
 {
   "minecraft:badlands": {
-    "_square_from_chunk": -2300079,
-    "coal_ore": 1226,
-    "copper_ore": 1148,
-    "diamond_ore": 395,
-    "gold_ore": 1724,
-    "iron_ore": 1282,
-    "lapis_ore": 420,
-    "redstone_ore": 559
+    "_square_from_chunk": 9300041,
+    "coal_ore": 1265,
+    "copper_ore": 1164,
+    "diamond_ore": 516,
+    "gold_ore": 1841,
+    "iron_ore": 1239,
+    "lapis_ore": 424,
+    "redstone_ore": 654
   },
   "minecraft:desert": {
     "_square_from_chunk": 6900033,
@@ -52,7 +52,7 @@
   "minecraft:birch_forest": {
     "_square_from_chunk": 9300061,
     "coal_ore": 1735,
-    "copper_ore": 1440,
+    "copper_ore": 1449,
     "diamond_ore": 387,
     "gold_ore": 432,
     "iron_ore": 1162,
@@ -66,7 +66,7 @@
     "diamond_ore": 406,
     "gold_ore": 360,
     "iron_ore": 1315,
-    "lapis_ore": 442,
+    "lapis_ore": 445,
     "redstone_ore": 557
   },
   "moderner_beta:early_release_extreme_hills": {
@@ -82,7 +82,7 @@
   },
   "minecraft:savanna": {
     "_square_from_chunk": 6100013,
-    "coal_ore": 1753,
+    "coal_ore": 1749,
     "copper_ore": 1484,
     "diamond_ore": 369,
     "gold_ore": 416,
@@ -101,21 +101,21 @@
     "redstone_ore": 604
   },
   "all": {
-    "coal_ore": 18403,
-    "copper_ore": 14364,
-    "diamond_ore": 3948,
+    "coal_ore": 18438,
+    "copper_ore": 14389,
+    "diamond_ore": 4069,
     "emerald_ore": 10,
-    "gold_ore": 5264,
-    "iron_ore": 12228,
-    "lapis_ore": 4248,
-    "redstone_ore": 5603
+    "gold_ore": 5381,
+    "iron_ore": 12185,
+    "lapis_ore": 4255,
+    "redstone_ore": 5698
   },
   "emerald_survey": {
     "centre_ground_y": 108,
     "centre_x": 1032,
     "centre_z": -2104,
     "chunks": 576,
-    "columns_with_ground_at_or_above_y95": 18853,
+    "columns_with_ground_at_or_above_y95": 19370,
     "emerald_ore": 423,
     "emerald_ore_in_host_stone": 420
   },
@@ -123,12 +123,12 @@
     "stone_ores_inside_host_stone": 0
   },
   "variants_open_to_caves_by_host": {
-    "andesite": 547,
-    "diorite": 235,
-    "granite": 378,
+    "andesite": 541,
+    "diorite": 236,
+    "granite": 374,
     "hardened_packed_ice": 60,
     "hardened_sandstone": 86,
-    "red_sandstone": 181
+    "red_sandstone": 73
   },
   "biome_stone_off": {
     "host_stone_blocks_besides_blobs": 0,

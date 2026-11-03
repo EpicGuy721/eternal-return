@@ -2,6 +2,10 @@
   "replace": false,
   "values": [
     {
+      "id": "eternalreturn:pinyon_woodland",
+      "required": false
+    },
+    {
       "id": "eternalreturn:savanna_peak",
       "required": false
     }

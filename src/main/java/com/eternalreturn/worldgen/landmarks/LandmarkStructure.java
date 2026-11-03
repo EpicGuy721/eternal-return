@@ -72,11 +72,13 @@ public final class LandmarkStructure extends Structure {
 		}
 		int size = this.minSize + random.nextInt(this.maxSize - this.minSize + 1);
 		long seed = random.nextLong();
-		Block stone = BiomeStoneProcessor.stoneOf(context.biomeSource().getBiome(BiomeCoords.fromBlock(x), BiomeCoords.fromBlock(y),
-				BiomeCoords.fromBlock(z), context.noiseConfig().getMultiNoiseSampler()));
+		var biome = context.biomeSource().getBiome(BiomeCoords.fromBlock(x), BiomeCoords.fromBlock(y), BiomeCoords.fromBlock(z),
+				context.noiseConfig().getMultiNoiseSampler());
+		Block stone = BiomeStoneProcessor.stoneOf(biome);
+		String style = biome.getKey().map(key -> key.getValue().toString()).orElse("");
 		int[] path = this.kind == Landmarks.Kind.LAVA_FLOW ? lavaPath(context, x, z, size, Random.create(seed)) : new int[0];
 		BlockPos centre = new BlockPos(x, y, z);
-		return Optional.of(new StructurePosition(centre, collector -> collector.addPiece(new LandmarkPiece(this.kind, centre, size, seed, stone, path))));
+		return Optional.of(new StructurePosition(centre, collector -> collector.addPiece(new LandmarkPiece(this.kind, centre, size, seed, stone, path, style))));
 	}
 
 	/**

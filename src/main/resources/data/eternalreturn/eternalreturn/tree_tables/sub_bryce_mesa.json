@@ -1,0 +1,15 @@
+{
+  "biomes": [
+    "eternalreturn:bryce_mesa"
+  ],
+  "saplings": {
+    "minecraft:spruce_sapling": {
+      "trees": [
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/pinyon"
+        }
+      ]
+    }
+  }
+}

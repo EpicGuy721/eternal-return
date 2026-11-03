@@ -17,7 +17,9 @@ import net.minecraft.world.gen.structure.StructureType;
 public final class Landmarks {
 	/** The kinds; each one's shape is in LandmarkShapes. */
 	public enum Kind {
-		ARCH, SPIRE, TROPICAL_PILLARS, CRATER, LAVA_FLOW, VOLCANO, GLACIER, ICE_WALL;
+		ARCH, SPIRE, TROPICAL_PILLARS, CRATER, LAVA_FLOW, VOLCANO, GLACIER, ICE_WALL,
+		/** The mesa styles' rock forms (phase 6): flat-topped buttes, wide green-topped tables, fields of hoodoos. */
+		BUTTE, TABLE, HOODOOS;
 
 		public String id() {
 			return this.name().toLowerCase(java.util.Locale.ROOT);

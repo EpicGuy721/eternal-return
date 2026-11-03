@@ -1,0 +1,10 @@
+{
+  "type": "eternalreturn:landmark",
+  "landmark": "hoodoos",
+  "min_size": 5,
+  "max_size": 9,
+  "biomes": "#eternalreturn:has_structure/hoodoo_cluster",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

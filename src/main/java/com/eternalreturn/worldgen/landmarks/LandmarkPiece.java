@@ -25,8 +25,10 @@ public final class LandmarkPiece extends StructurePiece {
 	final long seed;
 	public final Block stone;
 	final int[] path;
+	/** The biome it started in, for the mesa styles' bands (MesaBands); empty in landmarks saved before them. */
+	public final String style;
 
-	public LandmarkPiece(Landmarks.Kind kind, BlockPos centre, int size, long seed, Block stone, int[] path) {
+	public LandmarkPiece(Landmarks.Kind kind, BlockPos centre, int size, long seed, Block stone, int[] path, String style) {
 		super(Landmarks.PIECE, 0, box(kind, centre, size, path));
 		this.kind = kind;
 		this.centre = centre;
@@ -34,6 +36,7 @@ public final class LandmarkPiece extends StructurePiece {
 		this.seed = seed;
 		this.stone = stone;
 		this.path = path;
+		this.style = style;
 	}
 
 	public LandmarkPiece(NbtCompound nbt) {
@@ -44,6 +47,7 @@ public final class LandmarkPiece extends StructurePiece {
 		this.seed = nbt.getLong("seed");
 		this.stone = Registries.BLOCK.get(Identifier.of(nbt.getString("stone")));
 		this.path = nbt.getIntArray("path");
+		this.style = nbt.getString("style");
 	}
 
 	@Override
@@ -56,6 +60,7 @@ public final class LandmarkPiece extends StructurePiece {
 		nbt.putLong("seed", this.seed);
 		nbt.putString("stone", Registries.BLOCK.getId(this.stone).toString());
 		nbt.putIntArray("path", this.path);
+		nbt.putString("style", this.style);
 	}
 
 	/** How far each kind reaches round its centre (generous: it only decides which chunks build a part). */
@@ -92,6 +97,18 @@ public final class LandmarkPiece extends StructurePiece {
 			case ICE_WALL -> {
 				half = size / 2 + 12;
 				up = 45;
+			}
+			case BUTTE -> {
+				half = size + 8;
+				up = (int) (size * 1.7) + 8;
+			}
+			case TABLE -> {
+				half = size + 10;
+				up = size / 2 + 10;
+			}
+			case HOODOOS -> {
+				half = size + 5;
+				up = 26;
 			}
 			default -> {
 				int minX = c.getX();

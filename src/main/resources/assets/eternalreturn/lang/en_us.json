@@ -567,5 +567,14 @@
 	"enchantment.eternalreturn.defense": "Defense",
 	"enchantment.eternalreturn.swiftness": "Swiftness",
 	"item.eternalreturn.subtle": "Subtle %s",
-	"enchantment.eternalreturn.homing_curse": "Curse of Homing"
+	"enchantment.eternalreturn.homing_curse": "Curse of Homing",
+	"biome.eternalreturn.desert_oasis": "Desert Oasis",
+	"biome.eternalreturn.desert_baobabs": "Desert Baobabs",
+	"biome.eternalreturn.drylands": "Drylands",
+	"biome.eternalreturn.pinyon_woodland": "Pinyon Woodland",
+	"biome.eternalreturn.monument_valley": "Monument Valley",
+	"biome.eternalreturn.mesa_verde": "Mesa Verde",
+	"biome.eternalreturn.bryce_mesa": "Bryce Mesa",
+	"biome.eternalreturn.painted_canyon": "Painted Canyon",
+	"biome.eternalreturn.white_mesa": "White Mesa"
 }

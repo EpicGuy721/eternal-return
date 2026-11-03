@@ -11,6 +11,18 @@
     {
       "id": "eternalreturn:desert_scrub_edge",
       "required": false
+    },
+    {
+      "id": "eternalreturn:desert_oasis",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:desert_baobabs",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:drylands",
+      "required": false
     }
   ]
 }

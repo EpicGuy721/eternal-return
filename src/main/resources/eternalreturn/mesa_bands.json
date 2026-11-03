@@ -1,0 +1,185 @@
+{
+  "base_y": 58,
+  "styles": {
+    "eternalreturn:monument_valley": {
+      "bands": [
+        [
+          "minecraft:red_terracotta",
+          4
+        ],
+        [
+          "minecraft:orange_terracotta",
+          2
+        ],
+        [
+          "minecraft:red_terracotta",
+          3
+        ],
+        [
+          "minecraft:terracotta",
+          2
+        ],
+        [
+          "minecraft:red_terracotta",
+          3
+        ],
+        [
+          "minecraft:orange_terracotta",
+          1
+        ],
+        [
+          "minecraft:red_sandstone",
+          2
+        ]
+      ]
+    },
+    "eternalreturn:mesa_verde": {
+      "bands": [
+        [
+          "minecraft:terracotta",
+          3
+        ],
+        [
+          "minecraft:light_gray_terracotta",
+          1
+        ],
+        [
+          "minecraft:brown_terracotta",
+          2
+        ],
+        [
+          "minecraft:terracotta",
+          2
+        ],
+        [
+          "minecraft:yellow_terracotta",
+          1
+        ],
+        [
+          "minecraft:brown_terracotta",
+          2
+        ],
+        [
+          "minecraft:smooth_sandstone",
+          1
+        ]
+      ],
+      "top": "minecraft:grass_block"
+    },
+    "eternalreturn:bryce_mesa": {
+      "bands": [
+        [
+          "minecraft:orange_terracotta",
+          3
+        ],
+        [
+          "minecraft:white_terracotta",
+          1
+        ],
+        [
+          "minecraft:pink_terracotta",
+          2
+        ],
+        [
+          "minecraft:orange_terracotta",
+          2
+        ],
+        [
+          "minecraft:red_terracotta",
+          1
+        ],
+        [
+          "minecraft:white_terracotta",
+          2
+        ],
+        [
+          "minecraft:orange_terracotta",
+          1
+        ],
+        [
+          "minecraft:pink_terracotta",
+          1
+        ]
+      ],
+      "cap": "minecraft:calcite"
+    },
+    "eternalreturn:painted_canyon": {
+      "bands": [
+        [
+          "minecraft:purple_terracotta",
+          2
+        ],
+        [
+          "minecraft:magenta_terracotta",
+          1
+        ],
+        [
+          "minecraft:red_terracotta",
+          2
+        ],
+        [
+          "minecraft:orange_terracotta",
+          2
+        ],
+        [
+          "minecraft:yellow_terracotta",
+          2
+        ],
+        [
+          "minecraft:white_terracotta",
+          1
+        ],
+        [
+          "minecraft:light_blue_terracotta",
+          1
+        ],
+        [
+          "minecraft:pink_terracotta",
+          2
+        ],
+        [
+          "minecraft:light_gray_terracotta",
+          1
+        ],
+        [
+          "minecraft:brown_terracotta",
+          2
+        ]
+      ],
+      "cap": "minecraft:white_terracotta"
+    },
+    "eternalreturn:white_mesa": {
+      "bands": [
+        [
+          "minecraft:white_terracotta",
+          3
+        ],
+        [
+          "minecraft:calcite",
+          2
+        ],
+        [
+          "minecraft:light_gray_terracotta",
+          1
+        ],
+        [
+          "minecraft:white_terracotta",
+          2
+        ],
+        [
+          "minecraft:smooth_sandstone",
+          2
+        ],
+        [
+          "minecraft:white_terracotta",
+          1
+        ],
+        [
+          "minecraft:diorite",
+          1
+        ]
+      ],
+      "cap": "minecraft:smooth_sandstone"
+    }
+  }
+}

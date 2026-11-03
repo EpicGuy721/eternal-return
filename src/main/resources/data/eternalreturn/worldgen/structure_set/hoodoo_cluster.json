@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "eternalreturn:hoodoo_cluster",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 7,
+    "separation": 2,
+    "salt": 20661106
+  }
+}

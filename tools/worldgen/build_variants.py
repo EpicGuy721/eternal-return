@@ -171,8 +171,8 @@ def how_many(n):
 
 
 def placement(p):
-    """A placement list, or a shorthand: {"trees": n, "water": depth, "on": block} (trees on the ground, or in water up to
-    that depth, on that block if given), {"patch": n, "heightmap": ...} (a patch of plants at the surface), or
+    """A placement list, or a shorthand: {"trees": n, "sapling": id, "water": depth, "on": block} (trees where that sapling
+    could stand, also in water up to that depth, or on that block if given), {"patch": n, "heightmap": ...} (a patch of plants at the surface), or
     {"scatter": n, "under": [lowest, highest], "near": [block tags]} (spots in the canopy and among the trunks: from the
     top of the leaves down, in air next to one of those blocks)."""
     if isinstance(p, list):
@@ -184,7 +184,7 @@ def placement(p):
         if 'on' in p:
             out.append({'type': 'minecraft:block_predicate_filter', 'predicate': {
                 'type': 'minecraft:matching_blocks', 'blocks': p['on'], 'offset': [0, -1, 0]}})
-        elif p.get('water', 0) == 0 and 'sapling' in p:
+        elif 'sapling' in p:
             out.append({'type': 'minecraft:block_predicate_filter', 'predicate': {
                 'type': 'minecraft:would_survive', 'state': {'Name': p['sapling'], 'Properties': {'stage': '0'}}}})
         return out + [{'type': 'minecraft:biome'}]
@@ -270,6 +270,11 @@ def main():
                        {'replace': False, 'values': [{'id': v, 'required': False} for v in added]})
             count += 1
     write_json(os.path.join(PACK, 'pack.mcmeta'), {'pack': {'pack_format': 48, 'description': 'Eternal Return: biome variants in their base biomes\' tags'}})
+
+    # The mesa styles' bands, for the rock forms built on them (MesaBands; the ground's own bands are surface rules, build_preset.py).
+    write_json(os.path.join(RES, NS, 'mesa_bands.json'), {'base_y': TABLE['mesa_base_y'], 'styles': {
+        f'{NS}:{vid}': {k: spec[k] for k in ('bands', 'cap', 'top') if k in spec}
+        for vid, (base, kind, spec) in variants.items() if 'bands' in spec}})
 
     # What the game reads: each variant's base, kind and boulders.
     write_json(os.path.join(RES, NS, 'biome_variants.json'), {

@@ -1,0 +1,27 @@
+{
+  "biomes": [
+    "eternalreturn:mesa_verde"
+  ],
+  "saplings": {
+    "minecraft:spruce_sapling": {
+      "trees": [
+        {
+          "weight": 2,
+          "tree": "eternalreturn:tree/pinyon"
+        },
+        {
+          "weight": 3,
+          "tree": "eternalreturn:tree/juniper"
+        }
+      ]
+    },
+    "minecraft:oak_sapling": {
+      "trees": [
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/scrub_oak"
+        }
+      ]
+    }
+  }
+}
