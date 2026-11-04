@@ -43,3 +43,4 @@ How the owner wants work on this repo done, and pitfalls that each cost a failed
 - Shape methods that read the world deadlock at shutdown (the lighting thread); overlay quads z-fight unless they have the face's exact corners; pull UVs in from sprite edges; CUTOUT, not CUTOUT_MIPPED, for overlays.
 - Fabric attachment sync gives the client no redraw signal: send your own payload and call `worldRenderer.scheduleBlockRenders`.
 - The owner plays with Nostalgic Tweaks' old lighting (no smooth light, round-robin relight) and "Full Block Outlines" on some blocks; ColorLight colours light per block id from its own thread.
+- The vanilla world's decorated fingerprint ignores leaves' distance (since leaves count to 10 in every world, LeafDistance, the generator marks some leaves near vanilla's limit a step differently); the baseline was re-recorded at the commit before that change with the same rule, so it still proves the leaves themselves unchanged.

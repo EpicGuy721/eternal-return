@@ -197,6 +197,12 @@ public class ControlFingerprintTests implements FabricGameTest {
 		if (state.getBlock() instanceof net.minecraft.block.CarpetBlock && state.get(com.eternalreturn.blocks.CarpetLayers.LAYERS) == 1) {
 			return name.replace("[layers=1]", "");
 		}
+		// Leaves count their distance from a log to 10 now, in every world (LeafDistance, the owner's choice): vanilla
+		// stops at 7, and the tree generator's longer count also marks some leaves near that limit a step differently,
+		// so the distance is left out. The leaves themselves (where, which, persistent or not) still have to match.
+		if (state.getBlock() instanceof net.minecraft.block.LeavesBlock) {
+			name = name.replaceAll("distance=\\d+", "distance=any");
+		}
 		// Vines have a "cut" property now (Farming); an uncut vine is vanilla's.
 		if (state.getBlock() instanceof net.minecraft.block.VineBlock && !state.get(com.eternalreturn.survival.Farming.CUT)) {
 			return name.replace("cut=false,", "");
