@@ -81,6 +81,13 @@ public final class SnowModels {
 	private static final Direction[] SIDES = {Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST};
 	/** The tops of the blocks snow covers lie on, as drawn (per bare state; made anew as models load). */
 	private static Map<BlockState, int[]> coveredTops = new ConcurrentHashMap<>();
+	/** A plant's top for its snow: nothing (the snow lies on the whole floor of its space, SnowCover). */
+	private static final int[] FLORA_HEIGHTS = new int[256];
+
+	static {
+		Arrays.fill(FLORA_HEIGHTS, -1);
+	}
+
 	/** Set while a snowy block's model is to draw only the snow logged in it (SnowOutlineMixin: the cracks of mining that snow). */
 	private static final ThreadLocal<Boolean> SNOW_ONLY = ThreadLocal.withInitial(() -> false);
 
@@ -272,6 +279,8 @@ public final class SnowModels {
 		private final Sprite snow;
 		private final Sprite drip;
 		private final RenderMaterial snowMaterial;
+		/** A plant's snow: shaded smoothly as snow layers are, though the plant's own model isn't. */
+		private final RenderMaterial floraSnowMaterial;
 		/** The block's top as drawn, measured the first time it's drawn (each time for a mixed slab, whose halves vary). */
 		@Nullable
 		private volatile int[] heights;
@@ -281,6 +290,7 @@ public final class SnowModels {
 			this.snow = snow;
 			this.drip = drip;
 			this.snowMaterial = snowMaterial();
+			this.floraSnowMaterial = renderer().materialFinder().copyFrom(this.snowMaterial).ambientOcclusion(net.fabricmc.fabric.api.util.TriState.TRUE).find();
 		}
 
 		@Override
@@ -290,7 +300,8 @@ public final class SnowModels {
 
 		@Override
 		public void emitBlockQuads(BlockRenderView view, BlockState state, BlockPos pos, Supplier<Random> randomSupplier, RenderContext context) {
-			int[] heights = this.heights;
+			boolean flora = SnowCover.isFlora(state);
+			int[] heights = flora ? FLORA_HEIGHTS : this.heights;
 			if (heights == null) {
 				Measure measure = new Measure();
 				context.pushTransform(measure);
@@ -317,6 +328,25 @@ public final class SnowModels {
 				floors[i] = Math.max(0, height);
 				tops[i] = layers > 0 && floors[i] < 16 ? Math.min(16, floors[i] + 2 * layers) : floors[i];
 				snowy[i] = height >= 0 && (height < 16 ? layers > 0 : snowAbove);
+			}
+			if (flora) {
+				// A plant: its snow on the ground under it, where the plant's model is drawn shifted (flowers and grass
+				// stand off centre), shifted back, so it fills the block; no drips.
+				net.minecraft.util.math.Vec3d offset = state.getModelOffset(view, pos);
+				if (!onlySnow) {
+					this.wrapped.emitBlockQuads(view, state, pos, randomSupplier, context);
+				}
+				if (layers > 0 || onlySnow) {
+					context.pushTransform(quad -> {
+						for (int i = 0; i < 4; i++) {
+							quad.pos(i, quad.x(i) - (float) offset.x, quad.y(i) - (float) offset.y, quad.z(i) - (float) offset.z);
+						}
+						return true;
+					});
+					emitSnow(view, pos, floors, tops, context.getEmitter(), this.snow, this.floraSnowMaterial);
+					context.popTransform();
+				}
+				return;
 			}
 			if (onlySnow) {
 				emitSnow(view, pos, floors, tops, context.getEmitter(), this.snow, this.snowMaterial);

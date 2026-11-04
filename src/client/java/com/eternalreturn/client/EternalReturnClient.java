@@ -40,6 +40,9 @@ public class EternalReturnClient implements ClientModInitializer {
 		DamageNumbers.register();
 		com.eternalreturn.client.weather.ClientWeather.register();
 		com.eternalreturn.client.climate.ClientFog.register();
+		// Icicles and ice crystals: cross models with see-through pixels.
+		net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap.INSTANCE.putBlocks(net.minecraft.client.render.RenderLayer.getCutout(),
+				com.eternalreturn.blocks.IceBlocks.ICICLE, com.eternalreturn.blocks.IceBlocks.ICE_CRYSTAL);
 		net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap.INSTANCE.putBlock(com.eternalreturn.blocks.CopperRail.BLOCK,
 				net.minecraft.client.render.RenderLayer.getCutout());
 		// A bottle of milk: the potion bottle, its liquid milk white.

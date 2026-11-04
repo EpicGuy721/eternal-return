@@ -163,7 +163,7 @@ public class ControlFingerprintTests implements FabricGameTest {
 					for (int y = world.getBottomY(); y < world.getTopY(); y++) {
 						for (int x = 0; x < 16; x++) {
 							for (int z = 0; z < 16; z++) {
-								BlockState state = chunk.getBlockState(pos.set(chunkX * 16 + x, y, chunkZ * 16 + z));
+								BlockState state = groundUnder(chunk, pos.set(chunkX * 16 + x, y, chunkZ * 16 + z), chunk.getBlockState(pos));
 								long code = stateCodes.computeIfAbsent(state, s -> (long) stateName(s).hashCode() * 0x9E3779B97F4A7C15L);
 								hash = hash * 31 + code;
 							}
@@ -177,6 +177,17 @@ public class ControlFingerprintTests implements FabricGameTest {
 		return hashes;
 	}
 
+	/** Ground (grass, podzol, mycelium) under flora with snow logged in it is snowy for that snow alone: as vanilla left it. */
+	private static BlockState groundUnder(Chunk chunk, BlockPos pos, BlockState state) {
+		if (state.contains(net.minecraft.state.property.Properties.SNOWY) && state.get(net.minecraft.state.property.Properties.SNOWY)) {
+			BlockState above = chunk.getBlockState(pos.up());
+			if (com.eternalreturn.blocks.SnowCover.marked(above) && com.eternalreturn.blocks.SnowCover.isFlora(above)) {
+				return state.with(net.minecraft.state.property.Properties.SNOWY, false);
+			}
+		}
+		return state;
+	}
+
 	/**
 	 * A state as the baselines recorded it. Carpets have a layers property now (CarpetLayers); a one-layer
 	 * carpet is exactly vanilla's carpet, so it is written without it.
@@ -186,14 +197,21 @@ public class ControlFingerprintTests implements FabricGameTest {
 		if (state.getBlock() instanceof net.minecraft.block.CarpetBlock && state.get(com.eternalreturn.blocks.CarpetLayers.LAYERS) == 1) {
 			return name.replace("[layers=1]", "");
 		}
+		// Leaves count their distance from a log to 10 now, in every world (LeafDistance, the owner's choice): vanilla
+		// stops at 7, and the tree generator's longer count also marks some leaves near that limit a step differently,
+		// so the distance is left out. The leaves themselves (where, which, persistent or not) still have to match.
+		if (state.getBlock() instanceof net.minecraft.block.LeavesBlock) {
+			name = name.replaceAll("distance=\\d+", "distance=any");
+		}
 		// Vines have a "cut" property now (Farming); an uncut vine is vanilla's.
 		if (state.getBlock() instanceof net.minecraft.block.VineBlock && !state.get(com.eternalreturn.survival.Farming.CUT)) {
 			return name.replace("cut=false,", "");
 		}
-		// Snow on slabs, stairs, walls, fences and gates (SnowCover) is the one change these worlds' generation has
-		// (snowy biomes lay it where vanilla could lay none), so it's left out: their "snowy" property, and snow covers.
+		// Snow on slabs, stairs, walls, fences, gates and flora (SnowCover) is the one change these worlds' generation
+		// has (snowy biomes lay it where vanilla could lay none), so it's left out: their "snowy" property, and snow
+		// covers (and the snowy ground under snowy flora: groundUnder).
 		if (com.eternalreturn.blocks.SnowCover.isHost(state)) {
-			name = name.replaceAll("snowy=\\d,", "").replaceAll(",snowy=\\d]", "]");
+			name = name.replaceAll("\\[snowy=\\d]", "").replaceAll("snowy=\\d,", "").replaceAll(",snowy=\\d]", "]");
 		}
 		if (com.eternalreturn.blocks.SnowCover.isCover(state)) {
 			return net.minecraft.block.Blocks.AIR.getDefaultState().toString();

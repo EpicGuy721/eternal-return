@@ -582,5 +582,12 @@
 	"biome.eternalreturn.snowy_mesa": "Snowy Mesa",
 	"biome.eternalreturn.alps": "Alps",
 	"biome.eternalreturn.icy_mountains": "Icy Mountains",
-	"biome.eternalreturn.glacier_field": "Glacier Field"
+	"biome.eternalreturn.glacier_field": "Glacier Field",
+	"block.eternalreturn.polished_ice": "Polished Ice",
+	"block.eternalreturn.ice_bricks": "Ice Bricks",
+	"block.eternalreturn.chiseled_ice": "Chiseled Ice",
+	"block.eternalreturn.icicle": "Icicle",
+	"block.eternalreturn.ice_crystal": "Ice Crystal",
+	"biome.eternalreturn.ice_caves": "Ice Caves",
+	"subtitles.block.ice_crystal.ambient": "Ice Crystal chimes"
 }

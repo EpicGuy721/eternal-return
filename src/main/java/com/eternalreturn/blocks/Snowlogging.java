@@ -254,6 +254,16 @@ public final class Snowlogging {
 			return false;
 		}
 		BlockState there = world.getBlockState(space);
+		if (SnowCover.isFlora(there)) {
+			// Flora where the snow layer would lie: a layer more logged in it, and the ground under it snowy.
+			int layers = SnowCover.layers(world, space, there);
+			if (layers >= Math.min(most, SnowCover.capacity(there)) || !SnowCover.holdsSnowAt(world, space, there)) {
+				return false;
+			}
+			snowlog(world, space, layers + 1, flags);
+			groundSnowy(world, space.down(), flags);
+			return true;
+		}
 		BlockPos pos = space.down();
 		BlockState state = world.getBlockState(pos);
 		if (!SnowCover.isHost(state) || !there.isAir() && !SnowCover.isCover(there)) {
@@ -275,6 +285,14 @@ public final class Snowlogging {
 			}
 		}
 		return settled;
+	}
+
+	/** Ground under snow logged in flora (grass, podzol, mycelium) turns snowy, as under a snow layer (in the world being made, where no neighbour is told). */
+	private static void groundSnowy(WorldAccess world, BlockPos ground, int flags) {
+		BlockState state = world.getBlockState(ground);
+		if (state.contains(net.minecraft.state.property.Properties.SNOWY) && !state.get(net.minecraft.state.property.Properties.SNOWY)) {
+			world.setBlockState(ground, state.with(net.minecraft.state.property.Properties.SNOWY, true), flags);
+		}
 	}
 
 	/** Snow lying on a block's whole top: the block says so (for its drips). */
@@ -301,6 +319,20 @@ public final class Snowlogging {
 		}
 		BlockPos clicked = context.getBlockPos();
 		BlockState state = world.getBlockState(clicked);
+		if (SnowCover.isFlora(state)) {
+			// Clicking a plant, from any side: a layer more logged in it; full of snow, a snow layer on it.
+			int layers = SnowCover.layers(world, clicked, state);
+			if (layers < SnowCover.capacity(state)) {
+				return SnowCover.holdsSnowAt(world, clicked, state) && placed(world, clicked, player, stack, () -> snowlog(world, clicked, layers + 1, Block.NOTIFY_ALL_AND_REDRAW));
+			}
+			BlockPos space = clicked.up();
+			BlockState snowLayer = Blocks.SNOW.getDefaultState();
+			if (world.getBlockState(space).isAir() && snowLayer.canPlaceAt(world, space)) {
+				placed(world, space, player, stack, () -> world.setBlockState(space, snowLayer, Block.NOTIFY_ALL_AND_REDRAW));
+			}
+			// (Taken all the same: the snow item would otherwise replace the plant, snow and all.)
+			return true;
+		}
 		if (SnowCover.isHost(state) && context.getSide() == Direction.UP) {
 			int layers = SnowCover.layers(world, clicked, state);
 			if (context.getHitPos().y - clicked.getY() < 1.0 - 1.0E-4) {
@@ -323,7 +355,7 @@ public final class Snowlogging {
 			return false;
 		}
 		int layers = SnowCover.layers(world, target, into);
-		return layers < SnowCover.capacity(into) && placed(world, target, player, stack, () -> snowlog(world, target, layers + 1, Block.NOTIFY_ALL_AND_REDRAW));
+		return layers < SnowCover.capacity(into) && SnowCover.holdsSnowAt(world, target, into) && placed(world, target, player, stack, () -> snowlog(world, target, layers + 1, Block.NOTIFY_ALL_AND_REDRAW));
 	}
 
 	private static boolean placed(World world, BlockPos pos, @Nullable PlayerEntity player, ItemStack stack, Runnable place) {

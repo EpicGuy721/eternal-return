@@ -134,7 +134,7 @@ public class SubBiomeTests implements FabricGameTest {
 			Map.entry("eternalreturn:pinyon_woodland", 4), Map.entry("eternalreturn:monument_valley", 8), Map.entry("eternalreturn:mesa_verde", 8),
 			Map.entry("eternalreturn:bryce_mesa", 8), Map.entry("eternalreturn:painted_canyon", 8), Map.entry("eternalreturn:white_mesa", 8),
 			Map.entry("eternalreturn:tundra", 4), Map.entry("eternalreturn:arctic", 8), Map.entry("eternalreturn:snowy_mesa", 8),
-			Map.entry("eternalreturn:alps", 8), Map.entry("eternalreturn:icy_mountains", 8), Map.entry("eternalreturn:glacier_field", 8));
+			Map.entry("eternalreturn:alps", 8), Map.entry("eternalreturn:glacier_field", 8));
 
 	/** What each sub-biome must show in 5 x 5 generated chunks round its spot: a block (or block tag) and how many at least. */
 	private record Sign(String what, int atLeast) {
@@ -168,7 +168,6 @@ public class SubBiomeTests implements FabricGameTest {
 			Map.entry("eternalreturn:arctic", List.of(new Sign("minecraft:snow_block", 300), new Sign("minecraft:packed_ice", 50))),
 			Map.entry("eternalreturn:snowy_mesa", List.of(new Sign("minecraft:light_blue_terracotta", 100), new Sign("minecraft:snow", 100))),
 			Map.entry("eternalreturn:alps", List.of(new Sign("minecraft:grass_block", 200), new Sign("minecraft:spruce_log", 10), new Sign("#minecraft:small_flowers", 20))),
-			Map.entry("eternalreturn:icy_mountains", List.of(new Sign("minecraft:snow_block", 300), new Sign("minecraft:packed_ice", 50))),
 			Map.entry("eternalreturn:glacier_field", List.of(new Sign("minecraft:gravel", 50), new Sign("minecraft:packed_ice", 30))));
 
 	/**
@@ -194,8 +193,10 @@ public class SubBiomeTests implements FabricGameTest {
 			boolean madeBefore = false;
 			for (int cx = cx0 - 2; cx <= cx0 + 2; cx++) {
 				for (int cz = cz0 - 2; cz <= cz0 + 2; cz++) {
+					// Made by these tests, loaded now, or saved by another batch (unloaded since).
 					madeBefore |= MADE.contains(net.minecraft.util.math.ChunkPos.toLong(cx, cz))
-							|| world.getChunkManager().getChunk(cx, cz, ChunkStatus.FEATURES, false) != null;
+							|| world.getChunkManager().getChunk(cx, cz, ChunkStatus.FEATURES, false) != null
+							|| world.getChunkManager().chunkLoadingManager.getNbt(new net.minecraft.util.math.ChunkPos(cx, cz)).join().isPresent();
 				}
 			}
 			for (int cx = cx0 - 3; cx <= cx0 + 3; cx++) {
@@ -314,7 +315,7 @@ public class SubBiomeTests implements FabricGameTest {
 	private static final Set<String> BUSHES_ONLY = Set.of("eternalreturn:heathland", "eternalreturn:drylands", "eternalreturn:bryce_mesa",
 			"eternalreturn:monument_valley", "eternalreturn:painted_canyon", "eternalreturn:white_mesa",
 			// Batch C: dwarf birches are bushes; the arctic and icy mountains have no trees; the snowy mesa and glacier field few.
-			"eternalreturn:tundra", "eternalreturn:arctic", "eternalreturn:icy_mountains", "eternalreturn:snowy_mesa", "eternalreturn:glacier_field",
+			"eternalreturn:tundra", "eternalreturn:arctic", "eternalreturn:snowy_mesa", "eternalreturn:glacier_field",
 			// Lone trees, a few in 25 chunks (Moderner Beta's decoration varies a little from run to run).
 			"eternalreturn:meadow", "eternalreturn:pumpkin_plains");
 

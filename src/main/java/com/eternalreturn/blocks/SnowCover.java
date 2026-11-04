@@ -4,10 +4,18 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.FenceBlock;
+import net.minecraft.block.FarmlandBlock;
 import net.minecraft.block.FenceGateBlock;
+import net.minecraft.block.LilyPadBlock;
+import net.minecraft.block.PitcherCropBlock;
+import net.minecraft.block.PlantBlock;
+import net.minecraft.block.SeaPickleBlock;
+import net.minecraft.block.SeagrassBlock;
 import net.minecraft.block.SlabBlock;
 import net.minecraft.block.SnowBlock;
 import net.minecraft.block.StairsBlock;
+import net.minecraft.block.TallPlantBlock;
+import net.minecraft.block.TallSeagrassBlock;
 import net.minecraft.block.WallBlock;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.registry.tag.BlockTags;
@@ -23,6 +31,7 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.EmptyBlockView;
+import net.minecraft.world.WorldView;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -44,6 +53,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * upside-down stairs, a slab full of snow), ordinary snow layers; where the block reaches the top only in places
  * (posts, a vertical slab's edge, stairs' upper step), a snow cover over just those places.</li>
  * </ul>
+ * <p>Flora (short plants: grass, ferns, flowers, saplings, mushrooms, the Nether's roots, fungi and sprouts, dead bushes,
+ * sweet berry bushes, petals, azaleas, crops and stems; not two-block plants or water plants) holds snow too, as in
+ * Bedrock Edition: up to 8 layers lying on the ground under it, the plant standing in them, wherever a snow layer could
+ * lie there (or on farmland). The plant stays the target where it's aimed at; only the snow aimed at itself is the
+ * snow's. A plant takes no drips and no snow covers, and the ground under it turns snowy (grass, podzol, mycelium).</p>
  * Every such block gets a "snowy" property as it's made (SnowHostMixin, from KINDS), 0 by default: 1 when snow is logged
  * in it or lies on it, so that it's drawn with its snow and drips (client SnowModels). The shapes here are the blocks'
  * own (their culling shape, which follows a fence's rails; a gate's rails are added by hand): drawing follows their models.
@@ -55,6 +69,9 @@ public final class SnowCover {
 	/** The kinds of block that hold snow: a new shape needs a line here (and its own top here, if its culling shape doesn't follow it). */
 	private static final List<Class<?>> KINDS = List.of(SlabBlock.class, StairsBlock.class, WallBlock.class, FenceBlock.class, FenceGateBlock.class,
 			MixedSlabs.MixedSlabBlock.class);
+	/** Plants that don't: two blocks tall, in water, on water. */
+	private static final List<Class<?>> NOT_FLORA = List.of(TallPlantBlock.class, TallSeagrassBlock.class, SeagrassBlock.class, LilyPadBlock.class,
+			SeaPickleBlock.class, PitcherCropBlock.class);
 	private static final Map<BlockState, Top> TOPS = new ConcurrentHashMap<>();
 	private static final Map<String, Top> SHARED = new ConcurrentHashMap<>();
 
@@ -95,7 +112,7 @@ public final class SnowCover {
 	/** Gives a block being made its snowy property, if it's a kind that holds snow (not if it has a "snowy" of its own). */
 	public static void addProperty(Block block, StateManager.Builder<Block, BlockState> builder) {
 		for (Class<?> kind : KINDS) {
-			if (kind.isInstance(block)) {
+			if (kind.isInstance(block) || isFlora(block)) {
 				try {
 					builder.add(SNOWY);
 				} catch (IllegalArgumentException taken) {
@@ -106,7 +123,36 @@ public final class SnowCover {
 		}
 	}
 
-	/** Whether a block holds snow (a slab, stairs, wall, fence or gate). */
+	/** Whether a block is flora that holds snow (a short plant on land: SnowCover). */
+	public static boolean isFlora(Block block) {
+		if (!(block instanceof PlantBlock)) {
+			return false;
+		}
+		for (Class<?> kind : NOT_FLORA) {
+			if (kind.isInstance(block)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/** Whether a block is flora holding snow (it may have none logged in it yet). */
+	public static boolean isFlora(BlockState state) {
+		return isHost(state) && isFlora(state.getBlock());
+	}
+
+	/** Whether snow can be logged in a block here: it takes some, and flora only where a snow layer could lie (or on farmland). */
+	public static boolean holdsSnowAt(WorldView world, BlockPos pos, BlockState state) {
+		if (capacity(state) == 0) {
+			return false;
+		}
+		if (!isFlora(state)) {
+			return true;
+		}
+		return Blocks.SNOW.getDefaultState().canPlaceAt(world, pos) || world.getBlockState(pos.down()).getBlock() instanceof FarmlandBlock;
+	}
+
+	/** Whether a block holds snow (a slab, stairs, wall, fence or gate, or flora). */
 	public static boolean isHost(BlockState state) {
 		return state.contains(SNOWY);
 	}
@@ -153,6 +199,10 @@ public final class SnowCover {
 
 	/** A block's shape for its snow: its culling shape (a fence's follows its rails), a closed gate's rails added; its outline if it has none. */
 	private static VoxelShape shapeOf(BlockState bare) {
+		if (isFlora(bare.getBlock())) {
+			// Snow lies on the ground under a plant, the whole floor of its space.
+			return VoxelShapes.empty();
+		}
 		VoxelShape culling = bare.getCullingShape(EmptyBlockView.INSTANCE, BlockPos.ORIGIN);
 		VoxelShape shape = culling.isEmpty() ? bare.getOutlineShape(EmptyBlockView.INSTANCE, BlockPos.ORIGIN) : culling;
 		if (bare.getBlock() instanceof FenceGateBlock && !bare.get(FenceGateBlock.OPEN) && !culling.isEmpty()) {
@@ -296,8 +346,8 @@ public final class SnowCover {
 		return block == null || snow.getPos().squaredDistanceTo(eye) <= block.getPos().squaredDistanceTo(eye);
 	}
 
-	/** A block's snowy mark as its snow says: snow logged in it, or snow lying on it. */
+	/** A block's snowy mark as its snow says: snow logged in it, or snow lying on it (not for flora: only its own snow). */
 	public static BlockState markedFor(BlockState state, int layers, BlockState above) {
-		return mark(state, layers > 0 || isSnow(above));
+		return mark(state, layers > 0 || isSnow(above) && !isFlora(state.getBlock()));
 	}
 }

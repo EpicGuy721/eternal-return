@@ -21,6 +21,8 @@
 			"com.eternalreturn.gametest.BiomeTreeTests",
 			"com.eternalreturn.gametest.BiomeVariantTests",
 			"com.eternalreturn.gametest.SubBiomeTests",
+			"com.eternalreturn.gametest.IceCaveTests",
+			"com.eternalreturn.gametest.IceBlockTests",
 			"com.eternalreturn.gametest.LandmarkTests",
 			"com.eternalreturn.gametest.ClimateTests",
 			"com.eternalreturn.gametest.OuterEndTests",

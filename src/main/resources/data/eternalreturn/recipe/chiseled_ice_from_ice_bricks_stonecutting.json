@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "eternalreturn:ice_bricks"
+  },
+  "result": {
+    "id": "eternalreturn:chiseled_ice",
+    "count": 1
+  }
+}

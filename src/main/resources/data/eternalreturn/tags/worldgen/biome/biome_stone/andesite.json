@@ -81,10 +81,6 @@
       "required": false
     },
     {
-      "id": "eternalreturn:icy_mountains",
-      "required": false
-    },
-    {
       "id": "eternalreturn:glacier_field",
       "required": false
     }

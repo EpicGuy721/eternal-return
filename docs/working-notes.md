@@ -51,3 +51,5 @@ How the owner wants work on this repo done, and pitfalls that each cost a failed
 - Items dropped beside a working piston get flung and pushed along by the moving blocks: look for them over the whole test area, not next to where they dropped.
 - Game test runs set `-Dfabric-api.gametest`; RandomSpawns is off there unless a test turns it on (every test player would otherwise be sent thousands of blocks off on joining).
 - Nostalgic Tweaks is reached by reflection (SwordBlocking): its SwordBlockingHelper.isBlocking and GameplayTweak.SWORD_BLOCK_DAMAGE_REDUCTION (2.0.0-beta.922). If a newer version renames them, Defense quietly does nothing; the log says so once.
+
+- The vanilla world's decorated fingerprint ignores leaves' distance (since leaves count to 10 in every world, LeafDistance, the generator marks some leaves near vanilla's limit a step differently); the baseline was re-recorded at the commit before that change with the same rule, so it still proves the leaves themselves unchanged.

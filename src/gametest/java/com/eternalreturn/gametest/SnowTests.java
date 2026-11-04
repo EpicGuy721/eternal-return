@@ -72,6 +72,12 @@ public class SnowTests implements FabricGameTest {
 	private static final String MELT_BATCH = "snow_melt";
 	/** The freezing feature covers 16 by 16 columns from the test's corner. */
 	private static final String WORLDGEN_BATCH = "snow_worldgen";
+	/** Snow in flora: by hand, aimed at, growing. */
+	private static final String FLORA_BATCH = "flora_snow";
+	/** Snowfall on flora changes the weather. */
+	private static final String FLORA_WEATHER_BATCH = "flora_snow_weather";
+	/** The freezing feature on flora covers 16 by 16 columns from the test's corner. */
+	private static final String FLORA_WORLDGEN_BATCH = "flora_snow_worldgen";
 	/** 16 by 40 blocks of stone floor (at y 1 here: stand on y 2), 14 high. */
 	private static final String ARENA = "eternalreturn_test:arena";
 
@@ -169,7 +175,7 @@ public class SnowTests implements FabricGameTest {
 		for (Block block : Registries.BLOCK) {
 			BlockState plain = block.getDefaultState();
 			boolean kind = block instanceof SlabBlock || block instanceof StairsBlock || block instanceof WallBlock || block instanceof FenceBlock
-					|| block instanceof FenceGateBlock || block == MixedSlabs.MIXED_SLAB;
+					|| block instanceof FenceGateBlock || block == MixedSlabs.MIXED_SLAB || SnowCover.isFlora(block);
 			if (!kind) {
 				ctx.assertTrue(!SnowCover.isHost(plain), Registries.BLOCK.getId(block) + " doesn't hold snow");
 				continue;
@@ -675,6 +681,213 @@ public class SnowTests implements FabricGameTest {
 			ctx.assertTrue(world.getBlockState(lit.up()).isAir(), "the cover melted too");
 			ctx.assertTrue(dropped(world, lit, Items.SNOWBALL) == 0, "dropping nothing");
 			ctx.assertTrue(logged(world, dark) == 1, "in the dark it stays");
+			ctx.complete();
+		});
+	}
+
+	/** A plant put on grass (the grass under it, at y - 1). */
+	private static void plant(ServerWorld world, BlockPos pos, BlockState plant) {
+		world.setBlockState(pos.down(), Blocks.GRASS_BLOCK.getDefaultState());
+		world.setBlockState(pos, plant);
+	}
+
+	private static boolean groundSnowy(ServerWorld world, BlockPos plant) {
+		BlockState ground = world.getBlockState(plant.down());
+		return ground.contains(net.minecraft.state.property.Properties.SNOWY) && ground.get(net.minecraft.state.property.Properties.SNOWY);
+	}
+
+	/**
+	 * Flora holds snow as in Bedrock Edition: grass, ferns, flowers, saplings (this mod's too), mushrooms, the Nether's
+	 * plants, dead bushes, berry bushes, petals (maple petals too), azaleas, crops and stems, up to 8 layers on the
+	 * floor of their space; two-block plants and water plants don't, nor a waterlogged propagule.
+	 */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = FLORA_BATCH)
+	public void whichFloraHoldsSnow(TestContext ctx) {
+		List<Block> flora = List.of(Blocks.SHORT_GRASS, Blocks.FERN, Blocks.POPPY, Blocks.WITHER_ROSE, Blocks.OAK_SAPLING, Blocks.BROWN_MUSHROOM, Blocks.CRIMSON_FUNGUS,
+				Blocks.WARPED_ROOTS, Blocks.NETHER_SPROUTS, Blocks.DEAD_BUSH, Blocks.SWEET_BERRY_BUSH, Blocks.PINK_PETALS, com.eternalreturn.blocks.Woods.MAPLE_PETALS,
+				Blocks.AZALEA, Blocks.FLOWERING_AZALEA, Blocks.WHEAT, Blocks.CARROTS, Blocks.BEETROOTS, Blocks.TORCHFLOWER_CROP, Blocks.PUMPKIN_STEM,
+				Blocks.ATTACHED_MELON_STEM, Blocks.MANGROVE_PROPAGULE);
+		for (Block block : flora) {
+			BlockState plain = block.getDefaultState();
+			ctx.assertTrue(SnowCover.isFlora(plain) && !SnowCover.marked(plain), Registries.BLOCK.getId(block) + " holds snow, none by default");
+			if (!plain.contains(net.minecraft.state.property.Properties.WATERLOGGED) || !plain.get(net.minecraft.state.property.Properties.WATERLOGGED)) {
+				ctx.assertTrue(SnowCover.capacity(plain) == 8, Registries.BLOCK.getId(block) + " takes 8 layers: " + SnowCover.capacity(plain));
+			}
+			ctx.assertTrue(!SnowCover.reachesTop(plain) && SnowCover.whole(plain, 8) && !SnowCover.whole(plain, 7), Registries.BLOCK.getId(block) + " takes no snow cover");
+		}
+		ctx.assertTrue(SnowCover.capacity(Blocks.MANGROVE_PROPAGULE.getDefaultState().with(net.minecraft.state.property.Properties.WATERLOGGED, true)) == 0,
+				"none in a waterlogged propagule");
+		int saplings = 0;
+		for (Block block : Registries.BLOCK) {
+			if (block instanceof net.minecraft.block.SaplingBlock && Registries.BLOCK.getId(block).getNamespace().equals(com.eternalreturn.EternalReturn.MOD_ID)) {
+				saplings++;
+				ctx.assertTrue(SnowCover.isFlora(block), Registries.BLOCK.getId(block) + " holds snow");
+			}
+		}
+		ctx.assertTrue(saplings > 0, "no saplings of this mod's found");
+		for (Block block : List.of(Blocks.TALL_GRASS, Blocks.LARGE_FERN, Blocks.SUNFLOWER, Blocks.ROSE_BUSH, Blocks.SMALL_DRIPLEAF, Blocks.PITCHER_CROP, Blocks.SEAGRASS,
+				Blocks.TALL_SEAGRASS, Blocks.LILY_PAD, Blocks.SEA_PICKLE, Blocks.KELP, Blocks.SUGAR_CANE, Blocks.CACTUS, Blocks.VINE)) {
+			ctx.assertTrue(!SnowCover.isHost(block.getDefaultState()), Registries.BLOCK.getId(block) + " doesn't hold snow");
+		}
+		ctx.complete();
+	}
+
+	/**
+	 * Snow put in flora by hand: clicking a plant from any side (using it, or not), or the ground under it, logs a layer
+	 * in it (the snow item doesn't replace short grass), and the grass under it turns snowy; full of snow, a snow layer
+	 * on it. Not where a snow layer couldn't lie.
+	 */
+	@GameTest(templateName = ARENA, batchId = FLORA_BATCH, tickLimit = 40)
+	public void snowInFloraByHand(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(8, 2, 2));
+		try {
+			ItemStack snow = new ItemStack(Items.SNOW, 64);
+			BlockPos poppy = ctx.getAbsolutePos(new BlockPos(2, 2, 6));
+			plant(world, poppy, Blocks.POPPY.getDefaultState());
+			ctx.assertTrue(useOn(player, snow, poppy, Direction.NORTH).isAccepted() && logged(world, poppy) == 1, "clicking its side logs a layer: " + logged(world, poppy));
+			ctx.assertTrue(world.getBlockState(poppy).isOf(Blocks.POPPY) && SnowCover.marked(world.getBlockState(poppy)), "the poppy stays, snowy");
+			ctx.assertTrue(groundSnowy(world, poppy), "the grass under it is snowy");
+			useOn(player, snow, poppy.down(), Direction.UP);
+			ctx.assertTrue(logged(world, poppy) == 2, "clicking the ground under it, a layer more: " + logged(world, poppy));
+			for (int i = 0; i < 6; i++) {
+				clickTop(player, world, snow, poppy, 0.9);
+			}
+			ctx.assertTrue(logged(world, poppy) == 8 && snowLayer(world, poppy.up()) == 0, "8 layers, nothing on it yet: " + logged(world, poppy));
+			clickTop(player, world, snow, poppy, 0.9);
+			ctx.assertTrue(logged(world, poppy) == 8 && snowLayer(world, poppy.up()) == 1, "full, a snow layer on it: " + world.getBlockState(poppy.up()));
+			ctx.assertTrue(snow.getCount() == 55, "a snow layer used a layer: " + snow.getCount());
+
+			BlockPos grass = ctx.getAbsolutePos(new BlockPos(5, 2, 6));
+			plant(world, grass, Blocks.SHORT_GRASS.getDefaultState());
+			clickTop(player, world, snow, grass, 0.5);
+			ctx.assertTrue(world.getBlockState(grass).isOf(Blocks.SHORT_GRASS) && logged(world, grass) == 1, "short grass keeps its place, a layer in it: " + world.getBlockState(grass));
+
+			BlockPos bush = ctx.getAbsolutePos(new BlockPos(8, 2, 6));
+			world.setBlockState(bush.down(), Blocks.PACKED_ICE.getDefaultState());
+			world.setBlockState(bush, Blocks.DEAD_BUSH.getDefaultState());
+			ctx.assertTrue(!SnowCover.holdsSnowAt(world, bush, world.getBlockState(bush)), "no snow where a snow layer couldn't lie (on packed ice)");
+			BlockPos wheat = ctx.getAbsolutePos(new BlockPos(11, 2, 6));
+			world.setBlockState(wheat.down(), Blocks.FARMLAND.getDefaultState());
+			world.setBlockState(wheat, Blocks.WHEAT.getDefaultState());
+			ctx.assertTrue(SnowCover.holdsSnowAt(world, wheat, world.getBlockState(wheat)), "crops on farmland hold it");
+		} finally {
+			FishingTests.disconnect(player);
+		}
+		ctx.complete();
+	}
+
+	/**
+	 * The plant stays the target: aiming at it breaks the plant and leaves its snow as a snow layer; aiming at the snow
+	 * beside it digs only the snow, leaving the plant. A crop growing keeps its snow.
+	 */
+	@GameTest(templateName = ARENA, batchId = FLORA_BATCH, tickLimit = 40)
+	public void thePlantStaysTheTarget(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(8, 2, 20));
+		try {
+			BlockPos sapling = ctx.getAbsolutePos(new BlockPos(2, 2, 24));
+			plant(world, sapling, Blocks.OAK_SAPLING.getDefaultState());
+			snowy(world, sapling, world.getBlockState(sapling), 2);
+			lookAt(player, world, sapling, new Vec3d(0.5, 0.5, 0.5), 1.0);
+			ctx.assertTrue(!SnowCover.aimsSnow(player, world, sapling, world.getBlockState(sapling)), "looking at the sapling, the sapling is aimed at");
+			lookAt(player, world, sapling, new Vec3d(0.5, 0.25, 0.97), 1.0);
+			ctx.assertTrue(SnowCover.aimsSnow(player, world, sapling, world.getBlockState(sapling)), "looking at the snow in front of it, the snow is aimed at");
+			player.setStackInHand(Hand.MAIN_HAND, new ItemStack(Items.IRON_SHOVEL));
+			player.interactionManager.tryBreakBlock(sapling);
+			ctx.assertTrue(world.getBlockState(sapling).isOf(Blocks.OAK_SAPLING) && logged(world, sapling) == 0 && dropped(world, sapling, Items.SNOWBALL) == 2,
+					"the snow dug off, the sapling stays: " + world.getBlockState(sapling));
+			ctx.assertTrue(!groundSnowy(world, sapling), "the grass under it is green again");
+
+			BlockPos pulled = ctx.getAbsolutePos(new BlockPos(6, 2, 24));
+			plant(world, pulled, Blocks.OAK_SAPLING.getDefaultState());
+			snowy(world, pulled, world.getBlockState(pulled), 3);
+			lookAt(player, world, pulled, new Vec3d(0.5, 0.5, 0.5), 1.0);
+			player.setStackInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
+			player.interactionManager.tryBreakBlock(pulled);
+			ctx.assertTrue(dropped(world, pulled, Items.OAK_SAPLING) == 1 && snowLayer(world, pulled) == 3, "the sapling broken, its snow stays: " + world.getBlockState(pulled));
+
+			BlockPos wheat = ctx.getAbsolutePos(new BlockPos(10, 2, 24));
+			world.setBlockState(wheat.down(), Blocks.FARMLAND.getDefaultState());
+			world.setBlockState(wheat, Blocks.WHEAT.getDefaultState());
+			snowy(world, wheat, world.getBlockState(wheat), 1);
+			world.setBlockState(wheat, ((net.minecraft.block.CropBlock) Blocks.WHEAT).withAge(4));
+			ctx.assertTrue(logged(world, wheat) == 1 && SnowCover.marked(world.getBlockState(wheat)), "the wheat grew, keeping its snow: " + world.getBlockState(wheat));
+			// Snow covers the whole floor under a plant; with 2 layers or more it's stood on.
+			ctx.assertTrue(top(SnowCover.snowOutline(world.getBlockState(wheat), 3)) == 6.0 / 16.0
+					&& SnowCover.snowOutline(world.getBlockState(wheat), 3).getBoundingBox().getLengthX() == 1.0, "the snow fills the floor");
+			ctx.assertTrue(top(world.getBlockState(wheat).getCollisionShape(world, wheat)) == 0.0, "a layer isn't stood on");
+		} finally {
+			FishingTests.disconnect(player);
+		}
+		ctx.killAllEntities();
+		ctx.complete();
+	}
+
+	/** Snowfall settles in flora a layer at a time (the snow-piling game rule), the grass under it turning snowy; not in tall grass. */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = FLORA_WEATHER_BATCH, skyAccess = true, tickLimit = 40)
+	public void snowfallSettlesInFlora(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		floor(ctx);
+		fillBiome(ctx, 7, "minecraft:snowy_plains");
+		BlockPos grass = ctx.getAbsolutePos(new BlockPos(2, 1, 2));
+		BlockPos poppy = ctx.getAbsolutePos(new BlockPos(3, 1, 2));
+		BlockPos berries = ctx.getAbsolutePos(new BlockPos(4, 1, 2));
+		BlockPos wheat = ctx.getAbsolutePos(new BlockPos(5, 1, 2));
+		BlockPos tall = ctx.getAbsolutePos(new BlockPos(2, 1, 4));
+		plant(world, grass, Blocks.SHORT_GRASS.getDefaultState());
+		plant(world, poppy, Blocks.POPPY.getDefaultState());
+		plant(world, berries, Blocks.SWEET_BERRY_BUSH.getDefaultState());
+		world.setBlockState(wheat.down(), Blocks.FARMLAND.getDefaultState());
+		world.setBlockState(wheat, Blocks.WHEAT.getDefaultState());
+		world.setBlockState(tall.down(), Blocks.GRASS_BLOCK.getDefaultState());
+		net.minecraft.block.TallPlantBlock.placeAt(world, Blocks.TALL_GRASS.getDefaultState(), tall, Block.NOTIFY_ALL);
+		Storm storm = Weathers.rain(world, Vec3d.ofCenter(grass), false);
+		ctx.runAtTick(20, () -> {
+			try {
+				List<BlockPos> all = List.of(grass, poppy, berries, wheat, tall);
+				for (int i = 0; i < 3; i++) {
+					all.forEach(world::tickIceAndSnow);
+				}
+				for (BlockPos pos : List.of(grass, poppy, berries, wheat)) {
+					ctx.assertTrue(logged(world, pos) == 1, "a layer logged in " + world.getBlockState(pos) + " (the game rule piles 1): " + logged(world, pos));
+				}
+				for (BlockPos pos : List.of(grass, poppy, berries)) {
+					ctx.assertTrue(groundSnowy(world, pos), "the grass under " + world.getBlockState(pos) + " is snowy");
+				}
+				ctx.assertTrue(!SnowCover.isHost(world.getBlockState(tall)) && world.getBlockState(tall.up(2)).isAir(), "nothing in tall grass");
+			} finally {
+				Weathers.dry(world, storm);
+			}
+			ctx.complete();
+		});
+	}
+
+	/** Snowy biomes' generation lays a layer in flora where vanilla's lays none, and makes the grass under it snowy. */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = FLORA_WORLDGEN_BATCH, skyAccess = true, tickLimit = 40)
+	public void generationSnowsInFlora(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		floor(ctx);
+		fillBiome(ctx, 7, "minecraft:snowy_taiga");
+		BlockPos fern = ctx.getAbsolutePos(new BlockPos(2, 1, 2));
+		BlockPos sapling = ctx.getAbsolutePos(new BlockPos(3, 1, 2));
+		BlockPos mushroom = ctx.getAbsolutePos(new BlockPos(4, 1, 2));
+		BlockPos bare = ctx.getAbsolutePos(new BlockPos(2, 1, 5));
+		plant(world, fern, Blocks.FERN.getDefaultState());
+		plant(world, sapling, Blocks.SPRUCE_SAPLING.getDefaultState());
+		world.setBlockState(mushroom.down(), Blocks.PODZOL.getDefaultState());
+		world.setBlockState(mushroom, Blocks.BROWN_MUSHROOM.getDefaultState());
+		world.setBlockState(bare.down(), Blocks.GRASS_BLOCK.getDefaultState());
+		ctx.runAtTick(5, () -> {
+			BlockPos corner = ctx.getAbsolutePos(BlockPos.ORIGIN);
+			BlockPos far = ctx.getAbsolutePos(new BlockPos(7, 0, 7));
+			BlockPos origin = new BlockPos(Math.min(corner.getX(), far.getX()), corner.getY(), Math.min(corner.getZ(), far.getZ()));
+			Feature.FREEZE_TOP_LAYER.generate(new FeatureContext<>(Optional.empty(), world, world.getChunkManager().getChunkGenerator(), world.random, origin,
+					DefaultFeatureConfig.INSTANCE));
+			ctx.assertTrue(snowLayer(world, bare) == 1 && groundSnowy(world, bare), "a snow layer on bare grass, as vanilla's");
+			for (BlockPos pos : List.of(fern, sapling, mushroom)) {
+				ctx.assertTrue(logged(world, pos) == 1 && groundSnowy(world, pos), "a layer logged in " + world.getBlockState(pos) + ", the ground snowy");
+			}
 			ctx.complete();
 		});
 	}

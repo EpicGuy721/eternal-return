@@ -18902,7 +18902,6 @@
                   "eternalreturn:larch_forest",
                   "eternalreturn:grand_fir_forest",
                   "eternalreturn:alps",
-                  "eternalreturn:icy_mountains",
                   "eternalreturn:glacier_field"
                 ]
               },
@@ -18997,17 +18996,7 @@
               "if_true": {
                 "type": "minecraft:biome",
                 "biome_is": [
-                  "moderner_beta:early_release_ice_plains",
-                  "moderner_beta:late_beta_ice_plains",
-                  "minecraft:snowy_plains",
-                  "minecraft:frozen_ocean",
-                  "minecraft:frozen_river",
-                  "minecraft:deep_frozen_ocean",
-                  "eternalreturn:ice_plains_peak",
-                  "eternalreturn:black_spruce_forest",
-                  "eternalreturn:tundra",
-                  "eternalreturn:arctic",
-                  "eternalreturn:snowy_mesa"
+                  "eternalreturn:ice_caves"
                 ]
               },
               "then_run": {

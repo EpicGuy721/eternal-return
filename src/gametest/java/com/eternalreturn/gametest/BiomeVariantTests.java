@@ -132,7 +132,8 @@ public class BiomeVariantTests implements FabricGameTest {
 		for (String id : variantTable().keySet()) {
 			BiomeVariants.Variant variant = BiomeVariants.get(Identifier.of(id));
 			biome(world, id);
-			if (!variant.kind().equals("peak")) {
+			// Peaks (and the icy mountains) come after the terrain, and cave biomes lie under it: neither needs a height.
+			if (!variant.kind().equals("peak") && !variant.kind().equals("cave")) {
 				String base = variant.base().toString();
 				// (Neither listed, as the beach and the palm beach: both take their height from Moderner Beta's height tags, which a variant joins.)
 				ctx.assertTrue(java.util.Objects.equals(heights.get(id), heights.get(base)),
