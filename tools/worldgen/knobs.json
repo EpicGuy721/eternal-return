@@ -29,7 +29,13 @@
       "minecraft:lukewarm_ocean",
       "minecraft:deep_lukewarm_ocean",
       "minecraft:warm_ocean",
-      "minecraft:cherry_grove"
+      "minecraft:cherry_grove",
+      "moderner_beta:early_release_ice_plains",
+      "moderner_beta:late_beta_ice_plains",
+      "minecraft:snowy_plains",
+      "minecraft:frozen_ocean",
+      "minecraft:frozen_river",
+      "minecraft:deep_frozen_ocean"
     ],
     "minecraft:andesite": [
       "minecraft:forest",
@@ -53,12 +59,7 @@
       "minecraft:badlands"
     ],
     "eternalreturn:hardened_packed_ice": [
-      "moderner_beta:early_release_ice_plains",
-      "moderner_beta:late_beta_ice_plains",
-      "minecraft:snowy_plains",
-      "minecraft:frozen_ocean",
-      "minecraft:frozen_river",
-      "minecraft:deep_frozen_ocean"
+      "eternalreturn:ice_caves"
     ]
   }
 }

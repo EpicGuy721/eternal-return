@@ -232,7 +232,10 @@ preset['biomeSettings']['moderner_beta:biome_injection_rules'] = [
          {'condition': 'moderner_beta:y_above', 'anchor': {'absolute': spec['y']}},
          {'condition': 'moderner_beta:below_surface', 'threshold': -8}]}}
     for vid, spec in VARIANTS['peaks'].items()]
-VARIANT_BASES = {f'{NS}:{vid}': spec['base'] for kind in ('peaks', 'edges', 'subs') for vid, spec in VARIANTS[kind].items() if not vid.startswith('_')}
+VARIANT_BASES = {f'{NS}:{vid}': spec['base'] for kind in ('peaks', 'edges', 'subs', 'caves') for vid, spec in VARIANTS[kind].items() if not vid.startswith('_')}
+# A variant with its own "stone" (the icy mountains: plain stone, though their base, the extreme hills, is andesite).
+STONE_OVERRIDE = {f'{NS}:{vid}': spec['stone'] for kind in ('subs', 'caves') for vid, spec in VARIANTS[kind].items()
+                  if not vid.startswith('_') and 'stone' in spec}
 VARIANT_BASES.update({f'{NS}:{vid}': 'minecraft:river' for vid in VARIANTS['rivers']})
 
 # ---------------------------------------------------------------- sub-biomes (worldgen expansion phase 6)
@@ -243,7 +246,10 @@ VARIANT_BASES.update({f'{NS}:{vid}': 'minecraft:river' for vid in VARIANTS['rive
 # ("shore_of") replace the beach where one of those lands meets the sea. In the later layers a sub-biome acts as its
 # parent (beaches or none, swamp lakes, frozen seas, rivers, its parent's edge, and as a neighbour for edges), except that
 # it gets no hills, old growth or peak.
-SUBS = {f'{NS}:{sid}': spec for sid, spec in VARIANTS['subs'].items() if not sid.startswith('_')}
+SUBS = {f'{NS}:{sid}': spec for sid, spec in VARIANTS['subs'].items() if not sid.startswith('_') and 'above_y' not in spec}
+# High sub-biomes ("above_y": the icy mountains): the ground above that height in the land they name, by an injection
+# rule like the peaks', after the terrain, so they are always on real high ground (see below).
+HIGH_SUBS = {f'{NS}:{sid}': spec for sid, spec in VARIANTS['subs'].items() if not sid.startswith('_') and 'above_y' in spec}
 LAND_SUBS = {sid: spec for sid, spec in SUBS.items() if 'share' in spec}
 SHORE_SUBS = {sid: spec for sid, spec in SUBS.items() if 'shore_of' in spec}
 subs_of = {}
@@ -344,9 +350,6 @@ if SUBS:
             {'biomes': with_subs(with_height_variants(spec['shore_of'])), 'condition': 'moderner_beta:in_set'}, copy.deepcopy(sea)]}}
         for sid, spec in SHORE_SUBS.items()]
 
-# ---------------------------------------------------------------- caves: no modern cave biomes
-preset['caveBiomeSettings'] = {'moderner_beta:provider': 'moderner_beta:none'}
-
 # ---------------------------------------------------------------- structures (Eternal Return worlds only)
 # No trial chambers and no ocean monuments (guardians spawn in the open ocean instead). Moderner Beta's
 # ocean shrines exist only through this override in its presets, so dropping it drops them.
@@ -436,6 +439,83 @@ if KNOBS['land_height'] is not None:
                 and biome.split('*')[0] not in KNOBS['land_height_except']):
             forced['heightOverrides'][biome] = KNOBS['land_height']
 
+# ---------------------------------------------------------------- cave biomes: only this mod's (ice caves), no modern ones
+# Which land and sea is snowy: each biome's temperature (from its biome file, a variant's from the table) below the snow
+# line, 0.15, as the climate rules and Moderner Beta's snow count it; and the deep frozen ocean, which vanilla rates warm.
+MC_JAR = zipfile.ZipFile([j for j in glob.glob(os.path.join(ROOT, '.gradle', 'loom-cache', 'minecraftMaven', 'net', 'minecraft',
+                                                            'minecraft-common-*', '*', '*.jar')) if not j.endswith('-sources.jar')][0])
+
+
+def base_temperature(ident):
+    ns, path = ident.split(':')
+    own = os.path.join(ROOT, 'src/main/resources/data', ns, 'worldgen/biome', path + '.json')
+    if os.path.exists(own) and ns == NS and path not in {v.split(':')[1] for v in VARIANT_BASES}:
+        return json.load(open(own, encoding='utf-8'))['temperature']
+    for jar in (MB_JAR, MC_JAR):
+        name = f'data/{ns}/worldgen/biome/{path}.json'
+        if name in jar.namelist():
+            return json.loads(jar.read(name))['temperature']
+    return None
+
+
+def temperature_of(ident):
+    for kind in ('peaks', 'edges', 'rivers', 'subs', 'caves'):
+        spec = VARIANTS[kind].get(ident.split(':')[1]) if ident.startswith(NS + ':') else None
+        if spec is not None:
+            base = 'minecraft:river' if kind == 'rivers' else spec['base']
+            if 'temperature' not in spec:
+                return base_temperature(base)
+            return base_temperature(base) + spec['temperature'] if kind == 'peaks' else spec['temperature']
+    return base_temperature(ident)
+
+
+SNOW_LINE = 0.15
+in_layers = set()
+pipeline_biomes(pipeline, in_layers)
+candidates = {b.split('*')[0] for b in in_layers if ':' in b and b[0] not in '~#' and not b.startswith('minecraft:the_void')}
+candidates |= set(VARIANT_BASES) - {f'{NS}:{c}' for c in VARIANTS['caves'] if not c.startswith('_')}
+SNOWY = sorted(b for b in candidates if b not in HIGH_SUBS and temperature_of(b) is not None and temperature_of(b) < SNOW_LINE) + ['minecraft:deep_frozen_ocean']
+CAVES = {f'{NS}:{cid}': spec for cid, spec in VARIANTS['caves'].items() if not cid.startswith('_')}
+# Moderner Beta's cave biome map: a Voronoi pattern of points over temperature, rain and depth noise; a point without a
+# biome is no cave biome. One point of 3 x "share" is the cave biome (the others empty), which gives about the share (the
+# noise favours some points; measured by IceCaveTests).
+points = []
+for cid, spec in CAVES.items():
+    n = spec['share'] * 3
+    for i in range(n):
+        point = {'depth': 0.25 if i % 2 == 0 else 0.75, 'rain': 0.5, 'temp': round((i + 0.5) / n, 4)}
+        # One point in 3 x share: measured under the cold of the test seed, two in 8 gave 53% of the underground, one in 8 38%.
+        if i == spec['share'] // 2:
+            point['biome'] = cid
+        points.append(point)
+preset['caveBiomeSettings'] = {'moderner_beta:provider': 'moderner_beta:voronoi', 'moderner_beta:cave_biome_voronoi': {
+    'depthMinY': -64, 'depthMaxY': 128, 'horizontalScale': 48.0, 'verticalScale': 16.0, 'points': points}} if CAVES else \
+    {'moderner_beta:provider': 'moderner_beta:none'}
+rules = preset['biomeSettings']['moderner_beta:biome_injection_rules']
+# High sub-biomes: before the peaks, so the ground above their height is theirs; over the snowy land and the extreme hills
+# (and their sub-biomes and variants), not the mesas (whose bands would stop at the height).
+HILLS = ['moderner_beta:early_release_extreme_hills']
+for sid, spec in reversed(list(HIGH_SUBS.items())):
+    mesas = {f'{NS}:{v}' for v, sub in VARIANTS['subs'].items() if 'bands' in sub}
+    over = sorted({b for b in SNOWY + with_subs(HILLS) + [v for v, base in VARIANT_BASES.items() if base in HILLS]
+                   if 'ocean' not in b and 'river' not in b and 'beach' not in b and b not in CAVES and b not in HIGH_SUBS and b not in mesas})
+    rules.insert(0, {'type': 'moderner_beta:predicate', 'step_for': 'before_surface',
+                     'onMatch': {'type': 'moderner_beta:constant_biome', 'biome': sid},
+                     'predicate': {'condition': 'moderner_beta:all_of', 'terms': [
+                         {'condition': 'moderner_beta:biome_in_set', 'biomes': over},
+                         {'condition': 'moderner_beta:y_above', 'anchor': {'absolute': spec['above_y']}},
+                         # Up to 48 above Moderner Beta's estimate of the ground: steep high ground rises well above it
+                         # (with the peaks' 8, most taiga columns at y 110 to 130 kept their biome; 32 still missed some).
+                         # Floating islands start at y 165, above the highest ground plus 48.
+                         {'condition': 'moderner_beta:below_surface', 'threshold': -48}]}})
+# Cave biomes: at least 8 blocks under the snowy land and frozen seas, where the cave biome map gives one (first of all
+# the rules, so a peak or the icy mountains never cover them).
+if CAVES:
+    rules.insert(0, {'type': 'moderner_beta:predicate', 'step_for': 'before_surface', 'onMatch': {'type': 'moderner_beta:cave_biome'},
+                     'predicate': {'condition': 'moderner_beta:all_of', 'terms': [
+                         {'condition': 'moderner_beta:biome_in_set', 'biomes': SNOWY},
+                         {'condition': 'moderner_beta:below_surface', 'threshold': 8}]}})
+
 preset['name'] = {'color': 'gold', 'translate': f'createWorld.customize.modern_beta.preset.name.{NS}.eternal_return'}
 preset['description'] = {'translate': f'createWorld.customize.modern_beta.preset.desc.{NS}.eternal_return'}
 write(f'data/{NS}/moderner_beta/settings_preset/eternal_return.json', preset)
@@ -450,7 +530,8 @@ if KNOBS['aquifers'] is not None:
 # stone. Switched by the config setting worldgen.biomeStone (the eternalreturn:biome_stone_enabled
 # condition). No blending: each block takes the stone of the biome it is in.
 for block, biomes in KNOBS['biome_stone'].items():
-    biomes += [v for v, base in VARIANT_BASES.items() if base in biomes and v not in biomes]
+    biomes += [v for v, base in VARIANT_BASES.items() if base in biomes and v not in biomes and v not in STONE_OVERRIDE]
+    biomes += [v for v, stone in STONE_OVERRIDE.items() if stone == block and v not in biomes]
 stone_rules = [{'type': 'minecraft:condition',
                 'if_true': {'type': 'minecraft:biome', 'biome_is': biomes},
                 'then_run': {'type': 'minecraft:block', 'result_state': {'Name': block}}}

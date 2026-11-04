@@ -232,12 +232,16 @@
   },
   "eternalreturn:icy_mountains": {
     "base": "moderner_beta:early_release_extreme_hills",
-    "kind": "sub",
+    "kind": "peak",
     "boulders": 1.0
   },
   "eternalreturn:glacier_field": {
     "base": "moderner_beta:early_release_taiga",
     "kind": "sub",
     "boulders": 1.5
+  },
+  "eternalreturn:ice_caves": {
+    "base": "moderner_beta:early_release_ice_plains",
+    "kind": "cave"
   }
 }

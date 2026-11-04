@@ -97,6 +97,7 @@ public class EternalReturn implements ModInitializer {
 		com.eternalreturn.mobs.PillagerBoats.register();
 		WorldgenFeatures.register();
 		HardenedBlocks.register();
+		com.eternalreturn.blocks.IceBlocks.register();
 		OreVariants.register();
 		BiomeStoneCondition.register();
 		LOGGER.info("Eternal Return loaded: {} capped tiers, {} inherent rules",

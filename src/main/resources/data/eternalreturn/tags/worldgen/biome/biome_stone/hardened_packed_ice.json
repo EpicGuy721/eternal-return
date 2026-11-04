@@ -1,47 +1,7 @@
 {
   "values": [
     {
-      "id": "moderner_beta:early_release_ice_plains",
-      "required": false
-    },
-    {
-      "id": "moderner_beta:late_beta_ice_plains",
-      "required": false
-    },
-    {
-      "id": "minecraft:snowy_plains",
-      "required": false
-    },
-    {
-      "id": "minecraft:frozen_ocean",
-      "required": false
-    },
-    {
-      "id": "minecraft:frozen_river",
-      "required": false
-    },
-    {
-      "id": "minecraft:deep_frozen_ocean",
-      "required": false
-    },
-    {
-      "id": "eternalreturn:ice_plains_peak",
-      "required": false
-    },
-    {
-      "id": "eternalreturn:black_spruce_forest",
-      "required": false
-    },
-    {
-      "id": "eternalreturn:tundra",
-      "required": false
-    },
-    {
-      "id": "eternalreturn:arctic",
-      "required": false
-    },
-    {
-      "id": "eternalreturn:snowy_mesa",
+      "id": "eternalreturn:ice_caves",
       "required": false
     }
   ]

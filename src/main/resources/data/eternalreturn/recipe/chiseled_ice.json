@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "#",
+    "#"
+  ],
+  "key": {
+    "#": {
+      "item": "eternalreturn:ice_bricks"
+    }
+  },
+  "result": {
+    "id": "eternalreturn:chiseled_ice",
+    "count": 1
+  }
+}

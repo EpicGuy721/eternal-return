@@ -145,7 +145,11 @@ def all_variants():
     for vid, spec in TABLE.get('subs', {}).items():
         if vid.startswith('_'):
             continue
-        out[vid] = (spec['base'], 'sub', spec)
+        # A high sub-biome (the icy mountains, "above_y") is placed as a peak is: after the terrain, by its height.
+        out[vid] = (spec['base'], 'peak' if 'above_y' in spec else 'sub', spec)
+    for vid, spec in TABLE.get('caves', {}).items():
+        if not vid.startswith('_'):
+            out[vid] = (spec['base'], 'cave', spec)
     return out
 
 
@@ -288,7 +292,7 @@ def main():
     write_json(lang_file, lang, indent='\t')
     print(f'{len(variants)} variants ({sum(1 for v in variants.values() if v[1] == "peak")} peaks, '
           f'{sum(1 for v in variants.values() if v[1] == "edge")} edges, {sum(1 for v in variants.values() if v[1] == "river")} rivers, '
-          f'{sum(1 for v in variants.values() if v[1] == "sub")} sub-biomes), '
+          f'{sum(1 for v in variants.values() if v[1] == "sub")} sub-biomes, {sum(1 for v in variants.values() if v[1] == "cave")} cave biomes), '
           f'{count} tags extended')
 
 

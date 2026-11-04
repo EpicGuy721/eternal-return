@@ -90,6 +90,10 @@
       "required": false
     },
     {
+      "id": "eternalreturn:ice_caves",
+      "required": false
+    },
+    {
       "id": "eternalreturn:ice_plains_peak",
       "required": false
     },

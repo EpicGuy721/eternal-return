@@ -489,16 +489,9 @@
             {
               "data": {
                 "type": "biome",
-                "value": "eternalreturn:icy_mountains"
-              },
-              "weight": 1
-            },
-            {
-              "data": {
-                "type": "biome",
                 "value": "minecraft:the_void*null"
               },
-              "weight": 2
+              "weight": 3
             }
           ]
         },
@@ -1250,7 +1243,6 @@
                         "eternalreturn:heathland",
                         "eternalreturn:grand_fir_forest",
                         "eternalreturn:alps",
-                        "eternalreturn:icy_mountains",
                         "eternalreturn:spooky_swamp",
                         "eternalreturn:bald_cypress_swamp"
                       ],
@@ -1451,7 +1443,6 @@
             "eternalreturn:heathland": "eternalreturn:rocky_river",
             "eternalreturn:grand_fir_forest": "eternalreturn:rocky_river",
             "eternalreturn:alps": "eternalreturn:rocky_river",
-            "eternalreturn:icy_mountains": "eternalreturn:rocky_river",
             "eternalreturn:pumpkin_plains": "eternalreturn:clay_river",
             "eternalreturn:meadow": "eternalreturn:clay_river",
             "eternalreturn:spooky_swamp": "eternalreturn:clay_river",
@@ -1522,6 +1513,94 @@
     "moderner_beta:provider": "moderner_beta:fractal",
     "moderner_beta:temperature_height_scaling": "none",
     "moderner_beta:biome_injection_rules": [
+      {
+        "type": "moderner_beta:predicate",
+        "step_for": "before_surface",
+        "onMatch": {
+          "type": "moderner_beta:cave_biome"
+        },
+        "predicate": {
+          "condition": "moderner_beta:all_of",
+          "terms": [
+            {
+              "condition": "moderner_beta:biome_in_set",
+              "biomes": [
+                "eternalreturn:alps",
+                "eternalreturn:arctic",
+                "eternalreturn:black_spruce_forest",
+                "eternalreturn:extreme_hills_peak",
+                "eternalreturn:glacier_field",
+                "eternalreturn:ice_plains_peak",
+                "eternalreturn:larch_forest",
+                "eternalreturn:old_growth_pine_taiga_peak",
+                "eternalreturn:old_growth_spruce_taiga_peak",
+                "eternalreturn:snowy_mesa",
+                "eternalreturn:taiga_edge",
+                "eternalreturn:taiga_peak",
+                "eternalreturn:tundra",
+                "minecraft:frozen_ocean",
+                "minecraft:frozen_river",
+                "minecraft:snowy_plains",
+                "moderner_beta:early_release_ice_plains",
+                "moderner_beta:early_release_taiga",
+                "moderner_beta:late_beta_ice_plains",
+                "minecraft:deep_frozen_ocean"
+              ]
+            },
+            {
+              "condition": "moderner_beta:below_surface",
+              "threshold": 8
+            }
+          ]
+        }
+      },
+      {
+        "type": "moderner_beta:predicate",
+        "step_for": "before_surface",
+        "onMatch": {
+          "type": "moderner_beta:constant_biome",
+          "biome": "eternalreturn:icy_mountains"
+        },
+        "predicate": {
+          "condition": "moderner_beta:all_of",
+          "terms": [
+            {
+              "condition": "moderner_beta:biome_in_set",
+              "biomes": [
+                "eternalreturn:alps",
+                "eternalreturn:arctic",
+                "eternalreturn:black_spruce_forest",
+                "eternalreturn:extreme_hills_peak",
+                "eternalreturn:glacier_field",
+                "eternalreturn:grand_fir_forest",
+                "eternalreturn:heathland",
+                "eternalreturn:ice_plains_peak",
+                "eternalreturn:larch_forest",
+                "eternalreturn:old_growth_pine_taiga_peak",
+                "eternalreturn:old_growth_spruce_taiga_peak",
+                "eternalreturn:taiga_edge",
+                "eternalreturn:taiga_peak",
+                "eternalreturn:tundra",
+                "minecraft:snowy_plains",
+                "moderner_beta:early_release_extreme_hills",
+                "moderner_beta:early_release_ice_plains",
+                "moderner_beta:early_release_taiga",
+                "moderner_beta:late_beta_ice_plains"
+              ]
+            },
+            {
+              "condition": "moderner_beta:y_above",
+              "anchor": {
+                "absolute": 105
+              }
+            },
+            {
+              "condition": "moderner_beta:below_surface",
+              "threshold": -48
+            }
+          ]
+        }
+      },
       {
         "type": "moderner_beta:predicate",
         "step_for": "before_surface",
@@ -1990,7 +2069,76 @@
     ]
   },
   "caveBiomeSettings": {
-    "moderner_beta:provider": "moderner_beta:none"
+    "moderner_beta:provider": "moderner_beta:voronoi",
+    "moderner_beta:cave_biome_voronoi": {
+      "depthMinY": -64,
+      "depthMaxY": 128,
+      "horizontalScale": 48.0,
+      "verticalScale": 16.0,
+      "points": [
+        {
+          "depth": 0.25,
+          "rain": 0.5,
+          "temp": 0.0417
+        },
+        {
+          "depth": 0.75,
+          "rain": 0.5,
+          "temp": 0.125
+        },
+        {
+          "depth": 0.25,
+          "rain": 0.5,
+          "temp": 0.2083,
+          "biome": "eternalreturn:ice_caves"
+        },
+        {
+          "depth": 0.75,
+          "rain": 0.5,
+          "temp": 0.2917
+        },
+        {
+          "depth": 0.25,
+          "rain": 0.5,
+          "temp": 0.375
+        },
+        {
+          "depth": 0.75,
+          "rain": 0.5,
+          "temp": 0.4583
+        },
+        {
+          "depth": 0.25,
+          "rain": 0.5,
+          "temp": 0.5417
+        },
+        {
+          "depth": 0.75,
+          "rain": 0.5,
+          "temp": 0.625
+        },
+        {
+          "depth": 0.25,
+          "rain": 0.5,
+          "temp": 0.7083
+        },
+        {
+          "depth": 0.75,
+          "rain": 0.5,
+          "temp": 0.7917
+        },
+        {
+          "depth": 0.25,
+          "rain": 0.5,
+          "temp": 0.875
+        },
+        {
+          "depth": 0.75,
+          "rain": 0.5,
+          "temp": 0.9583
+        }
+      ]
+    }
   },
   "chunkSettings": {
     "moderner_beta:cave_generation": {
@@ -2052,7 +2200,6 @@
         "eternalreturn:glacier_field": "0.1;0.05",
         "eternalreturn:grand_fir_forest": "0.1;0.05",
         "eternalreturn:heathland": "0.1;0.05",
-        "eternalreturn:icy_mountains": "0.1;0.05",
         "eternalreturn:jungle_edge": "0.1;0.05",
         "eternalreturn:larch_forest": "0.1;0.05",
         "eternalreturn:meadow": "0.1;0.05",

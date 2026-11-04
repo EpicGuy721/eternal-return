@@ -66,11 +66,90 @@ public class BiomeStoneTests implements FabricGameTest {
 		table.put("minecraft:savanna", Blocks.GRANITE);
 		table.put("minecraft:desert", HardenedBlocks.get("hardened_sandstone"));
 		table.put("minecraft:badlands", Blocks.RED_SANDSTONE);
+		// Since the ice caves (phase 6): the cold biomes are plain stone, and only the ice caves under them hardened packed ice.
 		for (String biome : List.of("moderner_beta:early_release_ice_plains", "moderner_beta:late_beta_ice_plains", "minecraft:snowy_plains",
 				"minecraft:frozen_ocean", "minecraft:deep_frozen_ocean", "minecraft:frozen_river")) {
-			table.put(biome, HardenedBlocks.get("hardened_packed_ice"));
+			table.put(biome, Blocks.STONE);
 		}
 		return table;
+	}
+
+	/**
+	 * Biomes injected after the biome layers (Moderner Beta's injection rules), which the layers' own per-block biomes
+	 * don't show: the ice caves under the snowy land and the icy mountains on its high ground. Where the world's biome at a
+	 * block is one of these, its stone is expected there.
+	 */
+	private static Map<String, Block> injected() {
+		// (Built when asked: test classes load before the mod's blocks are registered.)
+		return Map.of("eternalreturn:ice_caves", HardenedBlocks.get("hardened_packed_ice"), "eternalreturn:icy_mountains", Blocks.STONE);
+	}
+
+	/**
+	 * The biome whose stone a block should have: an injected one (ice caves, icy mountains) where the chunk's own biome cells
+	 * say so, else the layers' biome. The surface rules read biomes blurred across 4-block cells (vanilla's biome zoom), so
+	 * hardened packed ice next to an ice cave cell counts as the cave's. Cells are read from the square's own chunks only:
+	 * asking the chunk manager in this loop lets queued generation run, which moves chunks on while they are compared.
+	 */
+	private static String stoneBiome(Map<Long, Chunk> square, SurfaceBiomes biomes, BlockPos pos, BlockState state) {
+		int qx = pos.getX() >> 2;
+		int qy = pos.getY() >> 2;
+		int qz = pos.getZ() >> 2;
+		String layers = id(biomes.at(pos));
+		String own = cell(square, qx, qy, qz);
+		boolean injectedNear = false;
+		boolean outside = false;
+		// Two cells round: the blur reaches one, and Moderner Beta re-applies its rules once the ground's height is known, so
+		// a cave's edge can move a little after the stone was laid.
+		for (int dx = -2; dx <= 2 && !injectedNear; dx++) {
+			for (int dy = -2; dy <= 2 && !injectedNear; dy++) {
+				for (int dz = -2; dz <= 2 && !injectedNear; dz++) {
+					String near = cell(square, qx + dx, qy + dy, qz + dz);
+					outside |= near == null;
+					injectedNear = near != null && injected().containsKey(near);
+					// Near an injected biome's cells either stone is right: the one the block has wins, if it is one of them.
+					if (injectedNear && state.isOf(injected().get(near))) {
+						return near;
+					}
+				}
+			}
+		}
+		// At the square's edge the neighbouring cells aren't held: an ice cave's stone there can't be judged.
+		if (outside && state.isOf(HardenedBlocks.get("hardened_packed_ice"))) {
+			return "eternalreturn:ice_caves";
+		}
+		if (injectedNear) {
+			// The layers' stone, if the block has it; else the injected biome's (and then a wrong block is reported as such).
+			Block layersStone = stoneOf(layersTable(), layers);
+			return state.isOf(layersStone) || own == null || !injected().containsKey(own) ? layers : own;
+		}
+		return layers;
+	}
+
+	/** A biome's expected stone: its own entry, else its base's (variants and sub-biomes keep their base's stone). */
+	private static Block stoneOf(Map<String, Block> table, String biome) {
+		if (injected().containsKey(biome)) {
+			return injected().get(biome);
+		}
+		Block own = table.get(biome);
+		if (own != null) {
+			return own;
+		}
+		String base = com.eternalreturn.worldgen.variants.BiomeVariants.baseOf(net.minecraft.util.Identifier.of(biome)).toString();
+		return table.getOrDefault(base, Blocks.STONE);
+	}
+
+	private static Map<String, Block> layersTableCache;
+
+	private static Map<String, Block> layersTable() {
+		if (layersTableCache == null) {
+			layersTableCache = expectedTable();
+		}
+		return layersTableCache;
+	}
+
+	private static String cell(Map<Long, Chunk> square, int qx, int qy, int qz) {
+		Chunk chunk = square.get(ChunkPos.toLong(qx >> 2, qz >> 2));
+		return chunk == null ? null : id(chunk.getBiomeForNoiseGen(qx, qy, qz));
 	}
 
 	private static final class Tally {
@@ -135,6 +214,10 @@ public class BiomeStoneTests implements FabricGameTest {
 				worldgen.biomeStone = was;
 			}
 			BlockPos.Mutable pos = new BlockPos.Mutable();
+			Map<Long, Chunk> square = new java.util.HashMap<>();
+			for (Chunk[] pair : pairs) {
+				square.put(pair[0].getPos().toLong(), pair[0]);
+			}
 			for (Chunk[] pair : pairs) {
 				Chunk chunk = pair[0];
 				Chunk twinChunk = pair[1];
@@ -157,9 +240,10 @@ public class BiomeStoneTests implements FabricGameTest {
 							if (!twinStone && state == twinState) {
 								continue;
 							}
-							Block expected = twinStone ? table.getOrDefault(id(biomes.at(pos)), Blocks.STONE) : null;
+							String stoneBiome = twinStone ? stoneBiome(square, biomes, pos, state) : null;
+							Block expected = twinStone ? stoneOf(table, stoneBiome) : null;
 							if (twinStone) {
-								Tally tally = tallies.computeIfAbsent(id(biomes.at(pos)), key -> new Tally());
+								Tally tally = tallies.computeIfAbsent(stoneBiome, key -> new Tally());
 								tally.twinStone++;
 								if (state.isOf(expected) && expected != Blocks.STONE) {
 									tally.changed++;
@@ -194,7 +278,7 @@ public class BiomeStoneTests implements FabricGameTest {
 		Map<String, String> shares = new LinkedHashMap<>();
 		List<String> low = new ArrayList<>();
 		tallies.forEach((biome, tally) -> {
-			Block expected = table.getOrDefault(biome, Blocks.STONE);
+			Block expected = stoneOf(table, biome);
 			if (expected == Blocks.STONE || tally.twinStone == 0) {
 				shares.put(biome, name(expected) + (tally.changed > 0 ? " (" + tally.changed + " changed!)" : "") + " | " + tally.columns + " columns");
 				return;

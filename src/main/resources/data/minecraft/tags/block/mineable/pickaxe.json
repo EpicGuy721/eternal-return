@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "#eternalreturn:hardened_stones",
+    "#eternalreturn:ice_blocks",
     "#eternalreturn:ore_variants",
     "#eternalreturn:concrete_cut_blocks",
     "eternalreturn:obsidian_pressure_plate",
