@@ -3,6 +3,9 @@
 - textures (assets/eternalreturn/textures/block): the owner's hand-made ones from tools/ice/textures, copied; the
   icicle's upward segments (stalagmites) are its downward ones flipped, as no up textures were drawn;
 - block and item models, blockstates (the icicle as pointed dripstone's, the ice crystal as an amethyst cluster's);
+- the icicle's and the ice crystal's sounds (the owner's clips in tools/ice/sounds/<block>/, copied to
+  assets/eternalreturn/sounds/block/<block>/, and sounds.json: an event per action, each with the clips named after it;
+  the crystal has no fall clips and falls with its step ones, as vanilla blocks do);
 - loot tables (each drops itself), recipes (polished ice from packed ice, ice bricks from polished ice, chiseled ice
   from ice bricks; stonecutting from packed ice or polished ice), the block tag eternalreturn:ice_blocks (the pickaxe's,
   through data/minecraft/tags/block/mineable/pickaxe.json) and the names in en_us.json (other lines kept).
@@ -67,6 +70,30 @@ def main():
                                               'display': {'thirdperson_righthand': {'rotation': [0, 100, 0], 'translation': [-1, -1, 0], 'scale': [0.9, 0.9, 0.9]},
                                                           'firstperson_righthand': {'rotation': [0, 100, 0], 'translation': [0, -2, 0], 'scale': [0.9, 0.9, 0.9]}}})
 
+    # Sounds: each action's event lists that action's clips. Subtitles: vanilla's generic block ones, and the chime's own.
+    sounds = {}
+    for block in ('icicle', 'ice_crystal'):
+        src = os.path.join(ROOT, 'tools', 'ice', 'sounds', block)
+        dst = os.path.join(RES, 'assets', NS, 'sounds', 'block', block)
+        if os.path.isdir(dst):
+            shutil.rmtree(dst)
+        os.makedirs(dst)
+        clips = {}
+        for name in sorted(os.listdir(src)):
+            if name.endswith('.ogg'):
+                shutil.copyfile(os.path.join(src, name), os.path.join(dst, name))
+                clips.setdefault(name.rstrip('0123456789.og').rstrip('.'), []).append(f'{NS}:block/{block}/{name[:-4]}')
+        actions = {'break': 'subtitles.block.generic.break', 'hit': 'subtitles.block.generic.hit', 'place': 'subtitles.block.generic.place',
+                   'step': 'subtitles.block.generic.footsteps', 'fall': 'subtitles.block.generic.footsteps'}
+        if 'land' in clips:
+            actions['land'] = 'subtitles.block.generic.break'
+        if 'ambient' in clips:
+            actions['ambient'] = f'subtitles.block.{block}.ambient'
+        for action, subtitle in actions.items():
+            files = clips.get(action) or clips['step']
+            sounds[f'block.{block}.{action}'] = {'subtitle': subtitle, 'sounds': sorted(files, key=lambda f: int(''.join(c for c in f.split('/')[-1] if c.isdigit()) or 0))}
+    write_json(f'assets/{NS}/sounds.json', sounds)
+
     all_blocks = list(CUBES) + ['icicle', 'ice_crystal']
     for name in all_blocks:
         write_json(f'data/{NS}/loot_table/blocks/{name}.json', {'type': 'minecraft:block', 'pools': [{
@@ -90,6 +117,7 @@ def main():
     lang = json.load(open(lang_file, encoding='utf-8'))
     for name, title in {**CUBES, 'icicle': 'Icicle', 'ice_crystal': 'Ice Crystal'}.items():
         lang[f'block.{NS}.{name}'] = title
+    lang['subtitles.block.ice_crystal.ambient'] = 'Ice Crystal chimes'
     with open(lang_file, 'w', encoding='utf-8', newline='\n') as f:
         json.dump(lang, f, indent='\t', ensure_ascii=False)
         f.write('\n')

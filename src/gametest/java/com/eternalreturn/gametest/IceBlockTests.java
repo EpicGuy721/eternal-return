@@ -155,6 +155,12 @@ public class IceBlockTests implements FabricGameTest {
 		}
 		ctx.assertTrue(missing.isEmpty(), "missing recipes " + missing);
 		ctx.assertTrue(IceBlocks.POLISHED_ICE.getSlipperiness() == Blocks.PACKED_ICE.getSlipperiness(), "polished ice isn't slippery");
+		// Their own sounds (the owner's clips), registered.
+		ctx.assertTrue(IceBlocks.ICICLE.getDefaultState().getSoundGroup() == IceBlocks.ICICLE_SOUNDS
+				&& IceBlocks.ICE_CRYSTAL.getDefaultState().getSoundGroup() == IceBlocks.ICE_CRYSTAL_SOUNDS, "the ice blocks' sounds");
+		for (String sound : List.of("block.icicle.break", "block.icicle.land", "block.ice_crystal.ambient", "block.ice_crystal.step")) {
+			ctx.assertTrue(net.minecraft.registry.Registries.SOUND_EVENT.containsId(EternalReturn.id(sound)), "no sound " + sound);
+		}
 		ctx.complete();
 	}
 

@@ -1,0 +1,144 @@
+{
+  "block.icicle.break": {
+    "subtitle": "subtitles.block.generic.break",
+    "sounds": [
+      "eternalreturn:block/icicle/break1",
+      "eternalreturn:block/icicle/break2",
+      "eternalreturn:block/icicle/break3",
+      "eternalreturn:block/icicle/break4",
+      "eternalreturn:block/icicle/break5",
+      "eternalreturn:block/icicle/break6"
+    ]
+  },
+  "block.icicle.hit": {
+    "subtitle": "subtitles.block.generic.hit",
+    "sounds": [
+      "eternalreturn:block/icicle/hit1",
+      "eternalreturn:block/icicle/hit2",
+      "eternalreturn:block/icicle/hit3",
+      "eternalreturn:block/icicle/hit4",
+      "eternalreturn:block/icicle/hit5"
+    ]
+  },
+  "block.icicle.place": {
+    "subtitle": "subtitles.block.generic.place",
+    "sounds": [
+      "eternalreturn:block/icicle/place1",
+      "eternalreturn:block/icicle/place2",
+      "eternalreturn:block/icicle/place3",
+      "eternalreturn:block/icicle/place4",
+      "eternalreturn:block/icicle/place5",
+      "eternalreturn:block/icicle/place6"
+    ]
+  },
+  "block.icicle.step": {
+    "subtitle": "subtitles.block.generic.footsteps",
+    "sounds": [
+      "eternalreturn:block/icicle/step1",
+      "eternalreturn:block/icicle/step2",
+      "eternalreturn:block/icicle/step3",
+      "eternalreturn:block/icicle/step4",
+      "eternalreturn:block/icicle/step5",
+      "eternalreturn:block/icicle/step6"
+    ]
+  },
+  "block.icicle.fall": {
+    "subtitle": "subtitles.block.generic.footsteps",
+    "sounds": [
+      "eternalreturn:block/icicle/step1",
+      "eternalreturn:block/icicle/step2",
+      "eternalreturn:block/icicle/step3",
+      "eternalreturn:block/icicle/step4",
+      "eternalreturn:block/icicle/step5",
+      "eternalreturn:block/icicle/step6"
+    ]
+  },
+  "block.icicle.land": {
+    "subtitle": "subtitles.block.generic.break",
+    "sounds": [
+      "eternalreturn:block/icicle/land1",
+      "eternalreturn:block/icicle/land2",
+      "eternalreturn:block/icicle/land3",
+      "eternalreturn:block/icicle/land4",
+      "eternalreturn:block/icicle/land5",
+      "eternalreturn:block/icicle/land6"
+    ]
+  },
+  "block.ice_crystal.break": {
+    "subtitle": "subtitles.block.generic.break",
+    "sounds": [
+      "eternalreturn:block/ice_crystal/break1",
+      "eternalreturn:block/ice_crystal/break2",
+      "eternalreturn:block/ice_crystal/break3",
+      "eternalreturn:block/ice_crystal/break4",
+      "eternalreturn:block/ice_crystal/break5"
+    ]
+  },
+  "block.ice_crystal.hit": {
+    "subtitle": "subtitles.block.generic.hit",
+    "sounds": [
+      "eternalreturn:block/ice_crystal/hit1",
+      "eternalreturn:block/ice_crystal/hit2",
+      "eternalreturn:block/ice_crystal/hit3",
+      "eternalreturn:block/ice_crystal/hit4",
+      "eternalreturn:block/ice_crystal/hit5"
+    ]
+  },
+  "block.ice_crystal.place": {
+    "subtitle": "subtitles.block.generic.place",
+    "sounds": [
+      "eternalreturn:block/ice_crystal/place1",
+      "eternalreturn:block/ice_crystal/place2",
+      "eternalreturn:block/ice_crystal/place3",
+      "eternalreturn:block/ice_crystal/place4",
+      "eternalreturn:block/ice_crystal/place5"
+    ]
+  },
+  "block.ice_crystal.step": {
+    "subtitle": "subtitles.block.generic.footsteps",
+    "sounds": [
+      "eternalreturn:block/ice_crystal/step1",
+      "eternalreturn:block/ice_crystal/step2",
+      "eternalreturn:block/ice_crystal/step3",
+      "eternalreturn:block/ice_crystal/step4",
+      "eternalreturn:block/ice_crystal/step5",
+      "eternalreturn:block/ice_crystal/step6"
+    ]
+  },
+  "block.ice_crystal.fall": {
+    "subtitle": "subtitles.block.generic.footsteps",
+    "sounds": [
+      "eternalreturn:block/ice_crystal/step1",
+      "eternalreturn:block/ice_crystal/step2",
+      "eternalreturn:block/ice_crystal/step3",
+      "eternalreturn:block/ice_crystal/step4",
+      "eternalreturn:block/ice_crystal/step5",
+      "eternalreturn:block/ice_crystal/step6"
+    ]
+  },
+  "block.ice_crystal.ambient": {
+    "subtitle": "subtitles.block.ice_crystal.ambient",
+    "sounds": [
+      "eternalreturn:block/ice_crystal/ambient1",
+      "eternalreturn:block/ice_crystal/ambient2",
+      "eternalreturn:block/ice_crystal/ambient3",
+      "eternalreturn:block/ice_crystal/ambient4",
+      "eternalreturn:block/ice_crystal/ambient5",
+      "eternalreturn:block/ice_crystal/ambient6",
+      "eternalreturn:block/ice_crystal/ambient7",
+      "eternalreturn:block/ice_crystal/ambient8",
+      "eternalreturn:block/ice_crystal/ambient9",
+      "eternalreturn:block/ice_crystal/ambient10",
+      "eternalreturn:block/ice_crystal/ambient11",
+      "eternalreturn:block/ice_crystal/ambient12",
+      "eternalreturn:block/ice_crystal/ambient13",
+      "eternalreturn:block/ice_crystal/ambient14",
+      "eternalreturn:block/ice_crystal/ambient15",
+      "eternalreturn:block/ice_crystal/ambient16",
+      "eternalreturn:block/ice_crystal/ambient17",
+      "eternalreturn:block/ice_crystal/ambient18",
+      "eternalreturn:block/ice_crystal/ambient19",
+      "eternalreturn:block/ice_crystal/ambient20"
+    ]
+  }
+}

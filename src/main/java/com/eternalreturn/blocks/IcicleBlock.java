@@ -21,7 +21,6 @@ import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.DirectionProperty;
@@ -52,7 +51,8 @@ import org.jetbrains.annotations.Nullable;
  * hanging below it; a melting stalagmite breaks with everything on top of it, dropping them;</li>
  * <li>doesn't drip.</li>
  * </ul>
- * As dripstone: a stalactite whose support goes falls and its tip skewers what it lands on (falling stalactite damage);
+ * Its sounds are the owner's clips (IceBlocks): breaking, steps, placing, hitting, and landing when it falls (volume 2, as
+ * the wiki gives). As dripstone: a stalactite whose support goes falls and its tip skewers what it lands on (falling stalactite damage);
  * landing on a stalagmite's tip doubles the fall damage; a thrown trident breaks one.
  */
 public class IcicleBlock extends Block implements LandingBlock, Waterloggable {
@@ -275,7 +275,7 @@ public class IcicleBlock extends Block implements LandingBlock, Waterloggable {
 	@Override
 	public void onDestroyedOnLanding(World world, BlockPos pos, FallingBlockEntity fallingBlockEntity) {
 		if (!fallingBlockEntity.isSilent()) {
-			world.playSound(null, pos, SoundEvents.BLOCK_GLASS_BREAK, SoundCategory.BLOCKS, 1.0F, 0.9F + world.random.nextFloat() * 0.1F);
+			world.playSound(null, pos, IceBlocks.ICICLE_LAND, SoundCategory.BLOCKS, 2.0F, 0.9F + world.random.nextFloat() * 0.1F);
 		}
 	}
 
