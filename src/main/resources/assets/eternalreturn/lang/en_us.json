@@ -568,5 +568,8 @@
 	"block.eternalreturn.icicle": "Icicle",
 	"block.eternalreturn.ice_crystal": "Ice Crystal",
 	"biome.eternalreturn.ice_caves": "Ice Caves",
-	"subtitles.block.ice_crystal.ambient": "Ice Crystal chimes"
+	"subtitles.block.ice_crystal.ambient": "Ice Crystal chimes",
+	"block.eternalreturn.ice_brick_slab": "Ice Brick Slab",
+	"block.eternalreturn.ice_brick_stairs": "Ice Brick Stairs",
+	"block.eternalreturn.ice_brick_wall": "Ice Brick Wall"
 }

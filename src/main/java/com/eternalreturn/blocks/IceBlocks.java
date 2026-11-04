@@ -23,8 +23,8 @@ import net.minecraft.village.TradedItem;
 
 /**
  * Ice blocks (worldgen expansion phase 6, ice caves): the icicle and the ice crystal, which grow only in ice caves, and
- * three building blocks made from packed ice: polished ice, ice bricks, chiseled ice (crafted or stonecut, never
- * generated). Textures and sounds are the owner's (tools/ice/textures, tools/ice/sounds); models, blockstates, loot tables, recipes and tags are
+ * building blocks made from packed ice: polished ice, ice bricks with their slab, stairs and wall, chiseled ice (crafted or stonecut, never
+ * generated, but for the ice brick dungeons of cold biomes, worldgen.Dungeons). Textures and sounds are the owner's (tools/ice/textures, tools/ice/sounds); models, blockstates, loot tables, recipes and tags are
  * written by tools/ice/build_ice.py. Wandering traders sell icicles (2 for an emerald) and ice crystals (one for 2), as in
  * Java 26.4.
  */
@@ -55,6 +55,9 @@ public final class IceBlocks {
 	public static final Block POLISHED_ICE = block("polished_ice", new Block(AbstractBlock.Settings.copy(Blocks.PACKED_ICE)));
 	public static final Block ICE_BRICKS = block("ice_bricks", new Block(AbstractBlock.Settings.copy(Blocks.PACKED_ICE)));
 	public static final Block CHISELED_ICE = block("chiseled_ice", new Block(AbstractBlock.Settings.copy(Blocks.PACKED_ICE)));
+	public static final Block ICE_BRICK_SLAB = block("ice_brick_slab", new net.minecraft.block.SlabBlock(AbstractBlock.Settings.copy(ICE_BRICKS)));
+	public static final Block ICE_BRICK_STAIRS = block("ice_brick_stairs", new net.minecraft.block.StairsBlock(ICE_BRICKS.getDefaultState(), AbstractBlock.Settings.copy(ICE_BRICKS)));
+	public static final Block ICE_BRICK_WALL = block("ice_brick_wall", new net.minecraft.block.WallBlock(AbstractBlock.Settings.copy(ICE_BRICKS).solid()));
 
 	private IceBlocks() {
 	}
@@ -71,7 +74,7 @@ public final class IceBlocks {
 
 	public static void register() {
 		ItemGroupEvents.modifyEntriesEvent(ItemGroups.BUILDING_BLOCKS).register(entries ->
-				entries.addAfter(Items.BLUE_ICE, POLISHED_ICE, ICE_BRICKS, CHISELED_ICE));
+				entries.addAfter(Items.BLUE_ICE, POLISHED_ICE, ICE_BRICKS, ICE_BRICK_STAIRS, ICE_BRICK_SLAB, ICE_BRICK_WALL, CHISELED_ICE));
 		ItemGroupEvents.modifyEntriesEvent(ItemGroups.NATURAL).register(entries -> entries.addAfter(Items.POINTED_DRIPSTONE, ICICLE, ICE_CRYSTAL));
 		TradeOfferHelper.registerWanderingTraderOffers(1, factories -> {
 			factories.add((entity, random) -> new TradeOffer(new TradedItem(Items.EMERALD, 1), new ItemStack(ICICLE, 2), 5, 1, 0.05F));

@@ -124,9 +124,10 @@ for material in MATERIALS:
     write_json(f'data/{NS}/tags/block/{material}_cut_blocks.json', {'values': cut[material]['stairs'] + cut[material]['slab']})
 all_stairs = cut['wool']['stairs'] + cut['concrete']['stairs']
 all_slabs = cut['wool']['slab'] + cut['concrete']['slab']
+# The ice brick stairs and slab (tools/ice/build_ice.py) join through their own tags.
 for kind in ['block', 'item']:
-    write_json(f'data/minecraft/tags/{kind}/stairs.json', {'replace': False, 'values': all_stairs})
-    write_json(f'data/minecraft/tags/{kind}/slabs.json', {'replace': False, 'values': all_slabs})
+    write_json(f'data/minecraft/tags/{kind}/stairs.json', {'replace': False, 'values': all_stairs + [f'#{NS}:ice_stairs']})
+    write_json(f'data/minecraft/tags/{kind}/slabs.json', {'replace': False, 'values': all_slabs + [f'#{NS}:ice_slabs']})
 # Wool stairs and slabs are wool to shears (quick to cut) and to sculk (they muffle vibrations).
 write_json('data/minecraft/tags/block/wool.json', {'replace': False, 'values': [f'#{NS}:wool_cut_blocks']})
 

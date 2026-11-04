@@ -253,6 +253,14 @@ public final class Snowlogging {
 				|| world.getLightLevel(LightType.BLOCK, space) >= 10) {
 			return false;
 		}
+		return snowfallHere(world, space, most, flags);
+	}
+
+	/**
+	 * Snow settling at a space (as snowfall, without its weather checks: the caller knows it's cold there): a layer more
+	 * in flora there, or in and on a block that holds snow below it, each up to most. Returns whether any settled.
+	 */
+	public static boolean snowfallHere(WorldAccess world, BlockPos space, int most, int flags) {
 		BlockState there = world.getBlockState(space);
 		if (SnowCover.isFlora(there)) {
 			// Flora where the snow layer would lie: a layer more logged in it, and the ground under it snowy.

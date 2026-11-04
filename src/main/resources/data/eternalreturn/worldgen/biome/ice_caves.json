@@ -72,6 +72,7 @@
       "eternalreturn:sub/ice_cave_icicles",
       "eternalreturn:sub/ice_cave_long_icicles",
       "eternalreturn:sub/ice_cave_crystals",
+      "eternalreturn:sub/ice_cave_crystals_water",
       "eternalreturn:sub/ice_cave_snow"
     ],
     [
@@ -83,8 +84,6 @@
       "moderner_beta:patch_poppy",
       "moderner_beta:trees_beta_sparse",
       "moderner_beta:patch_grass_taiga_1",
-      "minecraft:brown_mushroom_normal",
-      "minecraft:red_mushroom_normal",
       "minecraft:patch_sugar_cane",
       "minecraft:patch_pumpkin"
     ],

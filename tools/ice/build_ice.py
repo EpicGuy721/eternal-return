@@ -8,13 +8,18 @@
   the crystal has no fall clips and falls with its step ones, as vanilla blocks do);
 - loot tables (each drops itself), recipes (polished ice from packed ice, ice bricks from polished ice, chiseled ice
   from ice bricks; stonecutting from packed ice or polished ice), the block tag eternalreturn:ice_blocks (the pickaxe's,
-  through data/minecraft/tags/block/mineable/pickaxe.json) and the names in en_us.json (other lines kept).
+  through data/minecraft/tags/block/mineable/pickaxe.json) and the names in en_us.json (other lines kept);
+- the ice brick slab, stairs and wall: vanilla's stone brick blockstates, models, loot tables and crafting recipes
+  from the Loom cache, renamed, stonecutting from ice bricks or polished ice, vanilla's walls tag and the tags
+  eternalreturn:ice_slabs and ice_stairs (which vanilla's slabs and stairs tags name, tools/blocks/build_blocks.py).
 
 Run: python tools/ice/build_ice.py
 """
+import glob
 import json
 import os
 import shutil
+import zipfile
 
 from PIL import Image
 
@@ -25,6 +30,25 @@ NS = 'eternalreturn'
 TEX = os.path.join(RES, 'assets', NS, 'textures', 'block')
 CUBES = {'polished_ice': 'Polished Ice', 'ice_bricks': 'Ice Bricks', 'chiseled_ice': 'Chiseled Ice'}
 THICKNESSES = ['tip', 'tip_merge', 'frustum', 'middle', 'base']
+# The ice brick slab, stairs and wall: vanilla's stone brick ones (from the Loom cache), renamed.
+SHAPES = {'ice_brick_slab': 'Ice Brick Slab', 'ice_brick_stairs': 'Ice Brick Stairs', 'ice_brick_wall': 'Ice Brick Wall'}
+LOOM = os.path.join(ROOT, '.gradle', 'loom-cache', 'minecraftMaven', 'net', 'minecraft')
+
+
+def vanilla_jar(kind):
+    return [j for j in glob.glob(os.path.join(LOOM, f'minecraft-{kind}-*', '*', '*.jar')) if not j.endswith('-sources.jar')][0]
+
+
+def renamed(text):
+    """Vanilla's stone brick shape files turned into the ice brick ones."""
+    return (text.replace('minecraft:block/stone_bricks', f'{NS}:block/ice_bricks').replace('minecraft:block/stone_brick_', f'{NS}:block/ice_brick_')
+            .replace('minecraft:stone_bricks', f'{NS}:ice_bricks').replace('minecraft:stone_brick_', f'{NS}:ice_brick_')
+            .replace('minecraft:blocks/stone_brick_', f'{NS}:blocks/ice_brick_'))
+
+
+def copy_vanilla(jar, src, dst):
+    with zipfile.ZipFile(jar) as z:
+        write_json(dst, json.loads(renamed(z.read(src).decode('utf-8'))))
 
 
 def write_json(rel, obj, indent=2):
@@ -94,12 +118,37 @@ def main():
             sounds[f'block.{block}.{action}'] = {'subtitle': subtitle, 'sounds': sorted(files, key=lambda f: int(''.join(c for c in f.split('/')[-1] if c.isdigit()) or 0))}
     write_json(f'assets/{NS}/sounds.json', sounds)
 
+    # The ice brick slab, stairs and wall, as vanilla's stone brick ones.
+    client, common = vanilla_jar('clientOnly'), vanilla_jar('common')
+    with zipfile.ZipFile(client) as z:
+        names = z.namelist()
+    for name in names:
+        base = os.path.basename(name)
+        if name.startswith('assets/minecraft/models/block/stone_brick_') or name.startswith('assets/minecraft/models/item/stone_brick_') \
+                or name.startswith('assets/minecraft/blockstates/stone_brick_'):
+            if not any(base.startswith(shape.replace('ice_', 'stone_')) for shape in SHAPES):
+                continue
+            folder = os.path.dirname(name).replace('assets/minecraft/', f'assets/{NS}/')
+            copy_vanilla(client, name, f'{folder}/{base.replace("stone_brick", "ice_brick")}')
+    for shape in SHAPES:
+        stone = shape.replace('ice_', 'stone_')
+        copy_vanilla(common, f'data/minecraft/loot_table/blocks/{stone}.json', f'data/{NS}/loot_table/blocks/{shape}.json')
+        copy_vanilla(common, f'data/minecraft/recipe/{stone}.json', f'data/{NS}/recipe/{shape}.json')
+        count = 2 if shape.endswith('slab') else 1
+        for source in ('ice_bricks', 'polished_ice'):
+            write_json(f'data/{NS}/recipe/{shape}_from_{source}_stonecutting.json', {
+                'type': 'minecraft:stonecutting', 'ingredient': item(source), 'result': {'id': f'{NS}:{shape}', 'count': count}})
+    for kind in ('block', 'item'):
+        write_json(f'data/{NS}/tags/{kind}/ice_slabs.json', {'values': [f'{NS}:ice_brick_slab']})
+        write_json(f'data/{NS}/tags/{kind}/ice_stairs.json', {'values': [f'{NS}:ice_brick_stairs']})
+        write_json(f'data/minecraft/tags/{kind}/walls.json', {'replace': False, 'values': [f'{NS}:ice_brick_wall']})
+
     all_blocks = list(CUBES) + ['icicle', 'ice_crystal']
     for name in all_blocks:
         write_json(f'data/{NS}/loot_table/blocks/{name}.json', {'type': 'minecraft:block', 'pools': [{
             'rolls': 1, 'entries': [{'type': 'minecraft:item', 'name': f'{NS}:{name}'}], 'conditions': [{'condition': 'minecraft:survives_explosion'}]}],
             'random_sequence': f'{NS}:blocks/{name}'})
-    write_json(f'data/{NS}/tags/block/ice_blocks.json', {'values': [f'{NS}:{name}' for name in all_blocks]})
+    write_json(f'data/{NS}/tags/block/ice_blocks.json', {'values': [f'{NS}:{name}' for name in all_blocks + list(SHAPES)]})
 
     recipes = f'data/{NS}/recipe'
     write_json(f'{recipes}/polished_ice.json', {'type': 'minecraft:crafting_shaped', 'category': 'building', 'pattern': ['##', '##'],
@@ -115,13 +164,13 @@ def main():
 
     lang_file = os.path.join(RES, 'assets', NS, 'lang', 'en_us.json')
     lang = json.load(open(lang_file, encoding='utf-8'))
-    for name, title in {**CUBES, 'icicle': 'Icicle', 'ice_crystal': 'Ice Crystal'}.items():
+    for name, title in {**CUBES, **SHAPES, 'icicle': 'Icicle', 'ice_crystal': 'Ice Crystal'}.items():
         lang[f'block.{NS}.{name}'] = title
     lang['subtitles.block.ice_crystal.ambient'] = 'Ice Crystal chimes'
     with open(lang_file, 'w', encoding='utf-8', newline='\n') as f:
         json.dump(lang, f, indent='\t', ensure_ascii=False)
         f.write('\n')
-    print(f'{len(all_blocks)} ice blocks')
+    print(f'{len(all_blocks) + len(SHAPES)} ice blocks')
 
 
 if __name__ == '__main__':

@@ -7,6 +7,7 @@ import com.eternalreturn.worldgen.WorldgenFeatures;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.SnowBlock;
@@ -217,6 +218,16 @@ public final class Climate extends Feature<Climate.Config> {
 						int depth = snowDepth(world, seed, config, top);
 						if (depth > state.get(SnowBlock.LAYERS)) {
 							world.setBlockState(top, state.with(SnowBlock.LAYERS, depth), 2);
+						}
+					}
+				} else if (com.eternalreturn.blocks.SnowCover.isFlora(state) || state.isAir() && com.eternalreturn.blocks.SnowCover.isHost(under)) {
+					// Moderner Beta's freezing step lays no snow in plants, slabs, fences and the like (Snowlogging): here they
+					// get as many layers as the ground around them.
+					int depth = snowDepth(world, seed, config, top);
+					if (depth > 0) {
+						int most = settings.deepSnow ? depth : 1;
+						BlockPos at = top.toImmutable();
+						for (int i = 0; i < most && com.eternalreturn.blocks.Snowlogging.snowfallHere(world, at, most, Block.NOTIFY_LISTENERS); i++) {
 						}
 					}
 				} else if (under.isOf(Blocks.ICE) && settings.thickLakeIce) {

@@ -4,6 +4,9 @@
     "eternalreturn:ice_bricks",
     "eternalreturn:chiseled_ice",
     "eternalreturn:icicle",
-    "eternalreturn:ice_crystal"
+    "eternalreturn:ice_crystal",
+    "eternalreturn:ice_brick_slab",
+    "eternalreturn:ice_brick_stairs",
+    "eternalreturn:ice_brick_wall"
   ]
 }

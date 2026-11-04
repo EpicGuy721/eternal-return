@@ -147,7 +147,8 @@ public class IceBlockTests implements FabricGameTest {
 		ctx.assertTrue(!onWall.canPlaceAt(world, ctx.getAbsolutePos(new BlockPos(5, 4, 5))), "a crystal floats in the air");
 		List<String> missing = new ArrayList<>();
 		for (String recipe : List.of("polished_ice", "ice_bricks", "chiseled_ice", "polished_ice_from_packed_ice_stonecutting",
-				"ice_bricks_from_polished_ice_stonecutting", "chiseled_ice_from_ice_bricks_stonecutting")) {
+				"ice_bricks_from_polished_ice_stonecutting", "chiseled_ice_from_ice_bricks_stonecutting", "ice_brick_slab", "ice_brick_stairs", "ice_brick_wall",
+				"ice_brick_slab_from_ice_bricks_stonecutting", "ice_brick_stairs_from_polished_ice_stonecutting", "ice_brick_wall_from_ice_bricks_stonecutting")) {
 			java.util.Optional<RecipeEntry<?>> found = world.getRecipeManager().get(EternalReturn.id(recipe));
 			if (found.isEmpty()) {
 				missing.add(recipe);
@@ -155,6 +156,13 @@ public class IceBlockTests implements FabricGameTest {
 		}
 		ctx.assertTrue(missing.isEmpty(), "missing recipes " + missing);
 		ctx.assertTrue(IceBlocks.POLISHED_ICE.getSlipperiness() == Blocks.PACKED_ICE.getSlipperiness(), "polished ice isn't slippery");
+		// The ice brick slab, stairs and wall: tagged as their shapes (so they turn on edge, join and hold snow as the others do).
+		ctx.assertTrue(IceBlocks.ICE_BRICK_SLAB.getDefaultState().isIn(BlockTags.SLABS) && IceBlocks.ICE_BRICK_STAIRS.getDefaultState().isIn(BlockTags.STAIRS)
+				&& IceBlocks.ICE_BRICK_WALL.getDefaultState().isIn(BlockTags.WALLS), "the ice brick shapes aren't tagged");
+		ctx.assertTrue(IceBlocks.ICE_BRICK_WALL.asItem().getDefaultStack().isIn(net.minecraft.registry.tag.ItemTags.WALLS)
+				&& IceBlocks.ICE_BRICK_SLAB.asItem().getDefaultStack().isIn(net.minecraft.registry.tag.ItemTags.SLABS), "the ice brick shape items aren't tagged");
+		ctx.assertTrue(com.eternalreturn.blocks.SnowCover.isHost(IceBlocks.ICE_BRICK_WALL.getDefaultState()), "the ice brick wall holds no snow");
+		ctx.assertTrue(IceBlocks.ICE_BRICK_SLAB.getDefaultState().isIn(BlockTags.PICKAXE_MINEABLE), "the ice brick slab isn't a pickaxe's");
 		// Their own sounds (the owner's clips), registered.
 		ctx.assertTrue(IceBlocks.ICICLE.getDefaultState().getSoundGroup() == IceBlocks.ICICLE_SOUNDS
 				&& IceBlocks.ICE_CRYSTAL.getDefaultState().getSoundGroup() == IceBlocks.ICE_CRYSTAL_SOUNDS, "the ice blocks' sounds");
@@ -180,6 +188,33 @@ public class IceBlockTests implements FabricGameTest {
 		trader.discard();
 		ctx.assertTrue(icicles && crystals, "trades: icicles " + icicles + ", crystals " + crystals);
 		ctx.complete();
+	}
+
+	/** An ice crystal placed into water is waterlogged (the water stays); water poured on a dry one waterlogs it. */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = BATCH, tickLimit = 40)
+	public void iceCrystalTakesWater(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		net.minecraft.server.network.ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(1, 2, 1));
+		BlockPos floor = ctx.getAbsolutePos(new BlockPos(3, 1, 3));
+		BlockPos into = floor.up();
+		try {
+			world.setBlockState(floor, Blocks.STONE.getDefaultState());
+			world.setBlockState(into, Blocks.WATER.getDefaultState());
+			net.minecraft.item.ItemStack stack = new net.minecraft.item.ItemStack(IceBlocks.ICE_CRYSTAL);
+			player.setStackInHand(net.minecraft.util.Hand.MAIN_HAND, stack);
+			net.minecraft.util.ActionResult result = player.interactionManager.interactBlock(player, world, stack, net.minecraft.util.Hand.MAIN_HAND,
+					new net.minecraft.util.hit.BlockHitResult(net.minecraft.util.math.Vec3d.ofCenter(floor).add(0, 0.5, 0), Direction.UP, floor, false));
+			BlockState placed = world.getBlockState(into);
+			ctx.assertTrue(result.isAccepted() && placed.isOf(IceBlocks.ICE_CRYSTAL), "the crystal wasn't placed: " + result + " " + placed);
+			ctx.assertTrue(placed.get(AmethystClusterBlock.WATERLOGGED) && world.getFluidState(into).isStill(), "placed into water, it isn't waterlogged: " + placed);
+		} finally {
+			FishingTests.disconnect(player);
+		}
+		ctx.runAtTick(20, () -> {
+			BlockState placed = world.getBlockState(into);
+			ctx.assertTrue(placed.isOf(IceBlocks.ICE_CRYSTAL) && placed.get(AmethystClusterBlock.WATERLOGGED), "the water went: " + placed);
+			ctx.complete();
+		});
 	}
 
 	static Identifier id(String path) {

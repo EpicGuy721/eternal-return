@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "eternalreturn:block/ice_brick_slab"
+    },
+    "type=double": {
+      "model": "eternalreturn:block/ice_bricks"
+    },
+    "type=top": {
+      "model": "eternalreturn:block/ice_brick_slab_top"
+    }
+  }
+}

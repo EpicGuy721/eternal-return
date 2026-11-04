@@ -27,7 +27,8 @@ import java.util.Optional;
  * <ul>
  * <li>Overworld dungeons are twice as common: every dungeon try (vanilla's monster room feature) is followed by
  * a second one elsewhere in the same chunk (worldgen.moreDungeons). A third are built of cobblestone as in
- * vanilla, a third of stone bricks, a third of bricks.</li>
+ * vanilla, a third of stone bricks, a third of bricks; in cold biomes (snowy ones and the ice caves) half of them
+ * are built of ice bricks instead, with polished ice in the floor.</li>
  * <li>The Nether has dungeons too, worldgen.netherDungeonAttempts tries per chunk, built of nether bricks or
  * red nether bricks, their spawners raising wither skeletons, blazes or witches. Their mobs drop nothing, like
  * every spawner's (SpawnerMobs).</li>
@@ -44,7 +45,9 @@ public final class Dungeons {
 		STONE_BRICKS(Blocks.MOSSY_STONE_BRICKS.getDefaultState(), Blocks.STONE_BRICKS.getDefaultState(), false),
 		BRICKS(Blocks.BRICKS.getDefaultState(), Blocks.BRICKS.getDefaultState(), false),
 		NETHER_BRICKS(Blocks.CRACKED_NETHER_BRICKS.getDefaultState(), Blocks.NETHER_BRICKS.getDefaultState(), true),
-		RED_NETHER_BRICKS(Blocks.RED_NETHER_BRICKS.getDefaultState(), Blocks.RED_NETHER_BRICKS.getDefaultState(), true);
+		RED_NETHER_BRICKS(Blocks.RED_NETHER_BRICKS.getDefaultState(), Blocks.RED_NETHER_BRICKS.getDefaultState(), true),
+		/** In cold biomes: ice brick walls and floor, patches of polished ice where vanilla's floor is mossy. */
+		ICE_BRICKS(com.eternalreturn.blocks.IceBlocks.POLISHED_ICE.getDefaultState(), com.eternalreturn.blocks.IceBlocks.ICE_BRICKS.getDefaultState(), false);
 
 		public final BlockState floor;
 		public final BlockState wall;
@@ -81,8 +84,17 @@ public final class Dungeons {
 		// From the spot, not the feature's random, so the dungeon itself comes out as before.
 		Random pick = Random.create(context.getOrigin().asLong() ^ 0x5DEECE66DL);
 		Style style = List.of(Style.COBBLESTONE, Style.STONE_BRICKS, Style.BRICKS).get(pick.nextInt(3));
+		// In a cold biome (snowy, or the ice caves), half are built of ice bricks.
+		if (pick.nextBoolean() && cold(context.getWorld(), context.getOrigin())) {
+			style = Style.ICE_BRICKS;
+		}
 		STYLE.set(style);
 		return null;
+	}
+
+	/** Whether a dungeon's spot is in a cold biome: one where snow falls (below vanilla's 0.15). */
+	public static boolean cold(net.minecraft.world.WorldView world, net.minecraft.util.math.BlockPos pos) {
+		return world.getBiome(pos).value().getTemperature() < 0.15F;
 	}
 
 	public static void end(@Nullable Style previous) {

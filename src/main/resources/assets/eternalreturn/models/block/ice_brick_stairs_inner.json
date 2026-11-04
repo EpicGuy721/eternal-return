@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {
+    "bottom": "eternalreturn:block/ice_bricks",
+    "side": "eternalreturn:block/ice_bricks",
+    "top": "eternalreturn:block/ice_bricks"
+  }
+}

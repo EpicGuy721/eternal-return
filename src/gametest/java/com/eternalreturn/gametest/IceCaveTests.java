@@ -109,8 +109,21 @@ public class IceCaveTests implements FabricGameTest {
 							BlockState state = world.getBlockState(pos);
 							Block block = state.getBlock();
 							if (block == HardenedBlocks.get("hardened_packed_ice") || block == Blocks.STONE || block == IceBlocks.ICICLE || block == IceBlocks.ICE_CRYSTAL
-									|| block == Blocks.SNOW || block == Blocks.PACKED_ICE || block == Blocks.BLUE_ICE || block == Blocks.CALCITE) {
+									|| block == Blocks.SNOW || block == Blocks.PACKED_ICE || block == Blocks.BLUE_ICE || block == Blocks.CALCITE
+									|| block == Blocks.BROWN_MUSHROOM || block == Blocks.RED_MUSHROOM) {
 								blocks.merge(net.minecraft.registry.Registries.BLOCK.getId(block).getPath(), 1, Integer::sum);
+							}
+							if (block == IceBlocks.ICE_CRYSTAL && state.get(net.minecraft.state.property.Properties.WATERLOGGED)) {
+								blocks.merge("(waterlogged ice_crystal)", 1, Integer::sum);
+							}
+							// Snow in patches: a snow layer with another beside it.
+							if (block == Blocks.SNOW) {
+								for (net.minecraft.util.math.Direction side : net.minecraft.util.math.Direction.Type.HORIZONTAL) {
+									if (world.getBlockState(pos.offset(side)).isOf(Blocks.SNOW)) {
+										blocks.merge("(snow beside snow)", 1, Integer::sum);
+										break;
+									}
+								}
 							}
 							if (state.isAir()) {
 								blocks.merge("(air)", 1, Integer::sum);
@@ -164,6 +177,89 @@ public class IceCaveTests implements FabricGameTest {
 			if (blocks.getOrDefault(grows, 0) < 5) {
 				problems.add("few " + grows + " in ice caves: " + blocks.getOrDefault(grows, 0));
 			}
+		}
+		int mushrooms = blocks.getOrDefault("brown_mushroom", 0) + blocks.getOrDefault("red_mushroom", 0);
+		if (mushrooms > 0) {
+			problems.add(mushrooms + " mushrooms in ice caves");
+		}
+		int snow = blocks.getOrDefault("snow", 0);
+		if (blocks.getOrDefault("(snow beside snow)", 0) * 10 < snow * 7) {
+			problems.add("snow not in patches: " + blocks.getOrDefault("(snow beside snow)", 0) + " of " + snow + " snow layers beside another");
+		}
+		ctx.assertTrue(problems.isEmpty(), String.join("; ", problems));
+		ctx.complete();
+	}
+
+	/**
+	 * Over the cold spots, the plants standing in the open have snow in them (Snowlogging, laid by the climate step:
+	 * Moderner Beta's freezing lays none in plants), the ground under them snowy. Waterlogged ice crystals turn up in
+	 * the ice caves' water (where it's found near the cold spots: logged), and dungeons in cold biomes are half ice bricks.
+	 */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = BATCH, tickLimit = 4_000_000)
+	public void snowInPlantsAndIceDungeons(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		List<ChunkPos> cold = spotsIn(world, COLD, 4);
+		List<ChunkPos> warm = spotsIn(world, WARM, 2);
+		int plants = 0;
+		int snowy = 0;
+		BlockPos firstBare = null;
+		BlockPos firstSnowy = null;
+		for (ChunkPos centre : cold) {
+			for (int cx = centre.x - 2; cx <= centre.x + 2; cx++) {
+				for (int cz = centre.z - 2; cz <= centre.z + 2; cz++) {
+					world.getChunk(cx, cz, ChunkStatus.FULL, true);
+				}
+			}
+			for (int x = (centre.x - 1) * 16; x < (centre.x + 2) * 16; x++) {
+				for (int z = (centre.z - 1) * 16; z < (centre.z + 2) * 16; z++) {
+					BlockPos top = new BlockPos(x, world.getTopY(Heightmap.Type.MOTION_BLOCKING, x, z), z);
+					BlockState state = world.getBlockState(top);
+					if (!com.eternalreturn.blocks.SnowCover.isFlora(state) || !com.eternalreturn.blocks.SnowCover.holdsSnowAt(world, top, state)) {
+						continue;
+					}
+					plants++;
+					if (com.eternalreturn.blocks.SnowCover.layers(world, top, state) > 0) {
+						snowy++;
+						firstSnowy = firstSnowy == null ? top : firstSnowy;
+					} else {
+						firstBare = firstBare == null ? top : firstBare;
+					}
+				}
+			}
+		}
+		// Dungeon styles picked at spots underground in the cold and warm spots.
+		int coldDungeons = 0;
+		int iceDungeons = 0;
+		int warmIce = 0;
+		for (List<ChunkPos> spots : List.of(cold, warm)) {
+			for (ChunkPos centre : spots) {
+				for (int i = 0; i < 40; i++) {
+					BlockPos at = new BlockPos(centre.getStartX() + (i * 7) % 16, 20 + i, centre.getStartZ() + (i * 11) % 16);
+					boolean isCold = com.eternalreturn.worldgen.Dungeons.cold(world, at);
+					com.eternalreturn.worldgen.Dungeons.Style previous = com.eternalreturn.worldgen.Dungeons.begin(new net.minecraft.world.gen.feature.util.FeatureContext<>(
+							java.util.Optional.empty(), world, world.getChunkManager().getChunkGenerator(), world.random, at, net.minecraft.world.gen.feature.DefaultFeatureConfig.INSTANCE));
+					boolean ice = com.eternalreturn.worldgen.Dungeons.style() == com.eternalreturn.worldgen.Dungeons.Style.ICE_BRICKS;
+					com.eternalreturn.worldgen.Dungeons.end(previous);
+					if (spots == cold && isCold) {
+						coldDungeons++;
+						iceDungeons += ice ? 1 : 0;
+					} else if (spots == warm && ice) {
+						warmIce++;
+					}
+				}
+			}
+		}
+		EternalReturn.LOGGER.info("[ice-caves] plants in the open over the cold: {} of {} with snow (snowy /tp @s {}, bare {}); dungeons in the cold: {} of {} ice bricks, in the warm {}",
+				snowy, plants, firstSnowy == null ? "-" : firstSnowy.toShortString(), firstBare == null ? "-" : firstBare.toShortString(), iceDungeons, coldDungeons, warmIce);
+		List<String> problems = new ArrayList<>();
+		if (plants < 20 || snowy * 10 < plants * 9) {
+			problems.add(snowy + " of " + plants + " plants over the cold have snow" + (firstBare == null ? "" : ", one without at " + firstBare.toShortString()));
+		}
+		if (coldDungeons < 40 || iceDungeons * 10 < coldDungeons * 3 || iceDungeons * 10 > coldDungeons * 7) {
+			problems.add(iceDungeons + " of " + coldDungeons + " cold dungeons are ice bricks, expected about half");
+		}
+		if (warmIce > 0) {
+			problems.add(warmIce + " ice brick dungeons in warm biomes");
 		}
 		ctx.assertTrue(problems.isEmpty(), String.join("; ", problems));
 		ctx.complete();
