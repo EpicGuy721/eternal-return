@@ -163,7 +163,7 @@ public class ControlFingerprintTests implements FabricGameTest {
 					for (int y = world.getBottomY(); y < world.getTopY(); y++) {
 						for (int x = 0; x < 16; x++) {
 							for (int z = 0; z < 16; z++) {
-								BlockState state = chunk.getBlockState(pos.set(chunkX * 16 + x, y, chunkZ * 16 + z));
+								BlockState state = groundUnder(chunk, pos.set(chunkX * 16 + x, y, chunkZ * 16 + z), chunk.getBlockState(pos));
 								long code = stateCodes.computeIfAbsent(state, s -> (long) stateName(s).hashCode() * 0x9E3779B97F4A7C15L);
 								hash = hash * 31 + code;
 							}
@@ -175,6 +175,17 @@ public class ControlFingerprintTests implements FabricGameTest {
 			}
 		}
 		return hashes;
+	}
+
+	/** Ground (grass, podzol, mycelium) under flora with snow logged in it is snowy for that snow alone: as vanilla left it. */
+	private static BlockState groundUnder(Chunk chunk, BlockPos pos, BlockState state) {
+		if (state.contains(net.minecraft.state.property.Properties.SNOWY) && state.get(net.minecraft.state.property.Properties.SNOWY)) {
+			BlockState above = chunk.getBlockState(pos.up());
+			if (com.eternalreturn.blocks.SnowCover.marked(above) && com.eternalreturn.blocks.SnowCover.isFlora(above)) {
+				return state.with(net.minecraft.state.property.Properties.SNOWY, false);
+			}
+		}
+		return state;
 	}
 
 	/**
@@ -190,10 +201,11 @@ public class ControlFingerprintTests implements FabricGameTest {
 		if (state.getBlock() instanceof net.minecraft.block.VineBlock && !state.get(com.eternalreturn.survival.Farming.CUT)) {
 			return name.replace("cut=false,", "");
 		}
-		// Snow on slabs, stairs, walls, fences and gates (SnowCover) is the one change these worlds' generation has
-		// (snowy biomes lay it where vanilla could lay none), so it's left out: their "snowy" property, and snow covers.
+		// Snow on slabs, stairs, walls, fences, gates and flora (SnowCover) is the one change these worlds' generation
+		// has (snowy biomes lay it where vanilla could lay none), so it's left out: their "snowy" property, and snow
+		// covers (and the snowy ground under snowy flora: groundUnder).
 		if (com.eternalreturn.blocks.SnowCover.isHost(state)) {
-			name = name.replaceAll("snowy=\\d,", "").replaceAll(",snowy=\\d]", "]");
+			name = name.replaceAll("\\[snowy=\\d]", "").replaceAll("snowy=\\d,", "").replaceAll(",snowy=\\d]", "]");
 		}
 		if (com.eternalreturn.blocks.SnowCover.isCover(state)) {
 			return net.minecraft.block.Blocks.AIR.getDefaultState().toString();

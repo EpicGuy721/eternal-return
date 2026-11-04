@@ -105,6 +105,7 @@
 		"snow.GateSnowMixin",
 		"snow.SnowBreakMixin",
 		"snow.SnowHostMixin",
+		"snow.SnowyGroundMixin",
 		"snow.SnowItemMixin",
 		"snow.SnowLayerMixin",
 		"snow.SnowLayerSupportMixin",
