@@ -249,8 +249,15 @@ public final class Snowlogging {
 	 * cover, each up to most (the snow-piling game rule). Returns whether any settled.
 	 */
 	public static boolean snowfall(WorldAccess world, Biome biome, BlockPos space, int most, int flags) {
-		if (biome.doesNotSnow(space) || space.getY() < world.getBottomY() || space.getY() >= world.getTopY()
-				|| world.getLightLevel(LightType.BLOCK, space) >= 10) {
+		if (biome.doesNotSnow(space)) {
+			return false;
+		}
+		return snowfallCold(world, space, most, flags);
+	}
+
+	/** snowfall where the climate has already said it snows here (Moderner Beta's snow step, ModernerBetaSnowCheckMixin). */
+	public static boolean snowfallCold(WorldAccess world, BlockPos space, int most, int flags) {
+		if (space.getY() < world.getBottomY() || space.getY() >= world.getTopY() || world.getLightLevel(LightType.BLOCK, space) >= 10) {
 			return false;
 		}
 		BlockState there = world.getBlockState(space);

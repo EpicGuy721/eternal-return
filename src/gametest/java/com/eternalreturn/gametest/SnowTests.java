@@ -891,4 +891,62 @@ public class SnowTests implements FabricGameTest {
 			ctx.complete();
 		});
 	}
+
+	/**
+	 * Moderner Beta's snow step (it takes over vanilla's in its worlds, Eternal Return's included) lays snow in flora and
+	 * in slabs as vanilla's does (ModernerBetaSnowMixin): run here on a patch of snowy taiga high above the test (its snow
+	 * check only snows from y 0 up). Without Moderner Beta there is nothing to check.
+	 */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = FLORA_WORLDGEN_BATCH, skyAccess = true, tickLimit = 40)
+	public void modernerBetaGenerationSnowsInFlora(TestContext ctx) {
+		if (!GameTestWorld.isModernerBetaLoaded()) {
+			ctx.complete();
+			return;
+		}
+		ServerWorld world = ctx.getWorld();
+		BlockPos corner = ctx.getAbsolutePos(BlockPos.ORIGIN);
+		BlockPos far = ctx.getAbsolutePos(new BlockPos(7, 0, 7));
+		BlockPos origin = new BlockPos(Math.min(corner.getX(), far.getX()), 100, Math.min(corner.getZ(), far.getZ()));
+		MinecraftServer server = world.getServer();
+		server.getCommandManager().executeWithPrefix(server.getCommandSource().withSilent(), "fillbiome " + origin.getX() + " 90 " + origin.getZ() + " "
+				+ (origin.getX() + 7) + " 110 " + (origin.getZ() + 7) + " minecraft:snowy_taiga");
+		for (int x = 0; x < 8; x++) {
+			for (int z = 0; z < 8; z++) {
+				world.setBlockState(origin.add(x, 0, z), Blocks.STONE.getDefaultState());
+			}
+		}
+		BlockPos fern = origin.add(2, 1, 2);
+		BlockPos grass = origin.add(3, 1, 2);
+		BlockPos slab = origin.add(4, 1, 2);
+		BlockPos bare = origin.add(2, 1, 5);
+		plant(world, fern, Blocks.FERN.getDefaultState());
+		plant(world, grass, Blocks.SHORT_GRASS.getDefaultState());
+		world.setBlockState(slab, Blocks.STONE_SLAB.getDefaultState());
+		world.setBlockState(bare.down(), Blocks.GRASS_BLOCK.getDefaultState());
+		ctx.runAtTick(5, () -> {
+			try {
+				Class.forName("mod.bluestaggo.modernerbeta.level.feature.BetaSnowAndFreezeFeature")
+						.getMethod("setFreezeTopLayer", net.minecraft.world.StructureWorldAccess.class, BlockPos.class, net.minecraft.world.biome.source.BiomeSource.class,
+								boolean.class)
+						.invoke(null, world, origin, world.getChunkManager().getChunkGenerator().getBiomeSource(), true);
+			} catch (ReflectiveOperationException e) {
+				throw new AssertionError("Moderner Beta's snow step can't be called", e);
+			}
+			ctx.assertTrue(snowLayer(world, bare) == 1, "a snow layer on bare grass, as Moderner Beta's");
+			for (BlockPos pos : List.of(fern, grass)) {
+				ctx.assertTrue(logged(world, pos) == 1 && groundSnowy(world, pos), "a layer logged in " + world.getBlockState(pos) + ", the ground snowy");
+			}
+			ctx.assertTrue(logged(world, slab) == 1, "a layer logged in the bottom slab, got " + logged(world, slab));
+			for (int x = 0; x < 8; x++) {
+				for (int z = 0; z < 8; z++) {
+					for (int y = 0; y <= 2; y++) {
+						BlockPos pos = origin.add(x, y, z);
+						Snowlogging.snowlog(world, pos, 0, Block.NOTIFY_ALL);
+						world.setBlockState(pos, Blocks.AIR.getDefaultState());
+					}
+				}
+			}
+			ctx.complete();
+		});
+	}
 }

@@ -743,7 +743,7 @@ Creatures keep their gear and name. The stone works before a creature's own righ
 
 **Curse of Homing** (armor, I only; found like the other curses, never from the table): any projectile someone else shot (arrows, tridents, fireballs, snowballs, potions, bullets, webs, other players' shots; not fishing lines) that comes within 1 block of the wearer per cursed piece worn (all four: 4 blocks) turns straight toward them at the speed it had. The wearer's own shots fly true.
 
-**Eating swing.** Holding attack on a block while eating or drinking swings the arm and knocks the block's hit particles off it, as in 1.7.10: in first person the eating hand swings on top of its eating bob. Nothing cracks or breaks and the eating goes on; other players see the swing.
+**Eating swing.** Holding attack on a block while eating or drinking swings the arm and knocks the block's hit particles off it, as in 1.7.10: in first person the food stays in its eating pose, bobbing, and the hand's swing turns it as 1.7.10 drew it. Nothing cracks or breaks and the eating goes on; other players see the swing.
 
 **Subtle potions.** An amethyst shard in a brewing stand makes potions, splash potions and lingering potions with effects subtle: "Subtle Potion of Swiftness". Their effects show no particles on whoever has them, a subtle splash potion breaks without the coloured burst, a subtle lingering cloud is invisible (F3+B shows no hitbox for it to survival and adventure players), and tipped arrows made from it fly without a trail and stay subtle. Brew redstone or glowstone first: a subtle potion can't be lengthened or strengthened. Gunpowder and dragon's breath still work on it. (`survival.subtlePotions`.)
 

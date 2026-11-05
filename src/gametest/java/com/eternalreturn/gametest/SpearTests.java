@@ -173,28 +173,51 @@ public class SpearTests implements FabricGameTest {
 		ctx.complete();
 	}
 
+	/**
+	 * Mobs spawn with spears only riding a mount that charges (SpearRiders): on foot or on a chicken never; on a horse,
+	 * piglins and zombified piglins with a golden sword and zombies with an iron sword sometimes swap it for a spear.
+	 */
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = BATCH, tickLimit = 60)
-	public void piglinsCarryGoldenSpears(TestContext ctx) {
+	public void onlyMountedRidersCarrySpears(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
-		int piglinSpears = 0;
-		int piglinSwords = 0;
-		int zombifiedSpears = 0;
-		int zombifiedSwords = 0;
+		int footSpears = 0;
+		int footSwords = 0;
+		int chickenSpears = 0;
+		int horseSpears = 0;
+		int horseSwords = 0;
 		for (int i = 0; i < 60; i++) {
 			PiglinEntity piglin = EntityType.PIGLIN.create(world);
 			piglin.initialize(world, world.getLocalDifficulty(piglin.getBlockPos()), SpawnReason.NATURAL, null);
-			piglinSpears += piglin.getMainHandStack().isOf(Spears.GOLDEN) ? 1 : 0;
-			piglinSwords += piglin.getMainHandStack().isOf(Items.GOLDEN_SWORD) ? 1 : 0;
+			footSpears += piglin.getMainHandStack().getItem() instanceof Spears.Spear ? 1 : 0;
+			footSwords += piglin.getMainHandStack().isOf(Items.GOLDEN_SWORD) ? 1 : 0;
 			piglin.discard();
 			ZombifiedPiglinEntity zombified = EntityType.ZOMBIFIED_PIGLIN.create(world);
 			zombified.initialize(world, world.getLocalDifficulty(zombified.getBlockPos()), SpawnReason.NATURAL, null);
-			zombifiedSpears += zombified.getMainHandStack().isOf(Spears.GOLDEN) ? 1 : 0;
-			zombifiedSwords += zombified.getMainHandStack().isOf(Items.GOLDEN_SWORD) ? 1 : 0;
+			footSpears += zombified.getMainHandStack().getItem() instanceof Spears.Spear ? 1 : 0;
 			zombified.discard();
+
+			ZombieEntity onChicken = EntityType.ZOMBIE.create(world);
+			onChicken.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
+			var chicken = EntityType.CHICKEN.create(world);
+			onChicken.startRiding(chicken, true);
+			chickenSpears += onChicken.getMainHandStack().getItem() instanceof Spears.Spear ? 1 : 0;
+			onChicken.discard();
+			chicken.discard();
+
+			for (EntityType<? extends net.minecraft.entity.mob.MobEntity> type : List.of(EntityType.ZOMBIE, EntityType.ZOMBIFIED_PIGLIN, EntityType.PIGLIN)) {
+				net.minecraft.entity.mob.MobEntity rider = type.create(world);
+				rider.equipStack(EquipmentSlot.MAINHAND, new ItemStack(type == EntityType.ZOMBIE ? Items.IRON_SWORD : Items.GOLDEN_SWORD));
+				var horse = EntityType.ZOMBIE_HORSE.create(world);
+				rider.startRiding(horse, true);
+				horseSpears += rider.getMainHandStack().getItem() instanceof Spears.Spear ? 1 : 0;
+				horseSwords += rider.getMainHandStack().getItem() instanceof net.minecraft.item.SwordItem ? 1 : 0;
+				rider.discard();
+				horse.discard();
+			}
 		}
-		ctx.assertTrue(piglinSpears > 0 && piglinSwords > 0, "piglins: " + piglinSpears + " spears, " + piglinSwords + " swords");
-		ctx.assertTrue(zombifiedSpears > 0 && zombifiedSwords > zombifiedSpears, "zombified piglins: " + zombifiedSpears + " spears, " + zombifiedSwords
-				+ " swords");
+		ctx.assertTrue(footSpears == 0 && footSwords > 0, "on foot: " + footSpears + " spears, " + footSwords + " piglin swords");
+		ctx.assertTrue(chickenSpears == 0, "on chickens: " + chickenSpears + " spears");
+		ctx.assertTrue(horseSpears > 0 && horseSwords > 0, "on horses: " + horseSpears + " spears, " + horseSwords + " swords");
 		ctx.complete();
 	}
 
