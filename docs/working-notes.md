@@ -42,6 +42,7 @@ How the owner wants work on this repo done, and pitfalls that each cost a failed
 - Adding a property to vanilla blocks: WallBlock's shape maps are keyed by its original states (look up the bare state); a BooleanProperty's first value (true) becomes the default; code in Blocks' class init must not reach back into maps being filled; override getCullingShape and isTransparent when the outline grows; each added state costs about 2 KB of heap.
 - Shape methods that read the world deadlock at shutdown (the lighting thread); overlay quads z-fight unless they have the face's exact corners; pull UVs in from sprite edges; CUTOUT, not CUTOUT_MIPPED, for overlays.
 - Fabric attachment sync gives the client no redraw signal: send your own payload and call `worldRenderer.scheduleBlockRenders`.
+- Nostalgic Tweaks' old lighting caches light blocking per block, not per state, on the render thread (the first state met wins): an extended piston went black under its arm. OldLightingOpacityMixin puts each state's own value back for blocks whose states differ. A client light bug in the owner's pack: compare client and server light at the spot (`world.getLightLevel(LightType.SKY, pos)` on both) before suspecting this mod.
 - The owner plays with Nostalgic Tweaks' old lighting (no smooth light, round-robin relight) and "Full Block Outlines" on some blocks; ColorLight colours light per block id from its own thread.
 
 ## Notes from feature batch 11 (cloud session)

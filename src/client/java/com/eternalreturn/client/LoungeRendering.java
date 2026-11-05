@@ -18,10 +18,14 @@ public final class LoungeRendering {
 	private LoungeRendering() {
 	}
 
-	/** After vanilla's turn of the body (setupTransforms): lowered to the floor. */
+	/**
+	 * After vanilla's turn of the body (setupTransforms): lowered to the floor. A baby biped's body is drawn at half
+	 * size (AnimalModel's child scaling, not the scale passed here), so its hips are half as high and it drops half as far.
+	 */
 	public static void lower(LivingEntity entity, MatrixStack matrices, float scale) {
 		if (Lounging.isLounging(entity)) {
-			matrices.translate(0.0F, -DROP * scale, 0.0F);
+			float drop = entity.isBaby() ? DROP * 0.5F : DROP;
+			matrices.translate(0.0F, -drop * scale, 0.0F);
 		}
 	}
 

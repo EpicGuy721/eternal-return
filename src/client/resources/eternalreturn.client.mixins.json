@@ -3,6 +3,8 @@
 	"package": "com.eternalreturn.mixin.client",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
+		"AbstractBlockOpacityInvoker",
+		"OldLightingOpacityMixin",
 		"AnvilScreenMixin",
 		"BeaconLevelTwoButtonMixin",
 		"BeaconScreenMixin",

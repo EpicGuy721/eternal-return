@@ -47,6 +47,27 @@ public final class Slimes {
 		}
 	}
 
+	/**
+	 * From a slime's initialize, after its size is picked: a slime spawning by itself (naturally, with the chunk, from a
+	 * spawner or a structure) shrinks, a step at a time, until it fits where it stands. The game checks the space for a
+	 * spawning slime at the smallest slime's size before the size is picked, so big slimes (vanilla's size 4 too, more
+	 * often the sizes 8 and 16 above) could spawn into cave walls and ceilings and suffocate.
+	 */
+	public static void fitSpace(SlimeEntity slime, net.minecraft.world.WorldAccess world, net.minecraft.entity.SpawnReason reason) {
+		if (reason != net.minecraft.entity.SpawnReason.NATURAL && reason != net.minecraft.entity.SpawnReason.CHUNK_GENERATION
+				&& reason != net.minecraft.entity.SpawnReason.SPAWNER && reason != net.minecraft.entity.SpawnReason.STRUCTURE) {
+			return;
+		}
+		while (slime.getSize() > 1 && !fits(slime, world)) {
+			slime.setSize(slime.getSize() / 2, true);
+		}
+	}
+
+	/** No block (or world border) in the slime's box. */
+	public static boolean fits(SlimeEntity slime, net.minecraft.world.WorldAccess world) {
+		return world.isSpaceEmpty(slime, slime.getBoundingBox());
+	}
+
 	/** A natural slime spawn on the surface while it rains there at night (any biome; with storms, under one). */
 	public static boolean rainSpawn(ServerWorld world, BlockPos pos) {
 		if (!EternalReturnConfig.get().mobs.slimesInNightRain || world.getDifficulty() == Difficulty.PEACEFUL

@@ -173,11 +173,53 @@ public class WorldRulesTests implements FabricGameTest {
 		try {
 			cfg.slimeSize16Chance = 1.0;
 			SlimeEntity slime = EntityType.SLIME.create(world);
+			// High above the test, in open air: a size 16 slime is over 8 blocks wide and tall.
+			BlockPos sky = ctx.getAbsolutePos(new BlockPos(3, 120, 3));
+			slime.refreshPositionAndAngles(sky.getX() + 0.5, sky.getY(), sky.getZ() + 0.5, 0.0F, 0.0F);
 			slime.initialize(world, world.getLocalDifficulty(ctx.getAbsolutePos(BlockPos.ORIGIN)), SpawnReason.NATURAL, null);
 			SlimeEntity magma = EntityType.MAGMA_CUBE.create(world);
 			magma.initialize(world, world.getLocalDifficulty(ctx.getAbsolutePos(BlockPos.ORIGIN)), SpawnReason.NATURAL, null);
 			ctx.assertTrue(slime.getSize() == 16, "a slime of size 16, got " + slime.getSize());
 			ctx.assertTrue(magma.getSize() <= 4, "magma cubes keep vanilla's sizes, got " + magma.getSize());
+		} finally {
+			cfg.slimeSize16Chance = saved;
+		}
+		ctx.complete();
+	}
+
+	/**
+	 * A slime spawning in a one-block hole in stone shrinks to fit it (size 1) even when it would grow to size 16; one
+	 * hatched from a spawn egg there keeps its size (the player chose the spot).
+	 */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "big_slimes")
+	public void slimesFitTheirSpace(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		EternalReturnConfig.MobTweaks cfg = EternalReturnConfig.get().mobs;
+		for (int x = 1; x <= 5; x++) {
+			for (int y = 1; y <= 5; y++) {
+				for (int z = 1; z <= 5; z++) {
+					ctx.setBlockState(x, y, z, Blocks.STONE);
+				}
+			}
+		}
+		ctx.setBlockState(3, 3, 3, Blocks.AIR);
+		BlockPos hole = ctx.getAbsolutePos(new BlockPos(3, 3, 3));
+		double saved = cfg.slimeSize16Chance;
+		try {
+			cfg.slimeSize16Chance = 1.0;
+			SlimeEntity natural = EntityType.SLIME.create(world);
+			natural.refreshPositionAndAngles(hole.getX() + 0.5, hole.getY(), hole.getZ() + 0.5, 0.0F, 0.0F);
+			natural.initialize(world, world.getLocalDifficulty(hole), SpawnReason.NATURAL, null);
+			SlimeEntity spawner = EntityType.SLIME.create(world);
+			spawner.refreshPositionAndAngles(hole.getX() + 0.5, hole.getY(), hole.getZ() + 0.5, 0.0F, 0.0F);
+			spawner.initialize(world, world.getLocalDifficulty(hole), SpawnReason.SPAWNER, null);
+			SlimeEntity egg = EntityType.SLIME.create(world);
+			egg.refreshPositionAndAngles(hole.getX() + 0.5, hole.getY(), hole.getZ() + 0.5, 0.0F, 0.0F);
+			egg.initialize(world, world.getLocalDifficulty(hole), SpawnReason.SPAWN_EGG, null);
+			ctx.assertTrue(natural.getSize() == 1, "a natural slime in a one-block hole is size 1, got " + natural.getSize());
+			ctx.assertTrue(spawner.getSize() == 1, "a spawner's slime in a one-block hole is size 1, got " + spawner.getSize());
+			ctx.assertTrue(world.isSpaceEmpty(natural, natural.getBoundingBox()), "the shrunk slime fits its hole");
+			ctx.assertTrue(egg.getSize() == 16, "a spawn egg's slime keeps size 16, got " + egg.getSize());
 		} finally {
 			cfg.slimeSize16Chance = saved;
 		}
