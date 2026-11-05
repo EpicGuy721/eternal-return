@@ -28,7 +28,8 @@ import java.util.List;
  * <li>adult zombies hunt farm animals (entity tag eternalreturn:zombie_prey) and, when hurt, eat raw meat
  * lying about (ZombieEatMeatGoal);</li>
  * <li>baby zombies sometimes ride a cow, pig or sheep (mobs.babyZombieAnimalJockeyChance) and steer it,
- * as they do chickens;</li>
+ * as they do chickens: only the land zombies (zombies, husks, zombie villagers; not drowned, zombified piglins or
+ * grimlocks), and never spawning in water;</li>
  * <li>phantoms sometimes carry a skeleton (mobs.phantomSkeletonChance), and slimes too
  * (mobs.slimeSkeletonChance); the mount moves on its own while the skeleton shoots.</li>
  * </ul>
@@ -54,9 +55,13 @@ public final class ZombieHabits {
 		zombie.equipStack(EquipmentSlot.MAINHAND, tool);
 	}
 
-	/** From a baby zombie's initialize: now and then it comes riding a cow, pig or sheep. */
+	/** The zombies that ride farm animals: those of the land (a drowned in the sea or a zombified piglin in the Nether on a cow makes no sense). */
+	private static final java.util.Set<EntityType<?>> ANIMAL_RIDERS = java.util.Set.of(EntityType.ZOMBIE, EntityType.HUSK, EntityType.ZOMBIE_VILLAGER);
+
+	/** From a baby zombie's initialize: now and then a land zombie on dry ground comes riding a cow, pig or sheep. */
 	public static void tryAnimalJockey(ZombieEntity zombie, ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason reason) {
-		if (!zombie.isBaby() || zombie.hasVehicle() || reason == SpawnReason.CONVERSION || reason == SpawnReason.JOCKEY
+		if (!zombie.isBaby() || zombie.hasVehicle() || !ANIMAL_RIDERS.contains(zombie.getType())
+				|| !world.getFluidState(zombie.getBlockPos()).isEmpty() || reason == SpawnReason.CONVERSION || reason == SpawnReason.JOCKEY
 				|| world.getRandom().nextDouble() >= EternalReturnConfig.get().mobs.babyZombieAnimalJockeyChance) {
 			return;
 		}

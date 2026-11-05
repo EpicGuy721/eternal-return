@@ -231,7 +231,7 @@ public class MobsAndMachinesTests implements FabricGameTest {
 		});
 	}
 
-	/** With the chances at 1: baby zombies come riding a cow, pig or sheep they steer; phantoms and slimes come with a skeleton that doesn't steer. */
+	/** With the chances at 1: baby zombies come riding a cow, pig or sheep they steer (land zombies on dry ground only); phantoms and slimes come with a skeleton that doesn't steer. */
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "new_jockeys")
 	public void newJockeys(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
@@ -251,6 +251,19 @@ public class MobsAndMachinesTests implements FabricGameTest {
 			ctx.assertTrue(mount instanceof CowEntity || mount instanceof PigEntity || mount instanceof net.minecraft.entity.passive.SheepEntity, "a baby zombie rides a farm animal: " + mount);
 			ctx.assertTrue(((JockeyMount) mount).eternalreturn$isJockeyMount() && ((AnimalEntity) mount).getControllingPassenger() == zombie, "it steers its mount, which despawns with it");
 
+			// Only land zombies on dry ground: no drowned or zombified piglin on a cow, nor a baby zombie spawning in water.
+			ctx.setBlockState(5, 1, 1, net.minecraft.block.Blocks.WATER);
+			List<ZombieEntity> riderless = new java.util.ArrayList<>();
+			for (EntityType<? extends ZombieEntity> type : List.of(EntityType.DROWNED, EntityType.ZOMBIFIED_PIGLIN, EntityType.ZOMBIE)) {
+				ZombieEntity other = type.create(world);
+				other.refreshPositionAndAngles(ctx.getAbsolutePos(type == EntityType.ZOMBIE ? new BlockPos(5, 1, 1) : new BlockPos(1, 1, 4)), 0.0F, 0.0F);
+				other.initialize(world, world.getLocalDifficulty(other.getBlockPos()), SpawnReason.NATURAL, new ZombieEntity.ZombieData(true, false));
+				ctx.assertTrue(!(other.getVehicle() instanceof AnimalEntity), "no farm animal under a baby " + type.getUntranslatedName()
+						+ (type == EntityType.ZOMBIE ? " in water" : "") + ": " + other.getVehicle());
+				riderless.add(other);
+			}
+			ctx.setBlockState(5, 1, 1, net.minecraft.block.Blocks.AIR);
+
 			PhantomEntity phantomEntity = EntityType.PHANTOM.create(world);
 			phantomEntity.refreshPositionAndAngles(ctx.getAbsolutePos(new BlockPos(2, 4, 2)), 0.0F, 0.0F);
 			phantomEntity.initialize(world, world.getLocalDifficulty(phantomEntity.getBlockPos()), SpawnReason.NATURAL, null);
@@ -263,6 +276,13 @@ public class MobsAndMachinesTests implements FabricGameTest {
 			ctx.assertTrue(slimeEntity.getSize() < 2 || slimeEntity.getFirstPassenger() instanceof SkeletonEntity, "a slime carries a skeleton: " + slimeEntity.getFirstPassenger());
 			for (Entity entity : List.of(zombie, mount, phantomEntity, slimeEntity)) {
 				entity.streamSelfAndPassengers().forEach(Entity::discard);
+			}
+			for (ZombieEntity other : riderless) {
+				Entity vehicle = other.getVehicle();
+				other.discard();
+				if (vehicle != null) {
+					vehicle.discard();
+				}
 			}
 		} finally {
 			cfg.babyZombieAnimalJockeyChance = baby;

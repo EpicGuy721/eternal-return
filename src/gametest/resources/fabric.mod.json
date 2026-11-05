@@ -70,6 +70,7 @@
 			"com.eternalreturn.gametest.VisionTests",
 			"com.eternalreturn.gametest.LoungingTests",
 			"com.eternalreturn.gametest.GrimlockTests",
+			"com.eternalreturn.gametest.ZombieAttackTests",
 			"com.eternalreturn.gametest.TweakTests",
 			"com.eternalreturn.gametest.NewEnchantmentTests",
 			"com.eternalreturn.gametest.NewItemTests",

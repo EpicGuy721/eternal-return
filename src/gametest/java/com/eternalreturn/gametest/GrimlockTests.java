@@ -199,4 +199,34 @@ public class GrimlockTests implements FabricGameTest {
 				"not above y 0");
 		ctx.complete();
 	}
+
+	/**
+	 * Shot at from out of its smell (a pillager 24 blocks off, arrows every 2 seconds): it heads toward the shooter, not
+	 * back to where it stood when hit.
+	 */
+	@GameTest(templateName = ARENA, batchId = "grimlock_shot", tickLimit = 400)
+	public void headsTowardAShooter(TestContext ctx) {
+		roof(ctx);
+		net.minecraft.entity.mob.PillagerEntity pillager = ctx.spawnEntity(net.minecraft.entity.EntityType.PILLAGER, new BlockPos(8, 2, 32));
+		pillager.setAiDisabled(true);
+		GrimlockEntity grimlock = awake(ctx, ctx.spawnEntity(NewMobs.GRIMLOCK, new BlockPos(8, 2, 8)));
+		double start = grimlock.distanceTo(pillager);
+		double[] closest = {start};
+		ctx.runAtEveryTick(() -> {
+			closest[0] = Math.min(closest[0], grimlock.distanceTo(pillager));
+			if (ctx.getTick() % 40 == 5 && grimlock.isAlive()) {
+				net.minecraft.entity.projectile.ArrowEntity arrow = new net.minecraft.entity.projectile.ArrowEntity(ctx.getWorld(), pillager,
+						new net.minecraft.item.ItemStack(net.minecraft.item.Items.ARROW), null);
+				Vec3d to = grimlock.getPos().add(0.0, grimlock.getHeight() * 0.6, 0.0).subtract(arrow.getPos());
+				arrow.setVelocity(to.x, to.y + to.horizontalLength() * 0.03, to.z, 2.4F, 0.0F);
+				arrow.setDamage(0.2);
+				ctx.getWorld().spawnEntity(arrow);
+			}
+		});
+		ctx.runAtTick(300, () -> {
+			ctx.assertTrue(closest[0] < start - 12.0, "it went toward the shooter: " + start + " -> " + closest[0]);
+			ctx.killAllEntities();
+			ctx.complete();
+		});
+	}
 }

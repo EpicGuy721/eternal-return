@@ -26,7 +26,7 @@ import java.util.Set;
 import java.util.WeakHashMap;
 
 /**
- * Lounging: now and then an idle bipedal monster (entity tag eternalreturn:loungers: zombies, skeletons, piglins,
+ * Lounging: now and then an idle bipedal monster, with no player within its smell (VisionCone), (entity tag eternalreturn:loungers: zombies, skeletons, piglins,
  * witches and the like; no illagers) sits down for a while (mobs.loungeMinTicks to mobs.loungeMaxTicks), head bowed
  * (the sitting pose; drawn by the client's LoungeRendering). Sitting, its AI is off (MobLoungeMixin skips it): it
  * spots and hunts no one, and costs little. A piglin doesn't sit down to it while trading (holding what it was given,
@@ -58,7 +58,18 @@ public final class Lounging {
 	public static boolean canLounge(MobEntity mob) {
 		return EternalReturnConfig.get().mobs.lounging && mob.getType().isIn(LOUNGERS) && mob.isAlive() && mob.isOnGround() && !mob.isTouchingWater()
 				&& !mob.isInLava() && !mob.isOnFire() && !mob.hasVehicle() && !mob.hasPassengers() && !mob.isLeashed() && mob.getTarget() == null
-				&& !mob.isAttacking() && mob.hurtTime == 0 && mob.isInPose(EntityPose.STANDING) && mob.getNavigation().isIdle() && !trading(mob);
+				&& !mob.isAttacking() && mob.hurtTime == 0 && mob.isInPose(EntityPose.STANDING) && mob.getNavigation().isIdle() && !trading(mob)
+				&& !playerNear(mob);
+	}
+
+	/**
+	 * A player it could smell (VisionCone.smellRange, a block more): it doesn't sit down beside one it hasn't noticed yet
+	 * (walking up behind them, say), or it would sit there, AI off, and never notice them.
+	 */
+	private static boolean playerNear(MobEntity mob) {
+		double range = VisionCone.smellRange(mob.getType()) + 1.0;
+		return mob.getWorld().getClosestPlayer(mob.getX(), mob.getY(), mob.getZ(), range,
+				player -> player instanceof net.minecraft.entity.player.PlayerEntity p && !p.isSpectator() && !p.isCreative()) != null;
 	}
 
 	/** A piglin minding a trade: admiring what it was given (something in its off hand), or a player near holding gold or rubies. */

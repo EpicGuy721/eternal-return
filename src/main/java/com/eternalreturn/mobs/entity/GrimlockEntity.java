@@ -171,13 +171,18 @@ public class GrimlockEntity extends ZombieEntity {
 	}
 
 	/**
-	 * A noise in the world (a game event): grimlocks in earshot note where. One on the hunt is drawn off its target by a
-	 * noise somewhere else, unless the target is right by it.
+	 * A noise in the world (a game event): grimlocks in earshot note where (for a shot landing, where it came from: the
+	 * shooter). One on the hunt is drawn off its target by a noise somewhere else, unless the target is right by it.
 	 */
 	public static void hear(ServerWorld world, RegistryEntry<GameEvent> event, Vec3d at, GameEvent.Emitter emitter) {
 		Set<GrimlockEntity> listening = LISTENING.get(world);
 		if (listening == null || listening.isEmpty() || !Lounging.isNoise(event, emitter)) {
 			return;
+		}
+		// An arrow (or any shot) landing tells where it was shot from: it goes toward the shooter, not to where the shot fell.
+		Vec3d heard = at;
+		if (emitter.sourceEntity() instanceof net.minecraft.entity.projectile.ProjectileEntity shot && shot.getOwner() instanceof LivingEntity shooter) {
+			heard = shooter.getPos();
 		}
 		for (GrimlockEntity grimlock : List.copyOf(listening)) {
 			if (grimlock.isRemoved() || !grimlock.isAlive()) {
@@ -196,7 +201,7 @@ public class GrimlockEntity extends ZombieEntity {
 				grimlock.hunting = false;
 				grimlock.distractedUntil = grimlock.age + DISTRACTED;
 			}
-			grimlock.noise = at;
+			grimlock.noise = heard;
 			grimlock.heardAt = grimlock.age;
 		}
 	}
