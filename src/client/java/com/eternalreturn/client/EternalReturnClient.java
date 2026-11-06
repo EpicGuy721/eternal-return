@@ -43,6 +43,15 @@ public class EternalReturnClient implements ClientModInitializer {
 		// Icicles and ice crystals: cross models with see-through pixels.
 		net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap.INSTANCE.putBlocks(net.minecraft.client.render.RenderLayer.getCutout(),
 				com.eternalreturn.blocks.IceBlocks.ICICLE, com.eternalreturn.blocks.IceBlocks.ICE_CRYSTAL);
+		// Stone dripstone and the cave mushrooms: cutout too; the mushroom gas is drawn only by its particles.
+		com.eternalreturn.blocks.StoneDripstones.all().values().forEach(block -> net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap.INSTANCE.putBlock(block,
+				net.minecraft.client.render.RenderLayer.getCutout()));
+		net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap.INSTANCE.putBlocks(net.minecraft.client.render.RenderLayer.getCutout(),
+				com.eternalreturn.blocks.CaveMushrooms.PURPLE_MUSHROOM, com.eternalreturn.blocks.CaveMushrooms.PUFFED_PURPLE_MUSHROOM,
+				com.eternalreturn.blocks.CaveMushrooms.BLUE_MUSHROOM, com.eternalreturn.blocks.CaveMushrooms.PUFFED_BLUE_MUSHROOM,
+				com.eternalreturn.blocks.CaveMushrooms.GREEN_MUSHROOM);
+		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(com.eternalreturn.blocks.MushroomGas.CLOUD,
+				net.minecraft.client.render.entity.EmptyEntityRenderer::new);
 		net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap.INSTANCE.putBlock(com.eternalreturn.blocks.CopperRail.BLOCK,
 				net.minecraft.client.render.RenderLayer.getCutout());
 		// A bottle of milk: the potion bottle, its liquid milk white.

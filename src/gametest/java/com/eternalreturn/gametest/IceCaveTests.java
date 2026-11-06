@@ -39,7 +39,7 @@ public class IceCaveTests implements FabricGameTest {
 	private static final Set<String> WARM = Set.of("minecraft:forest", "minecraft:desert", "minecraft:jungle", "moderner_beta:late_beta_plains");
 
 	/** Up to n chunk centres well inside these biomes (their neighbours 32 blocks off the same), nearest 0, 0 first. */
-	private static List<ChunkPos> spotsIn(ServerWorld world, Set<String> wanted, int n) {
+	static List<ChunkPos> spotsIn(ServerWorld world, Set<String> wanted, int n) {
 		ChunkGenerator generator = world.getChunkManager().getChunkGenerator();
 		NoiseConfig noise = world.getChunkManager().getNoiseConfig();
 		BiomeSource source = generator.getBiomeSource();

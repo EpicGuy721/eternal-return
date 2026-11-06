@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:spring_feature",
+  "config": {
+    "state": {
+      "Name": "minecraft:lava",
+      "Properties": {
+        "falling": "true"
+      }
+    },
+    "requires_block_below": false,
+    "rock_count": 4,
+    "hole_count": 1,
+    "valid_blocks": "#minecraft:base_stone_overworld"
+  }
+}

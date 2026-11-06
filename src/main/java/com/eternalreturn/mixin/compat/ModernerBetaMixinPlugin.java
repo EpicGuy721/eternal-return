@@ -30,7 +30,8 @@ public class ModernerBetaMixinPlugin implements IMixinConfigPlugin {
 			"com.eternalreturn.mixin.compat.ModernerBetaSurfaceExtraMixin", new Object[]{"provideSurfaceExtra", 5, "V"},
 			"com.eternalreturn.mixin.compat.ModernerBetaHeightMixin", new Object[]{"getHeightConfigAt", 2, "Lmod/bluestaggo/modernerbeta/level/biome/HeightConfig;"},
 			"com.eternalreturn.mixin.compat.ModernerBetaSnowMixin", new Object[]{"setFreezeTopLayer", 4, "V"},
-			"com.eternalreturn.mixin.compat.ModernerBetaSnowCheckMixin", new Object[]{"shouldSnow", 5, "Z"});
+			"com.eternalreturn.mixin.compat.ModernerBetaSnowCheckMixin", new Object[]{"shouldSnow", 5, "Z"},
+			"com.eternalreturn.mixin.compat.ModernerBetaCaveBiomeMixin", new Object[]{"apply", 4, null});
 
 	@Override
 	public void onLoad(String mixinPackage) {
@@ -53,7 +54,7 @@ public class ModernerBetaMixinPlugin implements IMixinConfigPlugin {
 			ClassNode node = MixinService.getService().getBytecodeProvider().getClassNode(targetClassName);
 			for (MethodNode method : node.methods) {
 				if (method.name.equals(target[0]) && Type.getArgumentTypes(method.desc).length == (int) target[1]
-						&& Type.getReturnType(method.desc).getDescriptor().equals(target[2])) {
+						&& (target[2] == null || Type.getReturnType(method.desc).getDescriptor().equals(target[2]))) {
 					found = true;
 				}
 			}
@@ -64,6 +65,8 @@ public class ModernerBetaMixinPlugin implements IMixinConfigPlugin {
 		if (!found) {
 			String effect = hook.startsWith("ModernerBetaSnow")
 					? "Worlds still generate, but snowy biomes lay no snow in plants, slabs, stairs, walls, fences and gates as they are made."
+					: hook.equals("ModernerBetaCaveBiomeMixin")
+					? "Eternal Return worlds still generate, but ice caves may turn up under warm land and mushroom and magma caves anywhere."
 					: hook.equals("ModernerBetaHeightMixin")
 					? "Eternal Return worlds still generate, but without deep stepped oceans or sinkholes."
 					: "Eternal Return worlds still generate, but biome stone may show columns of plain stone under Moderner Beta's bare-rock patches.";

@@ -15,6 +15,7 @@
 		"FogTintMixin",
 		"EnchantmentScreenMixin",
 		"HiddenWindowMixin",
+		"NoExperimentalWarningMixin",
 		"HungerBarMixin",
 		"ItemFrameEntityRendererMixin",
 		"LavaFogMixin",

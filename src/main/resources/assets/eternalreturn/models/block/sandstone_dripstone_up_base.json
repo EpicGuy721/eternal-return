@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/pointed_dripstone",
+  "textures": {
+    "cross": "eternalreturn:block/sandstone_dripstone_up_base"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "feature": "eternalreturn:sub/mushroom_cave_huge_reds",
+  "placement": [
+    {
+      "type": "minecraft:count",
+      "count": 16
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:height_range",
+      "height": {
+        "type": "minecraft:constant",
+        "value": {
+          "absolute": 100
+        }
+      }
+    },
+    {
+      "type": "eternalreturn:cave_surface",
+      "ceiling": false,
+      "range": 0
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

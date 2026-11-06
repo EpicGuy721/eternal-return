@@ -17,7 +17,7 @@ import net.minecraft.world.biome.SpawnSettings;
 /**
  * Slimes: besides vanilla's sizes 1, 2 and 4, a newly spawned slime is sometimes size 8
  * (mobs.slimeSize8Chance) or 16 (mobs.slimeSize16Chance), which split down through the sizes as usual.
- * And while it rains at night, slimes spawn on the surface in any overworld biome (mobs.slimesInNightRain),
+ * And while it rains at night, slimes spawn on the surface in any overworld biome but the mushroom islands (mobs.slimesInNightRain),
  * on top of vanilla's swamps and slime chunks: every overworld biome without slimes in its spawn list
  * gets them (weight 100, as vanilla gives most biomes), and the spawn rule lets them through where the
  * sky is open while it rains at night.
@@ -28,7 +28,7 @@ public final class Slimes {
 
 	public static void register() {
 		BiomeModifications.create(EternalReturn.id("rain_slimes")).add(ModificationPhase.ADDITIONS,
-				BiomeSelectors.foundInOverworld().or(com.eternalreturn.worldgen.variants.BiomeVariants.any()).and(context -> EternalReturnConfig.get().mobs.slimesInNightRain && context.getBiome().getSpawnSettings()
+				BiomeSelectors.foundInOverworld().or(com.eternalreturn.worldgen.variants.BiomeVariants.any()).and(context -> EternalReturnConfig.get().mobs.slimesInNightRain && !context.hasTag(MUSHROOM_ISLANDS) && context.getBiome().getSpawnSettings()
 						.getSpawnEntries(SpawnGroup.MONSTER).getEntries().stream().noneMatch(entry -> entry.type == EntityType.SLIME)),
 				context -> context.getSpawnSettings().addSpawn(SpawnGroup.MONSTER, new SpawnSettings.SpawnEntry(EntityType.SLIME, 100, 4, 4)));
 	}
@@ -68,10 +68,14 @@ public final class Slimes {
 		return world.isSpaceEmpty(slime, slime.getBoundingBox());
 	}
 
-	/** A natural slime spawn on the surface while it rains there at night (any biome; with storms, under one). */
+	/** Mushroom islands (and the giant mushroom island) never get rain slimes (owner's request, 2026-11-05). */
+	public static final net.minecraft.registry.tag.TagKey<net.minecraft.world.biome.Biome> MUSHROOM_ISLANDS =
+			net.fabricmc.fabric.api.tag.convention.v2.ConventionalBiomeTags.IS_MUSHROOM;
+
+	/** A natural slime spawn on the surface while it rains there at night (any biome but the mushroom islands; with storms, under one). */
 	public static boolean rainSpawn(ServerWorld world, BlockPos pos) {
 		if (!EternalReturnConfig.get().mobs.slimesInNightRain || world.getDifficulty() == Difficulty.PEACEFUL
-				|| !com.eternalreturn.weather.LocalWeather.rainingAt(world, pos)) {
+				|| !com.eternalreturn.weather.LocalWeather.rainingAt(world, pos) || world.getBiome(pos).isIn(MUSHROOM_ISLANDS)) {
 			return false;
 		}
 		long time = Math.floorMod(world.getTimeOfDay(), 24000L);

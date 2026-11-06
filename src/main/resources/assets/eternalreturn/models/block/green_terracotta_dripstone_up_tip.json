@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/pointed_dripstone",
+  "textures": {
+    "cross": "eternalreturn:block/green_terracotta_dripstone_up_tip"
+  }
+}

@@ -267,5 +267,13 @@
   "eternalreturn:ice_caves": {
     "base": "moderner_beta:early_release_ice_plains",
     "kind": "cave"
+  },
+  "eternalreturn:mushroom_caves": {
+    "base": "moderner_beta:late_beta_plains",
+    "kind": "cave"
+  },
+  "eternalreturn:magma_caves": {
+    "base": "moderner_beta:late_beta_plains",
+    "kind": "cave"
   }
 }

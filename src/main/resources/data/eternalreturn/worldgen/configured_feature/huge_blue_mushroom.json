@@ -1,0 +1,28 @@
+{
+  "type": "eternalreturn:huge_cave_mushroom",
+  "config": {
+    "shape": "cone",
+    "cap": {
+      "Name": "eternalreturn:blue_mushroom_block",
+      "Properties": {
+        "down": "false",
+        "east": "true",
+        "north": "true",
+        "south": "true",
+        "up": "true",
+        "west": "true"
+      }
+    },
+    "stem": {
+      "Name": "minecraft:mushroom_stem",
+      "Properties": {
+        "down": "false",
+        "east": "true",
+        "north": "true",
+        "south": "true",
+        "up": "false",
+        "west": "true"
+      }
+    }
+  }
+}

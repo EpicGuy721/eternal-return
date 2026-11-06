@@ -17,6 +17,8 @@ public final class ModernerBetaHooks {
 	public static final AtomicLong SURFACE_PASSES = new AtomicLong();
 	/** Chunk providers the column-height hook (ModernerBetaHeightMixin) has seen. */
 	public static final AtomicLong HEIGHT_PROVIDERS = new AtomicLong();
+	/** Calls of the cave biome injector seen by ModernerBetaCaveBiomeMixin. */
+	public static final AtomicLong CAVE_FILTER_CALLS = new AtomicLong();
 	/** The world Moderner Beta's snow-and-freeze step is decorating, while it runs on this thread (ModernerBetaSnowMixin). */
 	public static final ThreadLocal<net.minecraft.world.StructureWorldAccess> SNOWING = new ThreadLocal<>();
 	/** Snow checks seen during that step (ModernerBetaSnowCheckMixin). */

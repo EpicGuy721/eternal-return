@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
-    "#eternalreturn:troughs"
+    "#eternalreturn:troughs",
+    "#eternalreturn:cave_mushroom_blocks"
   ]
 }

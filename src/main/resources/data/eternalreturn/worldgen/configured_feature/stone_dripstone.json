@@ -1,0 +1,9 @@
+{
+  "type": "eternalreturn:stone_dripstone",
+  "config": {
+    "tries": 12,
+    "spread": 4,
+    "max_length": 4,
+    "floor_chance": 0.6
+  }
+}

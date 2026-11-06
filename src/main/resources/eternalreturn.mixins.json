@@ -6,6 +6,8 @@
 		"AnvilScreenHandlerMixin",
 		"AzaleaBlockMixin",
 		"BlockMixin",
+		"CauldronDripInvoker",
+		"CauldronStoneDripMixin",
 		"CarpetBlockMixin",
 		"EnchantmentHelperMixin",
 		"EnchantmentMixin",

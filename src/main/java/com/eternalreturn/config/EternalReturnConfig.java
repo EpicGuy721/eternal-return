@@ -658,6 +658,11 @@ public final class EternalReturnConfig {
 		 */
 		public boolean caveMushrooms = true;
 		/**
+		 * Small clusters of stone dripstone (pointed dripstone of the stone it hangs from or stands on) in caves, the
+		 * Nether's too. Eternal Return worlds only.
+		 */
+		public boolean stoneDripstone = true;
+		/**
 		 * Boulders: lumps of rock on the ground in most land biomes, of the ground's stone where that is granite, diorite
 		 * or andesite and plain stone elsewhere, more in the hills and taigas, few in plains, none in deserts and swamps (how many per biome: data/eternalreturn/worldgen/placed_feature/boulder.json).
 		 * Eternal Return worlds only.

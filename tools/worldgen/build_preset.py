@@ -514,6 +514,8 @@ CAVES = {f'{NS}:{cid}': spec for cid, spec in VARIANTS['caves'].items() if not c
 # noise favours some points; measured by IceCaveTests).
 points = []
 for cid, spec in CAVES.items():
+    if 'share' not in spec:
+        continue
     n = spec['share'] * 3
     for i in range(n):
         point = {'depth': 0.25 if i % 2 == 0 else 0.75, 'rain': 0.5, 'temp': round((i + 0.5) / n, 4)}
@@ -521,6 +523,13 @@ for cid, spec in CAVES.items():
         if i == spec['share'] // 2:
             point['biome'] = cid
         points.append(point)
+# The later cave biomes (mushroom and magma caves, 2026-11-05) take one of the empty points ("point": its index), so the
+# pattern, and every ice cave, stays exactly where it was; which land each may lie under (and how deep) is filtered in the
+# game (CaveBiomeFilter, from eternalreturn/cave_biomes.json below), as one map serves all the land.
+for cid, spec in CAVES.items():
+    if 'point' in spec:
+        assert 'biome' not in points[spec['point']], f'{cid}: point {spec["point"]} is taken'
+        points[spec['point']]['biome'] = cid
 preset['caveBiomeSettings'] = {'moderner_beta:provider': 'moderner_beta:voronoi', 'moderner_beta:cave_biome_voronoi': {
     'depthMinY': -64, 'depthMaxY': 128, 'horizontalScale': 48.0, 'verticalScale': 16.0, 'points': points}} if CAVES else \
     {'moderner_beta:provider': 'moderner_beta:none'}
@@ -541,13 +550,29 @@ for sid, spec in reversed(list(HIGH_SUBS.items())):
                          # (with the peaks' 8, most taiga columns at y 110 to 130 kept their biome; 32 still missed some).
                          # Floating islands start at y 165, above the highest ground plus 48.
                          {'condition': 'moderner_beta:below_surface', 'threshold': -48}]}})
-# Cave biomes: at least 8 blocks under the snowy land and frozen seas, where the cave biome map gives one (first of all
-# the rules, so a peak or the icy mountains never cover them).
+# Cave biomes: at least 8 blocks under any land or sea, where the cave biome map gives one (first of all the rules, so a
+# peak or the icy mountains never cover them). Each cave biome's own land (the ice caves the snowy land and frozen seas,
+# the mushroom caves the rest; the magma caves any, below y 0) is checked in the game by CaveBiomeFilter, which turns a
+# cave biome where it may not lie into none, from this table: "under" (only under these) or "not_under" (never under
+# these), and "max_y".
+ALL_GROUND = sorted(set(SNOWY) | {b for b in candidates if b not in HIGH_SUBS})
 if CAVES:
     rules.insert(0, {'type': 'moderner_beta:predicate', 'step_for': 'before_surface', 'onMatch': {'type': 'moderner_beta:cave_biome'},
                      'predicate': {'condition': 'moderner_beta:all_of', 'terms': [
-                         {'condition': 'moderner_beta:biome_in_set', 'biomes': SNOWY},
+                         {'condition': 'moderner_beta:biome_in_set', 'biomes': ALL_GROUND},
                          {'condition': 'moderner_beta:below_surface', 'threshold': 8}]}})
+    filters = {'_comment': 'Written by tools/worldgen/build_preset.py from variants.json "caves": where each cave biome may lie (CaveBiomeFilter).'}
+    for cid, spec in CAVES.items():
+        rule = {}
+        under = spec.get('under', 'snowy')
+        if under == 'snowy':
+            rule['under'] = SNOWY
+        elif under == 'not_snowy':
+            rule['not_under'] = SNOWY
+        if 'max_y' in spec:
+            rule['max_y'] = spec['max_y']
+        filters[cid] = rule
+    write('eternalreturn/cave_biomes.json', filters)
 
 preset['name'] = {'color': 'gold', 'translate': f'createWorld.customize.modern_beta.preset.name.{NS}.eternal_return'}
 preset['description'] = {'translate': f'createWorld.customize.modern_beta.preset.desc.{NS}.eternal_return'}

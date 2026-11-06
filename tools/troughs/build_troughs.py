@@ -178,7 +178,8 @@ def main():
             'result': {'count': 1, 'id': f'{NS}:{trough}'}})
     write_json(f'data/{NS}/tags/block/troughs.json', {'values': troughs})
     write_json(f'data/{NS}/tags/item/troughs.json', {'values': troughs})
-    write_json('data/minecraft/tags/block/mineable/axe.json', {'replace': False, 'values': [f'#{NS}:troughs']})
+    # The cave mushrooms' cap blocks (tools/mushrooms/build_mushrooms.py) share this vanilla tag.
+    write_json('data/minecraft/tags/block/mineable/axe.json', {'replace': False, 'values': [f'#{NS}:troughs', f'#{NS}:cave_mushroom_blocks']})
 
 
 if __name__ == '__main__':

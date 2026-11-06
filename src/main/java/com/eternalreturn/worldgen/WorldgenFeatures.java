@@ -56,6 +56,9 @@ public final class WorldgenFeatures {
 		}
 		// Clutter: boulders (Eternal Return worlds only).
 		com.eternalreturn.worldgen.clutter.Clutter.register();
+		// The magma caves' lava pools (their placed features are in the cave biome, eternalreturn:sub/magma_cave_pools).
+		com.eternalreturn.worldgen.caves.MagmaPoolFeature.register();
+		com.eternalreturn.worldgen.caves.CaveSurfacePlacement.register();
 		// Terrain landmarks: arches, spires, pillars, craters, lava flows, volcanoes, glaciers, ice walls (structures).
 		com.eternalreturn.worldgen.landmarks.Landmarks.register();
 		com.eternalreturn.worldgen.structures.ShipwreckTreasure.register();

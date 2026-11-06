@@ -114,6 +114,10 @@
       "required": false
     },
     {
+      "id": "eternalreturn:magma_caves",
+      "required": false
+    },
+    {
       "id": "eternalreturn:meadow",
       "required": false
     },
@@ -123,6 +127,10 @@
     },
     {
       "id": "eternalreturn:monument_valley",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:mushroom_caves",
       "required": false
     },
     {

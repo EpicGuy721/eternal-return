@@ -76,12 +76,13 @@ public class BiomeStoneTests implements FabricGameTest {
 
 	/**
 	 * Biomes injected after the biome layers (Moderner Beta's injection rules), which the layers' own per-block biomes
-	 * don't show: the ice caves under the snowy land and the icy mountains on its high ground. Where the world's biome at a
+	 * don't show: the ice caves under the snowy land, the mushroom and magma caves (plain stone) and the icy mountains on the cold land's high ground. Where the world's biome at a
 	 * block is one of these, its stone is expected there.
 	 */
 	private static Map<String, Block> injected() {
 		// (Built when asked: test classes load before the mod's blocks are registered.)
-		return Map.of("eternalreturn:ice_caves", HardenedBlocks.get("hardened_packed_ice"), "eternalreturn:icy_mountains", Blocks.STONE);
+		return Map.of("eternalreturn:ice_caves", HardenedBlocks.get("hardened_packed_ice"), "eternalreturn:icy_mountains", Blocks.STONE,
+				"eternalreturn:mushroom_caves", Blocks.STONE, "eternalreturn:magma_caves", Blocks.STONE);
 	}
 
 	/**

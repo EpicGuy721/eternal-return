@@ -1,0 +1,234 @@
+{
+	"_comment": "Stone dripstone (owner's request, 2026-11-05): pointed dripstone made of another stone, one block per entry, named eternalreturn:<entry>_dripstone. 'hosts': the blocks it hangs from or stands on in generated caves and grows under (the world feature picks the entry by the block it touches; ores count as their host stone, see StoneDripstones); 'texture': the block texture its pixels are taken from (tools/dripstone/build_dripstone.py); 'map_color': the map colour. The game reads this table to register the blocks; the script writes their resources.",
+	"stone": {
+		"hosts": [
+			"minecraft:stone",
+			"minecraft:cobblestone",
+			"minecraft:mossy_cobblestone",
+			"minecraft:infested_stone"
+		],
+		"texture": "stone",
+		"map_color": "stone_gray",
+		"name": "Stone"
+	},
+	"deepslate": {
+		"hosts": [
+			"minecraft:deepslate",
+			"minecraft:cobbled_deepslate"
+		],
+		"texture": "deepslate",
+		"map_color": "deepslate_gray",
+		"name": "Deepslate"
+	},
+	"andesite": {
+		"hosts": [
+			"minecraft:andesite"
+		],
+		"texture": "andesite",
+		"map_color": "stone_gray",
+		"name": "Andesite"
+	},
+	"diorite": {
+		"hosts": [
+			"minecraft:diorite"
+		],
+		"texture": "diorite",
+		"map_color": "off_white",
+		"name": "Diorite"
+	},
+	"granite": {
+		"hosts": [
+			"minecraft:granite"
+		],
+		"texture": "granite",
+		"map_color": "dirt_brown",
+		"name": "Granite"
+	},
+	"tuff": {
+		"hosts": [
+			"minecraft:tuff"
+		],
+		"texture": "tuff",
+		"map_color": "terracotta_gray",
+		"name": "Tuff"
+	},
+	"sandstone": {
+		"hosts": [
+			"minecraft:sandstone",
+			"eternalreturn:hardened_sandstone",
+			"minecraft:smooth_sandstone"
+		],
+		"texture": "sandstone",
+		"map_color": "pale_yellow",
+		"name": "Sandstone"
+	},
+	"red_sandstone": {
+		"hosts": [
+			"minecraft:red_sandstone",
+			"minecraft:smooth_red_sandstone"
+		],
+		"texture": "red_sandstone",
+		"map_color": "orange",
+		"name": "Red Sandstone"
+	},
+	"terracotta": {
+		"hosts": [
+			"minecraft:terracotta"
+		],
+		"texture": "terracotta",
+		"map_color": "orange",
+		"name": "Terracotta"
+	},
+	"white_terracotta": {
+		"hosts": [
+			"minecraft:white_terracotta"
+		],
+		"texture": "white_terracotta",
+		"map_color": "terracotta_white",
+		"name": "White Terracotta"
+	},
+	"orange_terracotta": {
+		"hosts": [
+			"minecraft:orange_terracotta"
+		],
+		"texture": "orange_terracotta",
+		"map_color": "terracotta_orange",
+		"name": "Orange Terracotta"
+	},
+	"magenta_terracotta": {
+		"hosts": [
+			"minecraft:magenta_terracotta"
+		],
+		"texture": "magenta_terracotta",
+		"map_color": "terracotta_magenta",
+		"name": "Magenta Terracotta"
+	},
+	"light_blue_terracotta": {
+		"hosts": [
+			"minecraft:light_blue_terracotta"
+		],
+		"texture": "light_blue_terracotta",
+		"map_color": "terracotta_light_blue",
+		"name": "Light Blue Terracotta"
+	},
+	"yellow_terracotta": {
+		"hosts": [
+			"minecraft:yellow_terracotta"
+		],
+		"texture": "yellow_terracotta",
+		"map_color": "terracotta_yellow",
+		"name": "Yellow Terracotta"
+	},
+	"lime_terracotta": {
+		"hosts": [
+			"minecraft:lime_terracotta"
+		],
+		"texture": "lime_terracotta",
+		"map_color": "terracotta_lime",
+		"name": "Lime Terracotta"
+	},
+	"pink_terracotta": {
+		"hosts": [
+			"minecraft:pink_terracotta"
+		],
+		"texture": "pink_terracotta",
+		"map_color": "terracotta_pink",
+		"name": "Pink Terracotta"
+	},
+	"gray_terracotta": {
+		"hosts": [
+			"minecraft:gray_terracotta"
+		],
+		"texture": "gray_terracotta",
+		"map_color": "terracotta_gray",
+		"name": "Gray Terracotta"
+	},
+	"light_gray_terracotta": {
+		"hosts": [
+			"minecraft:light_gray_terracotta"
+		],
+		"texture": "light_gray_terracotta",
+		"map_color": "terracotta_light_gray",
+		"name": "Light Gray Terracotta"
+	},
+	"cyan_terracotta": {
+		"hosts": [
+			"minecraft:cyan_terracotta"
+		],
+		"texture": "cyan_terracotta",
+		"map_color": "terracotta_cyan",
+		"name": "Cyan Terracotta"
+	},
+	"purple_terracotta": {
+		"hosts": [
+			"minecraft:purple_terracotta"
+		],
+		"texture": "purple_terracotta",
+		"map_color": "terracotta_purple",
+		"name": "Purple Terracotta"
+	},
+	"blue_terracotta": {
+		"hosts": [
+			"minecraft:blue_terracotta"
+		],
+		"texture": "blue_terracotta",
+		"map_color": "terracotta_blue",
+		"name": "Blue Terracotta"
+	},
+	"brown_terracotta": {
+		"hosts": [
+			"minecraft:brown_terracotta"
+		],
+		"texture": "brown_terracotta",
+		"map_color": "terracotta_brown",
+		"name": "Brown Terracotta"
+	},
+	"green_terracotta": {
+		"hosts": [
+			"minecraft:green_terracotta"
+		],
+		"texture": "green_terracotta",
+		"map_color": "terracotta_green",
+		"name": "Green Terracotta"
+	},
+	"red_terracotta": {
+		"hosts": [
+			"minecraft:red_terracotta"
+		],
+		"texture": "red_terracotta",
+		"map_color": "terracotta_red",
+		"name": "Red Terracotta"
+	},
+	"black_terracotta": {
+		"hosts": [
+			"minecraft:black_terracotta"
+		],
+		"texture": "black_terracotta",
+		"map_color": "terracotta_black",
+		"name": "Black Terracotta"
+	},
+	"netherrack": {
+		"hosts": [
+			"minecraft:netherrack"
+		],
+		"texture": "netherrack",
+		"map_color": "dark_red",
+		"name": "Netherrack"
+	},
+	"blackstone": {
+		"hosts": [
+			"minecraft:blackstone"
+		],
+		"texture": "blackstone",
+		"map_color": "black",
+		"name": "Blackstone"
+	},
+	"basalt": {
+		"hosts": [
+			"minecraft:basalt"
+		],
+		"texture": "basalt_side",
+		"map_color": "black",
+		"name": "Basalt"
+	}
+}
