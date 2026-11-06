@@ -1,0 +1,11 @@
+{
+  "type": "eternalreturn:landmark",
+  "landmark": "islets",
+  "min_size": 40,
+  "max_size": 100,
+  "at_sea": true,
+  "biomes": "#eternalreturn:has_structure/islets",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

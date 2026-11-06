@@ -134,7 +134,10 @@ public class SubBiomeTests implements FabricGameTest {
 			Map.entry("eternalreturn:pinyon_woodland", 4), Map.entry("eternalreturn:monument_valley", 8), Map.entry("eternalreturn:mesa_verde", 8),
 			Map.entry("eternalreturn:bryce_mesa", 8), Map.entry("eternalreturn:painted_canyon", 8), Map.entry("eternalreturn:white_mesa", 8),
 			Map.entry("eternalreturn:tundra", 4), Map.entry("eternalreturn:arctic", 8), Map.entry("eternalreturn:snowy_mesa", 8),
-			Map.entry("eternalreturn:alps", 8), Map.entry("eternalreturn:glacier_field", 8));
+			Map.entry("eternalreturn:alps", 8), Map.entry("eternalreturn:glacier_field", 8),
+			// Batch D (the giant mushroom island isn't checked: the few mushroom islands in the sample make its share swing).
+			Map.entry("eternalreturn:tropical_pillars", 8), Map.entry("eternalreturn:volcanic_jungle", 8), Map.entry("eternalreturn:roofed_fungi_forest", 4),
+			Map.entry("eternalreturn:coral_ocean", 3), Map.entry("eternalreturn:archipelago", 3));
 
 	/** What each sub-biome must show in 5 x 5 generated chunks round its spot: a block (or block tag) and how many at least. */
 	private record Sign(String what, int atLeast) {
@@ -168,7 +171,14 @@ public class SubBiomeTests implements FabricGameTest {
 			Map.entry("eternalreturn:arctic", List.of(new Sign("minecraft:snow_block", 300), new Sign("minecraft:packed_ice", 50))),
 			Map.entry("eternalreturn:snowy_mesa", List.of(new Sign("minecraft:light_blue_terracotta", 100), new Sign("minecraft:snow", 100))),
 			Map.entry("eternalreturn:alps", List.of(new Sign("minecraft:grass_block", 200), new Sign("minecraft:spruce_log", 10), new Sign("#minecraft:small_flowers", 20))),
-			Map.entry("eternalreturn:glacier_field", List.of(new Sign("minecraft:gravel", 50), new Sign("minecraft:packed_ice", 30))));
+			Map.entry("eternalreturn:glacier_field", List.of(new Sign("minecraft:gravel", 50), new Sign("minecraft:packed_ice", 30))),
+			// Batch D. The test world places no structures, so the pillars, volcanoes, islands and reefs aren't there (LandmarkTests builds them).
+			Map.entry("eternalreturn:tropical_pillars", List.of(new Sign("minecraft:jungle_log", 30))),
+			Map.entry("eternalreturn:volcanic_jungle", List.of(new Sign("minecraft:tuff", 100), new Sign("minecraft:coarse_dirt", 50), new Sign("minecraft:magma_block", 5))),
+			Map.entry("eternalreturn:roofed_fungi_forest", List.of(new Sign("minecraft:mycelium", 100), new Sign("minecraft:mushroom_stem", 30), new Sign("minecraft:dark_oak_log", 10))),
+			Map.entry("eternalreturn:giant_mushroom_island", List.of(new Sign("minecraft:mushroom_stem", 60), new Sign("minecraft:red_mushroom_block", 100))),
+			Map.entry("eternalreturn:coral_ocean", List.of(new Sign("#minecraft:coral_blocks", 20))),
+			Map.entry("eternalreturn:archipelago", List.of(new Sign("minecraft:seagrass", 30))));
 
 	/**
 	 * Round each sub-biome's spot, 5 x 5 chunks are generated in full. Each must show its signs (pumpkins, cobwebs, heath
@@ -215,12 +225,17 @@ public class SubBiomeTests implements FabricGameTest {
 					if (!BiomeStoneTests.id(world.getBiome(pos.set(x, Math.min(ground, top), z))).equals(id)) {
 						continue;
 					}
-					for (int y = Math.max(world.getBottomY(), world.getSeaLevel() - 8); y <= top + 2; y++) {
+					// The sea sub-biomes from their floor up.
+					boolean sea = world.getBiome(pos).isIn(net.minecraft.registry.tag.BiomeTags.IS_OCEAN);
+					for (int y = sea ? ground - 2 : Math.max(world.getBottomY(), world.getSeaLevel() - 8); y <= top + 2; y++) {
 						BlockState state = world.getBlockState(pos.set(x, y, z));
 						if (state.isAir()) {
 							continue;
 						}
 						found.merge(Registries.BLOCK.getId(state.getBlock()).toString(), 1, Integer::sum);
+						if (state.isIn(BlockTags.CORAL_BLOCKS)) {
+							found.merge("#minecraft:coral_blocks", 1, Integer::sum);
+						}
 						if (state.isIn(BlockTags.SMALL_FLOWERS)) {
 							found.merge("#minecraft:small_flowers", 1, Integer::sum);
 						}
@@ -317,7 +332,11 @@ public class SubBiomeTests implements FabricGameTest {
 			// Batch C: dwarf birches are bushes; the arctic and icy mountains have no trees; the snowy mesa and glacier field few.
 			"eternalreturn:tundra", "eternalreturn:arctic", "eternalreturn:snowy_mesa", "eternalreturn:glacier_field",
 			// Lone trees, a few in 25 chunks (Moderner Beta's decoration varies a little from run to run).
-			"eternalreturn:meadow", "eternalreturn:pumpkin_plains");
+			"eternalreturn:meadow", "eternalreturn:pumpkin_plains",
+			// Batch D: the archipelago's trees grow on its islands, which are landmarks (none in the test world).
+			"eternalreturn:archipelago",
+			// The coral ocean and the giant mushroom island have no trees.
+			"eternalreturn:coral_ocean", "eternalreturn:giant_mushroom_island");
 
 	private static boolean loneDirt(ServerWorld world, BlockPos dirt) {
 		for (net.minecraft.util.math.Direction d : net.minecraft.util.math.Direction.Type.HORIZONTAL) {

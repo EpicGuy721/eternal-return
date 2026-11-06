@@ -82,6 +82,10 @@
       "required": false
     },
     {
+      "id": "eternalreturn:giant_mushroom_island",
+      "required": false
+    },
+    {
       "id": "eternalreturn:glacier_field",
       "required": false
     },
@@ -162,6 +166,10 @@
       "required": false
     },
     {
+      "id": "eternalreturn:roofed_fungi_forest",
+      "required": false
+    },
+    {
       "id": "eternalreturn:savanna_peak",
       "required": false
     },
@@ -186,7 +194,15 @@
       "required": false
     },
     {
+      "id": "eternalreturn:tropical_pillars",
+      "required": false
+    },
+    {
       "id": "eternalreturn:tundra",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:volcanic_jungle",
       "required": false
     },
     {

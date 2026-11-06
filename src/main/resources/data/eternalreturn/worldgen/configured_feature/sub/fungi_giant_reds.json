@@ -1,0 +1,8 @@
+{
+  "type": "eternalreturn:giant_mushroom",
+  "config": {
+    "cap": "red",
+    "min_height": 9,
+    "max_height": 15
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "type": "eternalreturn:landmark",
+  "landmark": "reef",
+  "min_size": 10,
+  "max_size": 24,
+  "at_sea": true,
+  "biomes": "#eternalreturn:has_structure/reef",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

@@ -3,6 +3,8 @@
   "tints": {
     "eternalreturn:spooky_swamp": {"day": "#7E8571", "night": "#11150F"},
     "eternalreturn:webbed_forest": {"day": "#A3A8A2", "night": "#0F1111"},
+    "eternalreturn:volcanic_jungle": {"day": "#B5A99A", "night": "#150D0A"},
+    "eternalreturn:roofed_fungi_forest": {"day": "#A69CB4", "night": "#0B0710"},
     "#eternalreturn:fog/icy": {"day": "#DDE9F7", "night": "#0D1426"},
     "#eternalreturn:fog/taiga": {"day": "#BDD0E4", "night": "#0B121E"},
     "#eternalreturn:fog/mountains": {"day": "#C8D2DE", "night": "#0D1118"},

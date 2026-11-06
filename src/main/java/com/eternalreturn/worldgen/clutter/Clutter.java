@@ -35,6 +35,9 @@ import java.util.stream.Stream;
  */
 public final class Clutter {
 	public static final Feature<BoulderFeature.Config> BOULDER = Registry.register(Registries.FEATURE, EternalReturn.id("boulder"), new BoulderFeature());
+	/** Giant mushrooms (phase 6, batch D): the giant mushroom island and the roofed fungi forest. */
+	public static final Feature<GiantMushroomFeature.Config> GIANT_MUSHROOM = Registry.register(Registries.FEATURE, EternalReturn.id("giant_mushroom"),
+			new GiantMushroomFeature());
 
 	/**
 	 * Spots on the surface of the chunk, as many on average as the biome's density (placement eternalreturn:biome_density):

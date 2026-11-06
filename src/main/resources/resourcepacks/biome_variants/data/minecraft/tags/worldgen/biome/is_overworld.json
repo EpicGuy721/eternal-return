@@ -2,6 +2,10 @@
   "replace": false,
   "values": [
     {
+      "id": "eternalreturn:archipelago",
+      "required": false
+    },
+    {
       "id": "eternalreturn:autumnal_forest_peak",
       "required": false
     },
@@ -27,6 +31,10 @@
     },
     {
       "id": "eternalreturn:clay_river",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:coral_ocean",
       "required": false
     },
     {
@@ -63,6 +71,10 @@
     },
     {
       "id": "eternalreturn:forest_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:giant_mushroom_island",
       "required": false
     },
     {
@@ -114,11 +126,23 @@
       "required": false
     },
     {
+      "id": "eternalreturn:roofed_fungi_forest",
+      "required": false
+    },
+    {
       "id": "eternalreturn:sandy_river",
       "required": false
     },
     {
       "id": "eternalreturn:savanna_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:tropical_pillars",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:volcanic_jungle",
       "required": false
     },
     {

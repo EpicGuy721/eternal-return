@@ -57,7 +57,10 @@ public class LandmarkTests implements FabricGameTest {
 				// The mesa styles' rock forms (phase 6): only in their sub-biomes, so searched further, in more cells.
 				{"butte", 45, 2}, {"table", 35, 3}, {"hoodoos", 90, 2}, {"hoodoo_cluster", 40, 1},
 				// Batch C: glaciers and ice walls crowded in the glacier field and icy mountains.
-				{"glacier_cluster", 25, 6}, {"ice_wall_cluster", 45, 4}};
+				{"glacier_cluster", 25, 6}, {"ice_wall_cluster", 45, 4},
+				// Batch D: crowded pillars, volcanoes and lava flows in their jungles; islands, sea stacks and reefs at sea.
+				{"pillar_cluster", 60, 3}, {"volcanic_volcano", 25, 6}, {"volcanic_lava_flow", 50, 6},
+				{"islets", 60, 5}, {"sea_pillars", 45, 3}, {"reef", 90, 2}};
 		var calculator = world.getChunkManager().getStructurePlacementCalculator();
 		var generator = world.getChunkManager().getChunkGenerator();
 		for (Object[] k : kinds) {
@@ -134,7 +137,7 @@ public class LandmarkTests implements FabricGameTest {
 					what = span + " " + stone + " blocks over open air";
 					ok = span >= 5;
 				}
-				case "spire", "tropical_pillars" -> {
+				case "spire", "tropical_pillars", "pillar_cluster", "sea_pillars" -> {
 					int high = count(world, centre, 12, -piece.size / 2, piece.size / 2 + 6, s -> s.isOf(stone));
 					what = high + " " + stone + " blocks in its upper half";
 					ok = high >= 6;
@@ -152,13 +155,25 @@ public class LandmarkTests implements FabricGameTest {
 					what = bowl + " open blocks in the bowl, " + ores + " ores";
 					ok = bowl >= 20 && ores >= 3;
 				}
-				case "lava_flow" -> {
+				case "islets" -> {
+					// Land above the sea: grass and sand beaches.
+					int land = count(world, centre, half, 0, 12, s -> s.isOf(Blocks.GRASS_BLOCK) || s.isOf(Blocks.SAND));
+					what = land + " grass and sand at or above the sea, chain " + piece.size + " long";
+					ok = land >= 30;
+				}
+				case "reef" -> {
+					// A shelf 3 to 6 under the surface.
+					int shelf = count(world, centre.down(3), half, 4, 0, s -> s.isOf(Blocks.SAND) || s.isOf(Blocks.GRAVEL) || s.isIn(net.minecraft.registry.tag.BlockTags.CORAL_BLOCKS));
+					what = shelf + " reef blocks 3 to 7 under the surface, radius " + piece.size;
+					ok = shelf >= 100;
+				}
+				case "lava_flow", "volcanic_lava_flow" -> {
 					int lava = count(world, centre, half, 20, 6, s -> s.isOf(Blocks.LAVA));
 					int charred = count(world, centre, half, 20, 6, s -> s.isOf(Blocks.COAL_BLOCK) || s.isOf(Blocks.BASALT));
 					what = lava + " lava, " + charred + " coal and basalt";
 					ok = lava >= 10 && charred >= 20;
 				}
-				case "volcano" -> {
+				case "volcano", "volcanic_volcano" -> {
 					int top = world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, centre.getX() + 20, centre.getZ());
 					int lava = count(world, centre, 20, -20, 90, s -> s.isOf(Blocks.LAVA));
 					what = "slope 20 out at " + (top - centre.getY()) + " above the base, " + lava + " lava up top, radius " + piece.size;

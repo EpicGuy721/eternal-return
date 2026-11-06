@@ -20,6 +20,18 @@
     {
       "id": "eternalreturn:old_growth_spruce_taiga_peak",
       "required": false
+    },
+    {
+      "id": "eternalreturn:roofed_fungi_forest",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:tropical_pillars",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:volcanic_jungle",
+      "required": false
     }
   ]
 }

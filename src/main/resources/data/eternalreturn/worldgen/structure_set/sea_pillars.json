@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "eternalreturn:sea_pillars",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 9,
+    "separation": 4,
+    "salt": 20661205
+  }
+}

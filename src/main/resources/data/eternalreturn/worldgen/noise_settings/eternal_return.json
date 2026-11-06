@@ -1525,6 +1525,147 @@
                   }
                 }
               }
+            },
+            {
+              "type": "minecraft:condition",
+              "if_true": {
+                "type": "minecraft:biome",
+                "biome_is": [
+                  "eternalreturn:volcanic_jungle"
+                ]
+              },
+              "then_run": {
+                "type": "minecraft:condition",
+                "if_true": {
+                  "type": "minecraft:water",
+                  "offset": -1,
+                  "surface_depth_multiplier": 0,
+                  "add_stone_depth": false
+                },
+                "then_run": {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:stone_depth",
+                    "offset": 0,
+                    "surface_type": "floor",
+                    "add_surface_depth": false,
+                    "secondary_depth_range": 0
+                  },
+                  "then_run": {
+                    "type": "minecraft:sequence",
+                    "sequence": [
+                      {
+                        "type": "minecraft:condition",
+                        "if_true": {
+                          "type": "minecraft:noise_threshold",
+                          "noise": "minecraft:surface",
+                          "min_threshold": 0.12,
+                          "max_threshold": 1000000.0
+                        },
+                        "then_run": {
+                          "type": "minecraft:block",
+                          "result_state": {
+                            "Name": "minecraft:tuff"
+                          }
+                        }
+                      },
+                      {
+                        "type": "minecraft:condition",
+                        "if_true": {
+                          "type": "minecraft:noise_threshold",
+                          "noise": "minecraft:surface",
+                          "min_threshold": -1000000.0,
+                          "max_threshold": -0.3
+                        },
+                        "then_run": {
+                          "type": "minecraft:block",
+                          "result_state": {
+                            "Name": "minecraft:gravel"
+                          }
+                        }
+                      },
+                      {
+                        "type": "minecraft:condition",
+                        "if_true": {
+                          "type": "minecraft:noise_threshold",
+                          "noise": "minecraft:surface",
+                          "min_threshold": -1000000.0,
+                          "max_threshold": -0.1
+                        },
+                        "then_run": {
+                          "type": "minecraft:block",
+                          "result_state": {
+                            "Name": "minecraft:coarse_dirt"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "type": "minecraft:condition",
+              "if_true": {
+                "type": "minecraft:biome",
+                "biome_is": [
+                  "eternalreturn:roofed_fungi_forest"
+                ]
+              },
+              "then_run": {
+                "type": "minecraft:condition",
+                "if_true": {
+                  "type": "minecraft:water",
+                  "offset": -1,
+                  "surface_depth_multiplier": 0,
+                  "add_stone_depth": false
+                },
+                "then_run": {
+                  "type": "minecraft:condition",
+                  "if_true": {
+                    "type": "minecraft:stone_depth",
+                    "offset": 0,
+                    "surface_type": "floor",
+                    "add_surface_depth": false,
+                    "secondary_depth_range": 0
+                  },
+                  "then_run": {
+                    "type": "minecraft:sequence",
+                    "sequence": [
+                      {
+                        "type": "minecraft:condition",
+                        "if_true": {
+                          "type": "minecraft:noise_threshold",
+                          "noise": "minecraft:surface",
+                          "min_threshold": 0.15,
+                          "max_threshold": 1000000.0
+                        },
+                        "then_run": {
+                          "type": "minecraft:block",
+                          "result_state": {
+                            "Name": "minecraft:mycelium"
+                          }
+                        }
+                      },
+                      {
+                        "type": "minecraft:condition",
+                        "if_true": {
+                          "type": "minecraft:noise_threshold",
+                          "noise": "minecraft:surface",
+                          "min_threshold": -1000000.0,
+                          "max_threshold": -0.15
+                        },
+                        "then_run": {
+                          "type": "minecraft:block",
+                          "result_state": {
+                            "Name": "minecraft:podzol"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
             }
           ]
         }
@@ -17714,6 +17855,7 @@
                                   "minecraft:beach",
                                   "minecraft:snowy_beach",
                                   "moderner_beta:beta_warm_ocean",
+                                  "eternalreturn:coral_ocean",
                                   "eternalreturn:palm_beach"
                                 ]
                               },
@@ -18069,7 +18211,8 @@
                           "if_true": {
                             "type": "minecraft:biome",
                             "biome_is": [
-                              "minecraft:mushroom_fields"
+                              "minecraft:mushroom_fields",
+                              "eternalreturn:giant_mushroom_island"
                             ]
                           },
                           "then_run": {
@@ -18462,6 +18605,7 @@
                                   "minecraft:beach",
                                   "minecraft:snowy_beach",
                                   "moderner_beta:beta_warm_ocean",
+                                  "eternalreturn:coral_ocean",
                                   "eternalreturn:palm_beach"
                                 ]
                               },
@@ -18715,6 +18859,7 @@
                         "minecraft:beach",
                         "minecraft:snowy_beach",
                         "moderner_beta:beta_warm_ocean",
+                        "eternalreturn:coral_ocean",
                         "eternalreturn:palm_beach"
                       ]
                     },
@@ -18805,7 +18950,9 @@
                         "minecraft:lukewarm_ocean",
                         "minecraft:deep_lukewarm_ocean",
                         "moderner_beta:beta_warm_ocean",
-                        "moderner_beta:beta_lukewarm_ocean"
+                        "moderner_beta:beta_lukewarm_ocean",
+                        "eternalreturn:coral_ocean",
+                        "eternalreturn:archipelago"
                       ]
                     },
                     "then_run": {
@@ -18940,7 +19087,9 @@
                   "eternalreturn:savanna_peak",
                   "eternalreturn:jungle_peak",
                   "eternalreturn:jungle_edge",
-                  "eternalreturn:pinyon_woodland"
+                  "eternalreturn:pinyon_woodland",
+                  "eternalreturn:tropical_pillars",
+                  "eternalreturn:volcanic_jungle"
                 ]
               },
               "then_run": {

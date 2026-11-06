@@ -20,6 +20,14 @@
     {
       "id": "eternalreturn:swampland_edge",
       "required": false
+    },
+    {
+      "id": "eternalreturn:tropical_pillars",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:volcanic_jungle",
+      "required": false
     }
   ]
 }

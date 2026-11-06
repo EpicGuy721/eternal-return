@@ -80,6 +80,18 @@ public final class LandmarkPiece extends StructurePiece {
 			case TROPICAL_PILLARS -> {
 				half = 24;
 				up = size + 8;
+				// At sea they stand on the sea floor.
+				down = 72;
+			}
+			case ISLETS -> {
+				half = size / 2 + 24;
+				up = 24;
+				down = 72;
+			}
+			case REEF -> {
+				half = size + 14;
+				up = 4;
+				down = 72;
 			}
 			case CRATER -> {
 				half = (int) (size * 1.5) + 4;

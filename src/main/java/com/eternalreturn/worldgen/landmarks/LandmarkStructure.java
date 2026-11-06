@@ -22,24 +22,29 @@ import java.util.Optional;
 /**
  * One landmark kind as a structure (type eternalreturn:landmark): "landmark" names the kind and "min_size" and
  * "max_size" its size (what size means depends on the kind, docs/worldgen.md). It starts at a random spot of the chunk
- * on dry land, and only in Eternal Return worlds; the stone of the biome there is its stone.
+ * on dry land (or, with "at_sea", in the sea: islands, reefs, sea stacks), and only in Eternal Return worlds; the stone
+ * of the biome there is its stone.
  */
 public final class LandmarkStructure extends Structure {
 	public static final MapCodec<LandmarkStructure> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
 			configCodecBuilder(instance),
 			Codec.STRING.fieldOf("landmark").forGetter(s -> s.kind.id()),
 			Codec.intRange(1, 512).fieldOf("min_size").forGetter(s -> s.minSize),
-			Codec.intRange(1, 512).fieldOf("max_size").forGetter(s -> s.maxSize)).apply(instance, LandmarkStructure::new));
+			Codec.intRange(1, 512).fieldOf("max_size").forGetter(s -> s.maxSize),
+			Codec.BOOL.optionalFieldOf("at_sea", false).forGetter(s -> s.atSea)).apply(instance, LandmarkStructure::new));
 
 	private final Landmarks.Kind kind;
 	private final int minSize;
 	private final int maxSize;
+	/** Starts in the sea instead of on land: its base is the sea's surface, and it builds up from the sea floor. */
+	private final boolean atSea;
 
-	public LandmarkStructure(Structure.Config config, String kind, int minSize, int maxSize) {
+	public LandmarkStructure(Structure.Config config, String kind, int minSize, int maxSize, boolean atSea) {
 		super(config);
 		this.kind = Landmarks.Kind.of(kind);
 		this.minSize = minSize;
 		this.maxSize = Math.max(minSize, maxSize);
+		this.atSea = atSea;
 	}
 
 	@Override
@@ -58,6 +63,10 @@ public final class LandmarkStructure extends Structure {
 				BiomeCoords.fromBlock(z), context.noiseConfig().getMultiNoiseSampler()))) {
 			return Optional.empty();
 		}
+		if (this.atSea) {
+			// The sea's surface is its base: no height to work out (slow over the sea), each column builds up from its own floor.
+			return Optional.of(this.start(context, x, generator.getSeaLevel(), z, random));
+		}
 		// No landmark by the sea: and the height of ground near it is slow to work out (the deep oceans' distance to land).
 		for (int[] o : new int[][]{{-24, 0}, {24, 0}, {0, -24}, {0, 24}}) {
 			if (context.biomeSource().getBiome(BiomeCoords.fromBlock(x + o[0]), BiomeCoords.fromBlock(probe), BiomeCoords.fromBlock(z + o[1]),
@@ -70,6 +79,10 @@ public final class LandmarkStructure extends Structure {
 		if (y <= generator.getSeaLevel()) {
 			return Optional.empty();
 		}
+		return Optional.of(this.start(context, x, y, z, random));
+	}
+
+	private StructurePosition start(Context context, int x, int y, int z, Random random) {
 		int size = this.minSize + random.nextInt(this.maxSize - this.minSize + 1);
 		long seed = random.nextLong();
 		var biome = context.biomeSource().getBiome(BiomeCoords.fromBlock(x), BiomeCoords.fromBlock(y), BiomeCoords.fromBlock(z),
@@ -78,7 +91,7 @@ public final class LandmarkStructure extends Structure {
 		String style = biome.getKey().map(key -> key.getValue().toString()).orElse("");
 		int[] path = this.kind == Landmarks.Kind.LAVA_FLOW ? lavaPath(context, x, z, size, Random.create(seed)) : new int[0];
 		BlockPos centre = new BlockPos(x, y, z);
-		return Optional.of(new StructurePosition(centre, collector -> collector.addPiece(new LandmarkPiece(this.kind, centre, size, seed, stone, path, style))));
+		return new StructurePosition(centre, collector -> collector.addPiece(new LandmarkPiece(this.kind, centre, size, seed, stone, path, style)));
 	}
 
 	/**

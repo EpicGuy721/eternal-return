@@ -8,6 +8,10 @@
     {
       "id": "eternalreturn:dark_meadow",
       "required": false
+    },
+    {
+      "id": "eternalreturn:roofed_fungi_forest",
+      "required": false
     }
   ]
 }

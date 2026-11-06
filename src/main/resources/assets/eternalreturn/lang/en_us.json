@@ -589,5 +589,11 @@
 	"block.eternalreturn.icicle": "Icicle",
 	"block.eternalreturn.ice_crystal": "Ice Crystal",
 	"biome.eternalreturn.ice_caves": "Ice Caves",
-	"subtitles.block.ice_crystal.ambient": "Ice Crystal chimes"
+	"subtitles.block.ice_crystal.ambient": "Ice Crystal chimes",
+	"biome.eternalreturn.tropical_pillars": "Tropical Pillars",
+	"biome.eternalreturn.volcanic_jungle": "Volcanic Jungle",
+	"biome.eternalreturn.roofed_fungi_forest": "Roofed Fungi Forest",
+	"biome.eternalreturn.giant_mushroom_island": "Giant Mushroom Island",
+	"biome.eternalreturn.coral_ocean": "Coral Ocean",
+	"biome.eternalreturn.archipelago": "Archipelago"
 }

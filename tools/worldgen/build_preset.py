@@ -250,7 +250,10 @@ SUBS = {f'{NS}:{sid}': spec for sid, spec in VARIANTS['subs'].items() if not sid
 # High sub-biomes ("above_y": the icy mountains): the ground above that height in the land they name, by an injection
 # rule like the peaks', after the terrain, so they are always on real high ground (see below).
 HIGH_SUBS = {f'{NS}:{sid}': spec for sid, spec in VARIANTS['subs'].items() if not sid.startswith('_') and 'above_y' in spec}
-LAND_SUBS = {sid: spec for sid, spec in SUBS.items() if 'share' in spec}
+LAND_SUBS = {sid: spec for sid, spec in SUBS.items() if 'share' in spec and not spec.get('sea')}
+# Sea sub-biomes ("sea": true, batch D: the coral ocean, the archipelago): parts of a warm sea, picked after the ocean
+# climate step (see below). They keep their parent's depth, so the sea floor doesn't move.
+SEA_SUBS = {sid: spec for sid, spec in SUBS.items() if spec.get('sea')}
 SHORE_SUBS = {sid: spec for sid, spec in SUBS.items() if 'shore_of' in spec}
 subs_of = {}
 for sid, spec in SUBS.items():
@@ -337,6 +340,12 @@ if SUBS:
                 if pred.get('condition') == 'moderner_beta:single_match' and target['type'] == 'layer':
                     for sid in with_subs([pred['biome']])[1:]:
                         extra.append({**target, 'predicate': {'biome': sid, 'condition': 'moderner_beta:single_match'}})
+            # The mushroom island's shore: a sub-biome of the mushroom fields gets the same shore, so its coast keeps its height.
+            for target in s['targets']:
+                terms = target['predicate'].get('terms', [])
+                if target['type'] == 'biome' and target.get('result', '').endswith('*shore') and terms                         and terms[0].get('condition') == 'moderner_beta:single_match':
+                    for sid in with_subs([terms[0]['biome']])[1:]:
+                        extra.append({**target, 'predicate': {**target['predicate'], 'terms': [{**terms[0], 'biome': sid}] + terms[1:]}})
             s['targets'] += extra
         elif s['type'] in ('moderner_beta:mix_river', 'moderner_beta:add_land'):
             subs_act_as_parent(s)
@@ -349,6 +358,27 @@ if SUBS:
         {'type': 'biome', 'result': sid, 'predicate': {'condition': 'moderner_beta:all_of', 'terms': [
             {'biomes': with_subs(with_height_variants(spec['shore_of'])), 'condition': 'moderner_beta:in_set'}, copy.deepcopy(sea)]}}
         for sid, spec in SHORE_SUBS.items()]
+# Sea sub-biomes: after the ocean climate step (the last), each cell of 256 blocks of the warm or lukewarm sea (not the
+# deep sea) gets a pick from its pool, as the land's sub-biomes do; the pool is zoomed as the ocean climate is, so the
+# areas are rounded. Each pool has its own seed (pool_seeds) and so does its zoom.
+sea_targets = {}
+for n, parent in enumerate(sorted({spec['base'] for spec in SEA_SUBS.values()})):
+    mine = {sid: spec for sid, spec in SEA_SUBS.items() if spec['base'] == parent}
+    whole = 1
+    for spec in mine.values():
+        whole = whole * spec['share'] // __import__('math').gcd(whole, spec['share'])
+    targets = [{'data': {'type': 'biome', 'value': sid}, 'weight': whole // spec['share']} for sid, spec in mine.items()]
+    rest = whole - sum(t['weight'] for t in targets)
+    if rest > 0:
+        targets.append({'data': {'type': 'biome', 'value': 'minecraft:the_void*null'}, 'weight': rest})
+    pool_id = 'sub_' + parent.split(':')[1]
+    seed = VARIANTS['pool_seeds'][parent]
+    pipeline.append({'type': 'moderner_beta:weighted_pool', 'id': pool_id, 'seed': seed, 'targets': targets})
+    pipeline.append({'type': 'moderner_beta:stacked_zoom', 'parent': pool_id, 'id': pool_id, 'level': 6, 'seed': seed + 1000,
+                     'seedModifier': 1, 'zoomType': 'modal'})
+    sea_targets[parent] = {'type': 'layer', 'value': pool_id}
+if sea_targets:
+    pipeline.append({'type': 'moderner_beta:biome_replacement', 'parent': 'land', 'id': 'land', 'seed': 0, 'targets': sea_targets})
 
 # ---------------------------------------------------------------- structures (Eternal Return worlds only)
 # No trial chambers and no ocean monuments (guardians spawn in the open ocean instead). Moderner Beta's
@@ -396,6 +426,9 @@ for ocean in ['ocean', 'cold_ocean', 'lukewarm_ocean', 'warm_ocean', 'frozen_oce
 for ocean in ['deep_ocean', 'deep_cold_ocean', 'deep_lukewarm_ocean', 'deep_frozen_ocean']:
     forced['heightOverrides']['minecraft:' + ocean] = '-1.8;0.2'
 forced['heightOverrides']['minecraft:warm_ocean*deep'] = '-1.0;0.2'
+# The sea sub-biomes: their parent's depth.
+for sid, spec in SEA_SUBS.items():
+    forced['heightOverrides'][sid] = forced['heightOverrides'][spec['base']]
 
 
 def pipeline_biomes(node, found):
@@ -423,7 +456,7 @@ def pipeline_biomes(node, found):
 # are; water_scale gives them a scale negative enough to cancel the scale noise, which would otherwise raise
 # islets out of the sea and bars across rivers. Beaches and mushroom island shores (the coast) keep their own.
 WATER = {b for b in forced['heightOverrides'] if 'ocean' in b} | {'minecraft:river', 'minecraft:frozen_river'}
-WATER |= {f'{NS}:{vid}' for vid in VARIANTS['rivers']}
+WATER |= {f'{NS}:{vid}' for vid in VARIANTS['rivers']} | set(SEA_SUBS)
 COAST = {'minecraft:beach', 'minecraft:snowy_beach', 'minecraft:stony_shore', 'minecraft:mushroom_fields*shore'} | set(SHORE_SUBS)
 if KNOBS['water_scale'] is not None:
     for biome in sorted(WATER):
@@ -435,7 +468,7 @@ if KNOBS['land_height'] is not None:
     for biome in sorted(produced):
         # (Skipping '~' and '#' entries: negated biomes and tags in the layers' conditions.)
         if (':' in biome and biome[0] not in '~#' and not biome.startswith('minecraft:the_void')
-                and 'ocean' not in biome and 'river' not in biome and biome not in COAST
+                and 'ocean' not in biome and 'river' not in biome and biome not in COAST and biome not in WATER
                 and biome.split('*')[0] not in KNOBS['land_height_except']):
             forced['heightOverrides'][biome] = KNOBS['land_height']
 
@@ -644,6 +677,15 @@ SURFACES = {
         when(patches(0.25), block_rule('minecraft:gravel')),
         when(below(-0.3), block_rule('minecraft:packed_ice')),
         when(patches(-0.05), block_rule('minecraft:coarse_dirt'))]})),
+    # Volcanic jungle: ash and cinders, tuff, coarse dirt and gravel in patches through the grass.
+    'volcanic': when(DRY, when(TOP, {'type': 'minecraft:sequence', 'sequence': [
+        when(patches(0.12), block_rule('minecraft:tuff')),
+        when(below(-0.3), block_rule('minecraft:gravel')),
+        when(below(-0.1), block_rule('minecraft:coarse_dirt'))]})),
+    # Roofed fungi forest: mycelium and podzol in patches on the forest floor.
+    'fungi_floor': when(DRY, when(TOP, {'type': 'minecraft:sequence', 'sequence': [
+        when(patches(0.15), block_rule('minecraft:mycelium')),
+        when(below(-0.15), block_rule('minecraft:podzol'))]})),
     # Bryce Mesa: red sand in patches, coarse dirt where pines take hold.
     'bryce_floor': when(DRY, when(TOP, {'type': 'minecraft:sequence', 'sequence': [
         when(patches(0.25), block_rule('minecraft:red_sand')),

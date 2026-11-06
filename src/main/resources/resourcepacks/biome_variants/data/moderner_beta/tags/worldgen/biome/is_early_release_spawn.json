@@ -50,6 +50,14 @@
       "required": false
     },
     {
+      "id": "eternalreturn:tropical_pillars",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:volcanic_jungle",
+      "required": false
+    },
+    {
       "id": "eternalreturn:webbed_forest",
       "required": false
     }

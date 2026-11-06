@@ -2,6 +2,10 @@
   "replace": false,
   "values": [
     {
+      "id": "eternalreturn:giant_mushroom_island",
+      "required": false
+    },
+    {
       "id": "eternalreturn:old_growth_spruce_taiga_peak",
       "required": false
     }

@@ -1,0 +1,65 @@
+{
+  "biomes": [
+    "eternalreturn:tropical_pillars"
+  ],
+  "saplings": {
+    "minecraft:jungle_sapling": {
+      "trees": [
+        {
+          "weight": 12,
+          "tree": "vanilla"
+        },
+        {
+          "weight": 6,
+          "tree": "eternalreturn:tree/teak"
+        },
+        {
+          "weight": 3,
+          "template": "eternalreturn:tree/palm"
+        },
+        {
+          "weight": 3,
+          "template": "eternalreturn:tree/palm_leaning"
+        },
+        {
+          "weight": 2,
+          "template": "eternalreturn:tree/palm_curved"
+        },
+        {
+          "weight": 1,
+          "template": "eternalreturn:tree/palm_tall"
+        },
+        {
+          "weight": 2,
+          "template": "eternalreturn:tree/palm_dwarf"
+        },
+        {
+          "weight": 1,
+          "template": "eternalreturn:tree/palm_twin"
+        }
+      ],
+      "mega_trees": [
+        {
+          "weight": 3,
+          "tree": "vanilla"
+        },
+        {
+          "weight": 2,
+          "tree": "eternalreturn:tree/kapok"
+        }
+      ]
+    },
+    "minecraft:oak_sapling": {
+      "trees": [
+        {
+          "weight": 2,
+          "tree": "vanilla"
+        },
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/white_oak"
+        }
+      ]
+    }
+  }
+}

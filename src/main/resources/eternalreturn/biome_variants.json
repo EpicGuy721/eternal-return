@@ -240,6 +240,30 @@
     "kind": "sub",
     "boulders": 1.5
   },
+  "eternalreturn:tropical_pillars": {
+    "base": "minecraft:jungle",
+    "kind": "sub"
+  },
+  "eternalreturn:volcanic_jungle": {
+    "base": "minecraft:jungle",
+    "kind": "sub"
+  },
+  "eternalreturn:roofed_fungi_forest": {
+    "base": "minecraft:dark_forest",
+    "kind": "sub"
+  },
+  "eternalreturn:giant_mushroom_island": {
+    "base": "minecraft:mushroom_fields",
+    "kind": "sub"
+  },
+  "eternalreturn:coral_ocean": {
+    "base": "minecraft:warm_ocean",
+    "kind": "sub"
+  },
+  "eternalreturn:archipelago": {
+    "base": "minecraft:lukewarm_ocean",
+    "kind": "sub"
+  },
   "eternalreturn:ice_caves": {
     "base": "moderner_beta:early_release_ice_plains",
     "kind": "cave"

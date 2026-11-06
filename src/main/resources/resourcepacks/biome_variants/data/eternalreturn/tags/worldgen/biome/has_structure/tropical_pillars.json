@@ -12,6 +12,14 @@
     {
       "id": "eternalreturn:jungle_peak",
       "required": false
+    },
+    {
+      "id": "eternalreturn:tropical_pillars",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:volcanic_jungle",
+      "required": false
     }
   ]
 }

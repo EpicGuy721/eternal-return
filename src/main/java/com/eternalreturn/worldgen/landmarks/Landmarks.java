@@ -19,7 +19,9 @@ public final class Landmarks {
 	public enum Kind {
 		ARCH, SPIRE, TROPICAL_PILLARS, CRATER, LAVA_FLOW, VOLCANO, GLACIER, ICE_WALL,
 		/** The mesa styles' rock forms (phase 6): flat-topped buttes, wide green-topped tables, fields of hoodoos. */
-		BUTTE, TABLE, HOODOOS;
+		BUTTE, TABLE, HOODOOS,
+		/** The warm seas' landmarks (phase 6, batch D): chains of small islands, coral reef shelves under the surface. */
+		ISLETS, REEF;
 
 		public String id() {
 			return this.name().toLowerCase(java.util.Locale.ROOT);

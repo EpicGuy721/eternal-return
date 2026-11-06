@@ -2,6 +2,10 @@
   "replace": false,
   "values": [
     {
+      "id": "eternalreturn:coral_ocean",
+      "required": false
+    },
+    {
       "id": "eternalreturn:desert_baobabs",
       "required": false
     },

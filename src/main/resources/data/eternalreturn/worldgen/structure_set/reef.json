@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "eternalreturn:reef",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 3,
+    "separation": 1,
+    "salt": 20661206
+  }
+}

@@ -69,6 +69,8 @@ final class LandmarkShapes {
 			case BUTTE -> this.butte(1.6, false);
 			case TABLE -> this.butte(0.45, true);
 			case HOODOOS -> this.hoodoos();
+			case ISLETS -> this.islets();
+			case REEF -> this.reef();
 		}
 	}
 
@@ -664,6 +666,110 @@ final class LandmarkShapes {
 				int top = ground - 1 + (int) Math.round(h);
 				for (int y = ground - 2; y <= top; y++) {
 					this.set(x, y, z, this.ice(x, y, z, top - y, off > thickness / 2 - 1));
+				}
+			}
+		}
+	}
+	// ------------------------------------------------------------------ the warm seas (phase 6, batch D)
+
+	/**
+	 * A chain of three to seven small islands across the sea (size: the chain's length), strung along a gentle curve, one
+	 * of them the largest: each a mound of the stone from the sea floor up, ragged at the edge, grass over dirt where it
+	 * rises two or more above the sea, sand beaches round that, a sandy slope under the water, and mud flats in the
+	 * shallows round some of them (where mangroves take root). The base (centre y) is the sea's surface. Never lowers the floor.
+	 */
+	private void islets() {
+		int sea = this.cy;
+		int count = 3 + this.random.nextInt(5);
+		double angle = this.random.nextDouble() * Math.PI * 2;
+		double ux = Math.cos(angle);
+		double uz = Math.sin(angle);
+		double bend = (this.random.nextDouble() - 0.5) * 0.03;
+		int big = this.random.nextInt(count);
+		double[][] isles = new double[count][];
+		for (int i = 0; i < count; i++) {
+			double s = (i / (double) (count - 1) - 0.5) * this.piece.size;
+			double side = (this.random.nextDouble() - 0.5) * 14 + bend * s * s;
+			double radius = i == big ? 9 + this.random.nextDouble() * 7 : 3.5 + this.random.nextDouble() * 5.5;
+			double height = i == big ? 4 + this.random.nextDouble() * 5 : 1 + this.random.nextDouble() * radius * 0.45;
+			isles[i] = new double[]{this.cx + ux * s - uz * side, this.cz + uz * s + ux * side, radius, height};
+		}
+		for (int x = this.box.getMinX(); x <= this.box.getMaxX(); x++) {
+			for (int z = this.box.getMinZ(); z <= this.box.getMaxZ(); z++) {
+				double best = -1e9;
+				for (int i = 0; i < count; i++) {
+					double[] isle = isles[i];
+					double dx = x + 0.5 - isle[0];
+					double dz = z + 0.5 - isle[1];
+					double d = Math.sqrt(dx * dx + dz * dz);
+					double edge = isle[2] * (1 + 0.3 * this.n2(x * 0.08 + i * 7, z * 0.08));
+					double t = d < edge ? sea - 0.5 + (isle[3] + 0.5) * (1 - (d / edge) * (d / edge)) : sea - 0.5 - (d - edge) * 0.9;
+					best = Math.max(best, t);
+				}
+				int top = (int) Math.floor(best);
+				int ground = this.ground(x, z);
+				if (top < ground) {
+					continue;
+				}
+				boolean mudFlat = top >= sea - 3 && top < sea && this.n2(x * 0.05 + 50, z * 0.05) > 0.1;
+				for (int y = ground - 1; y <= top; y++) {
+					int depth = top - y;
+					BlockState state;
+					if (top >= sea + 2) {
+						state = depth == 0 ? Blocks.GRASS_BLOCK.getDefaultState() : depth <= 2 ? Blocks.DIRT.getDefaultState() : this.stone;
+					} else if (mudFlat) {
+						state = depth <= 1 ? Blocks.MUD.getDefaultState() : depth <= 3 ? Blocks.SAND.getDefaultState() : this.stone;
+					} else {
+						state = depth <= 2 ? Blocks.SAND.getDefaultState() : depth <= 4 ? Blocks.SANDSTONE.getDefaultState() : this.stone;
+					}
+					this.set(x, y, z, state);
+				}
+			}
+		}
+	}
+
+	private static final Block[] CORAL_BLOCKS = {Blocks.BRAIN_CORAL_BLOCK, Blocks.TUBE_CORAL_BLOCK, Blocks.FIRE_CORAL_BLOCK,
+			Blocks.HORN_CORAL_BLOCK, Blocks.BUBBLE_CORAL_BLOCK};
+
+	/**
+	 * A coral reef shelf (size: its radius): a ragged, flat-topped platform of the stone rising from the sea floor to 3 to
+	 * 6 blocks under the surface, its top sand with gravel and coral blocks in patches, deeper lagoons in it, its sides
+	 * sloping down to the floor. The coral ocean's coral and sea pickles grow on it. The base (centre y) is the sea's surface.
+	 */
+	private void reef() {
+		int sea = this.cy;
+		double radius = this.piece.size;
+		for (int x = this.box.getMinX(); x <= this.box.getMaxX(); x++) {
+			for (int z = this.box.getMinZ(); z <= this.box.getMaxZ(); z++) {
+				double dx = x + 0.5 - this.cx;
+				double dz = z + 0.5 - this.cz;
+				double d = Math.sqrt(dx * dx + dz * dz);
+				double edge = radius * (1 + 0.35 * this.n2(x * 0.04, z * 0.04));
+				double t;
+				if (d < edge) {
+					t = sea - 3 - 1.5 * (1 + this.n2(x * 0.1 + 30, z * 0.1));
+					if (this.n2(x * 0.07 + 90, z * 0.07) > 0.5) {
+						t -= 4;
+					}
+				} else {
+					t = sea - 3 - (d - edge) * 1.3;
+				}
+				int top = (int) Math.floor(t);
+				int ground = this.ground(x, z);
+				if (top < ground) {
+					continue;
+				}
+				for (int y = ground - 1; y <= top; y++) {
+					int depth = top - y;
+					BlockState state;
+					if (depth == 0 && this.chance(x, y, z, 11) < 0.08) {
+						state = CORAL_BLOCKS[(int) (this.chance(x, y, z, 12) * CORAL_BLOCKS.length)].getDefaultState();
+					} else if (depth == 0 && this.n2(x * 0.12 + 70, z * 0.12) > 0.45) {
+						state = Blocks.GRAVEL.getDefaultState();
+					} else {
+						state = depth <= 2 ? Blocks.SAND.getDefaultState() : this.stone;
+					}
+					this.set(x, y, z, state);
 				}
 			}
 		}

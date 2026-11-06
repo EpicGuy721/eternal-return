@@ -6,6 +6,10 @@
       "required": false
     },
     {
+      "id": "eternalreturn:giant_mushroom_island",
+      "required": false
+    },
+    {
       "id": "eternalreturn:pinyon_woodland",
       "required": false
     },

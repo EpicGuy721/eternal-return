@@ -371,6 +371,27 @@
         },
         {
           "type": "moderner_beta:weighted_pool",
+          "id": "sub_dark_forest_2",
+          "seed": 3017,
+          "targets": [
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:roofed_fungi_forest"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "minecraft:the_void*null"
+              },
+              "weight": 2
+            }
+          ]
+        },
+        {
+          "type": "moderner_beta:weighted_pool",
           "id": "sub_desert",
           "seed": 3009,
           "targets": [
@@ -422,6 +443,48 @@
                 "value": "minecraft:the_void*null"
               },
               "weight": 7
+            }
+          ]
+        },
+        {
+          "type": "moderner_beta:weighted_pool",
+          "id": "sub_jungle",
+          "seed": 3015,
+          "targets": [
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:tropical_pillars"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:volcanic_jungle"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "minecraft:the_void*null"
+              },
+              "weight": 6
+            }
+          ]
+        },
+        {
+          "type": "moderner_beta:weighted_pool",
+          "id": "sub_mushroom_fields",
+          "seed": 3016,
+          "targets": [
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:giant_mushroom_island"
+              },
+              "weight": 1
             }
           ]
         },
@@ -682,6 +745,14 @@
               "type": "layer",
               "value": "sub_forest"
             },
+            "minecraft:jungle": {
+              "type": "layer",
+              "value": "sub_jungle"
+            },
+            "minecraft:mushroom_fields": {
+              "type": "layer",
+              "value": "sub_mushroom_fields"
+            },
             "minecraft:savanna": {
               "type": "layer",
               "value": "sub_savanna"
@@ -714,6 +785,10 @@
           "id": "land",
           "seed": 0,
           "targets": {
+            "minecraft:dark_forest": {
+              "type": "layer",
+              "value": "sub_dark_forest_2"
+            },
             "moderner_beta:early_release_extreme_hills": {
               "type": "layer",
               "value": "sub_early_release_extreme_hills_2"
@@ -1042,7 +1117,9 @@
                   {
                     "biomes": [
                       "minecraft:jungle",
-                      "minecraft:jungle*hills"
+                      "minecraft:jungle*hills",
+                      "eternalreturn:tropical_pillars",
+                      "eternalreturn:volcanic_jungle"
                     ],
                     "condition": "moderner_beta:in_set"
                   },
@@ -1057,7 +1134,9 @@
                           "term": {
                             "biomes": [
                               "minecraft:jungle",
-                              "minecraft:jungle*hills"
+                              "minecraft:jungle*hills",
+                              "eternalreturn:tropical_pillars",
+                              "eternalreturn:volcanic_jungle"
                             ],
                             "condition": "moderner_beta:in_set"
                           }
@@ -1105,7 +1184,9 @@
                         "minecraft:savanna*hills",
                         "minecraft:jungle",
                         "minecraft:jungle*hills",
-                        "eternalreturn:pinyon_woodland"
+                        "eternalreturn:pinyon_woodland",
+                        "eternalreturn:tropical_pillars",
+                        "eternalreturn:volcanic_jungle"
                       ],
                       "condition": "moderner_beta:in_set"
                     },
@@ -1140,7 +1221,8 @@
                         "minecraft:dark_forest",
                         "eternalreturn:webbed_forest",
                         "eternalreturn:poplar_grove",
-                        "eternalreturn:dark_meadow"
+                        "eternalreturn:dark_meadow",
+                        "eternalreturn:roofed_fungi_forest"
                       ],
                       "condition": "moderner_beta:in_set"
                     },
@@ -1204,6 +1286,8 @@
                       "minecraft:desert",
                       "minecraft:desert*hills",
                       "eternalreturn:desert_scrub_edge",
+                      "eternalreturn:tropical_pillars",
+                      "eternalreturn:volcanic_jungle",
                       "eternalreturn:pinyon_woodland",
                       "eternalreturn:desert_oasis",
                       "eternalreturn:desert_baobabs",
@@ -1282,6 +1366,31 @@
                 ]
               },
               "result": "moderner_beta:early_release_extreme_hills*edge"
+            },
+            {
+              "type": "biome",
+              "predicate": {
+                "condition": "moderner_beta:all_of",
+                "terms": [
+                  {
+                    "biome": "eternalreturn:giant_mushroom_island",
+                    "condition": "moderner_beta:single_match"
+                  },
+                  {
+                    "condition": "moderner_beta:neighbor_match",
+                    "diagonal": false,
+                    "neighborPredicate": {
+                      "biomes": [
+                        "minecraft:ocean",
+                        "minecraft:deep_ocean"
+                      ],
+                      "condition": "moderner_beta:in_set"
+                    },
+                    "requiredCount": 1
+                  }
+                ]
+              },
+              "result": "minecraft:mushroom_fields*shore"
             }
           ]
         },
@@ -1364,6 +1473,22 @@
                 "condition": "moderner_beta:single_match"
               },
               "result": "swamp_lakes"
+            },
+            {
+              "type": "layer",
+              "predicate": {
+                "biome": "eternalreturn:tropical_pillars",
+                "condition": "moderner_beta:single_match"
+              },
+              "result": "jungle_lakes"
+            },
+            {
+              "type": "layer",
+              "predicate": {
+                "biome": "eternalreturn:volcanic_jungle",
+                "condition": "moderner_beta:single_match"
+              },
+              "result": "jungle_lakes"
             }
           ]
         },
@@ -1424,6 +1549,7 @@
             "eternalreturn:forest_dry_edge": "eternalreturn:leafy_river",
             "eternalreturn:birch_forest_dry_edge": "eternalreturn:leafy_river",
             "eternalreturn:jungle_edge": "eternalreturn:leafy_river",
+            "eternalreturn:giant_mushroom_island": "minecraft:mushroom_fields*shore",
             "eternalreturn:black_spruce_forest": "minecraft:frozen_river",
             "eternalreturn:tundra": "minecraft:frozen_river",
             "eternalreturn:arctic": "minecraft:frozen_river",
@@ -1449,7 +1575,10 @@
             "eternalreturn:bald_cypress_swamp": "eternalreturn:clay_river",
             "eternalreturn:webbed_forest": "eternalreturn:leafy_river",
             "eternalreturn:poplar_grove": "eternalreturn:leafy_river",
-            "eternalreturn:dark_meadow": "eternalreturn:leafy_river"
+            "eternalreturn:dark_meadow": "eternalreturn:leafy_river",
+            "eternalreturn:roofed_fungi_forest": "eternalreturn:leafy_river",
+            "eternalreturn:tropical_pillars": "eternalreturn:leafy_river",
+            "eternalreturn:volcanic_jungle": "eternalreturn:leafy_river"
           },
           "id": "land",
           "ignoredBiomes": [
@@ -1507,6 +1636,82 @@
           "oceanClimate": "ocean_climate",
           "applyCoasts": true,
           "seed": 0
+        },
+        {
+          "type": "moderner_beta:weighted_pool",
+          "id": "sub_lukewarm_ocean",
+          "seed": 3019,
+          "targets": [
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:archipelago"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "minecraft:the_void*null"
+              },
+              "weight": 2
+            }
+          ]
+        },
+        {
+          "type": "moderner_beta:stacked_zoom",
+          "parent": "sub_lukewarm_ocean",
+          "id": "sub_lukewarm_ocean",
+          "level": 6,
+          "seed": 4019,
+          "seedModifier": 1,
+          "zoomType": "modal"
+        },
+        {
+          "type": "moderner_beta:weighted_pool",
+          "id": "sub_warm_ocean",
+          "seed": 3018,
+          "targets": [
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:coral_ocean"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "minecraft:the_void*null"
+              },
+              "weight": 2
+            }
+          ]
+        },
+        {
+          "type": "moderner_beta:stacked_zoom",
+          "parent": "sub_warm_ocean",
+          "id": "sub_warm_ocean",
+          "level": 6,
+          "seed": 4018,
+          "seedModifier": 1,
+          "zoomType": "modal"
+        },
+        {
+          "type": "moderner_beta:biome_replacement",
+          "parent": "land",
+          "id": "land",
+          "seed": 0,
+          "targets": {
+            "minecraft:lukewarm_ocean": {
+              "type": "layer",
+              "value": "sub_lukewarm_ocean"
+            },
+            "minecraft:warm_ocean": {
+              "type": "layer",
+              "value": "sub_warm_ocean"
+            }
+          }
         }
       ]
     },
@@ -2178,6 +2383,8 @@
         "minecraft:deep_lukewarm_ocean": "-1.8;-1.2",
         "minecraft:deep_frozen_ocean": "-1.8;-1.2",
         "minecraft:warm_ocean*deep": "-1.0;-1.2",
+        "eternalreturn:coral_ocean": "-1.0;-1.2",
+        "eternalreturn:archipelago": "-1.0;-1.2",
         "eternalreturn:clay_river": "-0.5;-1.2",
         "eternalreturn:leafy_river": "-0.5;-1.2",
         "eternalreturn:rocky_river": "-0.5;-1.2",
@@ -2197,6 +2404,7 @@
         "eternalreturn:desert_scrub_edge": "0.1;0.05",
         "eternalreturn:drylands": "0.1;0.05",
         "eternalreturn:forest_dry_edge": "0.1;0.05",
+        "eternalreturn:giant_mushroom_island": "0.1;0.05",
         "eternalreturn:glacier_field": "0.1;0.05",
         "eternalreturn:grand_fir_forest": "0.1;0.05",
         "eternalreturn:heathland": "0.1;0.05",
@@ -2210,11 +2418,14 @@
         "eternalreturn:poplar_grove": "0.1;0.05",
         "eternalreturn:pumpkin_plains": "0.1;0.05",
         "eternalreturn:redwood_forest": "0.1;0.05",
+        "eternalreturn:roofed_fungi_forest": "0.1;0.05",
         "eternalreturn:snowy_mesa": "0.1;0.05",
         "eternalreturn:spooky_swamp": "0.1;0.05",
         "eternalreturn:swampland_edge": "0.1;0.05",
         "eternalreturn:taiga_edge": "0.1;0.05",
+        "eternalreturn:tropical_pillars": "0.1;0.05",
         "eternalreturn:tundra": "0.1;0.05",
+        "eternalreturn:volcanic_jungle": "0.1;0.05",
         "eternalreturn:webbed_forest": "0.1;0.05",
         "eternalreturn:white_mesa": "0.1;0.05",
         "minecraft:badlands": "0.1;0.05",

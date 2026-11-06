@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "eternalreturn:volcanic_volcano",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 14,
+    "separation": 6,
+    "salt": 20661202
+  }
+}

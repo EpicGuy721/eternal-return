@@ -30,6 +30,10 @@
       "required": false
     },
     {
+      "id": "eternalreturn:roofed_fungi_forest",
+      "required": false
+    },
+    {
       "id": "eternalreturn:webbed_forest",
       "required": false
     }

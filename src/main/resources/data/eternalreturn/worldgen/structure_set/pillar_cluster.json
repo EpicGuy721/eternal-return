@@ -1,0 +1,14 @@
+{
+  "structures": [
+    {
+      "structure": "eternalreturn:pillar_cluster",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 4,
+    "separation": 2,
+    "salt": 20661201
+  }
+}

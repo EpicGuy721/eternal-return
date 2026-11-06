@@ -1,0 +1,11 @@
+{
+  "type": "eternalreturn:landmark",
+  "landmark": "tropical_pillars",
+  "min_size": 20,
+  "max_size": 40,
+  "at_sea": true,
+  "biomes": "#eternalreturn:has_structure/sea_pillars",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

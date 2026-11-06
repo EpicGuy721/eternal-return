@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "eternalreturn:archipelago",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:coral_ocean",
+      "required": false
+    }
+  ]
+}

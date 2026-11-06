@@ -1,0 +1,43 @@
+{
+  "biomes": [
+    "eternalreturn:roofed_fungi_forest"
+  ],
+  "saplings": {
+    "minecraft:dark_oak_sapling": {
+      "mega_trees": [
+        {
+          "weight": 3,
+          "tree": "vanilla"
+        },
+        {
+          "weight": 2,
+          "tree": "eternalreturn:tree/ancient_dark_oak"
+        }
+      ]
+    },
+    "minecraft:birch_sapling": {
+      "trees": [
+        {
+          "weight": 2,
+          "tree": "vanilla"
+        },
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/river_birch"
+        }
+      ]
+    },
+    "minecraft:oak_sapling": {
+      "trees": [
+        {
+          "weight": 3,
+          "tree": "vanilla"
+        },
+        {
+          "weight": 1,
+          "tree": "eternalreturn:tree/white_oak"
+        }
+      ]
+    }
+  }
+}
