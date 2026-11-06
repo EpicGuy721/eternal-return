@@ -132,7 +132,7 @@ public class GasMushroomBlock extends MushroomPlantBlock {
 	@Override
 	protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
 		super.onStateReplaced(state, world, pos, newState, moved);
-		if (this.puffed && !newState.isOf(this)) {
+		if (this.puffed && !moved && !newState.isOf(this)) {
 			releaseOnRemoval(world, pos, this.gas);
 		}
 	}

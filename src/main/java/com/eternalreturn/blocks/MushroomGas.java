@@ -123,11 +123,29 @@ public final class MushroomGas {
 			return Math.min(CELLS, 1 + this.age * 2);
 		}
 
+		/**
+		 * Where the gas spreads from: the spot it was let out at, or, when that has been filled since (a piston crushing a
+		 * puffed block against obsidian moves the next block of the row into its place), the nearest open block beside it.
+		 */
+		private BlockPos openStart() {
+			BlockPos spot = this.getBlockPos();
+			if (open(this.getWorld(), spot)) {
+				return spot;
+			}
+			BlockPos best = null;
+			for (BlockPos near : BlockPos.iterate(spot.add(-1, -1, -1), spot.add(1, 1, 1))) {
+				if (open(this.getWorld(), near) && (best == null || near.getManhattanDistance(spot) < best.getManhattanDistance(spot))) {
+					best = near.toImmutable();
+				}
+			}
+			return best;
+		}
+
 		/** Flood fill through open blocks from the mushroom's spot, nearest first, up to n blocks. */
 		private void spread(int n) {
-			BlockPos start = this.getBlockPos();
+			BlockPos start = this.openStart();
 			List<BlockPos> out = new ArrayList<>();
-			if (!open(this.getWorld(), start)) {
+			if (start == null) {
 				this.cells = out;
 				return;
 			}
@@ -140,7 +158,7 @@ public final class MushroomGas {
 				out.add(at);
 				for (Direction direction : Direction.values()) {
 					BlockPos next = at.offset(direction);
-					if (Math.abs(next.getY() - start.getY()) <= 3 && seen.add(next) && open(this.getWorld(), next)) {
+					if (Math.abs(next.getY() - this.getBlockY()) <= 3 && seen.add(next) && open(this.getWorld(), next)) {
 						queue.add(next);
 					}
 				}

@@ -41,8 +41,8 @@ public class GasMushroomCapBlock extends MushroomBlock {
 	@Override
 	protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
 		super.onStateReplaced(state, world, pos, newState, moved);
-		// A face turning (another cap block placed beside it) keeps the block: no gas then.
-		if (this.puffed && !newState.isOf(this)) {
+		// A face turning (another cap block placed beside it) keeps the block, and a piston pushing it moves it: no gas then.
+		if (this.puffed && !moved && !newState.isOf(this)) {
 			GasMushroomBlock.releaseOnRemoval(world, pos, this.gas);
 		}
 	}

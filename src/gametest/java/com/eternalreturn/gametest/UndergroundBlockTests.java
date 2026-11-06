@@ -447,6 +447,38 @@ public class UndergroundBlockTests implements FabricGameTest {
 		});
 	}
 
+	/**
+	 * A piston crushing a puffed cap block against obsidian lets out its gas, which spreads from beside the spot (the next
+	 * block of the row moves into it); a piston only pushing one along lets nothing out.
+	 */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = BATCH, tickLimit = 100)
+	public void pistonsCrushingPuffedCapsLetOutGas(TestContext ctx) {
+		for (int x = 0; x <= 7; x++) {
+			for (int z = 0; z <= 7; z++) {
+				ctx.setBlockState(new BlockPos(x, 1, z), Blocks.STONE);
+			}
+		}
+		net.minecraft.block.BlockState piston = Blocks.PISTON.getDefaultState().with(net.minecraft.block.FacingBlock.FACING, Direction.EAST);
+		// Crushed: piston, puffed cap, obsidian.
+		ctx.setBlockState(new BlockPos(1, 2, 2), piston);
+		ctx.setBlockState(new BlockPos(2, 2, 2), CaveMushrooms.PUFFED_PURPLE_MUSHROOM_BLOCK);
+		ctx.setBlockState(new BlockPos(3, 2, 2), Blocks.OBSIDIAN);
+		// Pushed: piston, puffed cap, open air.
+		ctx.setBlockState(new BlockPos(1, 2, 5), piston);
+		ctx.setBlockState(new BlockPos(2, 2, 5), CaveMushrooms.PUFFED_BLUE_MUSHROOM_BLOCK);
+		ctx.setBlockState(new BlockPos(0, 2, 2), Blocks.REDSTONE_BLOCK);
+		ctx.setBlockState(new BlockPos(0, 2, 5), Blocks.REDSTONE_BLOCK);
+		ctx.waitAndRun(20, () -> {
+			List<MushroomGas.Cloud> clouds = ctx.getWorld().getEntitiesByClass(MushroomGas.Cloud.class, area(ctx), e -> true);
+			ctx.assertTrue(!ctx.getBlockState(new BlockPos(2, 2, 2)).isOf(CaveMushrooms.PUFFED_PURPLE_MUSHROOM_BLOCK), "the cap wasn't crushed");
+			ctx.assertTrue(ctx.getBlockState(new BlockPos(3, 2, 5)).isOf(CaveMushrooms.PUFFED_BLUE_MUSHROOM_BLOCK), "the blue cap wasn't pushed");
+			ctx.assertTrue(clouds.size() == 1 && clouds.get(0).kind() == MushroomGas.Kind.POISON, clouds.size() + " clouds");
+			ctx.assertTrue(clouds.get(0).cells().size() >= 4, "the crushed cap's gas fills " + clouds.get(0).cells().size() + " blocks");
+			clouds.forEach(net.minecraft.entity.Entity::discard);
+			ctx.complete();
+		});
+	}
+
 	/** No rain slimes on the mushroom islands; elsewhere they still come. */
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = BATCH)
 	public void noRainSlimesOnMushroomIslands(TestContext ctx) {
