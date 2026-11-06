@@ -24,7 +24,8 @@ import java.util.Set;
  * small, steep, pointed cone 5 wide and 4 or 5 tall, hollow underneath (its pores, the gills). Cap faces touching another
  * cap block or the stem are pores, as vanilla's are where blocks meet. "any_ground" lets it stand on any solid floor (the
  * mushroom caves, which have no mycelium), and there a shorter stem (to vanilla's shortest, 4, or the cone's 8) is tried
- * where the drawn one doesn't fit under the ceiling; otherwise it needs dirt or mycelium, as vanilla's (bone meal).
+ * where the drawn one doesn't fit under the ceiling, and the cap may press into the cave's wall (the blocks that would be
+ * inside the rock left out) as long as the middle over the stem and 6 in 10 of it are clear; otherwise it needs dirt or mycelium, as vanilla's (bone meal).
  */
 public class HugeCaveMushroomFeature extends Feature<HugeCaveMushroomFeature.Config> {
 	public enum Shape implements StringIdentifiable {
@@ -83,14 +84,19 @@ public class HugeCaveMushroomFeature extends Feature<HugeCaveMushroomFeature.Con
 			for (int y = 0; y < h && fits; y++) {
 				fits = free(world, origin.up(y));
 			}
+			// In the caves the cap may press into the cave's wall (its blocks inside the rock left out), as long as its
+			// middle (the 3 x 3 over the stem) is clear and most of it is; elsewhere all of it must be clear.
+			Set<BlockPos> open = new HashSet<>();
 			for (BlockPos pos : shape) {
-				if (!fits) {
-					break;
+				boolean middle = Math.abs(pos.getX() - origin.getX()) <= 1 && Math.abs(pos.getZ() - origin.getZ()) <= 1;
+				if (free(world, pos)) {
+					open.add(pos);
+				} else if (middle || !config.anyGround()) {
+					fits = false;
 				}
-				fits = free(world, pos);
 			}
-			if (fits) {
-				cap = shape;
+			if (fits && open.size() * 10 >= shape.size() * 6) {
+				cap = open;
 				stemHeight = h;
 			}
 		}

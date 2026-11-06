@@ -1,7 +1,9 @@
 {
   "values": [
     "eternalreturn:purple_mushroom_block",
+    "eternalreturn:puffed_purple_mushroom_block",
     "eternalreturn:blue_mushroom_block",
+    "eternalreturn:puffed_blue_mushroom_block",
     "eternalreturn:green_mushroom_block"
   ]
 }

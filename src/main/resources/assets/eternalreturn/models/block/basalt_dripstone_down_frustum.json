@@ -1,6 +1,7 @@
 {
-  "parent": "minecraft:block/pointed_dripstone",
+  "parent": "eternalreturn:block/stone_dripstone/down_frustum",
   "textures": {
-    "cross": "eternalreturn:block/basalt_dripstone_down_frustum"
+    "side": "minecraft:block/basalt_side",
+    "end": "minecraft:block/basalt_top"
   }
 }

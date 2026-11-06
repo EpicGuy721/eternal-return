@@ -1,6 +1,7 @@
 {
-  "parent": "minecraft:block/pointed_dripstone",
+  "parent": "eternalreturn:block/stone_dripstone/down_base",
   "textures": {
-    "cross": "eternalreturn:block/lime_terracotta_dripstone_down_base"
+    "side": "minecraft:block/lime_terracotta",
+    "end": "minecraft:block/lime_terracotta"
   }
 }

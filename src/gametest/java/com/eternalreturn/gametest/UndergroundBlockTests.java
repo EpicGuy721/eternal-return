@@ -255,8 +255,30 @@ public class UndergroundBlockTests implements FabricGameTest {
 			if (!only(drops, CaveMushrooms.GREEN_MUSHROOM) || gasClouds(ctx) != 2) {
 				problems.add("green: " + describe(drops) + ", " + gasClouds(ctx) + " clouds");
 			}
-			if (CaveMushrooms.PUFFED_PURPLE_MUSHROOM.getName().getString().equals(CaveMushrooms.PURPLE_MUSHROOM.getName().getString()) == false) {
-				problems.add("the puffed purple mushroom has its own name");
+			// Cap blocks: a puffed one by hand lets out gas and drops 0 to 2 small unpuffed mushrooms; with Silk Touch it
+			// drops itself, puffed, quietly; an unpuffed one is quiet.
+			drops = mine(ctx, player, CaveMushrooms.PUFFED_PURPLE_MUSHROOM_BLOCK, new BlockPos(1, 2, 5), ItemStack.EMPTY);
+			if (gasClouds(ctx) != 3 || drops.stream().anyMatch(d -> !d.isOf(CaveMushrooms.PURPLE_MUSHROOM.asItem()))) {
+				problems.add("puffed purple cap by hand: " + describe(drops) + ", " + gasClouds(ctx) + " clouds");
+			}
+			drops = mine(ctx, player, CaveMushrooms.PUFFED_BLUE_MUSHROOM_BLOCK, new BlockPos(1, 2, 5), silk);
+			if (!only(drops, CaveMushrooms.PUFFED_BLUE_MUSHROOM_BLOCK) || gasClouds(ctx) != 3) {
+				problems.add("puffed blue cap with Silk Touch: " + describe(drops) + ", " + gasClouds(ctx) + " clouds");
+			}
+			drops = mine(ctx, player, CaveMushrooms.BLUE_MUSHROOM_BLOCK, new BlockPos(1, 2, 5), silk);
+			if (!only(drops, CaveMushrooms.BLUE_MUSHROOM_BLOCK) || gasClouds(ctx) != 3) {
+				problems.add("unpuffed blue cap: " + describe(drops) + ", " + gasClouds(ctx) + " clouds");
+			}
+			// The names say which is which.
+			for (Block block : List.of(CaveMushrooms.PUFFED_PURPLE_MUSHROOM, CaveMushrooms.PUFFED_BLUE_MUSHROOM_BLOCK)) {
+				if (!block.asItem().getName().getString().startsWith("Puffed ")) {
+					problems.add(Registries.BLOCK.getId(block) + " is named " + block.asItem().getName().getString());
+				}
+			}
+			for (Block block : List.of(CaveMushrooms.PURPLE_MUSHROOM, CaveMushrooms.BLUE_MUSHROOM_BLOCK)) {
+				if (!block.asItem().getName().getString().startsWith("Unpuffed ")) {
+					problems.add(Registries.BLOCK.getId(block) + " is named " + block.asItem().getName().getString());
+				}
 			}
 		} finally {
 			FishingTests.disconnect(player);
@@ -349,8 +371,8 @@ public class UndergroundBlockTests implements FabricGameTest {
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = BATCH, tickLimit = 100, skyAccess = true)
 	public void boneMealGrowsHugeMushrooms(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
-		Object[][] cases = {{CaveMushrooms.PUFFED_PURPLE_MUSHROOM, CaveMushrooms.PURPLE_MUSHROOM_BLOCK, 20},
-				{CaveMushrooms.GREEN_MUSHROOM, CaveMushrooms.GREEN_MUSHROOM_BLOCK, 15}, {CaveMushrooms.PUFFED_BLUE_MUSHROOM, CaveMushrooms.BLUE_MUSHROOM_BLOCK, 20}};
+		Object[][] cases = {{CaveMushrooms.PUFFED_PURPLE_MUSHROOM, CaveMushrooms.PUFFED_PURPLE_MUSHROOM_BLOCK, 20},
+				{CaveMushrooms.GREEN_MUSHROOM, CaveMushrooms.GREEN_MUSHROOM_BLOCK, 15}, {CaveMushrooms.PUFFED_BLUE_MUSHROOM, CaveMushrooms.PUFFED_BLUE_MUSHROOM_BLOCK, 20}};
 		List<String> problems = new ArrayList<>();
 		Random random = Random.create(11);
 		for (Object[] c : cases) {
@@ -358,6 +380,8 @@ public class UndergroundBlockTests implements FabricGameTest {
 			for (BlockPos pos : BlockPos.iterate(ctx.getAbsolutePos(new BlockPos(0, 1, 0)), ctx.getAbsolutePos(new BlockPos(7, 22, 7)))) {
 				world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS | Block.FORCE_STATE);
 			}
+			// Clearing the last one's puffed caps lets out their gas: clear that too.
+			world.getEntitiesByClass(MushroomGas.Cloud.class, area(ctx), e -> true).forEach(net.minecraft.entity.Entity::discard);
 			BlockPos rel = new BlockPos(3, 2, 3);
 			ctx.setBlockState(rel.down(), Blocks.MYCELIUM);
 			ctx.setBlockState(rel, (Block) c[0]);
@@ -366,6 +390,9 @@ public class UndergroundBlockTests implements FabricGameTest {
 			boolean grown = false;
 			for (int i = 0; i < 20 && !grown; i++) {
 				grown = mushroom.trySpawningBigMushroom(world, abs, world.getBlockState(abs), random);
+			}
+			if (gasClouds(ctx) != 0) {
+				problems.add("growing " + Registries.BLOCK.getId((Block) c[0]).getPath() + " let out gas");
 			}
 			int caps = 0;
 			int stems = 0;
@@ -382,13 +409,42 @@ public class UndergroundBlockTests implements FabricGameTest {
 			if (!grown || caps < (int) c[2] || stems < 3) {
 				problems.add(name + ": grown " + grown + ", " + caps + " cap blocks, " + stems + " stem");
 			}
-			if (c[1] == CaveMushrooms.BLUE_MUSHROOM_BLOCK && (top < 10 || stems < 8)) {
+			if (c[1] == CaveMushrooms.PUFFED_BLUE_MUSHROOM_BLOCK && (top < 10 || stems < 8)) {
 				problems.add("the blue cone's top is " + top + " up on a stem of " + stems);
 			}
 		}
-		ctx.assertTrue(gasClouds(ctx) == 0, "growing a puffed mushroom let out gas");
 		ctx.assertTrue(problems.isEmpty(), String.join("; ", problems));
 		ctx.complete();
+	}
+
+	/**
+	 * A mushroom can't be placed under the open sky (unless on mycelium or podzol), so it never shows for a tick and goes;
+	 * under a roof in the dark it can.
+	 */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = BATCH, skyAccess = true, tickLimit = 100)
+	public void noMushroomsUnderTheOpenSky(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		ctx.setBlockState(new BlockPos(1, 1, 1), Blocks.STONE);
+		ctx.setBlockState(new BlockPos(3, 1, 1), Blocks.MYCELIUM);
+		for (int x = 4; x <= 6; x++) {
+			for (int z = 4; z <= 6; z++) {
+				ctx.setBlockState(new BlockPos(x, 1, z), Blocks.STONE);
+				ctx.setBlockState(new BlockPos(x, 4, z), Blocks.STONE);
+				for (int y = 2; y <= 3; y++) {
+					boolean wall = x != 5 || z != 5;
+					ctx.setBlockState(new BlockPos(x, y, z), wall ? Blocks.STONE.getDefaultState() : Blocks.AIR.getDefaultState());
+				}
+			}
+		}
+		ctx.waitAndRun(20, () -> {
+			for (Block mushroom : List.of(Blocks.RED_MUSHROOM, CaveMushrooms.PURPLE_MUSHROOM, CaveMushrooms.GREEN_MUSHROOM)) {
+				String name = Registries.BLOCK.getId(mushroom).getPath();
+				ctx.assertTrue(!mushroom.getDefaultState().canPlaceAt(world, ctx.getAbsolutePos(new BlockPos(1, 2, 1))), name + " goes on stone under the sky");
+				ctx.assertTrue(mushroom.getDefaultState().canPlaceAt(world, ctx.getAbsolutePos(new BlockPos(3, 2, 1))), name + " won't go on mycelium");
+				ctx.assertTrue(mushroom.getDefaultState().canPlaceAt(world, ctx.getAbsolutePos(new BlockPos(5, 2, 5))), name + " won't go on stone in a dark room");
+			}
+			ctx.complete();
+		});
 	}
 
 	/** No rain slimes on the mushroom islands; elsewhere they still come. */

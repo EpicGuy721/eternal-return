@@ -1,27 +1,23 @@
 """Writes the stone dripstone resources (owner's request, 2026-11-05; com.eternalreturn.blocks.StoneDripstones) from the
-table src/main/resources/eternalreturn/stone_dripstones.json (which the game also reads to register the blocks) and the
-vanilla textures in the Minecraft client jar in the Gradle cache (run a Gradle build first):
+table src/main/resources/eternalreturn/stone_dripstones.json (which the game also reads to register the blocks):
 
-- textures (assets/eternalreturn/textures/block/<kind>_dripstone_<down|up>_<thickness>.png and textures/item/<kind>_dripstone.png):
-  a spike shape drawn here (no vanilla dripstone texture is used), filled pixel for pixel with the stone's own texture, so
-  each looks like the stone it grows from; lit from the left (the left edge a little lighter, the right edge darker, in the
-  stone's own hue); the up textures are the down ones flipped;
-- block and item models (pointed dripstone's crossed planes), blockstates (pointed dripstone's), loot tables (each drops
-  itself), the block tag eternalreturn:stone_dripstones (the pickaxe's, through data/minecraft/tags/block/mineable/pickaxe.json),
-  the names in en_us.json (other lines kept);
+- block and item models: each piece is a small stepped spike of boxes (wide at the stone, narrowing to the tip), drawn
+  with the stone's own block textures (minecraft:block/granite and so on; sides from the side texture, the ends from the
+  stone's top where it has one), so a resource pack's stone shows on its dripstone too (the owner's report: the first
+  version drew its own textures from vanilla's stone and ignored the pack); the up pieces are the down ones turned over;
+- blockstates (pointed dripstone's), loot tables (each drops itself), the block tag eternalreturn:stone_dripstones (the
+  pickaxe's, through data/minecraft/tags/block/mineable/pickaxe.json), the names in en_us.json (other lines kept);
 - the cave features: worldgen/configured_feature/stone_dripstone.json and placed_feature/stone_dripstone.json (the
   overworld's caves) and nether_stone_dripstone.json (the Nether's), Eternal Return worlds only. Tune them here.
 
+The script checks each texture it names exists in the Minecraft client jar in the Gradle cache (run a Gradle build first).
 Run: python tools/dripstone/build_dripstone.py
 """
 import glob
-import io
 import json
 import os
 import sys
 import zipfile
-
-from PIL import Image
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 RES = os.path.join(ROOT, 'src', 'main', 'resources')
@@ -34,10 +30,13 @@ if not JARS:
 JAR = zipfile.ZipFile(JARS[0])
 THICKNESSES = ['tip', 'tip_merge', 'frustum', 'middle', 'base']
 
-# Half-widths in pixels, from the end fixed to the stone (row 0) to the far end, and the rows each piece covers (the tip
-# hangs 11 pixels, as its outline does).
-PROFILES = {'base': (6, 5, 16), 'middle': (5, 4, 16), 'frustum': (4, 3, 16), 'tip': (3, 1, 11), 'tip_merge': (3, 1, 16)}
-ITEM_PROFILE = (4, 1, 16)
+# Boxes of each piece pointing down, fixed to the stone at the top: (lowest y, highest y, half-width), in sixteenths. The
+# tip hangs 11 pixels (as its outline does); a merged tip runs the whole block down to meet the other.
+BOXES = {'base': [(8, 16, 6), (0, 8, 5)], 'middle': [(8, 16, 5), (0, 8, 4)], 'frustum': [(8, 16, 4), (0, 8, 3)],
+         'tip': [(11, 16, 3), (7, 11, 2), (5, 7, 1)], 'tip_merge': [(10, 16, 3), (4, 10, 2), (0, 4, 1)]}
+ITEM_BOXES = [(12, 16, 4), (8, 12, 3), (4, 8, 2), (0, 4, 1)]
+# The stones with their own end (top) texture.
+ENDS = {'sandstone': 'sandstone_top', 'red_sandstone': 'red_sandstone_top', 'basalt': 'basalt_top', 'deepslate': 'deepslate_top'}
 
 # Cave features. Overworld: tries per chunk at random heights; most land in rock and place nothing, so this is about
 # one cluster in every third chunk that has caves. Nether: its open caverns take more.
@@ -53,32 +52,22 @@ def write_json(rel, obj):
         f.write('\n')
 
 
-def stone_texture(name):
-    return Image.open(io.BytesIO(JAR.read(f'assets/minecraft/textures/block/{name}.png'))).convert('RGBA').crop((0, 0, 16, 16))
+def check_texture(name):
+    if f'assets/minecraft/textures/block/{name}.png' not in JAR.namelist():
+        sys.exit(f'no vanilla texture block/{name}')
+    return f'minecraft:block/{name}'
 
 
-def scale(px, f):
-    r, g, b, a = px
-    return (min(255, round(r * f)), min(255, round(g * f)), min(255, round(b * f)), a)
-
-
-def spike(stone, profile):
-    """The stone's own pixels inside a spike centred on the tile, wide end at the top; edges shaded in the stone's hue."""
-    wide, narrow, rows = profile
-    out = Image.new('RGBA', (16, 16), (0, 0, 0, 0))
-    for y in range(rows):
-        half = round(wide + (narrow - wide) * (y / max(1, rows - 1)))
-        left, right = 8 - half, 8 + half - 1
-        for x in range(left, right + 1):
-            px = stone.getpixel((x, y))
-            if x == left:
-                px = scale(px, 1.12)
-            elif x == right:
-                px = scale(px, 0.68)
-            elif x == right - 1 and half > 1:
-                px = scale(px, 0.84)
-            out.putpixel((x, y), (px[0], px[1], px[2], 255))
-    return out
+def spike_model(boxes, up, parent='minecraft:block/block'):
+    """A model of boxes centred on the block, turned over for a piece pointing up."""
+    elements = []
+    for low, high, half in boxes:
+        if up:
+            low, high = 16 - high, 16 - low
+        faces = {d: {'texture': '#side'} for d in ('north', 'south', 'east', 'west')}
+        faces.update({'up': {'texture': '#end'}, 'down': {'texture': '#end'}})
+        elements.append({'from': [8 - half, low, 8 - half], 'to': [8 + half, high, 8 + half], 'faces': faces})
+    return {'parent': parent, 'textures': {'particle': '#side'}, 'elements': elements}
 
 
 def feature(spec, nether):
@@ -94,26 +83,27 @@ def feature(spec, nether):
 
 def main():
     tex = os.path.join(RES, 'assets', NS, 'textures')
-    os.makedirs(os.path.join(tex, 'block'), exist_ok=True)
-    os.makedirs(os.path.join(tex, 'item'), exist_ok=True)
     models = f'assets/{NS}/models'
     lang_file = os.path.join(RES, 'assets', NS, 'lang', 'en_us.json')
     lang = json.load(open(lang_file, encoding='utf-8'))
+    # The textures the first version drew are no longer used.
+    for old in glob.glob(os.path.join(tex, 'block', '*_dripstone_*.png')) + glob.glob(os.path.join(tex, 'item', '*_dripstone.png')):
+        os.remove(old)
+    shapes = f'{models}/block/stone_dripstone'
+    for t in THICKNESSES:
+        for direction in ('down', 'up'):
+            write_json(f'{shapes}/{direction}_{t}.json', spike_model(BOXES[t], direction == 'up'))
+    write_json(f'{shapes}/item.json', spike_model(ITEM_BOXES, False))
     for kind, spec in KINDS.items():
         name = f'{kind}_dripstone'
-        stone = stone_texture(spec['texture'])
+        textures = {'side': check_texture(spec['texture']), 'end': check_texture(ENDS.get(kind, spec['texture']))}
         variants = {}
         for t in THICKNESSES:
-            down = spike(stone, PROFILES[t])
-            down.save(os.path.join(tex, 'block', f'{name}_down_{t}.png'))
-            down.transpose(Image.Transpose.FLIP_TOP_BOTTOM).save(os.path.join(tex, 'block', f'{name}_up_{t}.png'))
             for direction in ('down', 'up'):
-                write_json(f'{models}/block/{name}_{direction}_{t}.json',
-                           {'parent': 'minecraft:block/pointed_dripstone', 'textures': {'cross': f'{NS}:block/{name}_{direction}_{t}'}})
+                write_json(f'{models}/block/{name}_{direction}_{t}.json', {'parent': f'{NS}:block/stone_dripstone/{direction}_{t}', 'textures': textures})
                 variants[f'thickness={t},vertical_direction={direction}'] = {'model': f'{NS}:block/{name}_{direction}_{t}'}
-        spike(stone, ITEM_PROFILE).save(os.path.join(tex, 'item', f'{name}.png'))
         write_json(f'assets/{NS}/blockstates/{name}.json', {'variants': variants})
-        write_json(f'{models}/item/{name}.json', {'parent': 'minecraft:item/generated', 'textures': {'layer0': f'{NS}:item/{name}'}})
+        write_json(f'{models}/item/{name}.json', {'parent': f'{NS}:block/stone_dripstone/item', 'textures': textures})
         write_json(f'data/{NS}/loot_table/blocks/{name}.json', {'type': 'minecraft:block', 'pools': [{
             'rolls': 1, 'bonus_rolls': 0, 'entries': [{'type': 'minecraft:item', 'name': f'{NS}:{name}'}],
             'conditions': [{'condition': 'minecraft:survives_explosion'}]}], 'random_sequence': f'{NS}:blocks/{name}'})

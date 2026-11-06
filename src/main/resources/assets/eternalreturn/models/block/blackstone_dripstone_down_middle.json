@@ -1,6 +1,7 @@
 {
-  "parent": "minecraft:block/pointed_dripstone",
+  "parent": "eternalreturn:block/stone_dripstone/down_middle",
   "textures": {
-    "cross": "eternalreturn:block/blackstone_dripstone_down_middle"
+    "side": "minecraft:block/blackstone",
+    "end": "minecraft:block/blackstone"
   }
 }

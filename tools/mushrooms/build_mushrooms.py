@@ -7,7 +7,9 @@ Gradle cache (run a Gradle build first):
 - block and item models, blockstates (small mushrooms as vanilla's crosses; the cap blocks as vanilla's huge mushroom
   blocks, their inner faces vanilla's pores);
 - loot tables: an unpuffed or green mushroom drops itself; a puffed one drops itself with Silk Touch, else the unpuffed
-  one; a cap block drops itself with Silk Touch, else 0 to 2 of its small (unpuffed) mushroom, as vanilla's;
+  one; a cap block (the purple and blue ones puffed or unpuffed) drops itself with Silk Touch, else 0 to 2 of its small
+  (unpuffed) mushroom, as vanilla's; the names say "Puffed" or "Unpuffed" (the green mushroom comes one way only);
+- the huge mushrooms grow with puffed caps;
 - the huge mushrooms bone meal grows (worldgen/configured_feature/huge_<colour>_mushroom.json: flat, cone and dome on
   vanilla's stem; they need dirt or mycelium, as vanilla's do);
 - the block tag eternalreturn:cave_mushroom_blocks (the axe's, through data/minecraft/tags/block/mineable/axe.json),
@@ -72,7 +74,8 @@ def main():
         for name in names:
             write_json(f'assets/{NS}/blockstates/{name}.json', {'variants': {'': {'model': f'{NS}:block/{mushroom}'}}})
             write_json(f'{models}/item/{name}.json', {'parent': 'minecraft:item/generated', 'textures': {'layer0': f'{NS}:block/{mushroom}'}})
-            lang[f'block.{NS}.{name}'] = title
+            # The name says which it is (the owner's call, 2026-11-05); the green one comes one way only.
+            lang[f'block.{NS}.{name}'] = (('Puffed ' if name.startswith('puffed_') else 'Unpuffed ') if colour in PUFFED else '') + title
             small.append(f'{NS}:{name}')
         loot(mushroom, {'rolls': 1, 'bonus_rolls': 0, 'entries': [{'type': 'minecraft:item', 'name': f'{NS}:{mushroom}'}],
                         'conditions': [{'condition': 'minecraft:survives_explosion'}]})
@@ -80,23 +83,25 @@ def main():
             loot(f'puffed_{mushroom}', {'rolls': 1, 'bonus_rolls': 0, 'entries': [{'type': 'minecraft:alternatives', 'children': [
                 {'type': 'minecraft:item', 'name': f'{NS}:puffed_{mushroom}', 'conditions': [silk_touch()]},
                 {'type': 'minecraft:item', 'name': f'{NS}:{mushroom}'}]}], 'conditions': [{'condition': 'minecraft:survives_explosion'}]})
-        # Cap block: vanilla's multipart, its own outer face.
+        # Cap block: vanilla's multipart, its own outer face; the purple and blue ones puffed or unpuffed, the same to look at.
         write_json(f'{models}/block/{cap}.json', {'parent': 'minecraft:block/template_single_face', 'textures': {'texture': f'{NS}:block/{cap}'}})
         write_json(f'{models}/block/{cap}_inventory.json', {'parent': 'minecraft:block/cube_all', 'textures': {'all': f'{NS}:block/{cap}'}})
-        write_json(f'{models}/item/{cap}.json', {'parent': f'{NS}:block/{cap}_inventory'})
         states = json.loads(json.dumps(vanilla_states).replace('minecraft:block/brown_mushroom_block', f'{NS}:block/{cap}'))
-        write_json(f'assets/{NS}/blockstates/{cap}.json', states)
-        loot(cap, {'rolls': 1, 'bonus_rolls': 0, 'entries': [{'type': 'minecraft:alternatives', 'children': [
-            {'type': 'minecraft:item', 'name': f'{NS}:{cap}', 'conditions': [silk_touch()]},
-            {'type': 'minecraft:item', 'name': f'{NS}:{mushroom}', 'functions': [
-                {'function': 'minecraft:set_count', 'add': False, 'count': {'type': 'minecraft:uniform', 'min': -6.0, 'max': 2.0}},
-                {'function': 'minecraft:limit_count', 'limit': {'min': 0.0}},
-                {'function': 'minecraft:explosion_decay'}]}]}]})
-        lang[f'block.{NS}.{cap}'] = f'{title} Block'
-        blocks.append(f'{NS}:{cap}')
+        for name in [cap] + ([f'puffed_{cap}'] if colour in PUFFED else []):
+            write_json(f'{models}/item/{name}.json', {'parent': f'{NS}:block/{cap}_inventory'})
+            write_json(f'assets/{NS}/blockstates/{name}.json', states)
+            loot(name, {'rolls': 1, 'bonus_rolls': 0, 'entries': [{'type': 'minecraft:alternatives', 'children': [
+                {'type': 'minecraft:item', 'name': f'{NS}:{name}', 'conditions': [silk_touch()]},
+                {'type': 'minecraft:item', 'name': f'{NS}:{mushroom}', 'functions': [
+                    {'function': 'minecraft:set_count', 'add': False, 'count': {'type': 'minecraft:uniform', 'min': -6.0, 'max': 2.0}},
+                    {'function': 'minecraft:limit_count', 'limit': {'min': 0.0}},
+                    {'function': 'minecraft:explosion_decay'}]}]}]})
+            lang[f'block.{NS}.{name}'] = (('Puffed ' if name.startswith('puffed_') else 'Unpuffed ') if colour in PUFFED else '') + f'{title} Block'
+            blocks.append(f'{NS}:{name}')
+        grown_cap = f'puffed_{cap}' if colour in PUFFED else cap
         # The huge mushroom bone meal grows.
         write_json(f'data/{NS}/worldgen/configured_feature/huge_{mushroom}.json', {'type': f'{NS}:huge_cave_mushroom', 'config': {
-            'shape': shape, 'cap': {'Name': f'{NS}:{cap}', 'Properties': {'down': 'false', 'east': 'true', 'north': 'true', 'south': 'true', 'up': 'true', 'west': 'true'}},
+            'shape': shape, 'cap': {'Name': f'{NS}:{grown_cap}', 'Properties': {'down': 'false', 'east': 'true', 'north': 'true', 'south': 'true', 'up': 'true', 'west': 'true'}},
             'stem': STEM}})
     write_json(f'data/{NS}/tags/block/cave_mushroom_blocks.json', {'values': blocks})
     write_json(f'data/{NS}/tags/item/cave_mushrooms.json', {'values': small})

@@ -1,6 +1,7 @@
 {
-  "parent": "minecraft:item/generated",
+  "parent": "eternalreturn:block/stone_dripstone/item",
   "textures": {
-    "layer0": "eternalreturn:item/light_blue_terracotta_dripstone"
+    "side": "minecraft:block/light_blue_terracotta",
+    "end": "minecraft:block/light_blue_terracotta"
   }
 }

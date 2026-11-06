@@ -8,6 +8,7 @@
 		"BlockMixin",
 		"CauldronDripInvoker",
 		"CauldronStoneDripMixin",
+		"MushroomPlacementMixin",
 		"CarpetBlockMixin",
 		"EnchantmentHelperMixin",
 		"EnchantmentMixin",

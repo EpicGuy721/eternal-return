@@ -25,16 +25,17 @@ import java.util.Set;
  * tools/mushrooms/build_mushrooms.py): purple (toxic: its gas poisons), blue (its gas gives night vision) and green (glows,
  * light 8), each a small mushroom (GasMushroomBlock; purple and blue puffed or unpuffed) and a huge one: the purple's as
  * the huge brown mushroom, the green's as the huge red one, the blue's a tall pointed cone (HugeCaveMushroomFeature), all
- * on vanilla's mushroom stem. The green caps glow at light 8 too.
+ * on vanilla's mushroom stem. The purple and blue cap blocks come puffed or unpuffed too (GasMushroomCapBlock; huge mushrooms
+ * grow puffed), and each puffed or unpuffed block is named so. The green caps glow at light 8 too.
  */
 public final class CaveMushrooms {
 	public static final Feature<HugeCaveMushroomFeature.Config> HUGE_FEATURE = Registry.register(Registries.FEATURE,
 			EternalReturn.id("huge_cave_mushroom"), new HugeCaveMushroomFeature());
 
-	public static final Block PURPLE_MUSHROOM_BLOCK = block("purple_mushroom_block",
-			new MushroomBlock(AbstractBlock.Settings.copy(Blocks.BROWN_MUSHROOM_BLOCK).mapColor(MapColor.PURPLE)));
-	public static final Block BLUE_MUSHROOM_BLOCK = block("blue_mushroom_block",
-			new MushroomBlock(AbstractBlock.Settings.copy(Blocks.BROWN_MUSHROOM_BLOCK).mapColor(MapColor.BLUE)));
+	public static final Block PURPLE_MUSHROOM_BLOCK = block("purple_mushroom_block", cap(MapColor.PURPLE, MushroomGas.Kind.POISON, false));
+	public static final Block PUFFED_PURPLE_MUSHROOM_BLOCK = block("puffed_purple_mushroom_block", cap(MapColor.PURPLE, MushroomGas.Kind.POISON, true));
+	public static final Block BLUE_MUSHROOM_BLOCK = block("blue_mushroom_block", cap(MapColor.BLUE, MushroomGas.Kind.NIGHT_VISION, false));
+	public static final Block PUFFED_BLUE_MUSHROOM_BLOCK = block("puffed_blue_mushroom_block", cap(MapColor.BLUE, MushroomGas.Kind.NIGHT_VISION, true));
 	public static final Block GREEN_MUSHROOM_BLOCK = block("green_mushroom_block",
 			new MushroomBlock(AbstractBlock.Settings.copy(Blocks.BROWN_MUSHROOM_BLOCK).mapColor(MapColor.LIME).luminance(state -> 8)));
 
@@ -45,6 +46,10 @@ public final class CaveMushrooms {
 	public static final Block GREEN_MUSHROOM = block("green_mushroom", mushroom("green", MapColor.LIME, 8, null, false));
 
 	private CaveMushrooms() {
+	}
+
+	private static Block cap(MapColor color, MushroomGas.Kind gas, boolean puffed) {
+		return new GasMushroomCapBlock(AbstractBlock.Settings.copy(Blocks.BROWN_MUSHROOM_BLOCK).mapColor(color), gas, puffed);
 	}
 
 	private static RegistryKey<ConfiguredFeature<?, ?>> huge(String colour) {
@@ -76,7 +81,8 @@ public final class CaveMushrooms {
 		MushroomGas.register();
 		ItemGroupEvents.modifyEntriesEvent(ItemGroups.NATURAL).register(entries -> {
 			entries.addAfter(Items.RED_MUSHROOM, PURPLE_MUSHROOM, PUFFED_PURPLE_MUSHROOM, BLUE_MUSHROOM, PUFFED_BLUE_MUSHROOM, GREEN_MUSHROOM);
-			entries.addAfter(Items.MUSHROOM_STEM, PURPLE_MUSHROOM_BLOCK, BLUE_MUSHROOM_BLOCK, GREEN_MUSHROOM_BLOCK);
+			entries.addAfter(Items.MUSHROOM_STEM, PURPLE_MUSHROOM_BLOCK, PUFFED_PURPLE_MUSHROOM_BLOCK, BLUE_MUSHROOM_BLOCK, PUFFED_BLUE_MUSHROOM_BLOCK,
+					GREEN_MUSHROOM_BLOCK);
 		});
 	}
 }

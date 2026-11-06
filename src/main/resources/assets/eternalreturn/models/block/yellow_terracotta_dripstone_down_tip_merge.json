@@ -1,6 +1,7 @@
 {
-  "parent": "minecraft:block/pointed_dripstone",
+  "parent": "eternalreturn:block/stone_dripstone/down_tip_merge",
   "textures": {
-    "cross": "eternalreturn:block/yellow_terracotta_dripstone_down_tip_merge"
+    "side": "minecraft:block/yellow_terracotta",
+    "end": "minecraft:block/yellow_terracotta"
   }
 }

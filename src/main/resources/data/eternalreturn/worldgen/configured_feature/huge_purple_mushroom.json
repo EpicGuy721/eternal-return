@@ -3,7 +3,7 @@
   "config": {
     "shape": "flat",
     "cap": {
-      "Name": "eternalreturn:purple_mushroom_block",
+      "Name": "eternalreturn:puffed_purple_mushroom_block",
       "Properties": {
         "down": "false",
         "east": "true",

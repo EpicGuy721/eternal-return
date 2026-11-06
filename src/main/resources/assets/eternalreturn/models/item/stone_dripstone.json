@@ -1,6 +1,7 @@
 {
-  "parent": "minecraft:item/generated",
+  "parent": "eternalreturn:block/stone_dripstone/item",
   "textures": {
-    "layer0": "eternalreturn:item/stone_dripstone"
+    "side": "minecraft:block/stone",
+    "end": "minecraft:block/stone"
   }
 }

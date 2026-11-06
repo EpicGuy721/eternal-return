@@ -165,24 +165,25 @@ public class UndergroundBiomeTests implements FabricGameTest {
 		}
 		Map<String, Integer> mush = under.blocks.getOrDefault("eternalreturn:mushroom_caves", Map.of());
 		// Huge mushrooms need room: the domes (red, green) fit most tunnels, the flat caps (brown, purple, 7 wide) the wider
-		// rooms, the blue cones (11 or more tall) only big caverns, which the sample may miss. Several kinds must turn up.
+		// rooms or press into a tunnel's walls, the blue cones (11 or more tall) only big caverns, which the sample may miss. Several kinds must turn up.
 		int kinds = 0;
 		int caps = 0;
-		for (Block block : List.of(Blocks.RED_MUSHROOM_BLOCK, Blocks.BROWN_MUSHROOM_BLOCK, CaveMushrooms.PURPLE_MUSHROOM_BLOCK, CaveMushrooms.GREEN_MUSHROOM_BLOCK,
-				CaveMushrooms.BLUE_MUSHROOM_BLOCK)) {
+		for (Block block : List.of(Blocks.RED_MUSHROOM_BLOCK, Blocks.BROWN_MUSHROOM_BLOCK, CaveMushrooms.PUFFED_PURPLE_MUSHROOM_BLOCK, CaveMushrooms.GREEN_MUSHROOM_BLOCK,
+				CaveMushrooms.PUFFED_BLUE_MUSHROOM_BLOCK)) {
 			int n = mush.getOrDefault(Registries.BLOCK.getId(block).getPath(), 0);
 			kinds += n > 0 ? 1 : 0;
 			caps += n;
 		}
-		if (kinds < 2 || caps < 100) {
-			problems.add(kinds + " kinds of huge mushroom, " + caps + " cap blocks in mushroom caves");
+		if (kinds < 3 || caps < 100 || mush.getOrDefault("puffed_purple_mushroom_block", 0) == 0) {
+			problems.add(kinds + " kinds of huge mushroom, " + caps + " cap blocks in mushroom caves (" + mush.getOrDefault("puffed_purple_mushroom_block", 0) + " purple)");
 		}
 		for (Block block : List.of(CaveMushrooms.PUFFED_PURPLE_MUSHROOM, CaveMushrooms.PUFFED_BLUE_MUSHROOM, CaveMushrooms.GREEN_MUSHROOM, Blocks.MUSHROOM_STEM)) {
 			if (mush.getOrDefault(Registries.BLOCK.getId(block).getPath(), 0) < 5) {
 				problems.add("few " + Registries.BLOCK.getId(block).getPath() + " in mushroom caves");
 			}
 		}
-		for (Block never : List.of(Blocks.MYCELIUM, CaveMushrooms.PURPLE_MUSHROOM, CaveMushrooms.BLUE_MUSHROOM)) {
+		for (Block never : List.of(Blocks.MYCELIUM, CaveMushrooms.PURPLE_MUSHROOM, CaveMushrooms.BLUE_MUSHROOM, CaveMushrooms.PURPLE_MUSHROOM_BLOCK,
+				CaveMushrooms.BLUE_MUSHROOM_BLOCK)) {
 			if (mush.getOrDefault(Registries.BLOCK.getId(never).getPath(), 0) > 0) {
 				problems.add(Registries.BLOCK.getId(never).getPath() + " in mushroom caves");
 			}

@@ -1,6 +1,7 @@
 {
-  "parent": "minecraft:block/pointed_dripstone",
+  "parent": "eternalreturn:block/stone_dripstone/up_frustum",
   "textures": {
-    "cross": "eternalreturn:block/black_terracotta_dripstone_up_frustum"
+    "side": "minecraft:block/black_terracotta",
+    "end": "minecraft:block/black_terracotta"
   }
 }

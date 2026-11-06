@@ -93,8 +93,8 @@ public class GasMushroomBlock extends MushroomPlantBlock {
 
 	@Override
 	public BlockState onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
-		if (!world.isClient && this.puffed && silkTouch(world, player.getMainHandStack())) {
-			QUIET.add(pos.toImmutable());
+		if (this.puffed) {
+			quietIfSilkTouch(world, pos, player);
 		}
 		return super.onBreak(world, pos, state, player);
 	}
@@ -102,7 +102,26 @@ public class GasMushroomBlock extends MushroomPlantBlock {
 	@Override
 	public void afterBreak(World world, PlayerEntity player, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, ItemStack tool) {
 		super.afterBreak(world, player, pos, state, blockEntity, tool);
+		forget(pos);
+	}
+
+	/** A puffed block mined with Silk Touch stays quiet (call from onBreak, before it is removed). */
+	static void quietIfSilkTouch(World world, BlockPos pos, PlayerEntity player) {
+		if (!world.isClient && silkTouch(world, player.getMainHandStack())) {
+			QUIET.add(pos.toImmutable());
+		}
+	}
+
+	/** After a puffed block is gone: forget the spot (call from afterBreak). */
+	static void forget(BlockPos pos) {
 		QUIET.remove(pos);
+	}
+
+	/** A puffed block replaced by something else lets out its gas, unless it was mined with Silk Touch or grew. */
+	static void releaseOnRemoval(World world, BlockPos pos, MushroomGas.Kind gas) {
+		if (!world.isClient && gas != null && !QUIET.remove(pos)) {
+			MushroomGas.release((ServerWorld) world, pos, gas);
+		}
 	}
 
 	private static boolean silkTouch(World world, ItemStack tool) {
@@ -113,8 +132,8 @@ public class GasMushroomBlock extends MushroomPlantBlock {
 	@Override
 	protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
 		super.onStateReplaced(state, world, pos, newState, moved);
-		if (!world.isClient && this.puffed && this.gas != null && !newState.isOf(this) && !QUIET.remove(pos)) {
-			MushroomGas.release((ServerWorld) world, pos, this.gas);
+		if (this.puffed && !newState.isOf(this)) {
+			releaseOnRemoval(world, pos, this.gas);
 		}
 	}
 }

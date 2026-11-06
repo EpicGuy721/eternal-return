@@ -624,14 +624,16 @@
 	"block.eternalreturn.netherrack_dripstone": "Netherrack Dripstone",
 	"block.eternalreturn.blackstone_dripstone": "Blackstone Dripstone",
 	"block.eternalreturn.basalt_dripstone": "Basalt Dripstone",
-	"block.eternalreturn.purple_mushroom": "Purple Mushroom",
-	"block.eternalreturn.puffed_purple_mushroom": "Purple Mushroom",
-	"block.eternalreturn.purple_mushroom_block": "Purple Mushroom Block",
-	"block.eternalreturn.blue_mushroom": "Blue Mushroom",
-	"block.eternalreturn.puffed_blue_mushroom": "Blue Mushroom",
-	"block.eternalreturn.blue_mushroom_block": "Blue Mushroom Block",
+	"block.eternalreturn.purple_mushroom": "Unpuffed Purple Mushroom",
+	"block.eternalreturn.puffed_purple_mushroom": "Puffed Purple Mushroom",
+	"block.eternalreturn.purple_mushroom_block": "Unpuffed Purple Mushroom Block",
+	"block.eternalreturn.blue_mushroom": "Unpuffed Blue Mushroom",
+	"block.eternalreturn.puffed_blue_mushroom": "Puffed Blue Mushroom",
+	"block.eternalreturn.blue_mushroom_block": "Unpuffed Blue Mushroom Block",
 	"block.eternalreturn.green_mushroom": "Green Mushroom",
 	"block.eternalreturn.green_mushroom_block": "Green Mushroom Block",
 	"biome.eternalreturn.mushroom_caves": "Mushroom Caves",
-	"biome.eternalreturn.magma_caves": "Magma Caves"
+	"biome.eternalreturn.magma_caves": "Magma Caves",
+	"block.eternalreturn.puffed_purple_mushroom_block": "Puffed Purple Mushroom Block",
+	"block.eternalreturn.puffed_blue_mushroom_block": "Puffed Blue Mushroom Block"
 }

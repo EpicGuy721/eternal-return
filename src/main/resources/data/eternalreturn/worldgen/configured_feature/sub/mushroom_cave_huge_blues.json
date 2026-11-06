@@ -3,7 +3,7 @@
   "config": {
     "shape": "cone",
     "cap": {
-      "Name": "eternalreturn:blue_mushroom_block",
+      "Name": "eternalreturn:puffed_blue_mushroom_block",
       "Properties": {
         "down": "false",
         "east": "true",
