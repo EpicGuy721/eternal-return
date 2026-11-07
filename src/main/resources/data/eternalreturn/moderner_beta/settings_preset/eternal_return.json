@@ -2405,7 +2405,8 @@
         {
           "depth": 0.25,
           "rain": 0.5,
-          "temp": 0.875
+          "temp": 0.875,
+          "biome": "eternalreturn:mushroom_caves"
         },
         {
           "depth": 0.75,

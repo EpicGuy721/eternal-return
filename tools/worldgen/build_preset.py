@@ -523,13 +523,17 @@ for cid, spec in CAVES.items():
         if i == spec['share'] // 2:
             point['biome'] = cid
         points.append(point)
-# The later cave biomes (mushroom and magma caves, 2026-11-05) take one of the empty points ("point": its index), so the
+# The later cave biomes (mushroom and magma caves, 2026-11-05) take empty points ("point": an index or a list), so the
 # pattern, and every ice cave, stays exactly where it was; which land each may lie under (and how deep) is filtered in the
 # game (CaveBiomeFilter, from eternalreturn/cave_biomes.json below), as one map serves all the land.
+# A list of points gives one biome several (labels only: the pattern stays). The mushroom caves' first point (7, a
+# shallow one) only reached down to about y 20, where caves are few, and the owner found none (2026-11-07): they also
+# take point 10, a deep one (measured round the owner's world: about 9% of the underground at y 0 and below, 15% in all).
 for cid, spec in CAVES.items():
     if 'point' in spec:
-        assert 'biome' not in points[spec['point']], f'{cid}: point {spec["point"]} is taken'
-        points[spec['point']]['biome'] = cid
+        for index in spec['point'] if isinstance(spec['point'], list) else [spec['point']]:
+            assert 'biome' not in points[index], f'{cid}: point {index} is taken'
+            points[index]['biome'] = cid
 preset['caveBiomeSettings'] = {'moderner_beta:provider': 'moderner_beta:voronoi', 'moderner_beta:cave_biome_voronoi': {
     'depthMinY': -64, 'depthMaxY': 128, 'horizontalScale': 48.0, 'verticalScale': 16.0, 'points': points}} if CAVES else \
     {'moderner_beta:provider': 'moderner_beta:none'}
