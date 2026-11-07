@@ -24,6 +24,12 @@ public final class ModernerBetaHooks {
 	/** Snow checks seen during that step (ModernerBetaSnowCheckMixin). */
 	public static final AtomicLong SNOW_CHECKS = new AtomicLong();
 
+	/** Biome injection handlers seen by ModernerBetaBiomeCacheMixin (identity hash to whether its cell memory is on: Eternal Return worlds only). */
+	public static final Map<Integer, Boolean> BIOME_CACHES = new ConcurrentHashMap<>();
+	/** Biome questions it answered from memory, and ones Moderner Beta worked out. */
+	public static final java.util.concurrent.atomic.LongAdder BIOME_CACHE_HITS = new java.util.concurrent.atomic.LongAdder();
+	public static final java.util.concurrent.atomic.LongAdder BIOME_CACHE_MISSES = new java.util.concurrent.atomic.LongAdder();
+
 	private ModernerBetaHooks() {
 	}
 }

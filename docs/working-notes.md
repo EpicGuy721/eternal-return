@@ -54,3 +54,9 @@ How the owner wants work on this repo done, and pitfalls that each cost a failed
 - Nostalgic Tweaks is reached by reflection (SwordBlocking): its SwordBlockingHelper.isBlocking and GameplayTweak.SWORD_BLOCK_DAMAGE_REDUCTION (2.0.0-beta.922). If a newer version renames them, Defense quietly does nothing; the log says so once.
 
 - The vanilla world's decorated fingerprint ignores leaves' distance (since leaves count to 10 in every world, LeafDistance, the generator marks some leaves near vanilla's limit a step differently); the baseline was re-recorded at the commit before that change with the same rule, so it still proves the leaves themselves unchanged.
+
+## Worldgen speed (2026-11-07)
+
+- Measure with `./gradlew runGametestBenchmark` (docs/performance.md), profile with `-PbenchProfile` and `tools/bench/jfr_steps.py`. Minecraft 1.21.1 runs structure starts, surface, carving and decoration one chunk at a time on one queue: anything slow there (per-block work in surface rules above all) holds up every core.
+- Moderner Beta's per-block biome lookup is expensive; Eternal Return's biome stone surface rules call it for every block down to bedrock. `ModernerBetaBiomeCacheMixin` remembers each 4x4x4 cell's answer. A Mixin field initializer in that class didn't run for every instance (NullPointerException from structure placement): create such fields on first use.
+- Moderner Beta lists biomes in a different order each start, which reordered decoration features (and their random numbers): decoration never repeated. `FeatureOrder` fixes the order in Eternal Return worlds, so the `er_fingerprint` decorated check repeats exactly. Plain Moderner Beta worlds still don't repeat.

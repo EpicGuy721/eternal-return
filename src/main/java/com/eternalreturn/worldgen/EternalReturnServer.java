@@ -44,6 +44,12 @@ public final class EternalReturnServer {
 		server.getRegistryManager().getOptional(RegistryKeys.CHUNK_GENERATOR_SETTINGS)
 				.flatMap(registry -> registry.getOrEmpty(CaveWorlds.NOISE_SETTINGS))
 				.ifPresent(settings -> CaveWorlds.rememberRouter(settings.noiseRouter()));
+		// Every dimension generated with Eternal Return's terrain decorates in the same order on every start (FeatureOrder).
+		for (DimensionOptions dimension : dimensions) {
+			if (dimension.chunkGenerator() instanceof NoiseChunkGenerator noise && CaveWorlds.usesEternalReturnSettings(noise, server.getRegistryManager())) {
+				com.eternalreturn.worldgen.perf.FeatureOrder.fix(noise);
+			}
+		}
 	}
 
 	private static boolean essentialOnly(RegistryEntry<StructureSet> set) {

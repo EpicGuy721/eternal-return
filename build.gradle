@@ -40,15 +40,17 @@ def batchOverride = project.hasProperty("gametestBatches") ? ["gametest.batches"
 if (project.hasProperty("gametestRepeat")) {
 	batchOverride += ["gametest.repeat": project.property("gametestRepeat").toString()]
 }
-def gameTestRun = { String runName, String label, String dir, Map<String, String> props ->
+def gameTestRun = { String runName, String label, String dir, Map<String, String> props, List<String> extraVmArgs = [] ->
 	loom.runs.create(runName) {
 		server()
 		name label
 		source sourceSets.gametest
 		runDir "build/gametest/${dir}"
+		extraVmArgs.each { vmArg it }
 		vmArg "-Dfabric-api.gametest"
 		vmArg "-Dfabric-api.gametest.report-file=${file("build/gametest/${dir}/report.xml")}"
-		(props + (props.containsKey("gametest.fingerprint") ? fingerprintRecord : [:]) + batchOverride).each { key, value -> vmArg "-Deternalreturn.${key}=${value}" }
+		(props + (props.containsKey("gametest.fingerprint") ? fingerprintRecord : [:]) + batchOverride
+				+ (project.hasProperty("noBiomeCache") ? ["noBiomeCache": "true"] : [:])).each { key, value -> vmArg "-Deternalreturn.${key}=${value}" }
 	}
 }
 gameTestRun("gametest", "Game Test (flat world)", "flat", [:])
@@ -80,6 +82,33 @@ gameTestRun("gametestEternalReturnOldCaves", "Game Test (Eternal Return, old cav
 gameTestRun("gametestCaves", "Game Test (Eternal Return caves)", "caves",
 		["gametest.preset": "eternalreturn_test:eternal_return_twin", "gametest.seed": worldmapSeed, "gametest.caves.logStarts": "true",
 		 "gametest.batches": "caves,caves_spaghetti,caves_ravine,caves_large,caves_vertical,caves_zigzag,caves_ribbed,caves_spiral,caves_toroidal,biome_stone"])
+
+// The worldgen benchmark (WorldgenBenchmarkTests, docs/performance.md): chunks per second generated to full chunks in a
+// square on the coast and one inland, seed 173164, structures on, all worker threads busy. One run per world, for comparison.
+// -PbenchSize=n sets the square's side in chunks (default 24). -PbenchProfile also times every feature and structure and
+// records a Java Flight Recording (build/gametest/<dir>/bench.jfr; tools/bench/jfr_steps.py sums it per worldgen step).
+// -PgametestBatches=worldgen_bench,er_fingerprint adds the Eternal Return fingerprint check (-PrecordFingerprints records it);
+// -PdumpBlocks=<file> also writes every block of its decorated chunks, to compare two runs (tools/bench/diff_dumps.py).
+def benchProps = ["gametest.seed": worldmapSeed, "gametest.structures": "true", "gametest.batches": "worldgen_bench"]
+if (project.hasProperty("benchSize")) {
+	benchProps += ["bench.size": project.property("benchSize").toString()]
+}
+if (project.hasProperty("benchProfile")) {
+	benchProps += ["gametest.featureTiming": "true"]
+}
+// -PnoBiomeCache (any run) turns the speed-ups off (ModernerBetaBiomeCacheMixin), to record a baseline or measure them.
+if (project.hasProperty("dumpBlocks")) {
+	benchProps += ["gametest.dumpBlocks": file(project.property("dumpBlocks").toString()).absolutePath]
+}
+[
+	[task: "gametestBenchmark", label: "Eternal Return", dir: "bench_eternal_return", props: ["gametest.preset": "eternalreturn:eternal_return", "gametest.fingerprint": "eternal_return"]],
+	[task: "gametestBenchmarkVanilla", label: "vanilla", dir: "bench_vanilla", props: ["gametest.preset": "minecraft:normal"]],
+	[task: "gametestBenchmarkModernerBeta", label: "Moderner Beta Release 1.6.4", dir: "bench_moderner_beta", props: ["gametest.preset": "eternalreturn_test:moderner_beta_1_6_4"]],
+].each { b ->
+	def jfr = project.hasProperty("benchProfile")
+			? ["-XX:StartFlightRecording=filename=${file("build/gametest/${b.dir}/bench.jfr")},settings=profile,dumponexit=true".toString()] : []
+	gameTestRun(b.task, "Worldgen benchmark (${b.label})", b.dir, benchProps + b.props, jfr)
+}
 
 // The headless map tool: renders maps of a preset at a fixed seed into docs/worldgen-maps/<name>.
 // -PworldmapHalf=1024 renders a smaller area (faster); -PworldmapOut=<dir> writes to <dir>/<name> instead.
@@ -230,6 +259,52 @@ def lambDynLightsNested() {
 		}
 	}
 	return dir.listFiles().findAll { it.name.endsWith(".jar") }.sort()
+}
+
+// -Pc2me: every run also loads C2ME (Concurrent Chunk Management Engine, a mod that generates chunks on many threads), to
+// measure it with the worldgen benchmark and check that it changes nothing (docs/performance.md). Never part of the
+// release. Its jar holds its modules as nested jars, which the dev runs don't load, so they are taken out once into
+// build/c2me-nested, as for LambDynamicLights above.
+configurations {
+	c2meShell {
+		transitive = false
+	}
+}
+dependencies {
+	c2meShell "maven.modrinth:c2me-fabric:${project.c2me_version}"
+}
+def c2meNested() {
+	def dir = file("build/c2me-nested/${project.c2me_version}")
+	if (!dir.exists()) {
+		copy {
+			from(zipTree(configurations.c2meShell.singleFile)) {
+				include "META-INF/jars/*.jar"
+				eachFile { it.path = it.name }
+			}
+			includeEmptyDirs = false
+			into dir
+		}
+		def opened = [] as Set
+		def next = { dir.listFiles().find { it.name.endsWith(".jar") && !opened.contains(it.name) } }
+		for (def jar = next(); jar != null; jar = next()) {
+			opened << jar.name
+			copy {
+				from(zipTree(jar)) {
+					include "META-INF/jars/*.jar"
+					eachFile { it.path = it.name }
+				}
+				includeEmptyDirs = false
+				into dir
+			}
+		}
+	}
+	return dir.listFiles().findAll { it.name.endsWith(".jar") }.sort()
+}
+if (project.hasProperty("c2me")) {
+	dependencies {
+		modLocalRuntime "maven.modrinth:c2me-fabric:${project.c2me_version}"
+		modLocalRuntime files(c2meNested())
+	}
 }
 
 dependencies {

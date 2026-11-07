@@ -93,7 +93,13 @@ public abstract class TestServerMixin {
 	@ModifyExpressionValue(method = "method_40377", at = @At(value = "FIELD", target = "Lnet/minecraft/test/TestServer;TEST_LEVEL:Lnet/minecraft/world/gen/GeneratorOptions;"))
 	private static GeneratorOptions eternalreturn$seed(GeneratorOptions options) {
 		Long seed = GameTestWorld.seedProperty();
-		return seed == null ? options : new GeneratorOptions(seed, options.shouldGenerateStructures(), options.hasBonusChest());
+		// eternalreturn.gametest.structures=true turns structures on, as in a player's world (the worldgen benchmark).
+		String structures = System.getProperty("eternalreturn.gametest.structures");
+		if (seed == null && structures == null) {
+			return options;
+		}
+		return new GeneratorOptions(seed == null ? options.getSeed() : seed,
+				structures == null ? options.shouldGenerateStructures() : Boolean.parseBoolean(structures), options.hasBonusChest());
 	}
 
 	/** method_40377 is the lambda in create() that builds the world from WorldPresets.FLAT. */

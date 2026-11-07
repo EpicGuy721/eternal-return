@@ -31,7 +31,8 @@ public class ModernerBetaMixinPlugin implements IMixinConfigPlugin {
 			"com.eternalreturn.mixin.compat.ModernerBetaHeightMixin", new Object[]{"getHeightConfigAt", 2, "Lmod/bluestaggo/modernerbeta/level/biome/HeightConfig;"},
 			"com.eternalreturn.mixin.compat.ModernerBetaSnowMixin", new Object[]{"setFreezeTopLayer", 4, "V"},
 			"com.eternalreturn.mixin.compat.ModernerBetaSnowCheckMixin", new Object[]{"shouldSnow", 5, "Z"},
-			"com.eternalreturn.mixin.compat.ModernerBetaCaveBiomeMixin", new Object[]{"apply", 4, null});
+			"com.eternalreturn.mixin.compat.ModernerBetaCaveBiomeMixin", new Object[]{"apply", 4, null},
+			"com.eternalreturn.mixin.compat.ModernerBetaBiomeCacheMixin", new Object[]{"getBiome", 7, "Lnet/minecraft/registry/entry/RegistryEntry;"});
 
 	@Override
 	public void onLoad(String mixinPackage) {
@@ -67,6 +68,8 @@ public class ModernerBetaMixinPlugin implements IMixinConfigPlugin {
 					? "Worlds still generate, but snowy biomes lay no snow in plants, slabs, stairs, walls, fences and gates as they are made."
 					: hook.equals("ModernerBetaCaveBiomeMixin")
 					? "Eternal Return worlds still generate, but ice caves may turn up under warm land and mushroom and magma caves anywhere."
+					: hook.equals("ModernerBetaBiomeCacheMixin")
+					? "Eternal Return worlds still generate the same, only more slowly."
 					: hook.equals("ModernerBetaHeightMixin")
 					? "Eternal Return worlds still generate, but without deep stepped oceans or sinkholes."
 					: "Eternal Return worlds still generate, but biome stone may show columns of plain stone under Moderner Beta's bare-rock patches.";

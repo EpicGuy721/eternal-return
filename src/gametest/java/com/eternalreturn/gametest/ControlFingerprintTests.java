@@ -108,7 +108,16 @@ public class ControlFingerprintTests implements FabricGameTest {
 	}
 
 	private static void compare(TestContext ctx, String name, Map<String, String> hashes, String what) throws IOException {
+		compareOnly(ctx, name, hashes, what);
+		ctx.complete();
+	}
 
+	static int[][] decoratedCentres() {
+		return DECORATED_CENTRES;
+	}
+
+	/** Compares with the baseline (or records it, with -PrecordFingerprints) and fails the test on a difference; doesn't complete it. */
+	static void compareOnly(TestContext ctx, String name, Map<String, String> hashes, String what) throws IOException {
 		String recordDir = System.getProperty("eternalreturn.gametest.fingerprintRecord");
 		if (recordDir != null) {
 			Path file = Path.of(recordDir).resolve(name + ".json");
@@ -117,7 +126,6 @@ public class ControlFingerprintTests implements FabricGameTest {
 				GSON.toJson(hashes, writer);
 			}
 			EternalReturn.LOGGER.info("[fingerprint] recorded {} chunks for {} in {}", hashes.size(), name, file);
-			ctx.complete();
 			return;
 		}
 
@@ -137,7 +145,6 @@ public class ControlFingerprintTests implements FabricGameTest {
 		EternalReturn.LOGGER.info("[fingerprint] {}: {} of {} chunks match the baseline{}", name, baseline.size() - different.size(),
 				baseline.size(), different.isEmpty() ? "" : ", different: " + different);
 		ctx.assertTrue(different.isEmpty(), name + ": " + what + " changed in chunks " + different);
-		ctx.complete();
 	}
 
 	/** Chunk "x,z" -> hash of every block state in it, after carving and before features (or fully decorated). */

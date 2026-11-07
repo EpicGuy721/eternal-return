@@ -10,7 +10,9 @@
 		"SandownAccessor",
 		"StepSoundInvoker",
 		"TestContextAccessor",
-		"TestServerMixin"
+		"TestServerMixin",
+		"FeatureTimingMixin",
+		"StructureTimingMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

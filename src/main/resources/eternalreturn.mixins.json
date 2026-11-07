@@ -241,6 +241,7 @@
 		"worldgen.ConfiguredCarverMixin",
 		"worldgen.DungeonFeatureMixin",
 		"worldgen.LakeFeatureMixin",
+		"worldgen.ChunkGeneratorFeatureOrderAccessor",
 		"worldgen.MinecraftServerMixin",
 		"worldgen.MineshaftPartMixin",
 		"worldgen.MineshaftPiecesMixin",
