@@ -24,6 +24,10 @@ import net.minecraft.entity.SpawnLocationTypes;
 import net.minecraft.entity.SpawnRestriction;
 import net.minecraft.entity.mob.AbstractSkeletonEntity;
 import net.minecraft.entity.mob.HostileEntity;
+import net.minecraft.entity.SpawnReason;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.random.Random;
+import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.CowEntity;
@@ -120,6 +124,8 @@ public final class NewMobs {
 		SpawnRestriction.register(SUNKEN, SpawnLocationTypes.IN_WATER, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, SunkenEntity::canSpawn);
 		SpawnRestriction.register(MOOBLOOM, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, AnimalEntity::isValidNaturalSpawn);
 		SpawnRestriction.register(MOOLIP, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, AnimalEntity::isValidNaturalSpawn);
+		// Vanilla's breezes come only from trial spawners and have no natural spawn rule; here they spawn in the dark below y 0.
+		SpawnRestriction.register(EntityType.BREEZE, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, NewMobs::canBreezeSpawn);
 
 		// As strays take four in five of skeletons' spawns in the snow: frostbites of zombies' in the cold, the parched of
 		// skeletons' in deserts.
@@ -143,6 +149,12 @@ public final class NewMobs {
 		BiomeModifications.create(EternalReturn.id("grimlocks")).add(ModificationPhase.ADDITIONS,
 				BiomeSelectors.foundInOverworld().or(com.eternalreturn.worldgen.variants.BiomeVariants.any()),
 				context -> context.getSpawnSettings().addSpawn(SpawnGroup.MONSTER, new SpawnSettings.SpawnEntry(GRIMLOCK, 30, 2, 3)));
+		// Breezes in deep caves (canBreezeSpawn: below y 0, in the dark), alone; a third of the grimlocks' weight. Every
+		// overworld biome: those the world's generator lists, vanilla's overworld tag (its cave biomes, which a generator
+		// may not list) and the variants (the cave biomes of Eternal Return worlds among them).
+		BiomeModifications.create(EternalReturn.id("cave_breezes")).add(ModificationPhase.ADDITIONS,
+				BiomeSelectors.foundInOverworld().or(BiomeSelectors.tag(BiomeTags.IS_OVERWORLD)).or(com.eternalreturn.worldgen.variants.BiomeVariants.any()),
+				context -> context.getSpawnSettings().addSpawn(SpawnGroup.MONSTER, new SpawnSettings.SpawnEntry(EntityType.BREEZE, 10, 1, 1)));
 		// Rare: alone, a small weight beside endermen's 10 (in fours), and SandownEntity.canSpawn passes half of them.
 		BiomeModifications.create(EternalReturn.id("end_sandowns")).add(ModificationPhase.ADDITIONS, BiomeSelectors.foundInTheEnd(),
 				context -> context.getSpawnSettings().addSpawn(SpawnGroup.MONSTER, new SpawnSettings.SpawnEntry(SANDOWN, 1, 1, 1)));
@@ -182,5 +194,10 @@ public final class NewMobs {
 			entries.addAfter(Items.ENDERMAN_SPAWN_EGG, sandown);
 			entries.addAfter(Items.STRAY_SPAWN_EGG, sunken);
 		});
+	}
+
+	/** A natural breeze: below y 0 only, where a monster could spawn in the dark. Spawners, eggs and commands are unaffected. */
+	public static boolean canBreezeSpawn(EntityType<? extends HostileEntity> type, ServerWorldAccess world, SpawnReason reason, BlockPos pos, Random random) {
+		return (pos.getY() < 0 || reason != SpawnReason.NATURAL) && HostileEntity.canSpawnInDark(type, world, reason, pos, random);
 	}
 }

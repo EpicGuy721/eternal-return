@@ -491,4 +491,24 @@ public class UndergroundBlockTests implements FabricGameTest {
 		ctx.assertTrue(plains, "plains lost their slimes");
 		ctx.complete();
 	}
+
+	/** Breezes spawn naturally in overworld caves (any overworld biome, the cave biomes too), only below y 0, not in the Nether. */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = BATCH)
+	public void breezesSpawnInDeepCaves(TestContext ctx) {
+		var biomes = ctx.getWorld().getRegistryManager().get(RegistryKeys.BIOME);
+		java.util.function.Predicate<net.minecraft.world.biome.Biome> breezes = biome -> biome.getSpawnSettings().getSpawnEntries(SpawnGroup.MONSTER).getEntries()
+				.stream().anyMatch(entry -> entry.type == EntityType.BREEZE);
+		ctx.assertTrue(breezes.test(biomes.get(BiomeKeys.PLAINS)), "no breezes in plains");
+		ctx.assertTrue(breezes.test(biomes.get(BiomeKeys.DRIPSTONE_CAVES)), "no breezes in dripstone caves");
+		// The cave biomes exist only with Moderner Beta.
+		var mushroomCaves = biomes.get(Identifier.of("eternalreturn", "mushroom_caves"));
+		ctx.assertTrue(mushroomCaves == null || breezes.test(mushroomCaves), "no breezes in mushroom caves");
+		ctx.assertTrue(!breezes.test(biomes.get(BiomeKeys.NETHER_WASTES)), "breezes in the Nether");
+		ServerWorld world = ctx.getWorld();
+		ctx.assertTrue(net.minecraft.entity.SpawnRestriction.getLocation(EntityType.BREEZE) == net.minecraft.entity.SpawnLocationTypes.ON_GROUND,
+				"breezes have no ground spawn rule");
+		ctx.assertTrue(!net.minecraft.entity.SpawnRestriction.canSpawn(EntityType.BREEZE, world, net.minecraft.entity.SpawnReason.NATURAL,
+				new BlockPos(0, 40, 0), world.getRandom()), "a natural breeze above y 0");
+		ctx.complete();
+	}
 }
