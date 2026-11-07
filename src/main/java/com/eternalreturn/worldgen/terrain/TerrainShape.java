@@ -21,9 +21,9 @@ import java.util.Map;
  * Reshapes Eternal Return terrain where Moderner Beta works out each terrain column's height (its depth
  * and scale, from the biomes around; ModernerBetaHeightMixin). Two changes, Eternal Return worlds only:
  * <ul>
- * <li>Deep oceans: the sea floor steps down away from the coast. A shelf at about y 30 for some 50
- * blocks, a steep drop to about y 0, and further out (about 170 blocks from land) another steep drop to
- * about y -30. The distance to land comes from the biome map (a distance field per 256-block region),
+ * <li>Deep oceans: the sea floor steps down away from the coast. A shelf at about y 30 for some 40
+ * to 50 blocks, a steep slope (45 to 60 degrees at its steepest, 24 to 44 blocks wide) to about y 0, and
+ * further out (about 175 blocks from land) another such slope to about y -30. The distance to land comes from the biome map (a distance field per 256-block region),
  * and both edges wander with noise.</li>
  * <li>Sinkholes: very rarely the ground (mostly the sea floor) drops into a pit about 100 blocks across down to
  * the bottom of the world, which the generator floods from sea level down, as 1.18 and 1.19 sometimes did.</li>
@@ -44,9 +44,16 @@ public final class TerrainShape {
 	public static final double SHELF_Y = 30;
 	public static final double MIDDLE_Y = 0;
 	public static final double DEEP_Y = -30;
-	/** Blocks from land where the shelf ends, and where the second drop is (each plus or minus some noise). */
-	public static final double SHELF_EDGE = 48;
-	public static final double DEEP_EDGE = 170;
+	/** Blocks from land where the shelf ends, and where the second drop is (each plus or minus some noise): the middle of each drop. */
+	public static final double SHELF_EDGE = 60;
+	public static final double DEEP_EDGE = 175;
+	/**
+	 * How wide each drop is, in blocks, from its top to its foot: between these two, varying along the coast with noise.
+	 * A 30-block drop over 24 blocks is about 60 degrees at its steepest, over 44 blocks about 45 (it was 10 to 12 blocks,
+	 * a wall).
+	 */
+	public static final double DROP_WIDTH_MIN = 24;
+	public static final double DROP_WIDTH_MAX = 44;
 	/** Sinkholes: one chance per square of this many blocks. */
 	public static final int SINKHOLE_CELL = 1024;
 	public static final double SINKHOLE_CHANCE = 0.35;
@@ -158,17 +165,25 @@ public final class TerrainShape {
 
 	// ------------------------------------------------------------------ deep oceans
 
+	/** Half a drop's width for a noise value in -1..1. */
+	private static double dropHalfWidth(double noise) {
+		return MathHelper.lerp((noise + 1) * 0.5, DROP_WIDTH_MIN, DROP_WIDTH_MAX) * 0.5;
+	}
+
 	private static float oceanDepth(State state, int noiseX, int noiseZ, float depth) {
 		double distance = coastDistance(state, noiseX, noiseZ);
 		double x = noiseX * 4.0;
 		double z = noiseZ * 4.0;
 		double shelfEdge = SHELF_EDGE + 14 * state.noise.sample(x / 160.0, z / 160.0);
 		double deepEdge = DEEP_EDGE + 35 * state.noise.sample(x / 260.0 + 91.3, z / 260.0 - 17.7);
+		// Half the width of each drop: steeper in some stretches of coast, gentler in others.
+		double shelfHalf = dropHalfWidth(state.noise.sample(x / 120.0 - 40.1, z / 120.0 + 63.7));
+		double deepHalf = dropHalfWidth(state.noise.sample(x / 140.0 + 12.9, z / 140.0 + 88.4));
 		double y = yForDepth(depth);
-		// Down from the coast to the shelf, then two steep drops.
+		// Down from the coast to the shelf, then two steep slopes.
 		y = MathHelper.lerp(smoothstep(2, 26, distance), y, Math.min(y, SHELF_Y));
-		y = MathHelper.lerp(smoothstep(shelfEdge - 5, shelfEdge + 5, distance), y, Math.min(y, MIDDLE_Y));
-		y = MathHelper.lerp(smoothstep(deepEdge - 6, deepEdge + 6, distance), y, Math.min(y, DEEP_Y));
+		y = MathHelper.lerp(smoothstep(shelfEdge - shelfHalf, shelfEdge + shelfHalf, distance), y, Math.min(y, MIDDLE_Y));
+		y = MathHelper.lerp(smoothstep(deepEdge - deepHalf, deepEdge + deepHalf, distance), y, Math.min(y, DEEP_Y));
 		return depthForY(y);
 	}
 

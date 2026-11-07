@@ -43,7 +43,8 @@ public class TerrainFeatureTests implements FabricGameTest {
 	 * Over 8,000 x 8,000 blocks, the floor of every ocean column (sampled every 32 blocks): the deepest
 	 * is around y -30 and none lies below y -40; most of the open sea is far below the old floors (y 33
 	 * to 47); and the floor gathers on the three steps (y 30, 0 and -30) rather than spreading evenly,
-	 * with steep drops between them. Sinkholes are left out.
+	 * with steep slopes between them that are not walls (a 6-block rise over 4 blocks is common, 12 or more rare).
+ * Sinkholes are left out.
 	 */
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = TERRAIN_BATCH, tickLimit = 2_000_000)
 	public void oceansFallInSteps(TestContext ctx) {
@@ -57,6 +58,7 @@ public class TerrainFeatureTests implements FabricGameTest {
 		int nearSteps = 0;
 		int between = 0;
 		int steepDrops = 0;
+		int walls = 0;
 		// For the checklist: the column nearest spawn on each step.
 		int[][] examples = new int[3][];
 		int[] steps = {(int) TerrainShape.SHELF_Y, (int) TerrainShape.MIDDLE_Y, (int) TerrainShape.DEEP_Y};
@@ -95,19 +97,23 @@ public class TerrainFeatureTests implements FabricGameTest {
 					between++;
 				}
 				int next = generator.getHeight(x + 4, z, Heightmap.Type.OCEAN_FLOOR_WG, world, noise) - 1;
-				if (Math.abs(next - floor) >= 10) {
+				if (Math.abs(next - floor) >= 6) {
 					steepDrops++;
+				}
+				if (Math.abs(next - floor) >= 12) {
+					walls++;
 				}
 			}
 		}
 		int deep = floors.entrySet().stream().filter(e -> e.getKey() < TerrainShape.MIDDLE_Y + 10).mapToInt(Map.Entry::getValue).sum();
-		EternalReturn.LOGGER.info("[terrain] ocean floors (sampled every 32 blocks): {} columns, deepest y {}, by 10-block band {}, near a step {}, between steps {}, 10+ block drops over 4 blocks {} | nearest spawn on each step (x floor z): {}",
-				columns, lowest, floors, nearSteps, between, steepDrops, java.util.Arrays.stream(examples).map(java.util.Arrays::toString).toList());
+		EternalReturn.LOGGER.info("[terrain] ocean floors (sampled every 32 blocks): {} columns, deepest y {}, by 10-block band {}, near a step {}, between steps {}, 6+ block drops over 4 blocks {}, 12+ {} | nearest spawn on each step (x floor z): {}",
+				columns, lowest, floors, nearSteps, between, steepDrops, walls, java.util.Arrays.stream(examples).map(java.util.Arrays::toString).toList());
 		ctx.assertTrue(columns > 2_500, "only " + columns + " ocean columns");
 		ctx.assertTrue(lowest <= TerrainShape.DEEP_Y + 6 && lowest >= TerrainShape.DEEP_Y - 10, "the deepest ocean floor is at y " + lowest + ", not around y -30");
 		ctx.assertTrue(deep * 3 > columns, "only " + deep + " of " + columns + " ocean columns are below y 10");
 		ctx.assertTrue(nearSteps > between * 3, nearSteps + " ocean columns near a step against " + between + " between them: the floor isn't stepped");
 		ctx.assertTrue(steepDrops > 15, "only " + steepDrops + " steep drops in the sea floor");
+		ctx.assertTrue(walls * 5 < steepDrops, walls + " of the sea floor's " + steepDrops + " steep drops are walls (12 blocks or more over 4)");
 		ctx.assertTrue(Boolean.TRUE.equals(ModernerBetaHooks.APPLIED.get("ModernerBetaHeightMixin")) && ModernerBetaHooks.HEIGHT_PROVIDERS.get() > 0,
 				"the column-height hook into Moderner Beta is not applied: " + ModernerBetaHooks.APPLIED);
 		ctx.complete();
