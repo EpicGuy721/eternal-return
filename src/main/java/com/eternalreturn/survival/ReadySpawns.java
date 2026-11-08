@@ -2,7 +2,6 @@ package com.eternalreturn.survival;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.server.network.SpawnLocating;
 import net.minecraft.server.world.ChunkTicketType;
 import net.minecraft.server.world.ServerChunkManager;
 import net.minecraft.server.world.ServerWorld;
@@ -75,8 +74,8 @@ public final class ReadySpawns {
 				hold(tickWorld, centre, true);
 			}
 		} else if (spot == null && tickWorld.getChunkManager().isChunkLoaded(centre.x, centre.z)) {
-			BlockPos found = SpawnLocating.findServerSpawnPoint(tickWorld, centre);
-			if (found != null && tickWorld.getWorldBorder().contains(found)) {
+			BlockPos found = RandomSpawns.standingSpot(tickWorld, centre);
+			if (found != null) {
 				spot = found;
 			} else {
 				// No ground to stand on in that chunk: let it go and try elsewhere.
@@ -107,7 +106,10 @@ public final class ReadySpawns {
 		if (in != world || spot == null || centre == null || !in.getChunkManager().isChunkLoaded(centre.x, centre.z)) {
 			return null;
 		}
-		BlockPos taken = spot;
+		BlockPos taken = RandomSpawns.stillStanding(in, spot) ? spot : RandomSpawns.standingSpot(in, centre);
+		if (taken == null) {
+			return null;
+		}
 		RELEASING.add(new Held(in, centre, in.getTime() + RELEASE_AFTER));
 		centre = null;
 		spot = null;

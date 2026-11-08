@@ -16,6 +16,7 @@
 			"com.eternalreturn.gametest.FishingFixTests",
 			"com.eternalreturn.gametest.WorldgenTests",
 			"com.eternalreturn.gametest.WorldgenBenchmarkTests",
+			"com.eternalreturn.gametest.SpawnSpotTests",
 			"com.eternalreturn.gametest.EternalReturnPresetTests",
 			"com.eternalreturn.gametest.TerrainFeatureTests",
 			"com.eternalreturn.gametest.ClutterTests",

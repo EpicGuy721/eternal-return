@@ -5,16 +5,19 @@ import com.eternalreturn.worldgen.EternalReturnServer;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.BiomeTags;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.network.SpawnLocating;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.TeleportTarget;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.chunk.WorldChunk;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -49,12 +52,56 @@ public final class RandomSpawns {
 			if (candidate == null) {
 				continue;
 			}
-			BlockPos spot = SpawnLocating.findServerSpawnPoint(world, new ChunkPos(candidate));
-			if (spot != null && world.getWorldBorder().contains(spot)) {
+			BlockPos spot = standingSpot(world, new ChunkPos(candidate));
+			if (spot != null) {
 				return spot;
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * A place to stand in this chunk (it is generated if it isn't yet), or null if it has none: the top of the first
+	 * column, in vanilla's order, whose highest solid block has a full top, isn't under water or lava, and has two free
+	 * dry blocks above it. Read from the blocks themselves: vanilla's spawn finder trusted the chunk's height map and
+	 * didn't check the room above, so a height map off by a little put players inside the ground or under water.
+	 */
+	@Nullable
+	public static BlockPos standingSpot(ServerWorld world, ChunkPos chunkPos) {
+		WorldChunk chunk = world.getChunk(chunkPos.x, chunkPos.z);
+		int top = Math.min(world.getTopY() - 1, chunk.getHighestNonEmptySectionYOffset() + 15);
+		BlockPos.Mutable pos = new BlockPos.Mutable();
+		for (int x = chunkPos.getStartX(); x <= chunkPos.getEndX(); x++) {
+			for (int z = chunkPos.getStartZ(); z <= chunkPos.getEndZ(); z++) {
+				for (int y = top; y > world.getBottomY(); y--) {
+					BlockState state = chunk.getBlockState(pos.set(x, y, z));
+					if (passable(world, pos, state)) {
+						continue;
+					}
+					BlockPos feet = pos.up().toImmutable();
+					if (state.getFluidState().isEmpty() && Block.isFaceFullSquare(state.getCollisionShape(world, pos), Direction.UP)
+							&& passable(world, feet, chunk.getBlockState(feet)) && passable(world, feet.up(), chunk.getBlockState(feet.up()))
+							&& world.getWorldBorder().contains(feet)) {
+						return feet;
+					}
+					// The top of this column is water, lava, a slab, a fence...: try the next column.
+					break;
+				}
+			}
+		}
+		return null;
+	}
+
+	/** Whether a player can stand in this block: nothing to collide with, and no water or lava. */
+	private static boolean passable(ServerWorld world, BlockPos pos, BlockState state) {
+		return state.getFluidState().isEmpty() && state.getCollisionShape(world, pos).isEmpty();
+	}
+
+	/** Whether a spot found earlier is still one to stand on (nothing has been built or poured there since). */
+	public static boolean stillStanding(ServerWorld world, BlockPos feet) {
+		BlockState below = world.getBlockState(feet.down());
+		return below.getFluidState().isEmpty() && Block.isFaceFullSquare(below.getCollisionShape(world, feet.down()), Direction.UP)
+				&& passable(world, feet, world.getBlockState(feet)) && passable(world, feet.up(), world.getBlockState(feet.up()));
 	}
 
 	/**
