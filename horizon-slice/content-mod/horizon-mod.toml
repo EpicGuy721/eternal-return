@@ -1,0 +1,8 @@
+id = "eternalreturn"
+name = "Eternal Return (Horizon slice)"
+version = "0.1.0"
+description = "Wool and concrete stairs and slabs, and boulders, from the Eternal Return Fabric mod."
+authors = ["Ryan"]
+api = "0.2"
+side = "both"
+capabilities = ["registries"]

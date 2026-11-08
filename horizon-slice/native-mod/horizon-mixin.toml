@@ -1,0 +1,24 @@
+# Eternal Return's leaf distance for Horizon: leaves hold on up to 9 blocks from a log (vanilla: 6),
+# as the Fabric mod's LeafDistance does. Build it with
+#   horizon-launcher native-build <this folder> --instance <instance> --trust-native-code
+# or put the folder in the game folder's horizon-native-mods/ and let the launcher build it.
+[mod]
+id = "eternalreturn_leaves"
+version = "0.1.0"
+
+[compatibility]
+# Nightly 2026-11-07 (tag nightly-source/2026-11-07-6560641). The helper reaches into GameLevel (a game type,
+# not part of the stable hook API), so the mod pins a commit instead of naming a hooks version.
+horizon_revision = "6560641ba51a452f6bc2407baa4eb1b3be517ca8"
+
+[[injection]]
+id = "leaf_distance"
+hook = "leaves_decay"       # GameLevel::native_leaves_decay: a leaf at distance 7 is about to decay
+hook_version = 1
+kind = "HEAD"
+helper = "leaf_distance.rs"
+bindings = [
+  { name = "level", ty = "&crate::game::GameLevel<'_>", value = "self" },
+  { name = "pos", ty = "horizon_core::position::BlockPos", value = "pos" },
+  { name = "cancel", ty = "&mut bool", value = "&mut *cancel" },
+]
