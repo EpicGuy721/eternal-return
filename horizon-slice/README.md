@@ -19,8 +19,13 @@ A feasibility slice of the Eternal Return Fabric mod (1.21.1) for [Horizon](http
 
 ## Limits of this slice
 
-- The boulders use vanilla's `forest_rock` feature (the giant taiga's lumps), not the Fabric mod's boulder templates
+- The boulders use vanilla's rock feature (`block_blob`, the giant taiga's lumps), not the Fabric mod's boulder templates
   with each biome's stone: Horizon has no hook for a mod's own feature types yet.
 - The leaf rule checks again on each random tick of a leaf at vanilla's distance 7 (vanilla's distance property
   stops at 7), so very wide crowns cost a little more than in the Fabric mod.
 - Wool stairs and slabs copy oak stairs' and slabs' behaviour (sounds and hardness are wool's); concrete copies stone's.
+
+## Checked in the game
+
+Run on 2026-11-07 (launcher 0.2.50, Nightly 2026-11-07-2ebf00a): see `screenshots/`. All 64 blocks place and draw;
+leaves 1 to 9 blocks from a log stay and 10 or more decay; granite boulders generate on the land.

@@ -96,12 +96,23 @@ upstream must come first), **impossible today**.
    `leaves_decay` hook can only keep a leaf at vanilla's distance 7, and vanilla's distance stops at 7, so the mod
    searches through the leaves for a log within 9 steps itself. It reads block names from a game type, so it pins
    Nightly 2026-11-07.
-3. **Boulder** (in the content mod): vanilla's `forest_rock` feature in stone, granite, diorite and andesite, added
-   to every overworld biome with a biome modifier. It is not the Fabric boulder (templates in each biome's stone):
-   a mod's own feature type needs a hook Horizon lacks.
+3. **Boulder** (in the content mod): vanilla's rock feature (`block_blob` in 26.3, 1.21.1's `forest_rock`) in
+   stone, granite, diorite and andesite, added to every overworld biome with a biome modifier. It is not the Fabric
+   boulder (templates in each biome's stone): a mod's own feature type needs a hook Horizon lacks.
 
-Run status: not yet run in the game. Horizon's launcher needs the owner's Microsoft sign-in and a download of
-Minecraft 26.3 and the launcher itself (portable zip, 21 MB; it fetches its own Rust toolchain for native mods).
+**Run in the game on 2026-11-07** (launcher 0.2.50, Nightly 2026-11-07-2ebf00a, a fresh creative world), with
+screenshots in `horizon-slice/screenshots/`:
+
+- `stairs_and_slabs.png`: all 64 stairs and slabs placed, drawn with this repo's models, the right colours.
+- `leaves_distance_10.png`: a log with a line of 12 leaves, random ticks sped up: the leaves 1 to 9 blocks from the
+  log stayed, 10 to 12 decayed (vanilla keeps only 1 to 6). The native mod applied and compiled on the first try.
+- `boulder_granite.png`: a granite boulder the world generated on its own, on the grass of a forest.
+
+What it took: the first native build is about 20 minutes (the launcher downloads Rust 1.99.1 and Horizon's source
+and compiles the whole game); the version must first be prepared from Minecraft 26.3 (about a minute). Rebuilds
+after a change to a mod are incremental. One format catch: 26.3 renamed `forest_rock` to `block_blob`, dropped
+the `config` wrapper and writes the block as a plain name; the game logs "placed features cannot run" and skips a
+feature in the old form, which is how it was found.
 
 ## Phased plan (rough sizes; a "session" is one working session like the feature batches)
 

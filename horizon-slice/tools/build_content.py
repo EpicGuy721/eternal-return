@@ -130,9 +130,12 @@ def main():
     # boulder stones, one feature per stone, each rare on the land of every overworld biome.
     features = []
     for stone in ('stone', 'granite', 'diorite', 'andesite'):
-        write(f'data/{NS}/worldgen/configured_feature/boulder_{stone}.json', {
-            'type': 'minecraft:forest_rock',
-            'config': {'state': {'Name': f'minecraft:{stone}'}},
+        write(f'data/{NS}/worldgen/feature/boulder_{stone}.json', {
+            # 26.3's name for 1.21.1's forest_rock; it now says what it may land on.
+            # 26.3's form, as vanilla's own forest_rock.json: no "config" wrapper, the block by name.
+            'type': 'minecraft:block_blob',
+            'can_place_on': {'type': 'minecraft:matching_block_tag', 'tag': 'minecraft:forest_rock_can_place_on'},
+            'state': f'minecraft:{stone}',
         })
         write(f'data/{NS}/worldgen/placed_feature/boulder_{stone}.json', {
             'feature': f'{NS}:boulder_{stone}',
