@@ -154,6 +154,17 @@ public class IceBlockTests implements FabricGameTest {
 			}
 		}
 		ctx.assertTrue(missing.isEmpty(), "missing recipes " + missing);
+		// Ice brick stairs, slab and wall: tagged as such, pickaxe blocks, crafted from ice bricks or stonecut, the wall holds snow.
+		for (net.minecraft.block.Block block : List.of(IceBlocks.ICE_BRICK_STAIRS, IceBlocks.ICE_BRICK_SLAB, IceBlocks.ICE_BRICK_WALL)) {
+			Identifier id = net.minecraft.registry.Registries.BLOCK.getId(block);
+			ctx.assertTrue(block.getDefaultState().isIn(BlockTags.PICKAXE_MINEABLE) && block.asItem() != net.minecraft.item.Items.AIR
+					&& block.getSlipperiness() == Blocks.PACKED_ICE.getSlipperiness(), id + ": a slippery pickaxe block with an item");
+			ctx.assertTrue(world.getRecipeManager().get(id).isPresent()
+					&& world.getRecipeManager().get(Identifier.of(id.getNamespace(), id.getPath() + "_from_packed_ice_stonecutting")).isPresent(), id + " recipes");
+		}
+		ctx.assertTrue(IceBlocks.ICE_BRICK_STAIRS.getDefaultState().isIn(BlockTags.STAIRS) && IceBlocks.ICE_BRICK_SLAB.getDefaultState().isIn(BlockTags.SLABS)
+				&& IceBlocks.ICE_BRICK_WALL.getDefaultState().isIn(BlockTags.WALLS), "ice brick stairs, slab and wall tags");
+		ctx.assertTrue(IceBlocks.ICE_BRICK_WALL.getDefaultState().contains(com.eternalreturn.blocks.SnowCover.SNOWY), "the ice brick wall doesn't hold snow");
 		ctx.assertTrue(IceBlocks.POLISHED_ICE.getSlipperiness() == Blocks.PACKED_ICE.getSlipperiness(), "polished ice isn't slippery");
 		// Their own sounds (the owner's clips), registered.
 		ctx.assertTrue(IceBlocks.ICICLE.getDefaultState().getSoundGroup() == IceBlocks.ICICLE_SOUNDS

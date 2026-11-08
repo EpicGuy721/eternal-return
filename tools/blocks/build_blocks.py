@@ -10,6 +10,9 @@ Writes (all under src/main/resources):
   that have a slab but no stairs (both registered by CutBlocks: STONE_WALLS, MORE_STAIRS, whose tables
   must match these): blockstates, block and item models, loot tables, recipes (crafting and the
   stonecutter), tags and their English names in en_us.json (other lines kept);
+- ice brick stairs, slabs and walls (registered by com.eternalreturn.blocks.IceBlocks; the ice bricks themselves come
+  from tools/ice/build_ice.py): the same resources, crafted from ice bricks or stonecut from packed ice, polished ice
+  or ice bricks;
 - layered carpets (com.eternalreturn.blocks.CarpetLayers, CarpetBlockMixin): vanilla's carpet
   blockstates with a variant per layer count, a model per carpet and layer count (2 to 16; one layer
   keeps vanilla's model), and vanilla's carpet loot tables dropping one carpet per layer.
@@ -211,12 +214,52 @@ for stairs, (base, side, end, name) in MORE_STAIRS.items():
     write_json(f'data/{NS}/recipe/{stairs}_from_{base}_stonecutting.json', {
         'type': 'minecraft:stonecutting', 'ingredient': ingredient, 'result': {'count': 1, 'id': f'{NS}:{stairs}'}})
 
+# Ice brick stairs, slab and wall (IceBlocks), from eternalreturn:ice_bricks.
+ICE = f'{NS}:block/ice_bricks'
+ice_cut = {'stairs': f'{NS}:ice_brick_stairs', 'slab': f'{NS}:ice_brick_slab', 'wall': f'{NS}:ice_brick_wall'}
+names.update({f'block.{NS}.ice_brick_stairs': 'Ice Brick Stairs', f'block.{NS}.ice_brick_slab': 'Ice Brick Slab',
+              f'block.{NS}.ice_brick_wall': 'Ice Brick Wall'})
+sides = {'bottom': ICE, 'top': ICE, 'side': ICE}
+for suffix, parent in [('', 'stairs'), ('_inner', 'inner_stairs'), ('_outer', 'outer_stairs')]:
+    write_json(f'assets/{NS}/models/block/ice_brick_stairs{suffix}.json', {'parent': f'minecraft:block/{parent}', 'textures': sides})
+write_json(f'assets/{NS}/blockstates/ice_brick_stairs.json', stairs_blockstate(f'{NS}:block/ice_brick_stairs'))
+write_json(f'assets/{NS}/models/block/ice_brick_slab.json', {'parent': 'minecraft:block/slab', 'textures': sides})
+write_json(f'assets/{NS}/models/block/ice_brick_slab_top.json', {'parent': 'minecraft:block/slab_top', 'textures': sides})
+write_json(f'assets/{NS}/blockstates/ice_brick_slab.json', {'variants': {
+    'type=bottom': {'model': f'{NS}:block/ice_brick_slab'},
+    'type=double': {'model': f'{NS}:block/ice_bricks'},
+    'type=top': {'model': f'{NS}:block/ice_brick_slab_top'},
+}})
+for suffix, parent in [('_post', 'template_wall_post'), ('_side', 'template_wall_side'), ('_side_tall', 'template_wall_side_tall'),
+                       ('_inventory', 'wall_inventory')]:
+    write_json(f'assets/{NS}/models/block/ice_brick_wall{suffix}.json', {'parent': f'minecraft:block/{parent}', 'textures': {'wall': ICE}})
+write_json(f'assets/{NS}/blockstates/ice_brick_wall.json', wall_blockstate(f'{NS}:block/ice_brick_wall'))
+write_json(f'assets/{NS}/models/item/ice_brick_stairs.json', {'parent': f'{NS}:block/ice_brick_stairs'})
+write_json(f'assets/{NS}/models/item/ice_brick_slab.json', {'parent': f'{NS}:block/ice_brick_slab'})
+write_json(f'assets/{NS}/models/item/ice_brick_wall.json', {'parent': f'{NS}:block/ice_brick_wall_inventory'})
+write_json(f'data/{NS}/loot_table/blocks/ice_brick_stairs.json', simple_loot(ice_cut['stairs']))
+write_json(f'data/{NS}/loot_table/blocks/ice_brick_slab.json', slab_loot(ice_cut['slab']))
+write_json(f'data/{NS}/loot_table/blocks/ice_brick_wall.json', simple_loot(ice_cut['wall']))
+ice_bricks = {'item': f'{NS}:ice_bricks'}
+for kind, category, pattern, count in [('stairs', 'building', ['#  ', '## ', '###'], 4), ('slab', 'building', ['###'], 6),
+                                       ('wall', 'misc', ['###', '###'], 6)]:
+    write_json(f'data/{NS}/recipe/ice_brick_{kind}.json', {
+        'type': 'minecraft:crafting_shaped', 'category': category, 'key': {'#': ice_bricks}, 'pattern': pattern,
+        'result': {'count': count, 'id': ice_cut[kind]}})
+    for source in ['minecraft:packed_ice', f'{NS}:polished_ice', f'{NS}:ice_bricks']:
+        write_json(f'data/{NS}/recipe/ice_brick_{kind}_from_{source.split(":")[1]}_stonecutting.json', {
+            'type': 'minecraft:stonecutting', 'ingredient': {'item': source},
+            'result': {'count': 2 if kind == 'slab' else 1, 'id': ice_cut[kind]}})
+stone_cut.extend(ice_cut.values())
+more_stairs.append(ice_cut['stairs'])
+
 # Pickaxe blocks (data/minecraft/tags/block/mineable/pickaxe.json lists this tag).
 write_json(f'data/{NS}/tags/block/stone_cut_blocks.json', {'values': stone_cut})
-stone_walls = [f'{NS}:{wall}' for wall in STONE_WALLS]
+stone_walls = [f'{NS}:{wall}' for wall in STONE_WALLS] + [ice_cut['wall']]
 for kind in ['block', 'item']:
     write_json(f'data/minecraft/tags/{kind}/stairs.json', {'replace': False, 'values': all_stairs + more_stairs})
     write_json(f'data/minecraft/tags/{kind}/walls.json', {'replace': False, 'values': stone_walls})
+    write_json(f'data/minecraft/tags/{kind}/slabs.json', {'replace': False, 'values': all_slabs + [ice_cut['slab']]})
 
 lang_file = os.path.join(ROOT, 'assets', NS, 'lang', 'en_us.json')
 with open(lang_file, encoding='utf-8') as f:

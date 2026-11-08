@@ -635,5 +635,8 @@
 	"biome.eternalreturn.mushroom_caves": "Mushroom Caves",
 	"biome.eternalreturn.magma_caves": "Magma Caves",
 	"block.eternalreturn.puffed_purple_mushroom_block": "Puffed Purple Mushroom Block",
-	"block.eternalreturn.puffed_blue_mushroom_block": "Puffed Blue Mushroom Block"
+	"block.eternalreturn.puffed_blue_mushroom_block": "Puffed Blue Mushroom Block",
+	"block.eternalreturn.ice_brick_stairs": "Ice Brick Stairs",
+	"block.eternalreturn.ice_brick_slab": "Ice Brick Slab",
+	"block.eternalreturn.ice_brick_wall": "Ice Brick Wall"
 }

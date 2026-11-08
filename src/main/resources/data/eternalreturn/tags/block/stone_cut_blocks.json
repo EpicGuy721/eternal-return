@@ -16,6 +16,9 @@
     "eternalreturn:dark_prismarine_wall",
     "eternalreturn:smooth_stone_stairs",
     "eternalreturn:cut_sandstone_stairs",
-    "eternalreturn:cut_red_sandstone_stairs"
+    "eternalreturn:cut_red_sandstone_stairs",
+    "eternalreturn:ice_brick_stairs",
+    "eternalreturn:ice_brick_slab",
+    "eternalreturn:ice_brick_wall"
   ]
 }
