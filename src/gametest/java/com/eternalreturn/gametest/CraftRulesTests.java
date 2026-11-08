@@ -266,4 +266,43 @@ public class CraftRulesTests implements FabricGameTest {
 		FishingTests.disconnect(player);
 		ctx.complete();
 	}
+
+	/**
+	 * The next random spawn is prepared in the background (ReadySpawns): a spot on the ground with the land around it
+	 * already generated, and the next death without a bed goes there at once. (A batch of its own: it turns random
+	 * spawns on.)
+	 */
+	@GameTest(templateName = ARENA, batchId = "ready_spawns", tickLimit = 2400)
+	public void nextSpawnIsReady(TestContext ctx) {
+		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(8, 2, 8));
+		com.eternalreturn.survival.ReadySpawns.forget();
+		RandomSpawns.testEverywhere = true;
+		boolean[] done = {false};
+		ctx.runAtEveryTick(() -> {
+			BlockPos ready = com.eternalreturn.survival.ReadySpawns.ready();
+			if (done[0] || ready == null) {
+				return;
+			}
+			done[0] = true;
+			try {
+				ServerWorld world = ctx.getWorld();
+				int radius = com.eternalreturn.survival.ReadySpawns.RADIUS;
+				for (int dx = -radius; dx <= radius; dx++) {
+					for (int dz = -radius; dz <= radius; dz++) {
+						ctx.assertTrue(world.getChunkManager().isChunkLoaded((ready.getX() >> 4) + dx, (ready.getZ() >> 4) + dz),
+								"the land around " + ready + " is generated");
+					}
+				}
+				ctx.assertTrue(Math.sqrt(ready.getX() * (double) ready.getX() + ready.getZ() * (double) ready.getZ()) <= 5001.0, "within 5,000 blocks: " + ready);
+				TeleportTarget target = player.getRespawnTarget(false, TeleportTarget.NO_OP);
+				ctx.assertTrue(BlockPos.ofFloored(target.pos()).equals(ready), "the respawn goes to the prepared spot " + ready + ", not " + target.pos());
+				ctx.assertTrue(com.eternalreturn.survival.ReadySpawns.ready() == null, "used up");
+			} finally {
+				RandomSpawns.testEverywhere = false;
+				com.eternalreturn.survival.ReadySpawns.forget();
+			}
+			FishingTests.disconnect(player);
+			ctx.complete();
+		});
+	}
 }

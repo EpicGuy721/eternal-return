@@ -25,14 +25,17 @@ import java.util.Set;
 public class ModernerBetaMixinPlugin implements IMixinConfigPlugin {
 	private static final Logger LOGGER = LoggerFactory.getLogger("eternalreturn");
 	/** Mixin class to {target method name, argument count, return descriptor}. */
-	private static final Map<String, Object[]> TARGETS = Map.of(
-			"com.eternalreturn.mixin.compat.ModernerBetaSurfaceMixin", new Object[]{"isBlockSuitableForSurface", 1, "Z"},
-			"com.eternalreturn.mixin.compat.ModernerBetaSurfaceExtraMixin", new Object[]{"provideSurfaceExtra", 5, "V"},
-			"com.eternalreturn.mixin.compat.ModernerBetaHeightMixin", new Object[]{"getHeightConfigAt", 2, "Lmod/bluestaggo/modernerbeta/level/biome/HeightConfig;"},
-			"com.eternalreturn.mixin.compat.ModernerBetaSnowMixin", new Object[]{"setFreezeTopLayer", 4, "V"},
-			"com.eternalreturn.mixin.compat.ModernerBetaSnowCheckMixin", new Object[]{"shouldSnow", 5, "Z"},
-			"com.eternalreturn.mixin.compat.ModernerBetaCaveBiomeMixin", new Object[]{"apply", 4, null},
-			"com.eternalreturn.mixin.compat.ModernerBetaBiomeCacheMixin", new Object[]{"getBiome", 7, "Lnet/minecraft/registry/entry/RegistryEntry;"});
+	private static final Map<String, Object[]> TARGETS = Map.ofEntries(
+			Map.entry("com.eternalreturn.mixin.compat.ModernerBetaSurfaceMixin", new Object[]{"isBlockSuitableForSurface", 1, "Z"}),
+			Map.entry("com.eternalreturn.mixin.compat.ModernerBetaSurfaceExtraMixin", new Object[]{"provideSurfaceExtra", 5, "V"}),
+			Map.entry("com.eternalreturn.mixin.compat.ModernerBetaHeightMixin", new Object[]{"getHeightConfigAt", 2, "Lmod/bluestaggo/modernerbeta/level/biome/HeightConfig;"}),
+			Map.entry("com.eternalreturn.mixin.compat.ModernerBetaSnowMixin", new Object[]{"setFreezeTopLayer", 4, "V"}),
+			Map.entry("com.eternalreturn.mixin.compat.ModernerBetaSnowCheckMixin", new Object[]{"shouldSnow", 5, "Z"}),
+			Map.entry("com.eternalreturn.mixin.compat.ModernerBetaCaveBiomeMixin", new Object[]{"apply", 4, null}),
+			Map.entry("com.eternalreturn.mixin.compat.ModernerBetaBiomeCacheMixin", new Object[]{"getBiome", 7, "Lnet/minecraft/registry/entry/RegistryEntry;"}),
+			Map.entry("com.eternalreturn.mixin.compat.ModernerBetaChunkCacheMixin", new Object[]{"<init>", 4, "V"}),
+			Map.entry("com.eternalreturn.mixin.compat.ModernerBetaAuxChunkCacheMixin", new Object[]{"<init>", 4, "V"}),
+			Map.entry("com.eternalreturn.mixin.compat.ModernerBetaSurfaceHeightMixin", new Object[]{"estimateSurfaceHeight", 2, "I"}));
 
 	@Override
 	public void onLoad(String mixinPackage) {
@@ -68,7 +71,7 @@ public class ModernerBetaMixinPlugin implements IMixinConfigPlugin {
 					? "Worlds still generate, but snowy biomes lay no snow in plants, slabs, stairs, walls, fences and gates as they are made."
 					: hook.equals("ModernerBetaCaveBiomeMixin")
 					? "Eternal Return worlds still generate, but ice caves may turn up under warm land and mushroom and magma caves anywhere."
-					: hook.equals("ModernerBetaBiomeCacheMixin")
+					: hook.equals("ModernerBetaBiomeCacheMixin") || hook.endsWith("ChunkCacheMixin") || hook.equals("ModernerBetaSurfaceHeightMixin")
 					? "Eternal Return worlds still generate the same, only more slowly."
 					: hook.equals("ModernerBetaHeightMixin")
 					? "Eternal Return worlds still generate, but without deep stepped oceans or sinkholes."

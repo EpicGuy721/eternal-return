@@ -19,7 +19,7 @@ Numbers are from the owner's PC (Intel i5-13500H, 16 threads, 16 GB), chunks per
 | Vanilla | 37.9 / 40.0 | (unchanged) |
 | Moderner Beta Release 1.6.4 | 23.7 / 24.0 | (unchanged) |
 | Eternal Return | 5.7 / 3.5 | 15.7 / 12.5 (2.8x / 3.6x) |
-| Eternal Return with C2ME | 13.2 / 10.9 (C2ME alone) | 43.2 / 37.9 (7.6x / 10.8x) |
+| Eternal Return with C2ME | 13.2 / 10.9 (C2ME alone) | 43.2 / 37.9 (7.6x / 10.8x); 58 / 49 with the larger caches (10x / 14x) |
 | Vanilla with C2ME | | 113.4 / 126.7 |
 
 ## Where the time went
@@ -33,10 +33,19 @@ The profile of the old code: 83% of all generation time was the surface step, an
 - **Biome cell memory** (`ModernerBetaBiomeCacheMixin`, `QuartBiomeCache`, `ColumnHeightCache`): Moderner Beta's answer for a cell, and a column's heights, are worked out once and remembered (per worker thread, a few thousand recent cells). The answer only depends on the cell, so it is the same answer. Eternal Return worlds only; other worlds never touch it.
 - **The same decoration on every start** (`FeatureOrder`): each decoration feature takes its random numbers from its place in the list of features the game builds when the world loads. Moderner Beta hands over its biomes in an order that changes each time the game starts, so that list, and with it where every ore, tree and plant lands, came out different on each start: the same seed never made the same world twice, and decoration couldn't be checked against a recording. Eternal Return worlds now list the biomes by name, so the order is fixed. This is not a speed-up, but it is what makes the decorated check below possible. Other worlds are untouched (their decoration still doesn't repeat in plain Moderner Beta worlds).
 
+- **Larger Moderner Beta caches** (`ModernerBetaChunkCacheMixin`, `ModernerBetaAuxChunkCacheMixin`): Moderner Beta keeps its per-chunk biome and height maps for the last 512 chunks. A render distance of 12 or more, a pre-generator or C2ME's threads work on more chunks than that at once, so the maps were thrown away and worked out again; caches of that size keep 2048 now (a few megabytes each). With C2ME: 44 / 39 to 58 / 49 chunks a second. Every Moderner Beta world (the caches only remember answers; the control fingerprints match).
+- **The column's surface height, once** (`ModernerBetaSurfaceHeightMixin`): Moderner Beta's surface rules looked up the column's surface height (a locked cache lookup) for every block they tested; the last column's answer is kept. Every Moderner Beta world, same answers.
+- **C2ME's thread count**: 10 (its default here), 12, 14 and 15 worker threads all came out between 45 and 59 chunks a second with no pattern (run-to-run noise); the i5-13500H's eight efficiency cores add little. Left at C2ME's default, which also leaves room for the game itself. `-Pc2me -Pc2meThreads=n` measures it.
+- What's left (with C2ME): Moderner Beta working out each chunk's biome and height maps once (its design), and its per-block biome blending (about 10 to 15%, which would mean rewriting Moderner Beta's own maths line for line).
+
+## Random respawns
+
+A death without a bed (or a player's first join) puts the player at a random spot within 5,000 blocks (RandomSpawns), almost always somewhere no one has been, so the respawn waited 30 to 45 seconds while the spot was found and the land around it generated. `ReadySpawns` now picks the next spot ahead of time, while players are in the world, and generates the 11 x 11 chunks around it in the background (held as full chunks that don't tick, so nothing there moves or grows). The next respawn goes there at once and the rest of the view fills in around the player; then the next spot is prepared. Spots are picked exactly as before (same radius, dry land), so they are just as random. Checked by the game test `nextSpawnIsReady` (batch `ready_spawns`). Pre-generating the whole 5,000-block disc with Chunky (about 300,000 chunks) would make every respawn instant, for disk space.
+
 ## Proof that nothing looks different
 
 - Eternal Return fingerprint (`src/gametest/resources/fingerprints/eternal_return.json` and `eternal_return_features.json`, batch `er_fingerprint` in `runGametestBenchmark`): 27 chunks hashed after carving and 27 other chunks fully decorated, one by one in a fixed order. Recorded with the speed-ups off (`-PnoBiomeCache`). A second run with them off matched 27 of 27 decorated chunks (decoration now repeats), and runs with them on matched 27 of 27 carved and 27 of 27 decorated chunks, with and without C2ME. (The carved chunks also matched a recording made at the original code before any change.)
-- The control worlds (`runGametestVanilla`, `runGametestModernerBeta164`, `runGametestEternalReturnOldCaves`) still match their fingerprints.
+- The control worlds (`runGametestVanilla`, `runGametestModernerBeta164`, `runGametestModernerBetaBeta`) still match their fingerprints. (`runGametestEternalReturnOldCaves` matched only 6 of 27 carved chunks before any of this work, the same with the speed-ups off: an earlier terrain change; its baseline was left for the owner.)
 
 ## Mods
 

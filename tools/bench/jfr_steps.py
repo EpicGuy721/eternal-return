@@ -48,7 +48,7 @@ def main():
     selfc = collections.Counter()
     total = 0
     for thread, frames in samples(path):
-        if not (thread.startswith("Worker-Main") or thread == "Server thread"):
+        if not (thread.startswith("Worker-Main") or thread == "Server thread" or "c2me" in thread.lower()):
             continue
         total += 1
         step = step_of(frames)

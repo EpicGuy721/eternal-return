@@ -22,7 +22,8 @@ import org.jetbrains.annotations.Nullable;
  * respawn after a death with no bed (or respawn anchor) to go back to, is a random spot on dry land anywhere within
  * 5,000 blocks of 0, 0, not the world spawn point (RandomSpawnMixin, RandomFirstSpawnMixin). Oceans and rivers are
  * skipped by their biome before any ground is generated; if no dry spot turns up in TRIES places, vanilla's spawn
- * by the world spawn point is used. Leaving the End (alive) still goes to the world spawn point, as in vanilla.
+ * by the world spawn point is used. Leaving the End (alive) still goes to the world spawn point, as in vanilla. The next
+ * spot is prepared in the background, land and all (ReadySpawns), so a respawn doesn't wait for it.
  */
 public final class RandomSpawns {
 	private static final int TRIES = 24;
@@ -43,8 +44,32 @@ public final class RandomSpawns {
 	/** A random spot to stand on, on land within the radius of 0, 0, or null if none turned up. */
 	@Nullable
 	public static BlockPos find(ServerWorld world, Random random) {
-		int radius = EternalReturnConfig.get().survival.randomSpawnRadius;
 		for (int i = 0; i < TRIES; i++) {
+			BlockPos candidate = candidate(world, random, 1);
+			if (candidate == null) {
+				continue;
+			}
+			BlockPos spot = SpawnLocating.findServerSpawnPoint(world, new ChunkPos(candidate));
+			if (spot != null && world.getWorldBorder().contains(spot)) {
+				return spot;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * A random place within the radius whose biome isn't ocean or river, found without generating anything (ReadySpawns
+	 * then generates the land there), or null if none turned up in TRIES places.
+	 */
+	@Nullable
+	public static BlockPos candidate(ServerWorld world, Random random) {
+		return candidate(world, random, TRIES);
+	}
+
+	@Nullable
+	private static BlockPos candidate(ServerWorld world, Random random, int tries) {
+		int radius = EternalReturnConfig.get().survival.randomSpawnRadius;
+		for (int i = 0; i < tries; i++) {
 			// Even over the disc: the distance from 0, 0 goes as the square root.
 			double angle = random.nextDouble() * Math.PI * 2.0;
 			double distance = radius * Math.sqrt(random.nextDouble());
@@ -57,12 +82,16 @@ public final class RandomSpawns {
 			if (biome.isIn(BiomeTags.IS_OCEAN) || biome.isIn(BiomeTags.IS_DEEP_OCEAN) || biome.isIn(BiomeTags.IS_RIVER)) {
 				continue;
 			}
-			BlockPos spot = SpawnLocating.findServerSpawnPoint(world, new ChunkPos(x >> 4, z >> 4));
-			if (spot != null && world.getWorldBorder().contains(spot)) {
-				return spot;
-			}
+			return new BlockPos(x, world.getSeaLevel(), z);
 		}
 		return null;
+	}
+
+	/** The spot prepared ahead of time (ReadySpawns), or one found now. */
+	@Nullable
+	private static BlockPos spawnSpot(ServerWorld world) {
+		BlockPos ready = ReadySpawns.take(world);
+		return ready != null ? ready : find(world, world.getRandom());
 	}
 
 	/** A dead player's respawn: a random spot if they have no bed to go back to (vanilla's target otherwise). */
@@ -76,7 +105,7 @@ public final class RandomSpawns {
 		if (bed) {
 			return target;
 		}
-		BlockPos spot = find(overworld, overworld.getRandom());
+		BlockPos spot = spawnSpot(overworld);
 		if (spot == null) {
 			return target;
 		}
@@ -90,7 +119,7 @@ public final class RandomSpawns {
 		if (!applies(world)) {
 			return;
 		}
-		BlockPos spot = find(world, world.getRandom());
+		BlockPos spot = spawnSpot(world);
 		if (spot != null) {
 			player.refreshPositionAndAngles(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, player.getYaw(), 0.0F);
 		}

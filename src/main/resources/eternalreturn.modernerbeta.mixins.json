@@ -4,12 +4,15 @@
 	"plugin": "com.eternalreturn.mixin.compat.ModernerBetaMixinPlugin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
+		"ModernerBetaAuxChunkCacheMixin",
 		"ModernerBetaBiomeCacheMixin",
+		"ModernerBetaChunkCacheMixin",
 		"ModernerBetaCaveBiomeMixin",
 		"ModernerBetaHeightMixin",
 		"ModernerBetaSnowCheckMixin",
 		"ModernerBetaSnowMixin",
 		"ModernerBetaSurfaceExtraMixin",
+		"ModernerBetaSurfaceHeightMixin",
 		"ModernerBetaSurfaceMixin"
 	],
 	"injectors": {

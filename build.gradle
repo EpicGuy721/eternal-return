@@ -110,6 +110,21 @@ if (project.hasProperty("dumpBlocks")) {
 	gameTestRun(b.task, "Worldgen benchmark (${b.label})", b.dir, benchProps + b.props, jfr)
 }
 
+// -Pc2meThreads=n (with -Pc2me): the benchmark runs C2ME with n worker threads (its globalExecutorParallelism).
+def c2meThreads = findProperty("c2meThreads")
+if (c2meThreads != null) {
+	def benchConfigs = ["bench_eternal_return", "bench_vanilla", "bench_moderner_beta"].collect { file("build/gametest/${it}/config/c2me.toml") }
+	def threadsText = c2meThreads.toString()
+	tasks.matching { it.name.startsWith("runGametestBenchmark") }.configureEach {
+		doFirst {
+			benchConfigs.each { f ->
+				f.parentFile.mkdirs()
+				f.text = 'version = 3' + System.lineSeparator() + 'globalExecutorParallelism = "' + threadsText + '"' + System.lineSeparator()
+			}
+		}
+	}
+}
+
 // The headless map tool: renders maps of a preset at a fixed seed into docs/worldgen-maps/<name>.
 // -PworldmapHalf=1024 renders a smaller area (faster); -PworldmapOut=<dir> writes to <dir>/<name> instead.
 // -PworldmapCentre=x,z moves the area; -PworldmapCloseup=x,z and -PworldmapSliceZ=z pin the close-up and side view.

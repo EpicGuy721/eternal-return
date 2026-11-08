@@ -58,6 +58,7 @@ public class EternalReturn implements ModInitializer {
 		com.eternalreturn.survival.Meals.register();
 		com.eternalreturn.survival.IceCracking.register();
 		com.eternalreturn.survival.ColdExposure.register();
+		com.eternalreturn.survival.ReadySpawns.register();
 		com.eternalreturn.logic.OldCombat.register();
 		com.eternalreturn.items.Potions2.register();
 		com.eternalreturn.items.Milk.register();
