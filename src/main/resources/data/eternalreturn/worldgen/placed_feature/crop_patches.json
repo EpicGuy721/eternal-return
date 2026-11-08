@@ -1,0 +1,8 @@
+{
+  "feature": "eternalreturn:crop_patches",
+  "placement": [
+    {
+      "type": "eternalreturn:eternal_return_only"
+    }
+  ]
+}

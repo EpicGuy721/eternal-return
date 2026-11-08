@@ -669,6 +669,12 @@ public final class EternalReturnConfig {
 		 */
 		public boolean boulders = true;
 		/**
+		 * Wild crop patches: small clumps of fully grown wheat, carrots, potatoes or beetroot on farmland, or loose pumpkins
+		 * or melons, only in each crop's ideal biomes, about one per 500 chunks of them; one in ten an overgrown field in rows
+		 * with broken fence posts (data/eternalreturn/worldgen/configured_feature/crop_patches.json). Eternal Return worlds only.
+		 */
+		public boolean wildCropPatches = true;
+		/**
 		 * Biome trees: in Eternal Return worlds a sapling grows a tree picked from its biome's tree table, and the world's
 		 * own trees come from the same tables (data/eternalreturn/eternalreturn/tree_tables, docs/worldgen.md). Off: vanilla
 		 * saplings and trees. Other worlds never change.

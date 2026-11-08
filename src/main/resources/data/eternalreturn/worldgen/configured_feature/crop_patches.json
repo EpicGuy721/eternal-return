@@ -1,0 +1,18 @@
+{
+  "type": "eternalreturn:crop_patch",
+  "config": {
+    "crops": [
+      {"block": "minecraft:wheat", "biomes": "eternalreturn:ideal_biomes/wheat", "chance": 500, "kind": "crop"},
+      {"block": "minecraft:carrots", "biomes": "eternalreturn:ideal_biomes/carrots", "chance": 500, "kind": "crop"},
+      {"block": "minecraft:potatoes", "biomes": "eternalreturn:ideal_biomes/potatoes", "chance": 500, "kind": "crop"},
+      {"block": "minecraft:beetroots", "biomes": "eternalreturn:ideal_biomes/beetroots", "chance": 500, "kind": "crop"},
+      {"block": "minecraft:pumpkin", "biomes": "eternalreturn:ideal_biomes/pumpkin_stem", "chance": 500, "kind": "fruit"},
+      {"block": "minecraft:melon", "biomes": "eternalreturn:ideal_biomes/melon_stem", "chance": 500, "kind": "fruit"}
+    ],
+    "size": {"type": "minecraft:uniform", "min_inclusive": 4, "max_inclusive": 12},
+    "overgrown_chance": 10,
+    "rows": {"type": "minecraft:uniform", "min_inclusive": 3, "max_inclusive": 5},
+    "row_length": {"type": "minecraft:uniform", "min_inclusive": 6, "max_inclusive": 10},
+    "fence_posts": {"type": "minecraft:uniform", "min_inclusive": 2, "max_inclusive": 5}
+  }
+}

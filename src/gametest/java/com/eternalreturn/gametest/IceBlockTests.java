@@ -100,8 +100,13 @@ public class IceBlockTests implements FabricGameTest {
 		BlockPos tip = ctx.getAbsolutePos(top.down(2));
 		ctx.assertTrue(!IcicleBlock.meltsAt(world, tip), "the icicle melts in the dark");
 		ctx.setBlockState(new BlockPos(3, 5, 2), Blocks.GLOWSTONE);
-		ctx.waitAndRun(20, () -> {
-			ctx.assertTrue(IcicleBlock.meltsAt(world, tip), "light " + world.getLightLevel(net.minecraft.world.LightType.BLOCK, tip) + " doesn't melt it");
+		// Placed light takes a while to spread: wait until it reaches the tip (nothing below changes until it has).
+		boolean[] done = {false};
+		ctx.runAtEveryTick(() -> {
+			if (done[0] || !IcicleBlock.meltsAt(world, tip)) {
+				return;
+			}
+			done[0] = true;
 			// The root segment never melts; the tip does, and falls.
 			world.getBlockState(root).randomTick(world, root, Random.create(1));
 			ctx.assertTrue(world.getBlockState(root).isOf(IceBlocks.ICICLE), "the root segment melted");

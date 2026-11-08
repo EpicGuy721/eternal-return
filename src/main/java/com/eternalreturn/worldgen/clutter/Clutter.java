@@ -38,6 +38,9 @@ public final class Clutter {
 	/** Giant mushrooms (phase 6, batch D): the giant mushroom island and the roofed fungi forest. */
 	public static final Feature<GiantMushroomFeature.Config> GIANT_MUSHROOM = Registry.register(Registries.FEATURE, EternalReturn.id("giant_mushroom"),
 			new GiantMushroomFeature());
+	/** Wild crop patches (worldgen expansion 2, phase 1): data/eternalreturn/worldgen/configured_feature/crop_patches.json. */
+	public static final Feature<CropPatchFeature.Config> CROP_PATCH = Registry.register(Registries.FEATURE, EternalReturn.id("crop_patch"),
+			new CropPatchFeature());
 
 	/**
 	 * Spots on the surface of the chunk, as many on average as the biome's density (placement eternalreturn:biome_density):
@@ -128,5 +131,9 @@ public final class Clutter {
 		java.util.Objects.requireNonNull(BiomeStoneProcessor.TYPE);
 		BiomeModifications.addFeature(WorldgenFeatures.overworld().and(context -> EternalReturnConfig.get().worldgen.boulders),
 				GenerationStep.Feature.UNDERGROUND_DECORATION, RegistryKey.of(RegistryKeys.PLACED_FEATURE, EternalReturn.id("boulder")));
+		// Wild crop patches: last of the plants in every biome, after the trees and grass, so they settle into open ground
+		// and no other feature's place in the decoration order moves.
+		BiomeModifications.addFeature(WorldgenFeatures.overworld().and(context -> EternalReturnConfig.get().worldgen.wildCropPatches),
+				GenerationStep.Feature.VEGETAL_DECORATION, RegistryKey.of(RegistryKeys.PLACED_FEATURE, EternalReturn.id("crop_patches")));
 	}
 }
