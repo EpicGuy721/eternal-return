@@ -254,13 +254,18 @@ public final class Climate extends Feature<Climate.Config> {
 		return true;
 	}
 
+	/** The upper half of a two-block plant (its snow lies in the lower half). */
+	public static boolean upperHalf(BlockState state) {
+		return state.contains(Properties.DOUBLE_BLOCK_HALF) && state.get(Properties.DOUBLE_BLOCK_HALF) == net.minecraft.block.enums.DoubleBlockHalf.UPPER;
+	}
+
 	/** Down through a snowed crown from its top (top): a plant on the ground under it takes the snow that falls through. */
 	static void plantUnderCrown(WorldAccess world, long seed, Config config, BlockPos top) {
 		BlockPos.Mutable at = top.mutableCopy().move(0, -1, 0);
 		while (at.getY() > world.getBottomY()) {
 			at.move(0, -1, 0);
 			BlockState state = world.getBlockState(at);
-			if (state.isIn(BlockTags.LEAVES) || state.isAir()) {
+			if (state.isIn(BlockTags.LEAVES) || state.isAir() || upperHalf(state)) {
 				continue;
 			}
 			if (com.eternalreturn.blocks.SnowCover.isFlora(state) && !com.eternalreturn.blocks.SnowCover.marked(state)
@@ -289,6 +294,10 @@ public final class Climate extends Feature<Climate.Config> {
 			at.move(0, -1, 0);
 			BlockState state = world.getBlockState(at);
 			if (state.isIn(BlockTags.LEAVES)) {
+				continue;
+			}
+			if (upperHalf(state)) {
+				// The top of a two-block plant: its snow lies in its lower half, below.
 				continue;
 			}
 			if (com.eternalreturn.blocks.SnowCover.isFlora(state)) {

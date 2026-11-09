@@ -7,14 +7,12 @@ import net.minecraft.block.FenceBlock;
 import net.minecraft.block.FarmlandBlock;
 import net.minecraft.block.FenceGateBlock;
 import net.minecraft.block.LilyPadBlock;
-import net.minecraft.block.PitcherCropBlock;
 import net.minecraft.block.PlantBlock;
 import net.minecraft.block.SeaPickleBlock;
 import net.minecraft.block.SeagrassBlock;
 import net.minecraft.block.SlabBlock;
 import net.minecraft.block.SnowBlock;
 import net.minecraft.block.StairsBlock;
-import net.minecraft.block.TallPlantBlock;
 import net.minecraft.block.TallSeagrassBlock;
 import net.minecraft.block.WallBlock;
 import net.minecraft.entity.player.PlayerEntity;
@@ -54,8 +52,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * (posts, a vertical slab's edge, stairs' upper step), a snow cover over just those places.</li>
  * </ul>
  * <p>Flora (short plants: grass, ferns, flowers, saplings, mushrooms, the Nether's roots, fungi and sprouts, dead bushes,
- * sweet berry bushes, petals, azaleas, crops and stems; not two-block plants or water plants) holds snow too, as in
- * Bedrock Edition: up to 8 layers lying on the ground under it, the plant standing in them, wherever a snow layer could
+ * sweet berry bushes, petals, azaleas, crops and stems, and the lower half of two-block plants: tall grass, large ferns,
+ * tall flowers, the pitcher crop; not water plants) holds snow too, as in Bedrock Edition: up to 8 layers lying on the ground under it, the plant standing in them, wherever a snow layer could
  * lie there (or on farmland). The plant stays the target where it's aimed at; only the snow aimed at itself is the
  * snow's. A plant takes no drips and no snow covers, and the ground under it turns snowy (grass, podzol, mycelium).</p>
  * Every such block gets a "snowy" property as it's made (SnowHostMixin, from KINDS), 0 by default: 1 when snow is logged
@@ -69,9 +67,8 @@ public final class SnowCover {
 	/** The kinds of block that hold snow: a new shape needs a line here (and its own top here, if its culling shape doesn't follow it). */
 	private static final List<Class<?>> KINDS = List.of(SlabBlock.class, StairsBlock.class, WallBlock.class, FenceBlock.class, FenceGateBlock.class,
 			MixedSlabs.MixedSlabBlock.class);
-	/** Plants that don't: two blocks tall, in water, on water. */
-	private static final List<Class<?>> NOT_FLORA = List.of(TallPlantBlock.class, TallSeagrassBlock.class, SeagrassBlock.class, LilyPadBlock.class,
-			SeaPickleBlock.class, PitcherCropBlock.class);
+	/** Plants that don't: in water, on water. (Two-block plants do, in their lower half: capacity.) */
+	private static final List<Class<?>> NOT_FLORA = List.of(TallSeagrassBlock.class, SeagrassBlock.class, LilyPadBlock.class, SeaPickleBlock.class);
 	private static final Map<BlockState, Top> TOPS = new ConcurrentHashMap<>();
 	private static final Map<String, Top> SHARED = new ConcurrentHashMap<>();
 
@@ -235,6 +232,10 @@ public final class SnowCover {
 	/** The most layers of snow a block takes in its space: 8 with ground in it, 4 on a bottom slab; none in water. */
 	public static int capacity(BlockState state) {
 		if (!isHost(state) || state.contains(Properties.WATERLOGGED) && state.get(Properties.WATERLOGGED)) {
+			return 0;
+		}
+		// A two-block plant's snow lies in its lower half, on the ground; its upper half takes none.
+		if (state.contains(Properties.DOUBLE_BLOCK_HALF) && state.get(Properties.DOUBLE_BLOCK_HALF) == net.minecraft.block.enums.DoubleBlockHalf.UPPER) {
 			return 0;
 		}
 		return top(state).capacity;

@@ -720,7 +720,8 @@ public class SnowTests implements FabricGameTest {
 	/**
 	 * Flora holds snow as in Bedrock Edition: grass, ferns, flowers, saplings (this mod's too), mushrooms, the Nether's
 	 * plants, dead bushes, berry bushes, petals (maple petals too), azaleas, crops and stems, up to 8 layers on the
-	 * floor of their space; two-block plants and water plants don't, nor a waterlogged propagule.
+	 * floor of their space, and two-block plants in their lower half (none in the upper); water plants don't, nor a
+	 * waterlogged propagule.
 	 */
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = FLORA_BATCH)
 	public void whichFloraHoldsSnow(TestContext ctx) {
@@ -746,8 +747,13 @@ public class SnowTests implements FabricGameTest {
 			}
 		}
 		ctx.assertTrue(saplings > 0, "no saplings of this mod's found");
-		for (Block block : List.of(Blocks.TALL_GRASS, Blocks.LARGE_FERN, Blocks.SUNFLOWER, Blocks.ROSE_BUSH, Blocks.SMALL_DRIPLEAF, Blocks.PITCHER_CROP, Blocks.SEAGRASS,
-				Blocks.TALL_SEAGRASS, Blocks.LILY_PAD, Blocks.SEA_PICKLE, Blocks.KELP, Blocks.SUGAR_CANE, Blocks.CACTUS, Blocks.VINE)) {
+		for (Block block : List.of(Blocks.TALL_GRASS, Blocks.LARGE_FERN, Blocks.SUNFLOWER, Blocks.ROSE_BUSH, Blocks.LILAC, Blocks.PEONY, Blocks.PITCHER_PLANT)) {
+			BlockState lower = block.getDefaultState().with(net.minecraft.state.property.Properties.DOUBLE_BLOCK_HALF, net.minecraft.block.enums.DoubleBlockHalf.LOWER);
+			BlockState upper = lower.with(net.minecraft.state.property.Properties.DOUBLE_BLOCK_HALF, net.minecraft.block.enums.DoubleBlockHalf.UPPER);
+			ctx.assertTrue(SnowCover.isFlora(lower) && SnowCover.capacity(lower) == 8 && SnowCover.capacity(upper) == 0,
+					Registries.BLOCK.getId(block) + " holds 8 layers in its lower half, none in its upper: " + SnowCover.capacity(lower) + ", " + SnowCover.capacity(upper));
+		}
+		for (Block block : List.of(Blocks.SEAGRASS, Blocks.TALL_SEAGRASS, Blocks.LILY_PAD, Blocks.SEA_PICKLE, Blocks.KELP, Blocks.SUGAR_CANE, Blocks.CACTUS, Blocks.VINE)) {
 			ctx.assertTrue(!SnowCover.isHost(block.getDefaultState()), Registries.BLOCK.getId(block) + " doesn't hold snow");
 		}
 		ctx.complete();
@@ -876,7 +882,8 @@ public class SnowTests implements FabricGameTest {
 				for (BlockPos pos : List.of(grass, poppy, berries)) {
 					ctx.assertTrue(groundSnowy(world, pos), "the grass under " + world.getBlockState(pos) + " is snowy");
 				}
-				ctx.assertTrue(!SnowCover.isHost(world.getBlockState(tall)) && world.getBlockState(tall.up(2)).isAir(), "nothing in tall grass");
+				ctx.assertTrue(logged(world, tall) == 1 && logged(world, tall.up()) == 0 && groundSnowy(world, tall) && world.getBlockState(tall.up(2)).isAir(),
+						"a layer in tall grass's lower half, none in its upper: " + logged(world, tall) + ", " + logged(world, tall.up()));
 			} finally {
 				Weathers.dry(world, storm);
 			}
@@ -884,7 +891,7 @@ public class SnowTests implements FabricGameTest {
 		});
 	}
 
-	/** Snowy biomes' generation lays a layer in flora where vanilla's lays none, and makes the grass under it snowy. */
+	/** Snowy biomes' generation lays a layer in flora where vanilla's lays none (a two-block plant's lower half too), and makes the grass under it snowy. */
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = FLORA_WORLDGEN_BATCH, skyAccess = true, tickLimit = 40)
 	public void generationSnowsInFlora(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
@@ -894,8 +901,11 @@ public class SnowTests implements FabricGameTest {
 		BlockPos sapling = ctx.getAbsolutePos(new BlockPos(3, 1, 2));
 		BlockPos mushroom = ctx.getAbsolutePos(new BlockPos(4, 1, 2));
 		BlockPos bare = ctx.getAbsolutePos(new BlockPos(2, 1, 5));
+		BlockPos tall = ctx.getAbsolutePos(new BlockPos(5, 1, 2));
 		plant(world, fern, Blocks.FERN.getDefaultState());
 		plant(world, sapling, Blocks.SPRUCE_SAPLING.getDefaultState());
+		world.setBlockState(tall.down(), Blocks.GRASS_BLOCK.getDefaultState());
+		net.minecraft.block.TallPlantBlock.placeAt(world, Blocks.LARGE_FERN.getDefaultState(), tall, Block.NOTIFY_ALL);
 		world.setBlockState(mushroom.down(), Blocks.PODZOL.getDefaultState());
 		world.setBlockState(mushroom, Blocks.BROWN_MUSHROOM.getDefaultState());
 		world.setBlockState(bare.down(), Blocks.GRASS_BLOCK.getDefaultState());
@@ -906,9 +916,10 @@ public class SnowTests implements FabricGameTest {
 			Feature.FREEZE_TOP_LAYER.generate(new FeatureContext<>(Optional.empty(), world, world.getChunkManager().getChunkGenerator(), world.random, origin,
 					DefaultFeatureConfig.INSTANCE));
 			ctx.assertTrue(snowLayer(world, bare) == 1 && groundSnowy(world, bare), "a snow layer on bare grass, as vanilla's");
-			for (BlockPos pos : List.of(fern, sapling, mushroom)) {
+			for (BlockPos pos : List.of(fern, sapling, mushroom, tall)) {
 				ctx.assertTrue(logged(world, pos) == 1 && groundSnowy(world, pos), "a layer logged in " + world.getBlockState(pos) + ", the ground snowy");
 			}
+			ctx.assertTrue(logged(world, tall.up()) == 0, "snow in a large fern's upper half");
 			ctx.complete();
 		});
 	}

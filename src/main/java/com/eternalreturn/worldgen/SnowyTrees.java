@@ -53,7 +53,7 @@ public final class SnowyTrees {
 				// Under the leaves to the ground: a snow layer there was put down before the tree came.
 				below.move(0, -1, 0);
 				while (below.getY() > world.getBottomY() && (world.getBlockState(below).isAir() || world.getBlockState(below).isIn(BlockTags.LEAVES)
-						|| world.getBlockState(below).isIn(BlockTags.LOGS))) {
+						|| world.getBlockState(below).isIn(BlockTags.LOGS) || Climate.upperHalf(world.getBlockState(below)))) {
 					below.move(0, -1, 0);
 				}
 				BlockState plant = world.getBlockState(below);
