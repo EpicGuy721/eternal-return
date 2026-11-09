@@ -72,6 +72,7 @@ final class LandmarkShapes {
 			case ISLETS -> this.islets();
 			case REEF -> this.reef();
 			case HOT_SPRING -> HotSprings.build(this.piece, this.world, this.box);
+			case ELDER_TREE -> ElderTrees.build(this.piece, this.world, this.box);
 		}
 	}
 

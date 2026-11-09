@@ -62,7 +62,8 @@ public final class LandmarkStructure extends Structure {
 		if (!(generator instanceof NoiseChunkGenerator noise) || !CaveWorlds.usesEternalReturnSettings(noise, context.dynamicRegistryManager())) {
 			return Optional.empty();
 		}
-		if (this.kind == Landmarks.Kind.HOT_SPRING && !com.eternalreturn.config.EternalReturnConfig.get().worldgen.hotSprings) {
+		if (this.kind == Landmarks.Kind.HOT_SPRING && !com.eternalreturn.config.EternalReturnConfig.get().worldgen.hotSprings
+				|| this.kind == Landmarks.Kind.ELDER_TREE && !com.eternalreturn.config.EternalReturnConfig.get().worldgen.elderTrees) {
 			return Optional.empty();
 		}
 		Random random = context.random();
@@ -93,6 +94,11 @@ public final class LandmarkStructure extends Structure {
 		}
 		if (this.surfaceBiomes.isPresent() && !context.biomeSource().getBiome(BiomeCoords.fromBlock(x), BiomeCoords.fromBlock(y), BiomeCoords.fromBlock(z),
 				context.noiseConfig().getMultiNoiseSampler()).isIn(this.surfaceBiomes.get())) {
+			return Optional.empty();
+		}
+		// An elder needs a species that can grow as one in the biome's own tree lists.
+		if (this.kind == Landmarks.Kind.ELDER_TREE && ElderTrees.pick(context.biomeSource().getBiome(BiomeCoords.fromBlock(x), BiomeCoords.fromBlock(y),
+				BiomeCoords.fromBlock(z), context.noiseConfig().getMultiNoiseSampler()), 0) == null) {
 			return Optional.empty();
 		}
 		return Optional.of(this.start(context, x, y, z, random));

@@ -687,6 +687,13 @@ public final class EternalReturnConfig {
 		 */
 		public boolean hotSprings = true;
 		/**
+		 * Elder trees: about one per 2,000 x 2,000 blocks of land with a tree table, a single colossal tree (50 to 90 tall)
+		 * of a local species, in a clearing with its saplings, a hollow in its roots (sometimes a spring, sometimes a bear's
+		 * den), bee nests and birds in its crown (data/eternalreturn/eternalreturn/elder_trees.json). A landmark
+		 * (/locate structure eternalreturn:elder_tree). Eternal Return worlds only.
+		 */
+		public boolean elderTrees = true;
+		/**
 		 * Biome trees: in Eternal Return worlds a sapling grows a tree picked from its biome's tree table, and the world's
 		 * own trees come from the same tables (data/eternalreturn/eternalreturn/tree_tables, docs/worldgen.md). Off: vanilla
 		 * saplings and trees. Other worlds never change.

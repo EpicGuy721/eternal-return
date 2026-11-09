@@ -1,0 +1,11 @@
+{
+  "type": "eternalreturn:landmark",
+  "landmark": "elder_tree",
+  "min_size": 1,
+  "max_size": 1,
+  "biomes": "#eternalreturn:has_structure/elder_tree_probe",
+  "surface_biomes": "#eternalreturn:has_structure/elder_tree",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}
