@@ -77,6 +77,8 @@ public class GrimlockEntity extends ZombieEntity {
 	private int distractedUntil = -1000;
 	/** It had a target last tick (to notice a hunt ending, however it ended). */
 	private boolean hunting;
+	/** On its way out of the light (ShunLightGoal): the one walk that may cross lit ground. */
+	private boolean shunning;
 
 	public GrimlockEntity(EntityType<? extends ZombieEntity> type, World world) {
 		super(type, world);
@@ -140,10 +142,11 @@ public class GrimlockEntity extends ZombieEntity {
 			this.heardAt = this.age;
 		}
 		this.hunting = target != null;
-		// Never into the light, wherever it is heading (a noise beyond a lit stretch, say): in the dark, it gives up a
-		// path whose next step is lit. (Out of the light it goes by ShunLightGoal.)
+		// Never into the light, wherever it is heading (a noise beyond a lit stretch, say): it gives up a path whose next
+		// step is lit. (Out of the light it goes by ShunLightGoal, the one walk allowed over lit ground. Stopping only in the
+		// dark let one that had slid a step into the light walk on through it.)
 		net.minecraft.entity.ai.pathing.Path path = this.getNavigation().getCurrentPath();
-		if (path != null && !path.isFinished() && !lit(this.getWorld(), this.getBlockPos()) && lit(this.getWorld(), path.getCurrentNodePos())) {
+		if (path != null && !path.isFinished() && !this.shunning && lit(this.getWorld(), path.getCurrentNodePos())) {
 			this.getNavigation().stop();
 			this.getMoveControl().moveTo(this.getX(), this.getY(), this.getZ(), 0.0);
 		}
@@ -304,6 +307,8 @@ public class GrimlockEntity extends ZombieEntity {
 	/** Standing in the light: it backs off to the nearest dark place it can stand (searching out to SHUN_RANGE blocks). */
 	static class ShunLightGoal extends Goal {
 		private static final int SHUN_RANGE = 16;
+		/** Dark spots it tries to find a way to, each search. */
+		private static final int PATHS = 8;
 		private final GrimlockEntity grimlock;
 		private int nextSearch;
 
@@ -319,8 +324,11 @@ public class GrimlockEntity extends ZombieEntity {
 			if (!lit(world, at) || this.grimlock.age < this.nextSearch) {
 				return false;
 			}
+			// A search that finds nowhere to go waits a second before the next; one that does may be followed at once (still
+			// in the light where it got to, say, as the light has moved).
 			this.nextSearch = this.grimlock.age + 20;
-			// Ring by ring outward: the first dark spot it can stand on and get to.
+			// Ring by ring outward: the first dark spot it can stand on and get to (trying at most PATHS of them each search).
+			int paths = 0;
 			for (int r = 1; r <= SHUN_RANGE; r++) {
 				for (int dx = -r; dx <= r; dx++) {
 					for (int dz = -r; dz <= r; dz++) {
@@ -329,9 +337,18 @@ public class GrimlockEntity extends ZombieEntity {
 						}
 						for (int dy = -3; dy <= 3; dy++) {
 							BlockPos spot = at.add(dx, dy, dz);
-							if (world.getBlockState(spot.down()).isSolidBlock(world, spot.down()) && world.isAir(spot) && world.isAir(spot.up())
-									&& !lit(world, spot) && this.grimlock.getNavigation().startMovingTo(spot.getX() + 0.5, spot.getY(), spot.getZ() + 0.5, 1.3)) {
+							if (!world.getBlockState(spot.down()).isSolidBlock(world, spot.down()) || !world.isAir(spot) || !world.isAir(spot.up()) || lit(world, spot)) {
+								continue;
+							}
+							// Only a spot it can get to: a path that stops short (the spot behind a wall) would leave it
+							// pressed against the wall in the light, picking the same spot every search.
+							net.minecraft.entity.ai.pathing.Path path = this.grimlock.getNavigation().findPathTo(spot, 0);
+							if (path != null && path.reachesTarget() && this.grimlock.getNavigation().startMovingAlong(path, 1.3)) {
+								this.nextSearch = 0;
 								return true;
+							}
+							if (++paths >= PATHS) {
+								return false;
 							}
 						}
 					}
@@ -341,8 +358,18 @@ public class GrimlockEntity extends ZombieEntity {
 		}
 
 		@Override
+		public void start() {
+			this.grimlock.shunning = true;
+		}
+
+		@Override
 		public boolean shouldContinue() {
 			return !this.grimlock.getNavigation().isIdle();
+		}
+
+		@Override
+		public void stop() {
+			this.grimlock.shunning = false;
 		}
 	}
 
