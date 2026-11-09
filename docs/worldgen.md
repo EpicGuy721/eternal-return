@@ -59,7 +59,7 @@ The preset is all data. Without Moderner Beta installed, the world type and its 
 - Phase 4, part 2 (ore variants): done. Every ore in every host stone, with old-style textures.
 - Terrain features: done. Deep oceans that fall in steps, rare sinkholes (mostly in the sea, about 100 blocks across), rare floating islands, old growth taigas, extremely rare monoliths, mushrooms in caves (see Terrain features).
 - Worldgen expansion (the owner's brief of 2026-11-01, seven phases, each checked in game before the next): phase 1 (clutter: boulders) done, see Clutter; phase 2 (biome trees) done, see Biome trees; phase 3 (biome variants) done, see Biome variants; phase 4 (terrain landmarks) done, see Terrain landmarks; phase 5 (climate rules) done, see Climate rules (checked in game by the owner on 2026-11-02: "everything looks good"); phase 6 (new biomes) in batches, see New biomes: batches A (temperate), B (dry) and C (cold) done (checked in game by the owner); then, on the owner's request, ice caves, the ice blocks and the icy mountains on the high ground, built and checked; D (tropical, ocean, fantasy: tropical pillars, volcanic jungle, roofed fungi forest, giant mushroom island, coral ocean, archipelago) built, waiting for the owner's in-game check.
-- Worldgen expansion 2 (the owner's brief of 2026-11-08, docs/worldgen-brief-2.md, seven phases, before the first brief's phase 7): phase 1 (wild crop patches) built and checked in screenshots, waiting for the owner's in-game check; see Wild crop patches.
+- Worldgen expansion 2 (the owner's brief of 2026-11-08, docs/worldgen-brief-2.md, seven phases, before the first brief's phase 7): phase 1 (wild crop patches) done (checked in game by the owner on 2026-11-08), see Wild crop patches; phase 2 (cacti that join sideways, shapes by biome) built and checked in screenshots, waiting for the owner's in-game check, see Cactus shapes.
 - Phase 4, part 3 (biomes and mineshafts): done. Cherry groves, every modern ocean, and mineshafts built from their biome's wood. Ocean monuments and Moderner Beta's ocean shrines were later removed from Eternal Return worlds; guardians spawn in the open sea instead (README, Mobs and Fishing).
 
 ## The Eternal Return preset
@@ -703,6 +703,29 @@ Small patches of fully grown crops, only in each crop's ideal biomes, so players
 ### Tests
 
 `CropPatchTests` (batch `crop_patches`, flat runs): a carrot patch is 4 to 12 grown carrots on the grass, which stay there; a pumpkin patch is loose pumpkins with no farmland or stems; an overgrown wheat field is bigger than a patch, with spruce posts beside a spruce trunk and no oak; farmland under a crop holds while bare farmland turns to dirt; a grown crop stands on grass, a seed or half-grown crop doesn't, and nothing stands on sand; the table loads its six crops. In game (screenshots of a fresh Eternal Return world with the chance raised for the shots): carrot and wheat fields in rows with posts, a dense potato patch in the grand fir forest, a loose wheat patch in the plains; the first try put patches under forest canopy, hence the open sky rule.
+
+## Cactus shapes (expansion 2, phase 2)
+
+**Joining sideways** (`CactusArms`, `CactusArmsMixin`; every world, the owner's choice): the vanilla cactus has four connections (north, east, south, west, as a fence), drawn as a one-pixel joint filling the gap between the two (`assets/minecraft/blockstates/cactus.json`, `eternalreturn:block/cactus_join`). A cactus placed against another joins every cactus beside it; a cactus beside another without joining (an arm's upright beside its trunk) is fine; any other block beside it still breaks it, as does lava, and liquid on top. Every piece must trace back, down through cactus or through its joins, to a cactus standing on sand or red sand (searched up to 256 pieces, then taken as held): break the trunk and each piece it held loses its hold in turn, breaks and drops. Joined loops fall too. Contact damage is unchanged. A cactus from before this change (or the world's own in other worlds) is simply unjoined.
+
+**Shapes by biome** (`CactusShapes`, data/eternalreturn/eternalreturn/cactus_shapes.json; Eternal Return worlds only, config `worldgen.cactusShapes`): each dry biome's cactus grows its own shape as the world is made, from growth and from bone meal, as saplings follow their tree tables. A biome finds its entry by its id, then its base's (variants and sub-biomes), then a `#tag` entry; with none, cactus grows straight up as in vanilla (and bone meal still stops at 3).
+
+| Shape | Biomes | Per chunk | Form |
+|---|---|---|---|
+| Saguaro | desert (and its peak, oasis) | 0.3 | trunk 5 to 9; 1 to 4 arms at different heights (never the bottom two or top two), each out one block and up 2 to 4 |
+| Organ pipe | desert scrub, desert baobabs | 0.25, 0.2 | 3 to 6 stems on the sand, each joined at its base to one beside it, 3 to 6 tall |
+| Cholla | drylands (new there, sparse, the owner's go-ahead) | 0.06 | trunk 2 to 4, 2 to 5 branches from anywhere above the ground, out one or two, sometimes up one |
+| Barrel cluster | badlands, eroded badlands, Monument Valley (and the other mesas through their base) | 0.3 | 3 to 7 one- and two-tall cacti on the sand, every neighbour joined into a mound |
+| Candelabra | savanna, savanna plateau, Mesa Verde | 0.04, 0.04, 0.08 | trunk 3 to 5; 2 or 3 arms near the top out, up, then out again (on or sideways) and up; stands on a little sand (red sand in Mesa Verde) set into the grass under it |
+
+- **A plan:** each shape is a plan of blocks from its root (the cactus standing on sand it started from), each joined to the block it grows from, in growing order, drawn from the root's position so it is the same at every step. With several blocks on the sand (organ pipe, barrel) the root is the westmost, then northmost, and the plan never puts another ground block before it, so the root stays the root.
+- **Growth:** only the root's random ticks drive it: its age counts up as vanilla's top block does and at the end the cactus adds the next block of its plan that grows from one already there and fits (the cactus rule above). Bone meal adds the next block at once, up to the whole shape. Planted in a shaped biome, a cactus grows into that biome's shape.
+- **Generation:** `eternalreturn:cactus_shapes` (2 tries a chunk, each kept with the biome's per-chunk share) places whole shapes, last of the plants; vanilla's straight cactus columns are skipped where a biome has a shape (`BlockColumnCactusMixin`, checked without touching the feature's random numbers), so other worlds and unshaped biomes keep theirs exactly.
+- The control fingerprints name an unjoined cactus as before (`ControlFingerprintTests.stateName`).
+
+### Tests
+
+`CactusTests` (batch `cacti`, flat runs): arms placed against a trunk join both ways and stay, and break the trunk's foot and all six pieces drop; two cacti put side by side stay (unjoined), one beside stone breaks; a joined ring falls when its trunk goes; every kind's plans (40 roots each) have one root, every block next to the one it grows from, nothing doubled and no ground block before the root; each shape grown a block at a time from one cactus ends exactly as the whole shape placed at once, every piece held. In game (screenshots of a fresh Eternal Return world): every shape on a sand platform, the joints drawing as one cactus and a player-built hedge joined end to end, saguaros in the desert, organ pipe clusters in the desert scrub. First tries: the test's sand fell (no floor under it), and a test's check ran again after it broke the trunk on purpose.
 
 ## The cave engine (phase 3)
 

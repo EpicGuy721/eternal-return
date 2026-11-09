@@ -26,6 +26,7 @@
 			"com.eternalreturn.gametest.IceCaveTests",
 			"com.eternalreturn.gametest.IceBlockTests",
 			"com.eternalreturn.gametest.CropPatchTests",
+			"com.eternalreturn.gametest.CactusTests",
 			"com.eternalreturn.gametest.UndergroundBlockTests",
 			"com.eternalreturn.gametest.UndergroundBiomeTests",
 			"com.eternalreturn.gametest.LandmarkTests",

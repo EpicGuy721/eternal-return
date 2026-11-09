@@ -39,6 +39,9 @@ public final class Clutter {
 	public static final Feature<GiantMushroomFeature.Config> GIANT_MUSHROOM = Registry.register(Registries.FEATURE, EternalReturn.id("giant_mushroom"),
 			new GiantMushroomFeature());
 	/** Wild crop patches (worldgen expansion 2, phase 1): data/eternalreturn/worldgen/configured_feature/crop_patches.json. */
+	/** Cactus shapes by biome (worldgen expansion 2, phase 2): data/eternalreturn/eternalreturn/cactus_shapes.json. */
+	public static final Feature<com.eternalreturn.worldgen.cactus.CactusFeature.Config> CACTUS_SHAPES = Registry.register(Registries.FEATURE,
+			EternalReturn.id("cactus_shapes"), new com.eternalreturn.worldgen.cactus.CactusFeature());
 	public static final Feature<CropPatchFeature.Config> CROP_PATCH = Registry.register(Registries.FEATURE, EternalReturn.id("crop_patch"),
 			new CropPatchFeature());
 
@@ -135,5 +138,9 @@ public final class Clutter {
 		// and no other feature's place in the decoration order moves.
 		BiomeModifications.addFeature(WorldgenFeatures.overworld().and(context -> EternalReturnConfig.get().worldgen.wildCropPatches),
 				GenerationStep.Feature.VEGETAL_DECORATION, RegistryKey.of(RegistryKeys.PLACED_FEATURE, EternalReturn.id("crop_patches")));
+		// Cactus shapes by biome, after the crop patches (each biome's table entry says how many; elsewhere none).
+		com.eternalreturn.worldgen.cactus.CactusShapes.register();
+		BiomeModifications.addFeature(WorldgenFeatures.overworld().and(context -> EternalReturnConfig.get().worldgen.cactusShapes),
+				GenerationStep.Feature.VEGETAL_DECORATION, RegistryKey.of(RegistryKeys.PLACED_FEATURE, EternalReturn.id("cactus_shapes")));
 	}
 }

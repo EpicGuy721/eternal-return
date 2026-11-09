@@ -207,6 +207,10 @@ public class ControlFingerprintTests implements FabricGameTest {
 		// Leaves count their distance from a log to 10 now, in every world (LeafDistance, the owner's choice): vanilla
 		// stops at 7, and the tree generator's longer count also marks some leaves near that limit a step differently,
 		// so the distance is left out. The leaves themselves (where, which, persistent or not) still have to match.
+		// Cacti join sideways now (CactusArms, every world); the world's own cacti never join, so an unjoined one is named as before.
+		if (state.getBlock() instanceof net.minecraft.block.CactusBlock && !com.eternalreturn.blocks.CactusArms.anyJoin(state)) {
+			name = name.replace(",east=false,north=false,south=false,west=false", "");
+		}
 		if (state.getBlock() instanceof net.minecraft.block.LeavesBlock) {
 			name = name.replaceAll("distance=\\d+", "distance=any");
 		}

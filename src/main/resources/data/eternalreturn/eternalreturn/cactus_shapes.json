@@ -1,0 +1,23 @@
+{
+  "shapes": {
+    "saguaro": {"kind": "saguaro", "height": [5, 9], "parts": [1, 4]},
+    "organ_pipe": {"kind": "organ_pipe", "height": [3, 6], "parts": [3, 6]},
+    "cholla": {"kind": "cholla", "height": [2, 4], "parts": [2, 5]},
+    "barrel_cluster": {"kind": "barrel", "height": [1, 2], "parts": [3, 7]},
+    "candelabra": {"kind": "candelabra", "height": [3, 5], "parts": [2, 3]}
+  },
+  "biomes": {
+    "minecraft:desert": {"shape": "saguaro", "per_chunk": 0.3},
+    "moderner_beta:beta_desert": {"shape": "saguaro", "per_chunk": 0.3},
+    "moderner_beta:pe_desert": {"shape": "saguaro", "per_chunk": 0.3},
+    "eternalreturn:desert_scrub_edge": {"shape": "organ_pipe", "per_chunk": 0.25},
+    "eternalreturn:desert_baobabs": {"shape": "organ_pipe", "per_chunk": 0.2},
+    "eternalreturn:drylands": {"shape": "cholla", "per_chunk": 0.06},
+    "minecraft:badlands": {"shape": "barrel_cluster", "per_chunk": 0.3},
+    "minecraft:eroded_badlands": {"shape": "barrel_cluster", "per_chunk": 0.3},
+    "eternalreturn:monument_valley": {"shape": "barrel_cluster", "per_chunk": 0.3},
+    "minecraft:savanna": {"shape": "candelabra", "per_chunk": 0.04, "ground": "minecraft:sand"},
+    "minecraft:savanna_plateau": {"shape": "candelabra", "per_chunk": 0.04, "ground": "minecraft:sand"},
+    "eternalreturn:mesa_verde": {"shape": "candelabra", "per_chunk": 0.08, "ground": "minecraft:red_sand"}
+  }
+}
