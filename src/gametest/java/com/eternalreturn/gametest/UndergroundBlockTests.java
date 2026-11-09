@@ -39,7 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Stone dripstone and the cave mushrooms (owner's request, 2026-11-05), flat runs (batch underground_blocks): the 28
+ * Stone dripstone and the cave mushrooms (owner's request, 2026-11-05), flat runs (batch underground_blocks): the 27
  * dripstones take their segments, fall and hurt, fill a cauldron from the water over their stone, grow under their own
  * stone, and are matched to the stone (and its ores) they touch; a puffed purple or blue mushroom lets out its gas when
  * mined without Silk Touch and drops the unpuffed one, with Silk Touch drops itself quietly, and an unpuffed one is quiet;
@@ -63,7 +63,7 @@ public class UndergroundBlockTests implements FabricGameTest {
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = BATCH)
 	public void stoneDripstonesAndTheirStones(TestContext ctx) {
 		List<String> problems = new ArrayList<>();
-		if (StoneDripstones.all().size() != 28) {
+		if (StoneDripstones.all().size() != 27) {
 			problems.add(StoneDripstones.all().size() + " stone dripstones");
 		}
 		for (StoneDripstoneBlock block : StoneDripstones.all().values()) {

@@ -706,9 +706,9 @@ SURFACES = {
         when(patches(0.25), block_rule('minecraft:gravel')),
         when(below(-0.3), block_rule('minecraft:packed_ice')),
         when(patches(-0.05), block_rule('minecraft:coarse_dirt'))]})),
-    # Volcanic jungle: ash and cinders, tuff, coarse dirt and gravel in patches through the grass.
+    # Volcanic jungle: ash and cinders, blackstone, coarse dirt and gravel in patches through the grass.
     'volcanic': when(DRY, when(TOP, {'type': 'minecraft:sequence', 'sequence': [
-        when(patches(0.12), block_rule('minecraft:tuff')),
+        when(patches(0.12), block_rule('minecraft:blackstone')),
         when(below(-0.3), block_rule('minecraft:gravel')),
         when(below(-0.1), block_rule('minecraft:coarse_dirt'))]})),
     # Roofed fungi forest: mycelium and podzol in patches on the forest floor.

@@ -174,7 +174,7 @@ public class SubBiomeTests implements FabricGameTest {
 			Map.entry("eternalreturn:glacier_field", List.of(new Sign("minecraft:gravel", 50), new Sign("minecraft:packed_ice", 30))),
 			// Batch D. The test world places no structures, so the pillars, volcanoes, islands and reefs aren't there (LandmarkTests builds them).
 			Map.entry("eternalreturn:tropical_pillars", List.of(new Sign("minecraft:jungle_log", 30))),
-			Map.entry("eternalreturn:volcanic_jungle", List.of(new Sign("minecraft:tuff", 100), new Sign("minecraft:coarse_dirt", 50), new Sign("minecraft:magma_block", 5))),
+			Map.entry("eternalreturn:volcanic_jungle", List.of(new Sign("minecraft:blackstone", 100), new Sign("minecraft:coarse_dirt", 50), new Sign("minecraft:magma_block", 5))),
 			Map.entry("eternalreturn:roofed_fungi_forest", List.of(new Sign("minecraft:mycelium", 100), new Sign("minecraft:mushroom_stem", 30), new Sign("minecraft:dark_oak_log", 10))),
 			Map.entry("eternalreturn:giant_mushroom_island", List.of(new Sign("minecraft:mushroom_stem", 60), new Sign("minecraft:red_mushroom_block", 100))),
 			Map.entry("eternalreturn:coral_ocean", List.of(new Sign("#minecraft:coral_blocks", 20))),

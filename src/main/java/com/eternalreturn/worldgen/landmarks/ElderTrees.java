@@ -64,7 +64,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * builds its own part.
  */
 public final class ElderTrees {
-	public enum Form { DOME, SPIRE, COLUMN, UMBRELLA, WEEPING, PALM, BOTTLE }
+	public enum Form { DOME, SPIRE, COLUMN, UMBRELLA, WEEPING, PALM, BOTTLE, SAVANNA }
 
 	/** One species that can grow as an elder. */
 	public record Species(String id, Form form, Block log, List<Block> leaves, Block sapling, int minHeight, int maxHeight, int minTrunk, int maxTrunk) {
@@ -242,6 +242,21 @@ public final class ElderTrees {
 			}
 		}
 
+		/** A thin ragged disk of leaves (one block thick) round a point, at its height. */
+		void disk(BlockPos c, double radius) {
+			Block leaf = this.species.leaves().get(this.random.nextInt(this.species.leaves().size()));
+			for (int x = (int) -radius - 1; x <= radius + 1; x++) {
+				for (int z = (int) -radius - 1; z <= radius + 1; z++) {
+					if (x * x + z * z <= radius * radius * (1.0 - this.random.nextFloat() * 0.18)) {
+						BlockPos pos = c.add(x, 0, z);
+						if (!this.blocks.containsKey(pos)) {
+							this.leaves.put(pos, leaf);
+						}
+					}
+				}
+			}
+		}
+
 		/** Roots spreading from the trunk's foot, arching out over the ground and down into it. */
 		void roots() {
 			int count = 4 + this.trunk;
@@ -359,6 +374,17 @@ public final class ElderTrees {
 				this.saplings.add(new BlockPos((int) Math.round(Math.cos(angle) * r), 0, (int) Math.round(Math.sin(angle) * r)));
 			}
 		}
+	}
+
+	/** An acacia's canopy at a limb's end: a fan of short branches under a broad thin layer of leaves, a smaller one on top. */
+	private static void canopy(Plan plan, Random random, BlockPos crown, double radius) {
+		int spokes = 6 + random.nextInt(2);
+		for (int s = 0; s < spokes; s++) {
+			double a = Math.PI * 2 * s / spokes + random.nextDouble() * 0.4;
+			plan.branch(crown.getX(), crown.getY(), crown.getZ(), crown.getX() + Math.cos(a) * (radius - 3), crown.getY(), crown.getZ() + Math.sin(a) * (radius - 3), 1);
+		}
+		plan.disk(crown.up(), radius);
+		plan.disk(crown.up(2), radius - 4);
 	}
 
 	/** The whole plan of an elder of this species, from its seed. */
@@ -517,6 +543,58 @@ public final class ElderTrees {
 					}
 				}
 				plan.blob(topPos.up(2), 3, 2, 3);
+			}
+			case SAVANNA -> {
+				// An acacia's way: a leaning trunk forking into two or three crooked limbs that zigzag out and up, each
+				// ending in a broad thin canopy (two layers, the upper smaller) over a fan of short branches.
+				double lean = random.nextDouble() * Math.PI * 2;
+				int fork = (int) (h * 0.42);
+				double drift = 2 + random.nextDouble() * 3;
+				int ox = 0;
+				int oz = 0;
+				for (int y = -3; y <= fork; y++) {
+					double t = Math.max(0, (double) y / fork);
+					ox = (int) Math.round(Math.cos(lean) * drift * t);
+					oz = (int) Math.round(Math.sin(lean) * drift * t);
+					int w = y > fork * 0.7 ? Math.max(2, plan.trunk - 1) : plan.trunk;
+					int from = -(w / 2);
+					for (int x = from; x < from + w; x++) {
+						for (int z = from; z < from + w; z++) {
+							plan.log(ox + x, y, oz + z, Direction.Axis.Y);
+						}
+					}
+				}
+				int limbs = 2 + random.nextInt(2);
+				double spread = Math.PI * 2 / limbs;
+				double start = lean + random.nextDouble();
+				for (int i = 0; i < limbs; i++) {
+					double angle = start + spread * i + (random.nextDouble() - 0.5) * 0.5;
+					double x = ox;
+					double y = fork;
+					double z = oz;
+					for (int seg = 0; seg < 3; seg++) {
+						double heading = angle + (random.nextDouble() - 0.5) * 0.7;
+						double out = h * (0.09 + random.nextDouble() * 0.04);
+						double up = h * (0.13 + random.nextDouble() * 0.04);
+						double x0 = x;
+						double y0 = y;
+						double z0 = z;
+						BlockPos end = plan.branch(x, y, z, x + Math.cos(heading) * out, y + up, z + Math.sin(heading) * out, seg < 2 ? 2 : 1);
+						x = end.getX();
+						y = end.getY();
+						z = end.getZ();
+						// A side fork off the middle of the limb, with a smaller canopy of its own.
+						if (seg == 1) {
+							double side = heading + (random.nextBoolean() ? 1.0 : -1.0) * (0.8 + random.nextDouble() * 0.5);
+							double sx = (x0 + x) / 2;
+							double sy = (y0 + y) / 2;
+							double sz = (z0 + z) / 2;
+							BlockPos tip = plan.branch(sx, sy, sz, sx + Math.cos(side) * h * 0.12, sy + h * 0.12, sz + Math.sin(side) * h * 0.12, 1);
+							canopy(plan, random, tip, 6 + random.nextDouble() * 2);
+						}
+					}
+					canopy(plan, random, new BlockPos((int) x, (int) y, (int) z), 9 + random.nextDouble() * 4);
+				}
 			}
 			case BOTTLE -> {
 				// A fat trunk swelling in the middle, a ring of short thick limbs on top, small tufts.

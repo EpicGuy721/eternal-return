@@ -134,6 +134,7 @@
 		"survival.AbstractBlockSnowMixin",
 		"survival.GrownCropFootingMixin",
 		"survival.CactusShapeGrowthMixin",
+		"survival.MagmaGeyserMixin",
 		"survival.LeafDistanceMixin",
 		"survival.LeafDistancePropertyMixin",
 		"enchantments.AttractionMixin",

@@ -40,17 +40,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * hurts); whoever is in a pool or within 4 blocks of one is warm (warms, for ColdExposure).
  * Steam rises from every pool all the time, seen from far off. Within about 8 blocks of the pools no water freezes and
  * no snow settles (vanilla's snow and ice, Moderner Beta's, Snowlogging's), so grass stays bare for animals to graze in
- * deep cold. About one spring in 3 has a geyser in its first pool: every 1 to 2 minutes a rumble and bubbles, then a
- * 3-second plume of spray and steam that throws whatever stands over the vent about 10 blocks up (harmless itself; the
- * fall is not). Everything comes from the spring's centre, size and seed, so each chunk builds its own part; springs
- * are listed in the world's saved data as they are built, for the snow, steam and geyser checks.
+ * deep cold. About one spring in 3 has its vent on lava, which makes it a geyser (Geysers: magma with lava under it
+ * and water over it erupts now and then). Everything comes from the spring's centre, size and seed, so each chunk builds its own part; springs
+ * are listed in the world's saved data as they are built, for the snow and steam checks.
  */
 public final class HotSprings {
 	/** How far beyond its rims a spring keeps snow and ice off. */
 	public static final int CLEAR = 8;
-	/** Geyser timing (ticks): the warning before an eruption, and the eruption itself. */
-	static final int WARNING = 60;
-	static final int ERUPTION = 60;
 
 	/** One pool: its centre, water level (the water's top block), radius and depth (water blocks over the floor). */
 	public record Pool(int x, int level, int z, int radius, int depth) {
@@ -71,8 +67,8 @@ public final class HotSprings {
 		}
 	}
 
-	/** A spring: its pools (the first the deepest, with the vent), and its geyser's timing if it has one. */
-	public record Spring(BlockPos centre, int size, long seed, List<Pool> pools, boolean geyser, int period, int phase) {
+	/** A spring: its pools (the first the deepest, with the vent), and whether its vent sits on lava (a geyser: Geysers). */
+	public record Spring(BlockPos centre, int size, long seed, List<Pool> pools, boolean geyser) {
 		public Pool vent() {
 			return this.pools.get(0);
 		}
@@ -116,9 +112,7 @@ public final class HotSprings {
 			pools.add(pool);
 			last = pool;
 		}
-		boolean geyser = random.nextInt(3) == 0;
-		int period = 1200 + random.nextInt(1200);
-		return new Spring(centre, size, seed, List.copyOf(pools), geyser, period, random.nextInt(period));
+		return new Spring(centre, size, seed, List.copyOf(pools), random.nextInt(3) == 0);
 	}
 
 	/** How far a spring of this size can reach round its centre (generous: it decides which chunks build a part). */
@@ -155,7 +149,13 @@ public final class HotSprings {
 					boolean centre = x == water.x() && z == water.z();
 					boolean vent = water == spring.vent() && centre;
 					world.setBlockState(pos.set(x, floor, z), vent ? Blocks.MAGMA_BLOCK.getDefaultState() : rimBlock(random), Block.NOTIFY_LISTENERS);
-					fillBelow(world, pos, x, floor - 1, z);
+					if (vent && spring.geyser()) {
+						// Lava under the vent: the magma erupts now and then (Geysers).
+						world.setBlockState(pos.set(x, floor - 1, z), Blocks.LAVA.getDefaultState(), Block.NOTIFY_LISTENERS);
+						fillBelow(world, pos, x, floor - 2, z);
+					} else {
+						fillBelow(world, pos, x, floor - 1, z);
+					}
 				} else if (rim != null) {
 					clearAbove(world, pos, x, rim.level(), z);
 					world.setBlockState(pos.set(x, rim.level(), z), rimBlock(random), Block.NOTIFY_LISTENERS);
@@ -168,7 +168,7 @@ public final class HotSprings {
 	}
 
 	private static BlockState rimBlock(Random random) {
-		return random.nextInt(5) == 0 ? Blocks.TUFF.getDefaultState() : Blocks.CALCITE.getDefaultState();
+		return Blocks.CALCITE.getDefaultState();
 	}
 
 	/** Air over a pool or rim (a hillside it's cut into), up to 12 blocks. */
@@ -337,7 +337,7 @@ public final class HotSprings {
 		}
 	}
 
-	// ------------------------------------------------------------------ steam and geysers
+	// ------------------------------------------------------------------ steam
 
 	public static void register() {
 		// Load the list on the main thread before any chunk is made (the generation threads only add to it).
@@ -348,18 +348,9 @@ public final class HotSprings {
 				return;
 			}
 			Index index = Index.of(world);
-			List<Spring> active = new ArrayList<>();
 			for (ServerPlayerEntity player : world.getPlayers()) {
 				for (Spring spring : index.within(player.getBlockX(), player.getBlockZ(), 160)) {
-					if (!active.contains(spring)) {
-						active.add(spring);
-					}
 					steam(world, player, spring);
-				}
-			}
-			for (Spring spring : active) {
-				if (spring.geyser() && world.isChunkLoaded(spring.vent().x() >> 4, spring.vent().z() >> 4)) {
-					geyser(world, spring);
 				}
 			}
 		});
@@ -377,52 +368,6 @@ public final class HotSprings {
 			if (random.nextInt(3) == 0) {
 				world.spawnParticles(player, ParticleTypes.CLOUD, true, x, pool.level() + 1.1, z, 0, 0, 0.03, 0, 1);
 			}
-		}
-	}
-
-	/** Where a geyser is in its cycle: ticks since its last eruption began. */
-	public static int cycle(Spring spring, long time) {
-		return (int) Math.floorMod(time + spring.phase(), (long) spring.period());
-	}
-
-	private static void geyser(ServerWorld world, Spring spring) {
-		geyserAt(world, spring, cycle(spring, world.getTime()));
-	}
-
-	/** A geyser's doings at this point of its cycle (t: ticks since its last eruption began). Public for the tests. */
-	public static void geyserAt(ServerWorld world, Spring spring, int t) {
-		Pool vent = spring.vent();
-		double x = vent.x() + 0.5;
-		double z = vent.z() + 0.5;
-		double top = vent.level() + 1.0;
-		if (t >= spring.period() - WARNING) {
-			// The warning: bubbles and a rumble.
-			world.spawnParticles(ParticleTypes.BUBBLE_COLUMN_UP, x, vent.level() - vent.depth() + 1.0, z, 6, 0.3, 0.5, 0.3, 0.1);
-			world.spawnParticles(ParticleTypes.BUBBLE_POP, x, top, z, 4, 0.5, 0, 0.5, 0.05);
-			if ((t / 4) % 5 == 0) {
-				world.playSound(null, x, top, z, SoundEvents.BLOCK_BUBBLE_COLUMN_WHIRLPOOL_AMBIENT, SoundCategory.BLOCKS, 1.5F, 0.6F);
-			}
-			return;
-		}
-		if (t >= ERUPTION) {
-			return;
-		}
-		if (t < 4) {
-			world.playSound(null, x, top, z, SoundEvents.BLOCK_LAVA_EXTINGUISH, SoundCategory.BLOCKS, 2.0F, 0.5F);
-			world.playSound(null, x, top, z, SoundEvents.ENTITY_GENERIC_SPLASH, SoundCategory.BLOCKS, 2.0F, 0.6F);
-		}
-		// The plume: spray and steam up to about 10 blocks.
-		for (int h = 0; h < 10; h += 2) {
-			world.spawnParticles(ParticleTypes.SPLASH, x, top + h, z, 12, 0.35, 0.6, 0.35, 0.2);
-			world.spawnParticles(ParticleTypes.CLOUD, x, top + h + 1, z, 3, 0.3, 0.6, 0.3, 0.02);
-		}
-		world.spawnParticles(ParticleTypes.CAMPFIRE_SIGNAL_SMOKE, x, top + 8, z, 2, 0.3, 0.3, 0.3, 0.01);
-		// Whatever stands or swims over the vent is thrown up.
-		Box column = new Box(x - 0.9, vent.level() - vent.depth(), z - 0.9, x + 0.9, top + 3.0, z + 0.9);
-		for (Entity entity : world.getOtherEntities(null, column, entity -> !entity.isSpectator() && !entity.hasNoGravity())) {
-			entity.setVelocity(entity.getVelocity().x * 0.5, 1.4, entity.getVelocity().z * 0.5);
-			entity.velocityModified = true;
-			entity.fallDistance = 0;
 		}
 	}
 }

@@ -1565,7 +1565,7 @@
                         "then_run": {
                           "type": "minecraft:block",
                           "result_state": {
-                            "Name": "minecraft:tuff"
+                            "Name": "minecraft:blackstone"
                           }
                         }
                       },

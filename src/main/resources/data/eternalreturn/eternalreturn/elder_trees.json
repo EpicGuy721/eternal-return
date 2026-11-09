@@ -1,11 +1,11 @@
 {
-  "_comment": "Elder trees (worldgen expansion 2, phase 4; ElderTrees): each species that can grow as an elder, by its tree table id (or vanilla:<sapling> for a table's 'vanilla' tree), with its giant form, wood, leaves (one or a mix), sapling (the young trees round it), height and trunk width in blocks. Species not listed (the shrubs) never become elders. Forms: dome, spire, column, umbrella, weeping, palm, bottle.",
+  "_comment": "Elder trees (worldgen expansion 2, phase 4; ElderTrees): each species that can grow as an elder, by its tree table id (or vanilla:<sapling> for a table's 'vanilla' tree), with its giant form, wood, leaves (one or a mix), sapling (the young trees round it), height and trunk width in blocks. Species not listed (the shrubs) never become elders. Forms: dome, spire, column, umbrella, weeping, palm, bottle, savanna (the acacias).",
   "species": {
     "vanilla:minecraft:oak_sapling": {"form": "dome", "log": "minecraft:oak_log", "leaves": ["minecraft:oak_leaves"], "sapling": "minecraft:oak_sapling", "height": [50, 65], "trunk": [4, 5]},
     "vanilla:minecraft:birch_sapling": {"form": "column", "log": "minecraft:birch_log", "leaves": ["minecraft:birch_leaves"], "sapling": "minecraft:birch_sapling", "height": [55, 70], "trunk": [3, 4]},
     "vanilla:minecraft:spruce_sapling": {"form": "spire", "log": "minecraft:spruce_log", "leaves": ["minecraft:spruce_leaves"], "sapling": "minecraft:spruce_sapling", "height": [60, 80], "trunk": [4, 5]},
     "vanilla:minecraft:jungle_sapling": {"form": "umbrella", "log": "minecraft:jungle_log", "leaves": ["minecraft:jungle_leaves"], "sapling": "minecraft:jungle_sapling", "height": [65, 85], "trunk": [4, 5]},
-    "vanilla:minecraft:acacia_sapling": {"form": "umbrella", "log": "minecraft:acacia_log", "leaves": ["minecraft:acacia_leaves"], "sapling": "minecraft:acacia_sapling", "height": [50, 60], "trunk": [3, 4]},
+    "vanilla:minecraft:acacia_sapling": {"form": "savanna", "log": "minecraft:acacia_log", "leaves": ["minecraft:acacia_leaves"], "sapling": "minecraft:acacia_sapling", "height": [50, 60], "trunk": [3, 4]},
     "vanilla:minecraft:dark_oak_sapling": {"form": "dome", "log": "minecraft:dark_oak_log", "leaves": ["minecraft:dark_oak_leaves"], "sapling": "minecraft:dark_oak_sapling", "height": [50, 60], "trunk": [5, 5]},
     "vanilla:minecraft:cherry_sapling": {"form": "dome", "log": "minecraft:cherry_log", "leaves": ["minecraft:cherry_leaves"], "sapling": "minecraft:cherry_sapling", "height": [50, 60], "trunk": [3, 4]},
     "vanilla:minecraft:mangrove_propagule": {"form": "dome", "log": "minecraft:mangrove_log", "leaves": ["minecraft:mangrove_leaves"], "sapling": "minecraft:mangrove_propagule", "height": [50, 58], "trunk": [3, 4]},
@@ -36,7 +36,7 @@
     "eternalreturn:tree/willow": {"form": "weeping", "log": "minecraft:oak_log", "leaves": ["minecraft:oak_leaves"], "sapling": "minecraft:oak_sapling", "height": [50, 58], "trunk": [4, 5]},
     "eternalreturn:tree/black_mangrove": {"form": "dome", "log": "minecraft:mangrove_log", "leaves": ["minecraft:mangrove_leaves"], "sapling": "minecraft:mangrove_propagule", "height": [50, 58], "trunk": [3, 4]},
     "eternalreturn:tree/red_mangrove": {"form": "dome", "log": "minecraft:mangrove_log", "leaves": ["minecraft:mangrove_leaves"], "sapling": "minecraft:mangrove_propagule", "height": [50, 58], "trunk": [3, 4]},
-    "eternalreturn:tree/umbrella_thorn": {"form": "umbrella", "log": "minecraft:acacia_log", "leaves": ["minecraft:acacia_leaves"], "sapling": "minecraft:acacia_sapling", "height": [50, 58], "trunk": [3, 4]},
+    "eternalreturn:tree/umbrella_thorn": {"form": "savanna", "log": "minecraft:acacia_log", "leaves": ["minecraft:acacia_leaves"], "sapling": "minecraft:acacia_sapling", "height": [50, 58], "trunk": [3, 4]},
     "eternalreturn:tree/baobab": {"form": "bottle", "log": "minecraft:acacia_log", "leaves": ["minecraft:acacia_leaves"], "sapling": "minecraft:acacia_sapling", "height": [50, 58], "trunk": [5, 5]},
     "eternalreturn:tree/palm": {"form": "palm", "log": "minecraft:jungle_log", "leaves": ["minecraft:jungle_leaves"], "sapling": "minecraft:jungle_sapling", "height": [50, 62], "trunk": [3, 3]},
     "eternalreturn:tree/palm_tall": {"form": "palm", "log": "minecraft:jungle_log", "leaves": ["minecraft:jungle_leaves"], "sapling": "minecraft:jungle_sapling", "height": [58, 70], "trunk": [3, 3]},

@@ -489,7 +489,7 @@ final class LandmarkShapes {
 	// ------------------------------------------------------------------ volcano
 
 	/**
-	 * A huge cone (size: its radius at the foot) of the local stone streaked with basalt and tuff, rising up to 80 blocks
+	 * A huge cone (size: its radius at the foot) of the local stone streaked with basalt and blackstone, rising up to 80 blocks
 	 * from the ground at its centre: ash and basalt high up, coarse dirt and gravel on the middle slopes, grass on the
 	 * lower slopes so the land runs up into it. A crater at the top holds a lava lake ringed with magma; two or three lava
 	 * flows run down the sides.
@@ -534,7 +534,7 @@ final class LandmarkShapes {
 				int peak = (int) Math.round(top);
 				for (int y = ground - 1; y <= peak; y++) {
 					double m = this.n3(x * 0.07, y * 0.07, z * 0.07);
-					this.set(x, y, z, m > 0.45 ? Blocks.BASALT.getDefaultState() : m < -0.55 ? Blocks.TUFF.getDefaultState() : this.stone);
+					this.set(x, y, z, m > 0.45 ? Blocks.BASALT.getDefaultState() : m < -0.55 ? Blocks.BLACKSTONE.getDefaultState() : this.stone);
 				}
 				if (crater) {
 					for (int y = peak + 1; y <= Math.max(ground, (int) rimTop) + 2; y++) {
@@ -549,9 +549,9 @@ final class LandmarkShapes {
 				// The surface by height on the cone.
 				double c = this.chance(x, peak, z, 9);
 				if (dd < 0.35) {
-					this.set(x, peak, z, (d < craterRadius * 1.4 && c < 0.3 ? Blocks.MAGMA_BLOCK : c < 0.45 ? Blocks.BASALT : c < 0.8 ? Blocks.GRAVEL : Blocks.TUFF).getDefaultState());
+					this.set(x, peak, z, (d < craterRadius * 1.4 && c < 0.3 ? Blocks.MAGMA_BLOCK : c < 0.45 ? Blocks.BASALT : c < 0.8 ? Blocks.GRAVEL : Blocks.BLACKSTONE).getDefaultState());
 				} else if (dd < 0.7) {
-					this.set(x, peak, z, (c < 0.4 ? Blocks.COARSE_DIRT : c < 0.65 ? Blocks.GRAVEL : c < 0.85 ? this.stone.getBlock() : Blocks.TUFF).getDefaultState());
+					this.set(x, peak, z, (c < 0.4 ? Blocks.COARSE_DIRT : c < 0.65 ? Blocks.GRAVEL : c < 0.85 ? this.stone.getBlock() : Blocks.BLACKSTONE).getDefaultState());
 				} else {
 					this.set(x, peak, z, Blocks.GRASS_BLOCK.getDefaultState());
 					for (int y = peak - 3; y < peak; y++) {

@@ -1,0 +1,177 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "eternalreturn:alps",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:arctic",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:autumnal_forest_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:bald_cypress_swamp",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:birch_forest_dry_edge",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:birch_forest_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:black_spruce_forest",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:cherry_grove_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:dark_forest_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:dark_meadow",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:extreme_hills_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:forest_dry_edge",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:forest_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:glacier_field",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:grand_fir_forest",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:heathland",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:ice_caves",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:ice_plains_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:icy_mountains",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:jungle_edge",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:jungle_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:larch_forest",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:magma_caves",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:meadow",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:mushroom_caves",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:old_growth_pine_taiga_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:old_growth_spruce_taiga_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:pinyon_woodland",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:plains_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:poplar_grove",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:pumpkin_plains",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:redwood_forest",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:roofed_fungi_forest",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:savanna_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:snowy_mesa",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:spooky_swamp",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:swampland_edge",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:taiga_edge",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:taiga_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:tropical_pillars",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:tundra",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:volcanic_jungle",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:webbed_forest",
+      "required": false
+    }
+  ]
+}

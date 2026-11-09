@@ -20,7 +20,8 @@ import java.util.List;
 /**
  * Hot springs (worldgen expansion 2, phase 3; HotSprings): the plan's pools step down from the deepest, never touching;
  * built, the first pool has water over a magma vent, calcite rims hold the water, hidden magma keeps the springs warm,
- * snow and ice stay off within 8 blocks of the rims and not beyond; a geyser's eruption throws a pig over its vent up.
+ * snow and ice stay off within 8 blocks of the rims and not beyond; a geyser spring's vent sits on lava, and its eruption
+ * (Geysers) throws a pig over the vent up; magma erupts only with lava under it and water over it.
  * Flat runs (batch hot_springs).
  */
 public class HotSpringTests implements FabricGameTest {
@@ -62,7 +63,7 @@ public class HotSpringTests implements FabricGameTest {
 		throw new AssertionError("no fitting spring");
 	}
 
-	@GameTest(templateName = ARENA, batchId = BATCH, skyAccess = true, tickLimit = 200)
+	@GameTest(templateName = ARENA, batchId = BATCH, skyAccess = true, tickLimit = 300)
 	public void springWarmsClearsAndErupts(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
 		HotSprings.testing = true;
@@ -88,24 +89,48 @@ public class HotSpringTests implements FabricGameTest {
 				&& world.getBlockState(ventFloor.up(vent.depth() + 1)).isAir(), "the deep pool isn't 3 water deep");
 		BlockPos rim = new BlockPos(vent.x() + vent.radius() + 1, vent.level(), vent.z());
 		BlockState rimState = world.getBlockState(rim);
-		ctx.assertTrue(rimState.isOf(Blocks.CALCITE) || rimState.isOf(Blocks.TUFF) || world.getBlockState(rim).isOf(Blocks.WATER),
-				"no calcite or tuff rim round the pool: " + rimState);
+		ctx.assertTrue(rimState.isOf(Blocks.CALCITE) || world.getBlockState(rim).isOf(Blocks.WATER), "no calcite rim round the pool: " + rimState);
 		// Warm at the pool's edge (the hidden magma), snow and ice kept off nearby but not far off.
 		ctx.assertTrue(ColdExposure.warm(world, new BlockPos(vent.x() + vent.radius(), vent.level() + 1, vent.z())), "not warm at the pool's edge");
 		ctx.assertTrue(HotSprings.keepsClear(world, new BlockPos(vent.x() + vent.radius() + 6, vent.level() + 1, vent.z())), "snow can settle 6 blocks off the rim");
 		ctx.assertTrue(!HotSprings.keepsClear(world, new BlockPos(vent.x() + 60, vent.level() + 1, vent.z() + 60)), "snow kept off 60 blocks away");
 		ctx.assertTrue(!world.getBiome(rim.up()).value().canSetIce(world, ventFloor.up(vent.depth()), false), "the pool can freeze");
-		// The geyser throws a pig standing over the vent up.
+		// The vent sits on lava, so it's a geyser (Geysers); started, it throws a pig swimming over the vent up.
+		ctx.assertTrue(world.getBlockState(ventFloor.down()).isOf(Blocks.LAVA) && com.eternalreturn.blocks.Geysers.canErupt(world, ventFloor),
+				"the geyser spring's vent isn't on lava under water");
 		PigEntity pig = EntityType.PIG.create(world);
 		pig.refreshPositionAndAngles(vent.x() + 0.5, vent.level() + 1.0, vent.z() + 0.5, 0, 0);
 		world.spawnEntity(pig);
-		HotSprings.geyserAt(world, spring, 10);
-		ctx.assertTrue(pig.getVelocity().y > 1.0, "the pig wasn't thrown up: " + pig.getVelocity());
-		ctx.runAtTick(20, () -> {
+		ctx.assertTrue(com.eternalreturn.blocks.Geysers.start(world, ventFloor), "the geyser won't start");
+		ctx.runAtTick(com.eternalreturn.blocks.Geysers.WARNING + 20, () -> {
 			ctx.assertTrue(pig.getY() > vent.level() + 5, "the pig didn't fly: y " + pig.getY() + " over the water at " + vent.level());
 			pig.discard();
 			HotSprings.testing = false;
 			ctx.complete();
 		});
+	}
+	/** Magma erupts only with lava right under it and water right over it. */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = BATCH)
+	public void geyserNeedsLavaAndWater(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		BlockPos magma = ctx.getAbsolutePos(new BlockPos(2, 2, 2));
+		BlockPos dry = ctx.getAbsolutePos(new BlockPos(5, 2, 2));
+		BlockPos cold = ctx.getAbsolutePos(new BlockPos(2, 2, 5));
+		for (BlockPos pos : java.util.List.of(magma, dry, cold)) {
+			world.setBlockState(pos, Blocks.MAGMA_BLOCK.getDefaultState());
+		}
+		world.setBlockState(magma.down(), Blocks.LAVA.getDefaultState());
+		world.setBlockState(magma.up(), Blocks.WATER.getDefaultState());
+		world.setBlockState(dry.down(), Blocks.LAVA.getDefaultState());
+		world.setBlockState(cold.down(), Blocks.STONE.getDefaultState());
+		world.setBlockState(cold.up(), Blocks.WATER.getDefaultState());
+		ctx.assertTrue(com.eternalreturn.blocks.Geysers.canErupt(world, magma), "magma on lava under water won't erupt");
+		ctx.assertTrue(!com.eternalreturn.blocks.Geysers.canErupt(world, dry), "magma with no water over it erupts");
+		ctx.assertTrue(!com.eternalreturn.blocks.Geysers.canErupt(world, cold), "magma with no lava under it erupts");
+		ctx.assertTrue(Blocks.MAGMA_BLOCK.getDefaultState().hasRandomTicks(), "magma has no random ticks");
+		for (BlockPos pos : java.util.List.of(magma.up(), cold.up(), magma.down(), dry.down())) {
+			world.setBlockState(pos, Blocks.AIR.getDefaultState());
+		}
+		ctx.complete();
 	}
 }
