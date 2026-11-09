@@ -58,7 +58,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * a tree table, a single colossal tree of a species from that biome's own tables (data/eternalreturn/eternalreturn/
  * elder_trees.json says which species can, in which of seven giant forms, with which wood, leaves and size: 50 to 90
  * tall, a trunk 3 to 5 wide). Its leaves are ordinary non-persistent leaves at their true distance from the wood, so a cut
- * elder decays as any tree. Round it a clearing of podzol and fallen leaves with saplings of its kind (ordinary trees
+ * elder decays as any tree. Round it a clearing (the ground left as it is) with fallen leaves and saplings of its kind (ordinary trees
  * don't grow in it); in the base of its trunk, among its roots, a hollow, sometimes with a spring of water, sometimes a
  * bear's den; in its crown bee nests and roosting birds. Everything comes from its centre, size and seed, so each chunk
  * builds its own part.
@@ -666,11 +666,7 @@ public final class ElderTrees {
 					continue;
 				}
 				int top = world.getTopY(Heightmap.Type.OCEAN_FLOOR, x, z) - 1;
-				BlockState ground = world.getBlockState(pos.set(x, top, z));
-				if (ground.isOf(Blocks.GRASS_BLOCK) || ground.isOf(Blocks.DIRT) || ground.isOf(Blocks.COARSE_DIRT) || ground.isOf(Blocks.MYCELIUM)
-						|| ground.isOf(Blocks.SNOW_BLOCK) || ground.isOf(Blocks.MUD)) {
-					world.setBlockState(pos, random.nextInt(4) == 0 ? Blocks.COARSE_DIRT.getDefaultState() : Blocks.PODZOL.getDefaultState(), Block.NOTIFY_LISTENERS);
-				}
+				// The ground itself stays as it is (the owner's call, 2026-11-09: no podzol).
 				for (int y = top + 1; y <= top + 3; y++) {
 					BlockState above = world.getBlockState(pos.set(x, y, z));
 					if (!above.isAir() && (above.isReplaceable() || above.isIn(BlockTags.FLOWERS) || above.isIn(BlockTags.SAPLINGS)) && above.getFluidState().isEmpty()) {
