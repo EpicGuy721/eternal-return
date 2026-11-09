@@ -132,6 +132,7 @@
 		"scrolls.EnchantBookFactoryMixin",
 		"scrolls.ServerPlayNetworkHandlerMixin",
 		"survival.AbstractBlockSnowMixin",
+		"survival.GrownCropFootingMixin",
 		"survival.LeafDistanceMixin",
 		"survival.LeafDistancePropertyMixin",
 		"enchantments.AttractionMixin",

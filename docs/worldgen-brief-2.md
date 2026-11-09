@@ -164,3 +164,5 @@ Personality rolls come last on purpose: by then every new biome, crop patch, cac
 
 - Order (asked 2026-11-08): this brief comes before the first brief's phase 7 (ruins and underground rivers).
 - Phase 1 (asked 2026-11-08): no sweet berry patches (taiga's existing bushes are enough); pumpkin and melon patches are loose fruit on grass, no stems or farmland; the overgrown field's broken fence posts are the fence of a wood that grows in that biome.
+- Phase 1, after the in-game check (2026-11-08, "everything looks good"): patches no longer turn the ground to farmland; a fully grown crop can stand on grass or dirt (so wild patches stay), but seeds still need farmland to be planted and to grow.
+- Phase 2 (asked 2026-11-08): cactus connections work in every world (the shapes by biome generate only in Eternal Return worlds); sparse cholla in the drylands.

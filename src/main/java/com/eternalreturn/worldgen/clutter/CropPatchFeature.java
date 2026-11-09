@@ -6,7 +6,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.CropBlock;
-import net.minecraft.block.FarmlandBlock;
 import net.minecraft.block.FenceBlock;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
@@ -37,9 +36,9 @@ import java.util.List;
  * Wild crop patches (worldgen expansion 2, phase 1; feature eternalreturn:crop_patch,
  * data/eternalreturn/worldgen/configured_feature/crop_patches.json). Each chunk picks one spot on open grass or dirt under the sky; of
  * the crops whose ideal-biome tag holds the biome there, each rolls its own chance (one in "chance" chunks) and the first
- * to succeed grows a patch. A "crop" patch is a loose clump of fully grown crops on farmland set into the ground (farmland
- * under a crop never dries back to dirt, so it holds until harvested); a "fruit" patch is loose pumpkins or melons on the
- * grass. Grass and the biome's own flowers grow round it. One patch in "overgrown_chance" is an overgrown field instead:
+ * to succeed grows a patch. A "crop" patch is a loose clump of fully grown crops standing on the ground as it is (a grown
+ * crop may stand on grass or dirt, GrownCropFootingMixin; seeds still need farmland); a "fruit" patch is loose pumpkins or
+ * melons on the grass. Grass and the biome's own flowers grow round it. One patch in "overgrown_chance" is an overgrown field instead:
  * larger, in rough rows, with a few broken fence posts of the wood whose logs stand nearest (oak where there are none).
  */
 public final class CropPatchFeature extends Feature<CropPatchFeature.Config> {
@@ -193,7 +192,7 @@ public final class CropPatchFeature extends Feature<CropPatchFeature.Config> {
 		};
 	}
 
-	/** Plants one crop (on farmland) or fruit (on the ground) at this column, if its ground is within a block of the centre's. */
+	/** Plants one grown crop or fruit on the ground at this column, if its ground is within a block of the centre's. */
 	private static void plant(StructureWorldAccess world, Random random, BlockPos spot, BlockPos center, Crop crop, List<BlockPos> planted) {
 		BlockPos ground = ground(world, spot.getX(), spot.getZ());
 		if (ground == null || Math.abs(ground.getY() - center.getY()) > 1) {
@@ -214,7 +213,6 @@ public final class CropPatchFeature extends Feature<CropPatchFeature.Config> {
 		if (crop.fruit()) {
 			world.setBlockState(above, crop.block().getDefaultState(), Block.NOTIFY_LISTENERS);
 		} else {
-			world.setBlockState(ground, Blocks.FARMLAND.getDefaultState().with(FarmlandBlock.MOISTURE, 7), Block.NOTIFY_LISTENERS);
 			BlockState grown = crop.block() instanceof CropBlock cropBlock ? cropBlock.withAge(cropBlock.getMaxAge()) : crop.block().getDefaultState();
 			world.setBlockState(above, grown, Block.NOTIFY_LISTENERS);
 		}

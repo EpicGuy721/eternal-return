@@ -22,7 +22,7 @@ import net.minecraft.world.gen.feature.ConfiguredFeature;
 import java.util.List;
 
 /**
- * Wild crop patches (worldgen expansion 2, phase 1; CropPatchFeature): a crop patch is fully grown crops on farmland, a
+ * Wild crop patches (worldgen expansion 2, phase 1; CropPatchFeature): a crop patch is fully grown crops on the grass, a
  * fruit patch loose pumpkins on grass, an overgrown field rows with fence posts of the nearest tree's wood, and the
  * farmland holds under a crop and turns back to dirt once it's harvested. Flat runs (batch crop_patches).
  */
@@ -76,7 +76,16 @@ public class CropPatchTests implements FabricGameTest {
 		int grown = count(ctx, state -> state.isOf(Blocks.CARROTS) && ((CropBlock) Blocks.CARROTS).isMature(state));
 		int farmland = count(ctx, state -> state.isOf(Blocks.FARMLAND));
 		ctx.assertTrue(crops >= 4 && crops <= 12, "4 to 12 carrots, got " + crops);
-		ctx.assertTrue(grown == crops && farmland == crops, crops + " carrots, " + grown + " grown, " + farmland + " farmland");
+		ctx.assertTrue(grown == crops && farmland == 0, crops + " carrots, " + grown + " grown, " + farmland + " farmland");
+		// They stay on the grass: a neighbour update keeps them.
+		BlockPos one = null;
+		for (BlockPos pos : BlockPos.iterate(center.add(-4, 1, -4), center.add(4, 1, 4))) {
+			if (world.getBlockState(pos).isOf(Blocks.CARROTS)) {
+				one = pos.toImmutable();
+				break;
+			}
+		}
+		ctx.assertTrue(one != null && world.getBlockState(one).canPlaceAt(world, one), "a grown carrot can't stand on grass");
 		ctx.complete();
 	}
 
@@ -130,6 +139,21 @@ public class CropPatchTests implements FabricGameTest {
 		}
 		ctx.assertTrue(world.getBlockState(held).isOf(Blocks.FARMLAND), "farmland under a crop dried back to dirt");
 		ctx.assertTrue(world.getBlockState(bare).isOf(Blocks.DIRT), "bare farmland stayed farmland");
+		ctx.complete();
+	}
+
+	/** A grown crop stands on grass or dirt; a young one (a planted seed) needs farmland. */
+	@GameTest(templateName = ARENA, batchId = BATCH, skyAccess = true)
+	public void onlyGrownCropsStandOnGrass(TestContext ctx) {
+		grass(ctx);
+		ServerWorld world = ctx.getWorld();
+		BlockPos spot = ctx.getAbsolutePos(new BlockPos(4, 2, 4));
+		CropBlock wheat = (CropBlock) Blocks.WHEAT;
+		ctx.assertTrue(wheat.withAge(7).canPlaceAt(world, spot), "grown wheat can't stand on grass");
+		ctx.assertTrue(!wheat.withAge(0).canPlaceAt(world, spot), "a seed can be planted on grass");
+		ctx.assertTrue(!wheat.withAge(6).canPlaceAt(world, spot), "half-grown wheat stands on grass");
+		world.setBlockState(spot.down(), Blocks.SAND.getDefaultState());
+		ctx.assertTrue(!wheat.withAge(7).canPlaceAt(world, spot), "grown wheat stands on sand");
 		ctx.complete();
 	}
 
