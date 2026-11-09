@@ -195,12 +195,16 @@ public class MobsAndMachinesTests implements FabricGameTest {
 		hunter.equipStack(EquipmentSlot.HEAD, new ItemStack(Items.LEATHER_HELMET));
 		CowEntity cow = ctx.spawnEntity(EntityType.COW, new BlockPos(5, 1, 1));
 		ctx.runAtEveryTick(() -> {
+			// Idle until it spots the cow, it could sit down (Lounging) for longer than the test lasts.
+			com.eternalreturn.mobs.ai.Lounging.stand(hunter);
 			if (hunter.getTarget() == cow) {
 				hunter.discard();
 				cow.discard();
 				ctx.complete();
 			}
 		});
+		ctx.runAtTick(590, () -> ctx.assertTrue(false, "no hunt: zombie pose " + hunter.getPose() + " target " + hunter.getTarget()
+				+ " at " + hunter.getBlockPos() + ", cow at " + cow.getBlockPos() + " alive " + cow.isAlive()));
 	}
 
 	/** A hurt adult zombie walks to raw beef lying nearby, eats it and heals. */
