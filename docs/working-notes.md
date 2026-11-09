@@ -31,7 +31,8 @@ How the owner wants work on this repo done, and pitfalls that each cost a failed
 - Test runs save their config to `build/gametest/<run>/config/eternalreturn.json` and later runs read it.
 - Only the test areas' own chunks tick entities; mobs don't despawn on the test server; a passing test removes its entities, a failing one leaves them ticking.
 - `ctx.getRelativePos` returns x and z negated for unrotated tests: use `pos - ctx.getAbsolutePos(BlockPos.ORIGIN)`.
-- Placed light takes a while to spread: wait for it rather than a fixed tick. An entity's first `baseTick()` sees no fluids: tick twice.
+- Placed light takes a while to spread: wait for it rather than a fixed tick. So does a placed roof's shade (sky light stays 15 under it at first), and barriers pass light: a roofed arena with only the barrier walls round it lets daylight in at the sides. An entity's first `baseTick()` sees no fluids: tick twice.
+- Don't call `ctx.runAtEveryTick`/`runAtTick` from inside a running task (or a helper that does, such as one that spawns and keeps a mob standing): the test keeps tasks in a hash map it is iterating. Poll from one every-tick task instead.
 - A run stuck at "Saving worlds": the report is already written; stop only the gametest java process (its command line has `-Deternalreturn.gametest.batches`), never the Gradle daemon. A thread dump (jstack) shows deadlocks.
 - Flaky tests: `-PgametestRepeat=50 -PgametestBatches=a,b` runs the batches 50 times in one server.
 - The Eternal Return test world (seed 173164) has structures off (vanilla's test level): tests of structures start and place them by hand (LandmarkTests). Block ticks don't run high in its sky. `generator.getHeight` near coasts costs about 0.36 s (Moderner Beta's ocean distance), so check biomes before heights in anything that runs often.

@@ -11,6 +11,7 @@ import net.minecraft.test.GameTest;
 import net.minecraft.test.TestContext;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.LightType;
 import net.minecraft.world.event.GameEvent;
 
 /**
@@ -24,13 +25,46 @@ public class GrimlockTests implements FabricGameTest {
 	/** 16 by 40 blocks of stone floor (at y 1 here: stand on y 2), 14 high. */
 	private static final String ARENA = "eternalreturn_test:arena";
 
-	/** A stone roof over the arena: no daylight gets in, whatever the time (other tests set it), so it's dark as a cave. */
+	/**
+	 * A stone roof and walls round the arena: no daylight gets in, whatever the time (other tests set it), so it's dark as
+	 * a cave. (The test area's barrier walls pass light: under a roof alone, daylight came in from the sides, and by day
+	 * the arena's edges counted as lit.)
+	 */
 	private static void roof(TestContext ctx) {
 		for (int x = 0; x < 16; x++) {
 			for (int z = 0; z < 40; z++) {
-				ctx.setBlockState(new BlockPos(x, 13, z), Blocks.STONE.getDefaultState());
+				boolean edge = x == 0 || x == 15 || z == 0 || z == 39;
+				for (int y = edge ? 2 : 13; y <= 13; y++) {
+					ctx.setBlockState(new BlockPos(x, y, z), Blocks.STONE.getDefaultState());
+				}
 			}
 		}
+	}
+
+	/**
+	 * Placed light takes a while to spread, and so does the roof's shade: whether the block light at pos (test-relative)
+	 * is up to a grimlock's LIGHT yet, and the daylight gone from under the roof (at pos, mid-arena and in two corners).
+	 * (Tests poll this from their one every-tick task: a task added from inside another can be lost, as the test keeps
+	 * them in a map it is going through.)
+	 */
+	private static boolean lightSpread(TestContext ctx, BlockPos pos) {
+		var world = ctx.getWorld();
+		if (world.getLightLevel(LightType.BLOCK, ctx.getAbsolutePos(pos)) < GrimlockEntity.LIGHT) {
+			return false;
+		}
+		for (BlockPos shaded : new BlockPos[] {pos, new BlockPos(8, 2, 20), new BlockPos(1, 2, 1), new BlockPos(14, 2, 38)}) {
+			if (world.getLightLevel(LightType.SKY, ctx.getAbsolutePos(shaded)) > 0) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/** Where it is and how bright it is there, for failure messages. */
+	private static String where(TestContext ctx, GrimlockEntity grimlock) {
+		BlockPos at = grimlock.getBlockPos();
+		return "at " + at.subtract(ctx.getAbsolutePos(BlockPos.ORIGIN)).toShortString() + ", block light " + ctx.getWorld().getLightLevel(LightType.BLOCK, at)
+				+ ", sky light " + ctx.getWorld().getLightLevel(LightType.SKY, at) + (ctx.getWorld().isDay() ? " (day)" : " (night)") + ", target " + grimlock.getTarget();
 	}
 
 	/** Idle, a grimlock might sit down for a rest (Lounging), and sense nothing: not in these tests. */
@@ -57,13 +91,20 @@ public class GrimlockTests implements FabricGameTest {
 		GrimlockEntity looking = still(ctx, new BlockPos(4, 2, 4));
 		ServerPlayerEntity behind = FishingTests.survivalPlayer(ctx, new BlockPos(12, 2, 26));
 		GrimlockEntity sniffing = still(ctx, new BlockPos(12, 2, 32));
-		ctx.runAtTick(60, () -> {
+		// It looks for targets now and then (at random): wait for the sniffing one to find its player, and give the looking
+		// one at least 60 ticks to (not) notice its own.
+		boolean[] smelled = {false};
+		ctx.runAtEveryTick(() -> {
 			ctx.assertTrue(looking.getTarget() == null, "a player 14 blocks off in plain view goes unnoticed: " + looking.getTarget());
-			ctx.assertTrue(sniffing.getTarget() == behind, "one 6 blocks behind is smelled");
-			FishingTests.disconnect(inView);
-			FishingTests.disconnect(behind);
-			ctx.killAllEntities();
-			ctx.complete();
+			smelled[0] |= sniffing.getTarget() == behind;
+			if (smelled[0] && ctx.getTick() >= 60) {
+				FishingTests.disconnect(inView);
+				FishingTests.disconnect(behind);
+				ctx.killAllEntities();
+				ctx.complete();
+			} else if (ctx.getTick() == 190) {
+				ctx.assertTrue(false, "one 6 blocks behind is smelled: " + where(ctx, sniffing) + ", " + sniffing.distanceTo(behind) + " off, age " + sniffing.age);
+			}
 		});
 	}
 
@@ -91,12 +132,23 @@ public class GrimlockTests implements FabricGameTest {
 		roof(ctx);
 		ctx.setBlockState(new BlockPos(7, 1, 10), Blocks.GLOWSTONE.getDefaultState());
 		ctx.setBlockState(new BlockPos(9, 1, 10), Blocks.GLOWSTONE.getDefaultState());
-		GrimlockEntity grimlock = awake(ctx, ctx.spawnEntity(NewMobs.GRIMLOCK, new BlockPos(8, 2, 10)));
-		ctx.runAtTick(5, () -> ctx.assertTrue(GrimlockEntity.lit(ctx.getWorld(), grimlock.getBlockPos()), "it starts in the light"));
-		ctx.runAtTick(200, () -> {
-			ctx.assertTrue(!GrimlockEntity.lit(ctx.getWorld(), grimlock.getBlockPos()), "it backed out into the dark");
-			ctx.killAllEntities();
-			ctx.complete();
+		// In the light (once it has spread there), 150 ticks to back out of it.
+		GrimlockEntity[] grimlock = {null};
+		long[] litAt = {-1};
+		ctx.runAtEveryTick(() -> {
+			if (grimlock[0] == null) {
+				if (lightSpread(ctx, new BlockPos(8, 2, 10))) {
+					litAt[0] = ctx.getTick();
+					grimlock[0] = ctx.spawnEntity(NewMobs.GRIMLOCK, new BlockPos(8, 2, 10));
+				}
+				return;
+			}
+			com.eternalreturn.mobs.ai.Lounging.stand(grimlock[0]);
+			if (ctx.getTick() == litAt[0] + 150) {
+				ctx.assertTrue(!GrimlockEntity.lit(ctx.getWorld(), grimlock[0].getBlockPos()), "it backed out into the dark: " + where(ctx, grimlock[0]));
+				ctx.killAllEntities();
+				ctx.complete();
+			}
 		});
 	}
 
@@ -105,21 +157,34 @@ public class GrimlockTests implements FabricGameTest {
 		roof(ctx);
 		// A soul torch (light 10) just behind the player: their spot is lit, 5 blocks off it's dark, within smelling range.
 		ctx.setBlockState(new BlockPos(8, 2, 31), Blocks.SOUL_TORCH.getDefaultState());
-		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(8, 2, 30));
-		GrimlockEntity grimlock = awake(ctx, ctx.spawnEntity(NewMobs.GRIMLOCK, new BlockPos(8, 2, 25)));
+		// Both come once the light has spread to the player's spot (before that, the player stood in the dark, fair game).
+		ServerPlayerEntity[] player = {null};
+		GrimlockEntity[] grimlock = {null};
+		long[] litAt = {-1};
 		boolean[] smelled = {false};
-		boolean[] steppedIntoLight = {false};
+		String[] steppedIntoLight = {null};
 		ctx.runAtEveryTick(() -> {
-			smelled[0] |= grimlock.getTarget() == player;
-			steppedIntoLight[0] |= ctx.getTick() > 20 && GrimlockEntity.lit(ctx.getWorld(), grimlock.getBlockPos());
-		});
-		ctx.runAtTick(200, () -> {
-			ctx.assertTrue(smelled[0], "it smelled the player");
-			ctx.assertTrue(!steppedIntoLight[0], "but never stepped into the light around them");
-			ctx.assertTrue(player.getHealth() == player.getMaxHealth(), "nor hurt them: " + player.getHealth());
-			FishingTests.disconnect(player);
-			ctx.killAllEntities();
-			ctx.complete();
+			if (grimlock[0] == null) {
+				if (lightSpread(ctx, new BlockPos(8, 2, 30))) {
+					litAt[0] = ctx.getTick();
+					player[0] = FishingTests.survivalPlayer(ctx, new BlockPos(8, 2, 30));
+					grimlock[0] = ctx.spawnEntity(NewMobs.GRIMLOCK, new BlockPos(8, 2, 25));
+				}
+				return;
+			}
+			com.eternalreturn.mobs.ai.Lounging.stand(grimlock[0]);
+			smelled[0] |= grimlock[0].getTarget() == player[0];
+			if (steppedIntoLight[0] == null && GrimlockEntity.lit(ctx.getWorld(), grimlock[0].getBlockPos())) {
+				steppedIntoLight[0] = where(ctx, grimlock[0]) + " at tick " + (ctx.getTick() - litAt[0]);
+			}
+			if (ctx.getTick() == litAt[0] + 150) {
+				ctx.assertTrue(smelled[0], "it smelled the player");
+				ctx.assertTrue(steppedIntoLight[0] == null, "but never stepped into the light around them: " + steppedIntoLight[0]);
+				ctx.assertTrue(player[0].getHealth() == player[0].getMaxHealth(), "nor hurt them: " + player[0].getHealth());
+				FishingTests.disconnect(player[0]);
+				ctx.killAllEntities();
+				ctx.complete();
+			}
 		});
 	}
 
