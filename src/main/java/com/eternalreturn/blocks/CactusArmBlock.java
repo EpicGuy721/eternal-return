@@ -34,6 +34,9 @@ public class CactusArmBlock extends Block implements net.minecraft.block.Fertili
 	public static final MapCodec<CactusArmBlock> CODEC = createCodec(CactusArmBlock::new);
 	private static final VoxelShape COLUMN = Block.createCuboidShape(3, 0, 3, 13, 16, 13);
 	private static final VoxelShape COLUMN_COLLISION = Block.createCuboidShape(3, 0, 3, 13, 15, 13);
+	/** Joined to a cactus, the column starts at the stub's bottom. */
+	private static final VoxelShape JOINED_COLUMN = Block.createCuboidShape(3, 3, 3, 13, 16, 13);
+	private static final VoxelShape JOINED_COLLISION = Block.createCuboidShape(3, 3, 3, 13, 15, 13);
 	/** The stub across to a cactus, per side: north, east, south, west. */
 	private static final VoxelShape[] STUBS = {
 			Block.createCuboidShape(3, 3, 0, 13, 13, 3),
@@ -116,6 +119,15 @@ public class CactusArmBlock extends Block implements net.minecraft.block.Fertili
 		}
 	}
 
+	private static boolean joinedAny(BlockState state) {
+		for (Direction direction : SIDES) {
+			if (state.get(side(direction))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private static VoxelShape withStubs(VoxelShape column, BlockState state) {
 		VoxelShape shape = column;
 		for (int i = 0; i < 4; i++) {
@@ -128,12 +140,12 @@ public class CactusArmBlock extends Block implements net.minecraft.block.Fertili
 
 	@Override
 	protected VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-		return withStubs(COLUMN, state);
+		return withStubs(joinedAny(state) ? JOINED_COLUMN : COLUMN, state);
 	}
 
 	@Override
 	protected VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-		return withStubs(COLUMN_COLLISION, state);
+		return withStubs(joinedAny(state) ? JOINED_COLLISION : COLUMN_COLLISION, state);
 	}
 
 	@Override

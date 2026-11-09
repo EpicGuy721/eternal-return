@@ -7,17 +7,17 @@
     "candelabra": {"kind": "candelabra", "height": [3, 5], "parts": [2, 3]}
   },
   "biomes": {
-    "minecraft:desert": {"shape": "saguaro", "per_chunk": 0.3},
-    "moderner_beta:beta_desert": {"shape": "saguaro", "per_chunk": 0.3},
-    "moderner_beta:pe_desert": {"shape": "saguaro", "per_chunk": 0.3},
-    "eternalreturn:desert_scrub_edge": {"shape": "organ_pipe", "per_chunk": 0.25},
-    "eternalreturn:desert_baobabs": {"shape": "organ_pipe", "per_chunk": 0.2},
-    "eternalreturn:drylands": {"shape": "cholla", "per_chunk": 0.06},
-    "minecraft:badlands": {"shape": "barrel_cluster", "per_chunk": 0.3},
-    "minecraft:eroded_badlands": {"shape": "barrel_cluster", "per_chunk": 0.3},
-    "eternalreturn:monument_valley": {"shape": "barrel_cluster", "per_chunk": 0.3},
-    "minecraft:savanna": {"shape": "candelabra", "per_chunk": 0.04, "ground": "minecraft:sand"},
-    "minecraft:savanna_plateau": {"shape": "candelabra", "per_chunk": 0.04, "ground": "minecraft:sand"},
-    "eternalreturn:mesa_verde": {"shape": "candelabra", "per_chunk": 0.08, "ground": "minecraft:red_sand"}
+    "minecraft:desert": {"shape": "saguaro", "per_chunk": 0.5},
+    "moderner_beta:beta_desert": {"shape": "saguaro", "per_chunk": 0.5},
+    "moderner_beta:pe_desert": {"shape": "saguaro", "per_chunk": 0.5},
+    "eternalreturn:desert_scrub_edge": {"shape": "organ_pipe", "per_chunk": 0.4},
+    "eternalreturn:desert_baobabs": {"shape": "organ_pipe", "per_chunk": 0.3},
+    "eternalreturn:drylands": {"shape": "cholla", "per_chunk": 0.25, "ground": "minecraft:red_sand"},
+    "minecraft:badlands": {"shape": "barrel_cluster", "per_chunk": 0.4, "ground": "minecraft:red_sand"},
+    "minecraft:eroded_badlands": {"shape": "barrel_cluster", "per_chunk": 0.4, "ground": "minecraft:red_sand"},
+    "eternalreturn:monument_valley": {"shape": "barrel_cluster", "per_chunk": 0.4, "ground": "minecraft:red_sand"},
+    "minecraft:savanna": {"shape": "candelabra", "per_chunk": 0.12, "ground": "minecraft:sand"},
+    "minecraft:savanna_plateau": {"shape": "candelabra", "per_chunk": 0.12, "ground": "minecraft:sand"},
+    "eternalreturn:mesa_verde": {"shape": "candelabra", "per_chunk": 0.25, "ground": "minecraft:red_sand"}
   }
 }

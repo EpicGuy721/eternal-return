@@ -9,32 +9,32 @@
   "elements": [
     {
       "from": [
+        3,
         0,
-        0,
-        0
+        3
       ],
       "to": [
+        13,
         16,
-        16,
-        16
+        13
       ],
       "faces": {
         "up": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            3,
+            3,
+            13,
+            13
           ],
           "texture": "#top",
           "cullface": "up"
         },
         "down": {
           "uv": [
-            0,
-            0,
-            16,
-            16
+            3,
+            3,
+            13,
+            13
           ],
           "texture": "#top",
           "cullface": "down"

@@ -219,19 +219,68 @@ public final class Climate extends Feature<Climate.Config> {
 							world.setBlockState(top, state.with(SnowBlock.LAYERS, depth), 2);
 						}
 					}
+				} else if (settings.deepSnow && com.eternalreturn.blocks.SnowCover.isFlora(state) && com.eternalreturn.blocks.SnowCover.marked(state)
+						&& !under.isIn(BlockTags.LEAVES)) {
+					// A plant in the open with snow logged in it: as deep as the snow round it, as far as it holds.
+					int depth = Math.min(com.eternalreturn.blocks.SnowCover.capacity(state), snowDepth(world, seed, config, top));
+					if (depth > com.eternalreturn.blocks.SnowCover.layers(world, top, state)) {
+						com.eternalreturn.blocks.Snowlogging.snowlog(world, top, depth, 2);
+					}
 				} else if (under.isOf(Blocks.ICE) && settings.thickLakeIce) {
 					thickenIce(world, config, top.down());
+				}
+			}
+		}
+		if (settings.snowThroughLeaves) {
+			// Plants this chunk's own plants spilled under the snowed crowns of the chunks round it (up to 8 blocks over),
+			// after those were snowed: they take the snow that falls through the leaves too.
+			for (int dx = -8; dx < 24; dx++) {
+				for (int dz = -8; dz < 24; dz++) {
+					if (dx >= 0 && dx < 16 && dz >= 0 && dz < 16) {
+						continue;
+					}
+					int x = startX + dx;
+					int z = startZ + dz;
+					if (!world.isChunkLoaded(x >> 4, z >> 4)) {
+						continue;
+					}
+					top.set(x, world.getTopY(Heightmap.Type.MOTION_BLOCKING, x, z), z);
+					if (world.getBlockState(top).isOf(Blocks.SNOW) && world.getBlockState(top.down()).isIn(BlockTags.LEAVES)) {
+						plantUnderCrown(world, seed, config, top.toImmutable());
+					}
 				}
 			}
 		}
 		return true;
 	}
 
+	/** Down through a snowed crown from its top (top): a plant on the ground under it takes the snow that falls through. */
+	static void plantUnderCrown(WorldAccess world, long seed, Config config, BlockPos top) {
+		BlockPos.Mutable at = top.mutableCopy().move(0, -1, 0);
+		while (at.getY() > world.getBottomY()) {
+			at.move(0, -1, 0);
+			BlockState state = world.getBlockState(at);
+			if (state.isIn(BlockTags.LEAVES) || state.isAir()) {
+				continue;
+			}
+			if (com.eternalreturn.blocks.SnowCover.isFlora(state) && !com.eternalreturn.blocks.SnowCover.marked(state)
+					&& com.eternalreturn.blocks.SnowCover.holdsSnowAt(world, at, state)) {
+				int depth = Math.min(com.eternalreturn.blocks.SnowCover.capacity(state), Math.max(1, canopyDepth(config, snowDepth(world, seed, config, at))));
+				if (depth > 0) {
+					com.eternalreturn.blocks.Snowlogging.snowlog(world, at, depth, 2);
+					com.eternalreturn.blocks.Snowlogging.groundSnowy(world, at.down(), 2);
+				}
+			}
+			return;
+		}
+	}
+
 	/**
 	 * Snow falling through a tree crown from the snow on its top leaves (top): on leaves inside the crown, where there is
 	 * room above them, a layer with chance canopy_gap_chance; on the ground under the crown, canopyDepth of the open
 	 * ground's depth. In a storm (storm true) each settles one layer at a time, up to the same depth; at generation the
-	 * whole depth settles at once. Stops at anything but air and leaves (a trunk keeps the ground under it bare).
+	 * whole depth settles at once. A plant on the ground under the crown takes the snow in it (Snowlogging), as plants in
+	 * the open do. Stops at anything else but air and leaves (a trunk keeps the ground under it bare).
 	 */
 	public static void sift(WorldAccess world, long seed, Config config, BlockPos top, Random random, boolean storm) {
 		int flags = storm ? 3 : 2;
@@ -242,12 +291,26 @@ public final class Climate extends Feature<Climate.Config> {
 			if (state.isIn(BlockTags.LEAVES)) {
 				continue;
 			}
+			if (com.eternalreturn.blocks.SnowCover.isFlora(state)) {
+				// A plant on the ground under the crown: the snow settles in it, as in the open (Snowlogging), the ground under it snowy.
+				if (com.eternalreturn.blocks.SnowCover.holdsSnowAt(world, at, state)) {
+					// At least a layer: snow lies on the crown above, so it snows here, whatever this climate's own depth says.
+					int depth = Math.max(1, canopyDepth(config, snowDepth(world, seed, config, at)));
+					int now = com.eternalreturn.blocks.SnowCover.layers(world, at, state);
+					int layers = Math.min(com.eternalreturn.blocks.SnowCover.capacity(state), storm ? Math.min(depth, now + 1) : Math.max(depth, now));
+					if (layers > now) {
+						com.eternalreturn.blocks.Snowlogging.snowlog(world, at, layers, flags);
+						com.eternalreturn.blocks.Snowlogging.groundSnowy(world, at.down(), flags);
+					}
+				}
+				return;
+			}
 			if (!state.isAir() && !state.isOf(Blocks.SNOW)) {
 				return;
 			}
 			BlockState below = world.getBlockState(at.down());
-			if (below.isAir() || below.isOf(Blocks.SNOW)) {
-				// (Snow already lying lower down: the next layer goes on it.)
+			if (below.isAir() || below.isOf(Blocks.SNOW) || com.eternalreturn.blocks.SnowCover.isFlora(below)) {
+				// (Snow already lying lower down: the next layer goes on it. A plant lower down: the snow settles in it.)
 				continue;
 			}
 			if (below.isIn(BlockTags.LEAVES)) {

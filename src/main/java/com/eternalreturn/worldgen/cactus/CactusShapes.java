@@ -359,6 +359,12 @@ public final class CactusShapes {
 		return true;
 	}
 
+	/** Room for a cactus as the world is made: air, or a small plant it grows over (grass, flowers, dead bushes), never water. */
+	public static boolean clear(net.minecraft.world.WorldView world, BlockPos at) {
+		BlockState state = world.getBlockState(at);
+		return state.isAir() || (state.isReplaceable() && state.getFluidState().isEmpty()) || (state.isIn(BlockTags.FLOWERS) && !state.isIn(BlockTags.LEAVES));
+	}
+
 	/**
 	 * Places a whole cactus of this shape as the world is made, rooted at "root" (the air over the ground): each block of
 	 * the plan that fits, in growing order. With "ground" set, the ground under the root becomes it (a cactus on a savanna
@@ -368,7 +374,7 @@ public final class CactusShapes {
 		if (ground != null) {
 			BlockPos under = root.down();
 			BlockState there = world.getBlockState(under);
-			if (there.isOf(Blocks.GRASS_BLOCK) || there.isOf(Blocks.DIRT) || there.isOf(Blocks.COARSE_DIRT) || there.isIn(BlockTags.SAND)
+			if (there.isOf(Blocks.GRASS_BLOCK) || there.isOf(Blocks.DIRT) || there.isOf(Blocks.COARSE_DIRT) || there.isOf(Blocks.PACKED_MUD) || there.isIn(BlockTags.SAND)
 					|| there.isIn(BlockTags.TERRACOTTA)) {
 				world.setBlockState(under, ground.getDefaultState(), Block.NOTIFY_LISTENERS);
 			}
@@ -376,12 +382,15 @@ public final class CactusShapes {
 		Set<BlockPos> placed = new HashSet<>();
 		for (Node node : plan(shape, root)) {
 			BlockPos at = root.add(node.at());
-			if ((node.from() != null && !placed.contains(root.add(node.from()))) || !world.isAir(at)) {
+			if ((node.from() != null && !placed.contains(root.add(node.from()))) || !clear(world, at)) {
 				continue;
 			}
 			BlockState state = stateFor(node, world, at);
 			if (!state.canPlaceAt(world, at)) {
 				continue;
+			}
+			if (world.getBlockState(at).getBlock() instanceof net.minecraft.block.TallPlantBlock) {
+				world.setBlockState(at.up(), Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS);
 			}
 			world.setBlockState(at, state, Block.NOTIFY_LISTENERS);
 			placed.add(at);

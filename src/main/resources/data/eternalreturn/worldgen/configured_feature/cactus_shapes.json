@@ -1,6 +1,6 @@
 {
   "type": "eternalreturn:cactus_shapes",
   "config": {
-    "max_per_chunk": 2
+    "max_per_chunk": 3
   }
 }

@@ -19,7 +19,8 @@ import net.minecraft.world.biome.Biome;
  * every column it may cover gets what vanilla gives a tree within one chunk: snow on its top leaves where the biome
  * snows, and no snow (nor snowy grass) on the ground under them. Columns not yet snowed on are left to vanilla, which
  * does the same when their turn comes. In Eternal Return worlds the ground under them keeps the thinner snow that falls
- * through leaves (Climate) instead.
+ * through leaves (Climate) instead, and a plant under them takes that snow in it (Snowlogging); elsewhere a plant under
+ * them loses its snow, as vanilla leaves the ground under a tree bare.
  */
 public final class SnowyTrees {
 	/** How far a tree's leaves can reach from where it grows. */
@@ -54,6 +55,30 @@ public final class SnowyTrees {
 				while (below.getY() > world.getBottomY() && (world.getBlockState(below).isAir() || world.getBlockState(below).isIn(BlockTags.LEAVES)
 						|| world.getBlockState(below).isIn(BlockTags.LOGS))) {
 					below.move(0, -1, 0);
+				}
+				BlockState plant = world.getBlockState(below);
+				if (com.eternalreturn.blocks.SnowCover.isFlora(plant)) {
+					if (canopy != null) {
+						// Eternal Return worlds: a plant under the crown takes the thinner snow that falls through leaves.
+						int depth = Math.min(com.eternalreturn.blocks.SnowCover.capacity(plant),
+								Math.max(1, Climate.canopyDepth(canopy, Climate.snowDepth(world, world.getSeed(), canopy, below))));
+						if (depth > com.eternalreturn.blocks.SnowCover.layers(world, below, plant)
+								&& com.eternalreturn.blocks.SnowCover.holdsSnowAt(world, below, plant)) {
+							com.eternalreturn.blocks.Snowlogging.snowlog(world, below, depth, 2);
+							com.eternalreturn.blocks.Snowlogging.groundSnowy(world, below.down(), 2);
+						}
+					} else if (com.eternalreturn.blocks.SnowCover.marked(plant)) {
+						// Elsewhere, as vanilla leaves it under a tree: no snow in the plant, nor snowy ground.
+						com.eternalreturn.blocks.Snowlogging.snowlog(world, below, 0, 2);
+						BlockState ground = world.getBlockState(below.down());
+						if (ground.contains(Properties.SNOWY)) {
+							world.setBlockState(below.down(), ground.with(Properties.SNOWY, false), 2);
+						}
+					} else {
+						continue;
+					}
+					world.setBlockState(top, Blocks.SNOW.getDefaultState(), 2);
+					continue;
 				}
 				if (world.getBlockState(below).isOf(Blocks.SNOW) && canopy != null) {
 					// Eternal Return worlds (Climate): the ground keeps the thinner snow that falls through leaves.

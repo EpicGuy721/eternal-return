@@ -42,13 +42,13 @@ public final class CactusFeature extends Feature<CactusFeature.Config> {
 			float roll = random.nextFloat() * tries;
 			BlockPos root = new BlockPos(x, world.getTopY(Heightmap.Type.MOTION_BLOCKING, x, z), z);
 			CactusShapes.Entry entry = CactusShapes.entryFor(world.getBiome(root));
-			if (entry == null || roll >= entry.perChunk() || !world.isAir(root)) {
+			if (entry == null || roll >= entry.perChunk() || !CactusShapes.clear(world, root)) {
 				continue;
 			}
 			BlockState ground = world.getBlockState(root.down());
 			boolean sand = ground.isIn(BlockTags.SAND);
 			boolean swappable = entry.ground() != null && (ground.isOf(Blocks.GRASS_BLOCK) || ground.isOf(Blocks.DIRT)
-					|| ground.isOf(Blocks.COARSE_DIRT) || ground.isIn(BlockTags.TERRACOTTA));
+					|| ground.isOf(Blocks.COARSE_DIRT) || ground.isOf(Blocks.PACKED_MUD) || ground.isIn(BlockTags.TERRACOTTA));
 			if (!sand && !swappable) {
 				continue;
 			}

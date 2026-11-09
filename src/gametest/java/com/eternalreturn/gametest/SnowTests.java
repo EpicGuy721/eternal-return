@@ -697,6 +697,27 @@ public class SnowTests implements FabricGameTest {
 	}
 
 	/**
+	 * Snow falling through a tree crown (Climate.sift, Eternal Return worlds) settles in a plant on the ground under it, at
+	 * least a layer, the ground turning snowy; it used to stop at the plant and leave it bare among the snow round it.
+	 */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = FLORA_BATCH, skyAccess = true)
+	public void snowThroughLeavesSettlesInPlants(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		com.eternalreturn.worldgen.climate.Climate.Config config = com.eternalreturn.worldgen.climate.Climate.config(world.getRegistryManager());
+		ctx.assertTrue(config != null, "no climate settings");
+		BlockPos fern = ctx.getAbsolutePos(new BlockPos(3, 2, 3));
+		for (int y = 0; y < 6; y++) {
+			world.setBlockState(fern.up(y + 1), Blocks.AIR.getDefaultState());
+		}
+		plant(world, fern, Blocks.FERN.getDefaultState());
+		world.setBlockState(fern.up(2), Blocks.SPRUCE_LEAVES.getDefaultState().with(net.minecraft.block.LeavesBlock.PERSISTENT, true));
+		world.setBlockState(fern.up(3), Blocks.SNOW.getDefaultState());
+		com.eternalreturn.worldgen.climate.Climate.sift(world, world.getSeed(), config, fern.up(3), world.getRandom(), false);
+		ctx.assertTrue(logged(world, fern) >= 1 && groundSnowy(world, fern), "no snow in the fern under the crown: " + logged(world, fern));
+		ctx.complete();
+	}
+
+	/**
 	 * Flora holds snow as in Bedrock Edition: grass, ferns, flowers, saplings (this mod's too), mushrooms, the Nether's
 	 * plants, dead bushes, berry bushes, petals (maple petals too), azaleas, crops and stems, up to 8 layers on the
 	 * floor of their space; two-block plants and water plants don't, nor a waterlogged propagule.

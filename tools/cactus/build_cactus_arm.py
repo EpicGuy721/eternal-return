@@ -6,7 +6,7 @@
   blockstate choosing among them, the item model (the unjoined arm);
 - the loot table (drops itself), its name in en_us.json (other lines kept).
 
-The arm is a 10 x 10 pixel column drawn as vanilla draws cactus: each side face on its own plane 3 pixels in, the full
+The arm is a 10 x 10 pixel column (joined to a cactus, it starts at the stub's bottom, 3 pixels up) drawn as vanilla draws cactus: each side face on its own plane 3 pixels in, the full
 texture (spines past the edges) on it. A join is a stub from the arm across to the cactus face beside it (one pixel
 into the next block, where the cactus face is), 10 x 10 across, its texture turned to run along it. No two faces share
 a plane where both are drawn (no z-fighting): where a stub leaves the arm, the arm's side faces stop at the stub, and
@@ -36,19 +36,24 @@ def model(joins):
     north, east, south, west = (side in joins for side in SIDES)
     x0, x1 = (3 if west else 0), (13 if east else 16)
     z0, z1 = (3 if north else 0), (13 if south else 16)
+    # Joined to a cactus, the arm starts at its stub: its column reaches no lower than the stub's bottom.
+    y0 = 3 if joins else 0
+    bottom = {'uv': [3, 3, 13, 13], 'texture': '#top'}
+    if not joins:
+        bottom['cullface'] = 'down'
     elements = [
-        # Top and bottom: the top texture on both, on the block's top and bottom planes.
-        {'from': [0, 0, 0], 'to': [16, 16, 16], 'faces': {
-            'up': {'uv': [0, 0, 16, 16], 'texture': '#top', 'cullface': 'up'},
-            'down': {'uv': [0, 0, 16, 16], 'texture': '#top', 'cullface': 'down'}}},
+        # Top and bottom: the top texture on both (its 10 x 10 middle, the arm's own size).
+        {'from': [3, y0, 3], 'to': [13, 16, 13], 'faces': {
+            'up': {'uv': [3, 3, 13, 13], 'texture': '#top', 'cullface': 'up'},
+            'down': bottom}},
         # North and south faces on the planes 3 in, stopping where a stub leaves east or west.
-        {'from': [x0, 0, 3], 'to': [x1, 16, 13], 'faces': {
-            'north': {'uv': [16 - x1, 0, 16 - x0, 16], 'texture': '#side'},
-            'south': {'uv': [x0, 0, x1, 16], 'texture': '#side'}}},
+        {'from': [x0, y0, 3], 'to': [x1, 16, 13], 'faces': {
+            'north': {'uv': [16 - x1, 0, 16 - x0, 16 - y0], 'texture': '#side'},
+            'south': {'uv': [x0, 0, x1, 16 - y0], 'texture': '#side'}}},
         # West and east faces, stopping where a stub leaves north or south.
-        {'from': [3, 0, z0], 'to': [13, 16, z1], 'faces': {
-            'west': {'uv': [z0, 0, z1, 16], 'texture': '#side'},
-            'east': {'uv': [16 - z1, 0, 16 - z0, 16], 'texture': '#side'}}},
+        {'from': [3, y0, z0], 'to': [13, 16, z1], 'faces': {
+            'west': {'uv': [z0, 0, z1, 16 - y0], 'texture': '#side'},
+            'east': {'uv': [16 - z1, 0, 16 - z0, 16 - y0], 'texture': '#side'}}},
     ]
     turned = {'uv': [3, 6, 13, 10], 'texture': '#side', 'rotation': 90}
     along = {'uv': [3, 6, 13, 10], 'texture': '#side'}

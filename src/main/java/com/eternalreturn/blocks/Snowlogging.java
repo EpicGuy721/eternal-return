@@ -295,7 +295,7 @@ public final class Snowlogging {
 	}
 
 	/** Ground under snow logged in flora (grass, podzol, mycelium) turns snowy, as under a snow layer (in the world being made, where no neighbour is told). */
-	private static void groundSnowy(WorldAccess world, BlockPos ground, int flags) {
+	public static void groundSnowy(WorldAccess world, BlockPos ground, int flags) {
 		BlockState state = world.getBlockState(ground);
 		if (state.contains(net.minecraft.state.property.Properties.SNOWY) && !state.get(net.minecraft.state.property.Properties.SNOWY)) {
 			world.setBlockState(ground, state.with(net.minecraft.state.property.Properties.SNOWY, true), flags);
