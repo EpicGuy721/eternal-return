@@ -70,8 +70,20 @@ public class SurvivalWorldTests implements FabricGameTest {
 		world.spawnEntity(bolt);
 		ctx.runAtTick(10, () -> {
 			ctx.expectBlock(Blocks.GLASS, new BlockPos(3, 3, 3));
-			long glass = BlockPos.stream(new BlockPos(2, 1, 2), new BlockPos(4, 3, 4)).filter(pos -> ctx.getBlockState(pos).isOf(Blocks.GLASS)).count();
-			ctx.assertTrue(glass >= 3 && glass <= 18, "a small cluster of glass: " + glass);
+			// Each of the 26 sand blocks around the struck one fuses on a coin flip (about 14 on average, any number may come up).
+			long near = 0;
+			long further = 0;
+			for (BlockPos pos : BlockPos.iterate(new BlockPos(1, 1, 1), new BlockPos(5, 3, 5))) {
+				if (ctx.getBlockState(pos).isOf(Blocks.GLASS)) {
+					if (Math.abs(pos.getX() - 3) <= 1 && Math.abs(pos.getZ() - 3) <= 1) {
+						near++;
+					} else {
+						further++;
+					}
+				}
+			}
+			ctx.assertTrue(near >= 3, "a cluster of glass: " + near);
+			ctx.assertTrue(further == 0, "only a block out from the strike: " + further + " further");
 			ctx.complete();
 		});
 	}
