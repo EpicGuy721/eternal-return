@@ -31,6 +31,8 @@ public class ModernerBetaMixinPlugin implements IMixinConfigPlugin {
 			Map.entry("com.eternalreturn.mixin.compat.ModernerBetaHeightMixin", new Object[]{"getHeightConfigAt", 2, "Lmod/bluestaggo/modernerbeta/level/biome/HeightConfig;"}),
 			Map.entry("com.eternalreturn.mixin.compat.ModernerBetaSnowMixin", new Object[]{"setFreezeTopLayer", 4, "V"}),
 			Map.entry("com.eternalreturn.mixin.compat.ModernerBetaSnowCheckMixin", new Object[]{"shouldSnow", 5, "Z"}),
+			// Hot springs: shouldSnow and shouldFreeze, checked by the first (both stand or fall together).
+			Map.entry("com.eternalreturn.mixin.compat.ModernerBetaHotSpringMixin", new Object[]{"shouldSnow", 5, "Z"}),
 			Map.entry("com.eternalreturn.mixin.compat.ModernerBetaCaveBiomeMixin", new Object[]{"apply", 4, null}),
 			Map.entry("com.eternalreturn.mixin.compat.ModernerBetaBiomeCacheMixin", new Object[]{"getBiome", 7, "Lnet/minecraft/registry/entry/RegistryEntry;"}),
 			Map.entry("com.eternalreturn.mixin.compat.ModernerBetaChunkCacheMixin", new Object[]{"<init>", 4, "V"}),

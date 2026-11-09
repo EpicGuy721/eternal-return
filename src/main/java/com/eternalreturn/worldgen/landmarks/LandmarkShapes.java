@@ -71,6 +71,7 @@ final class LandmarkShapes {
 			case HOODOOS -> this.hoodoos();
 			case ISLETS -> this.islets();
 			case REEF -> this.reef();
+			case HOT_SPRING -> HotSprings.build(this.piece, this.world, this.box);
 		}
 	}
 

@@ -239,6 +239,7 @@
 		"weather.WorldRainMixin",
 		"worldgen.TreeSnowMixin",
 		"worldgen.BlockColumnCactusMixin",
+		"worldgen.BiomeHotSpringMixin",
 		"worldgen.CarverContextMixin",
 		"worldgen.ChunkGeneratorExtraMixin",
 		"worldgen.ConfiguredCarverMixin",

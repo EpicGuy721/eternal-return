@@ -118,6 +118,11 @@ public final class LandmarkPiece extends StructurePiece {
 				half = size + 10;
 				up = size / 2 + 10;
 			}
+			case HOT_SPRING -> {
+				half = HotSprings.reach(size);
+				up = 16;
+				down = 20;
+			}
 			case HOODOOS -> {
 				half = size + 5;
 				up = 26;

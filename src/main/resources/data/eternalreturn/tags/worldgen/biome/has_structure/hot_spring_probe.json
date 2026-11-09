@@ -1,0 +1,56 @@
+{
+  "values": [
+    {
+      "id": "eternalreturn:tundra",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:arctic",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:alps",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:icy_mountains",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:glacier_field",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:black_spruce_forest",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:taiga_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:old_growth_pine_taiga_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:old_growth_spruce_taiga_peak",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:early_release_taiga",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:early_release_extreme_hills",
+      "required": false
+    },
+    {
+      "id": "minecraft:old_growth_pine_taiga",
+      "required": false
+    },
+    {
+      "id": "minecraft:old_growth_spruce_taiga",
+      "required": false
+    }
+  ]
+}

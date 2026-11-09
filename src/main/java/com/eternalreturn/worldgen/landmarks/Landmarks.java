@@ -21,7 +21,9 @@ public final class Landmarks {
 		/** The mesa styles' rock forms (phase 6): flat-topped buttes, wide green-topped tables, fields of hoodoos. */
 		BUTTE, TABLE, HOODOOS,
 		/** The warm seas' landmarks (phase 6, batch D): chains of small islands, coral reef shelves under the surface. */
-		ISLETS, REEF;
+		ISLETS, REEF,
+		/** Hot springs (worldgen expansion 2, phase 3): terraced pools with a vent, some with a geyser (HotSprings). */
+		HOT_SPRING;
 
 		public String id() {
 			return this.name().toLowerCase(java.util.Locale.ROOT);
@@ -42,5 +44,6 @@ public final class Landmarks {
 
 	public static void register() {
 		// The fields above register the structure and piece types when the class loads.
+		HotSprings.register();
 	}
 }

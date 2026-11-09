@@ -10,6 +10,7 @@
 		"ModernerBetaCaveBiomeMixin",
 		"ModernerBetaHeightMixin",
 		"ModernerBetaSnowCheckMixin",
+		"ModernerBetaHotSpringMixin",
 		"ModernerBetaSnowMixin",
 		"ModernerBetaSurfaceExtraMixin",
 		"ModernerBetaSurfaceHeightMixin",

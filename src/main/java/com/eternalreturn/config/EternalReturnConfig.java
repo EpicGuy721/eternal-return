@@ -681,6 +681,12 @@ public final class EternalReturnConfig {
 		 */
 		public boolean cactusShapes = true;
 		/**
+		 * Hot springs: terraced, steaming pools in cold land (rarer in the cherry grove and volcanic jungle) that keep you
+		 * warm, never freeze and keep snow off the ground round them; about one in 3 has a geyser that erupts every 1 to 2
+		 * minutes and throws you up. A landmark (/locate structure eternalreturn:hot_spring). Eternal Return worlds only.
+		 */
+		public boolean hotSprings = true;
+		/**
 		 * Biome trees: in Eternal Return worlds a sapling grows a tree picked from its biome's tree table, and the world's
 		 * own trees come from the same tables (data/eternalreturn/eternalreturn/tree_tables, docs/worldgen.md). Off: vanilla
 		 * saplings and trees. Other worlds never change.

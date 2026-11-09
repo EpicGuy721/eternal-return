@@ -31,26 +31,38 @@ public final class LandmarkStructure extends Structure {
 			Codec.STRING.fieldOf("landmark").forGetter(s -> s.kind.id()),
 			Codec.intRange(1, 512).fieldOf("min_size").forGetter(s -> s.minSize),
 			Codec.intRange(1, 512).fieldOf("max_size").forGetter(s -> s.maxSize),
-			Codec.BOOL.optionalFieldOf("at_sea", false).forGetter(s -> s.atSea)).apply(instance, LandmarkStructure::new));
+			Codec.BOOL.optionalFieldOf("at_sea", false).forGetter(s -> s.atSea),
+			net.minecraft.registry.tag.TagKey.codec(net.minecraft.registry.RegistryKeys.BIOME).optionalFieldOf("surface_biomes")
+					.forGetter(s -> s.surfaceBiomes)).apply(instance, LandmarkStructure::new));
 
 	private final Landmarks.Kind kind;
 	private final int minSize;
 	private final int maxSize;
 	/** Starts in the sea instead of on land: its base is the sea's surface, and it builds up from the sea floor. */
 	private final boolean atSea;
+	/**
+	 * Biomes the ground itself must be in, checked at its height once that is known: for biomes laid by height (peaks,
+	 * the icy mountains), which the quick check at a fixed height ("biomes", then their bases) can't see.
+	 */
+	private final Optional<net.minecraft.registry.tag.TagKey<net.minecraft.world.biome.Biome>> surfaceBiomes;
 
-	public LandmarkStructure(Structure.Config config, String kind, int minSize, int maxSize, boolean atSea) {
+	public LandmarkStructure(Structure.Config config, String kind, int minSize, int maxSize, boolean atSea,
+			Optional<net.minecraft.registry.tag.TagKey<net.minecraft.world.biome.Biome>> surfaceBiomes) {
 		super(config);
 		this.kind = Landmarks.Kind.of(kind);
 		this.minSize = minSize;
 		this.maxSize = Math.max(minSize, maxSize);
 		this.atSea = atSea;
+		this.surfaceBiomes = surfaceBiomes;
 	}
 
 	@Override
 	public Optional<StructurePosition> getStructurePosition(Context context) {
 		ChunkGenerator generator = context.chunkGenerator();
 		if (!(generator instanceof NoiseChunkGenerator noise) || !CaveWorlds.usesEternalReturnSettings(noise, context.dynamicRegistryManager())) {
+			return Optional.empty();
+		}
+		if (this.kind == Landmarks.Kind.HOT_SPRING && !com.eternalreturn.config.EternalReturnConfig.get().worldgen.hotSprings) {
 			return Optional.empty();
 		}
 		Random random = context.random();
@@ -77,6 +89,10 @@ public final class LandmarkStructure extends Structure {
 		int y = generator.getHeight(x, z, Heightmap.Type.OCEAN_FLOOR_WG, context.world(), context.noiseConfig());
 
 		if (y <= generator.getSeaLevel()) {
+			return Optional.empty();
+		}
+		if (this.surfaceBiomes.isPresent() && !context.biomeSource().getBiome(BiomeCoords.fromBlock(x), BiomeCoords.fromBlock(y), BiomeCoords.fromBlock(z),
+				context.noiseConfig().getMultiNoiseSampler()).isIn(this.surfaceBiomes.get())) {
 			return Optional.empty();
 		}
 		return Optional.of(this.start(context, x, y, z, random));

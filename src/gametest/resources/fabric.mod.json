@@ -27,6 +27,7 @@
 			"com.eternalreturn.gametest.IceBlockTests",
 			"com.eternalreturn.gametest.CropPatchTests",
 			"com.eternalreturn.gametest.CactusTests",
+			"com.eternalreturn.gametest.HotSpringTests",
 			"com.eternalreturn.gametest.UndergroundBlockTests",
 			"com.eternalreturn.gametest.UndergroundBiomeTests",
 			"com.eternalreturn.gametest.LandmarkTests",

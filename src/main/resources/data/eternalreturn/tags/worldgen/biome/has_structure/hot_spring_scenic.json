@@ -1,0 +1,16 @@
+{
+  "values": [
+    {
+      "id": "minecraft:cherry_grove",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:cherry_grove_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:volcanic_jungle",
+      "required": false
+    }
+  ]
+}
