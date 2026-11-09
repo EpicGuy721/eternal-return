@@ -107,6 +107,7 @@ public class BeholderTests implements FabricGameTest {
 	@GameTest(templateName = ARENA, batchId = BATCH, skyAccess = true, tickLimit = 400)
 	public void laserHurts(TestContext ctx) {
 		BeholderEntity beholder = ctx.spawnEntity(NewMobs.BEHOLDER, new BlockPos(8, 2, 4));
+		hover(beholder);
 		ZombieEntity zombie = target(ctx, new BlockPos(8, 2, 14));
 		beholder.setTarget(zombie);
 		float health = zombie.getHealth();
@@ -115,7 +116,7 @@ public class BeholderTests implements FabricGameTest {
 		ctx.runAtTick(BeholderEntity.WARMUP + 40, () -> {
 			ctx.assertTrue(locked[0], "the beam locked on");
 			ctx.assertTrue(zombie.getHealth() < health, "and hurt: " + zombie.getHealth() + " of " + health);
-			ctx.assertTrue(fireballs(ctx, beholder).isEmpty(), "no fireballs at a target in sight");
+			ctx.assertTrue(fireballs(ctx, beholder).isEmpty(), "no fireballs at a target in sight; beholder at " + beholder.getPos().subtract(net.minecraft.util.math.Vec3d.of(ctx.getAbsolutePos(BlockPos.ORIGIN))));
 			ctx.killAllEntities();
 			ctx.complete();
 		});
@@ -125,6 +126,7 @@ public class BeholderTests implements FabricGameTest {
 	@GameTest(templateName = ARENA, batchId = BATCH, skyAccess = true, tickLimit = 400)
 	public void fireballAtHiddenTarget(TestContext ctx) {
 		BeholderEntity beholder = ctx.spawnEntity(NewMobs.BEHOLDER, new BlockPos(8, 2, 4));
+		hover(beholder);
 		ZombieEntity zombie = target(ctx, new BlockPos(8, 2, 14));
 		wall(ctx, 11);
 		beholder.setTarget(zombie);
@@ -136,10 +138,16 @@ public class BeholderTests implements FabricGameTest {
 		});
 		ctx.runAtTick(80, () -> {
 			ctx.assertTrue(fireball[0], "a fireball at the hidden target");
-			ctx.assertTrue(!beam[0], "and no beam");
+			ctx.assertTrue(!beam[0], "and no beam; beholder at " + beholder.getPos().subtract(net.minecraft.util.math.Vec3d.of(ctx.getAbsolutePos(BlockPos.ORIGIN))));
 			ctx.killAllEntities();
 			ctx.complete();
 		});
+	}
+
+	/** Holds it in place: its random drifting would take it out of laser range, or high or wide enough to see past the wall. */
+	private static void hover(BeholderEntity beholder) {
+		((com.eternalreturn.mixin.mobs.MobEntityAccessor) beholder).eternalreturn$goalSelector()
+				.clear(goal -> goal.getControls().contains(net.minecraft.entity.ai.goal.Goal.Control.MOVE));
 	}
 
 	/** An obsidian wall across the arena at this z, as high as it is. */
