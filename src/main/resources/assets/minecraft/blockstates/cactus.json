@@ -1,9 +1,0 @@
-{
-  "multipart": [
-    {"apply": {"model": "minecraft:block/cactus"}},
-    {"when": {"north": "true"}, "apply": {"model": "eternalreturn:block/cactus_join"}},
-    {"when": {"east": "true"}, "apply": {"model": "eternalreturn:block/cactus_join", "y": 90}},
-    {"when": {"south": "true"}, "apply": {"model": "eternalreturn:block/cactus_join", "y": 180}},
-    {"when": {"west": "true"}, "apply": {"model": "eternalreturn:block/cactus_join", "y": 270}}
-  ]
-}

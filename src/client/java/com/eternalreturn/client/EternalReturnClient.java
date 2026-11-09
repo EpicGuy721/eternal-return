@@ -42,7 +42,7 @@ public class EternalReturnClient implements ClientModInitializer {
 		com.eternalreturn.client.climate.ClientFog.register();
 		// Icicles and ice crystals: cross models with see-through pixels.
 		net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap.INSTANCE.putBlocks(net.minecraft.client.render.RenderLayer.getCutout(),
-				com.eternalreturn.blocks.IceBlocks.ICICLE, com.eternalreturn.blocks.IceBlocks.ICE_CRYSTAL);
+				com.eternalreturn.blocks.IceBlocks.ICICLE, com.eternalreturn.blocks.IceBlocks.ICE_CRYSTAL, com.eternalreturn.blocks.CactusArms.CACTUS_ARM);
 		// Stone dripstone and the cave mushrooms: cutout too; the mushroom gas is drawn only by its particles.
 		com.eternalreturn.blocks.StoneDripstones.all().values().forEach(block -> net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap.INSTANCE.putBlock(block,
 				net.minecraft.client.render.RenderLayer.getCutout()));

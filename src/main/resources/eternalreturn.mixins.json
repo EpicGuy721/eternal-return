@@ -133,7 +133,7 @@
 		"scrolls.ServerPlayNetworkHandlerMixin",
 		"survival.AbstractBlockSnowMixin",
 		"survival.GrownCropFootingMixin",
-		"survival.CactusArmsMixin",
+		"survival.CactusShapeGrowthMixin",
 		"survival.LeafDistanceMixin",
 		"survival.LeafDistancePropertyMixin",
 		"enchantments.AttractionMixin",

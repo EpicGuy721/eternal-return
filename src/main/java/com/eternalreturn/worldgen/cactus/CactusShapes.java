@@ -1,6 +1,7 @@
 package com.eternalreturn.worldgen.cactus;
 
 import com.eternalreturn.EternalReturn;
+import com.eternalreturn.blocks.CactusArmBlock;
 import com.eternalreturn.blocks.CactusArms;
 import com.eternalreturn.config.EternalReturnConfig;
 import com.eternalreturn.worldgen.EternalReturnServer;
@@ -45,16 +46,15 @@ import java.util.Set;
  * from growth and from bone meal, as saplings follow their tree tables. Eternal Return worlds only; elsewhere, and in a
  * biome with no shape, cactus grows straight up as in vanilla.
  * <p>
- * A shape is a plan: blocks relative to its root (the cactus standing on sand it started from), each joined to the one it
- * grows from, in growing order. The plan comes from the root's position, so it is the same at every growth step. Where a
- * plan stands on more than one block of sand (organ pipe, barrel), the root is the westmost, then northmost, of them, and
- * the plan never puts another of its ground blocks before it, so the root stays the root as the cactus grows. A growing
+ * A shape is a cactus trunk standing on sand with cactus arms (CactusArmBlock): each arm goes out one block from the
+ * trunk, joined to it, and may rise from there in arms. The plan lists its blocks from the root (the trunk's foot), each
+ * after the block it grows from; it comes from the root's position, so it is the same at every growth step. A growing
  * cactus adds the next block of its plan that it can (one per growth step; the root's random ticks drive it).
  */
 public final class CactusShapes {
 	public enum Kind { SAGUARO, ORGAN_PIPE, CHOLLA, BARREL, CANDELABRA }
 
-	/** A shape's numbers: height, and its arms, stems or cells (what "parts" counts depends on the kind). */
+	/** A shape's numbers: height, and its arms or stems ("parts"). */
 	public record Shape(Kind kind, int minHeight, int maxHeight, int minParts, int maxParts) {
 	}
 
@@ -62,8 +62,8 @@ public final class CactusShapes {
 	public record Entry(Shape shape, float perChunk, @Nullable Block ground) {
 	}
 
-	/** One block of a plan: where (from the root), and the block it grows from (null for the root). */
-	public record Node(BlockPos at, @Nullable BlockPos from) {
+	/** One block of a plan: where (from the root), the block it grows from (null for the root), and whether it is an arm. */
+	public record Node(BlockPos at, @Nullable BlockPos from, boolean arm) {
 	}
 
 	private static volatile Map<String, Entry> biomes = Map.of();
@@ -154,20 +154,55 @@ public final class CactusShapes {
 
 	// ------------------------------------------------------------------ plans
 
+	/** A plan being written: each block, the block it grows from, and whether it is an arm. */
+	private static final class Builder {
+		final Map<BlockPos, Node> nodes = new LinkedHashMap<>();
+
+		Builder() {
+			this.nodes.put(BlockPos.ORIGIN, new Node(BlockPos.ORIGIN, null, false));
+		}
+
+		/** The trunk: cactus from the root up, "height" tall. */
+		void trunk(int height) {
+			for (int y = 1; y < height; y++) {
+				this.nodes.put(BlockPos.ORIGIN.up(y), new Node(BlockPos.ORIGIN.up(y), BlockPos.ORIGIN.up(y - 1), false));
+			}
+		}
+
+		/** An arm out of the trunk at height y to this side, then "rise" more arms up from it. False if there's no room. */
+		boolean arm(int y, Direction side, int rise) {
+			BlockPos from = BlockPos.ORIGIN.up(y);
+			BlockPos out = from.offset(side);
+			Node trunk = this.nodes.get(from);
+			if (trunk == null || trunk.arm() || this.nodes.containsKey(out)) {
+				return false;
+			}
+			this.nodes.put(out, new Node(out, from, true));
+			BlockPos at = out;
+			for (int i = 0; i < rise && !this.nodes.containsKey(at.up()); i++) {
+				this.nodes.put(at.up(), new Node(at.up(), at, true));
+				at = at.up();
+			}
+			return true;
+		}
+
+		List<Node> build() {
+			return List.copyOf(this.nodes.values());
+		}
+	}
+
 	/** The plan of this shape for a cactus rooted at "root": positions from the root, each after the one it grows from. */
 	public static List<Node> plan(Shape shape, BlockPos root) {
 		Random random = Random.create(root.asLong() * 0x9E3779B97F4A7C15L ^ 0x5DEECE66DL);
-		Map<BlockPos, BlockPos> nodes = new LinkedHashMap<>();
-		BlockPos origin = BlockPos.ORIGIN;
-		nodes.put(origin, null);
+		Builder plan = new Builder();
 		int height = shape.minHeight() + random.nextInt(shape.maxHeight() - shape.minHeight() + 1);
 		int parts = shape.minParts() + random.nextInt(shape.maxParts() - shape.minParts() + 1);
 		List<Direction> sides = new ArrayList<>(Direction.Type.HORIZONTAL.stream().toList());
 		net.minecraft.util.Util.shuffle(sides, random);
+		plan.trunk(height);
 		switch (shape.kind()) {
 			case SAGUARO -> {
-				column(nodes, origin, height);
-				// Arms at different heights, never the lowest two or the top two, each its own side where it can.
+				// Arms at different heights, never the lowest two or the top two, each its own side where it can: out, then up.
 				List<Integer> heights = new ArrayList<>();
 				for (int y = 2; y <= height - 3; y++) {
 					heights.add(y);
@@ -175,120 +210,51 @@ public final class CactusShapes {
 				net.minecraft.util.Util.shuffle(heights, random);
 				for (int i = 0; i < Math.min(parts, heights.size()); i++) {
 					int y = heights.get(i);
-					Direction side = sides.get(i % 4);
-					BlockPos out = origin.up(y).offset(side);
-					if (add(nodes, out, origin.up(y))) {
-						column(nodes, out, 1 + random.nextInt(Math.max(1, Math.min(3, height - 1 - y))) + 1);
-					}
+					plan.arm(y, sides.get(i % 4), 1 + random.nextInt(Math.max(1, Math.min(3, height - 1 - y))));
 				}
 			}
-			case ORGAN_PIPE, BARREL -> {
-				// Stems on the sand round the root, each joined at the base to one beside it, all after the root.
-				List<BlockPos> ground = new ArrayList<>(List.of(origin));
-				for (int i = 1; i < parts; i++) {
-					List<BlockPos[]> options = new ArrayList<>();
-					for (BlockPos cell : ground) {
-						for (Direction side : Direction.Type.HORIZONTAL) {
-							BlockPos next = cell.offset(side);
-							if ((next.getX() > 0 || (next.getX() == 0 && next.getZ() > 0)) && !ground.contains(next)) {
-								options.add(new BlockPos[]{next, cell});
-							}
-						}
-					}
-					if (options.isEmpty()) {
-						break;
-					}
-					BlockPos[] pick = options.get(random.nextInt(options.size()));
-					ground.add(pick[0]);
-					nodes.put(pick[0], pick[1]);
-				}
-				for (int i = 0; i < ground.size(); i++) {
-					int stem = shape.kind() == Kind.BARREL
-							? (i < 2 ? shape.maxHeight() : shape.minHeight() + random.nextInt(shape.maxHeight() - shape.minHeight() + 1))
-							: (i == 0 ? height : Math.max(shape.minHeight(), height - 1 - random.nextInt(3)));
-					column(nodes, ground.get(i), stem);
+			case ORGAN_PIPE -> {
+				// Stems from the trunk's foot: arms out at the bottom or one up, rising nearly as tall as the trunk.
+				for (int i = 0; i < Math.min(parts - 1, 4); i++) {
+					int y = random.nextInt(2);
+					plan.arm(y, sides.get(i), Math.max(1, height - 1 - y - random.nextInt(3)));
 				}
 			}
 			case CHOLLA -> {
-				column(nodes, origin, height);
-				// Branches from anywhere above the ground, out one or two, sometimes up one, at several heights.
+				// Short arms out at several heights, some turning up one.
 				for (int i = 0; i < parts; i++) {
-					List<BlockPos> stems = nodes.keySet().stream().filter(pos -> pos.getY() >= 1).toList();
-					BlockPos from = stems.get(random.nextInt(stems.size()));
-					Direction side = Direction.Type.HORIZONTAL.random(random);
-					int reach = random.nextInt(3) == 0 ? 2 : 1;
-					BlockPos at = from;
-					for (int r = 0; r < reach; r++) {
-						BlockPos out = at.offset(side);
-						if (!add(nodes, out, at)) {
-							break;
-						}
-						at = out;
-					}
-					if (!at.equals(from) && random.nextBoolean()) {
-						add(nodes, at.up(), at);
-					}
+					int y = 1 + random.nextInt(Math.max(1, height - 1));
+					plan.arm(Math.min(y, height - 1), Direction.Type.HORIZONTAL.random(random), random.nextBoolean() ? 1 : 0);
+				}
+			}
+			case BARREL -> {
+				// Low arms round the foot, some rising one, into a mound no taller than the trunk.
+				for (int i = 0; i < Math.min(parts, 4); i++) {
+					plan.arm(0, sides.get(i), height > 1 && random.nextBoolean() ? 1 : 0);
 				}
 			}
 			case CANDELABRA -> {
-				column(nodes, origin, height);
-				// Two or three arms near the top: out, up, then out again and up.
-				int y = Math.max(1, height - 2);
-				for (int i = 0; i < Math.min(parts, 4); i++) {
-					Direction side = i < 2 ? (i == 0 ? sides.get(0) : sides.get(0).getOpposite()) : sides.get(i);
-					BlockPos out = origin.up(y).offset(side);
-					if (!add(nodes, out, origin.up(y))) {
-						continue;
-					}
-					int rise = 1 + random.nextInt(2);
-					BlockPos top = column(nodes, out, rise + 1);
-					Direction again = random.nextBoolean() ? side : (random.nextBoolean() ? side.rotateYClockwise() : side.rotateYCounterclockwise());
-					BlockPos branch = top.offset(again);
-					if (add(nodes, branch, top)) {
-						column(nodes, branch, 1 + random.nextInt(2) + 1);
-					}
+				// Two tiers near the top: a pair of opposite arms, then the other sides one higher; each out, then up.
+				int low = Math.max(1, height - 2);
+				plan.arm(low, sides.get(0), 1 + random.nextInt(2));
+				plan.arm(low, sides.get(0).getOpposite(), 1 + random.nextInt(2));
+				Direction across = sides.get(0).rotateYClockwise();
+				plan.arm(height - 1, across, 1 + random.nextInt(2));
+				if (parts > 2) {
+					plan.arm(height - 1, across.getOpposite(), 1 + random.nextInt(2));
 				}
 			}
 		}
-		List<Node> plan = new ArrayList<>();
-		for (Map.Entry<BlockPos, BlockPos> node : nodes.entrySet()) {
-			plan.add(new Node(node.getKey(), node.getValue()));
-		}
-		return plan;
-	}
-
-	/** A column "height" tall standing on (and counting) "base", each block growing from the one below. The top. */
-	private static BlockPos column(Map<BlockPos, BlockPos> nodes, BlockPos base, int height) {
-		BlockPos at = base;
-		for (int i = 1; i < height; i++) {
-			if (!add(nodes, at.up(), at)) {
-				break;
-			}
-			at = at.up();
-		}
-		return at;
-	}
-
-	/** Adds a block growing from "from", unless the plan has one there already or it is at ground level (stems on the sand are put in outright). */
-	private static boolean add(Map<BlockPos, BlockPos> nodes, BlockPos at, BlockPos from) {
-		if (nodes.containsKey(at) || at.getY() <= 0) {
-			return false;
-		}
-		nodes.put(at, from);
-		return true;
-	}
-
-	/** Whether the plan's block joins its neighbour at "at" sideways: it grows from it, or that one grows from it, or both are in a barrel's mound. */
-	private static boolean joins(Shape shape, Map<BlockPos, BlockPos> plan, BlockPos at, BlockPos next) {
-		if (!plan.containsKey(next) || at.getY() != next.getY()) {
-			return false;
-		}
-		return next.equals(plan.get(at)) || at.equals(plan.get(next)) || shape.kind() == Kind.BARREL;
+		return plan.build();
 	}
 
 	// ------------------------------------------------------------------ the world
 
-	/** The root of the cactus this block belongs to: of the pieces joined to it standing on sand, the westmost, then northmost. */
+	private static boolean isCactus(BlockState state) {
+		return state.isOf(Blocks.CACTUS) || CactusArms.isArm(state);
+	}
+
+	/** The root of the cactus this block (trunk or arm) belongs to: a trunk's foot on sand (null where none). */
 	@Nullable
 	public static BlockPos root(WorldView world, BlockPos pos) {
 		ArrayDeque<BlockPos> queue = new ArrayDeque<>();
@@ -299,16 +265,18 @@ public final class CactusShapes {
 		while (!queue.isEmpty() && seen.size() < 512) {
 			BlockPos at = queue.poll();
 			BlockState here = world.getBlockState(at);
-			if (world.getBlockState(at.down()).isIn(BlockTags.SAND)) {
-				if (best == null || at.getX() < best.getX() || (at.getX() == best.getX() && (at.getZ() < best.getZ()
-						|| (at.getZ() == best.getZ() && at.getY() < best.getY())))) {
+			if (here.isOf(Blocks.CACTUS) && world.getBlockState(at.down()).isIn(BlockTags.SAND)) {
+				if (best == null || at.getX() < best.getX() || (at.getX() == best.getX() && at.getZ() < best.getZ())) {
 					best = at;
 				}
 			}
 			for (Direction direction : Direction.values()) {
 				BlockPos next = at.offset(direction);
-				boolean linked = direction.getAxis().isVertical() || CactusArms.joined(here, direction);
-				if (linked && world.getBlockState(next).isOf(Blocks.CACTUS) && seen.add(next)) {
+				BlockState there = world.getBlockState(next);
+				// Up and down through cactus and arms; sideways only between an arm and a trunk.
+				boolean linked = direction.getAxis().isVertical() ? isCactus(there)
+						: (CactusArms.isArm(here) && there.isOf(Blocks.CACTUS)) || (here.isOf(Blocks.CACTUS) && CactusArms.isArm(there));
+				if (linked && isCactus(here) && seen.add(next)) {
 					queue.add(next);
 				}
 			}
@@ -316,67 +284,58 @@ public final class CactusShapes {
 		return best;
 	}
 
+	/** The block this plan block is: cactus, or an arm joined as it stands. */
+	private static BlockState stateFor(Node node, WorldView world, BlockPos at) {
+		if (!node.arm()) {
+			return Blocks.CACTUS.getDefaultState();
+		}
+		CactusArmBlock arm = (CactusArmBlock) CactusArms.CACTUS_ARM;
+		return arm.joined(arm.getDefaultState(), world, at);
+	}
+
+	private static boolean isPlanned(BlockState state, Node node) {
+		return node.arm() ? CactusArms.isArm(state) : state.isOf(Blocks.CACTUS);
+	}
+
 	/** The next block this cactus would grow: the first in its plan that isn't there, grows from one that is, and fits. */
 	@Nullable
 	public static BlockPos next(WorldView world, BlockPos root, Shape shape) {
 		List<Node> plan = plan(shape, root);
-		Map<BlockPos, BlockPos> map = map(plan);
+		Map<BlockPos, Node> byPos = new HashMap<>();
+		for (Node node : plan) {
+			byPos.put(node.at(), node);
+		}
 		for (Node node : plan) {
 			if (node.from() == null) {
 				continue;
 			}
 			BlockPos at = root.add(node.at());
-			BlockPos from = root.add(node.from());
-			if (world.getBlockState(at).isOf(Blocks.CACTUS) || !world.getBlockState(from).isOf(Blocks.CACTUS) || !world.isAir(at)) {
+			if (isPlanned(world.getBlockState(at), node) || !world.isAir(at)) {
 				continue;
 			}
-			if (fits(world, at, joinedState(shape, map, root, at, world))) {
+			if (!isPlanned(world.getBlockState(root.add(node.from())), byPos.get(node.from()))) {
+				continue;
+			}
+			if (stateFor(node, world, at).canPlaceAt(world, at)) {
 				return at;
 			}
 		}
 		return null;
 	}
 
-	private static Map<BlockPos, BlockPos> map(List<Node> plan) {
-		Map<BlockPos, BlockPos> map = new LinkedHashMap<>();
-		for (Node node : plan) {
-			map.put(node.at(), node.from());
-		}
-		return map;
-	}
-
-	/** The cactus for this plan block, joined to the plan blocks beside it that are there. */
-	private static BlockState joinedState(Shape shape, Map<BlockPos, BlockPos> map, BlockPos root, BlockPos at, WorldView world) {
-		BlockState state = Blocks.CACTUS.getDefaultState();
-		BlockPos rel = at.subtract(root);
-		for (Direction direction : Direction.Type.HORIZONTAL) {
-			if (joins(shape, map, rel, rel.offset(direction)) && world.getBlockState(at.offset(direction)).isOf(Blocks.CACTUS)) {
-				state = state.with(CactusArms.side(direction), true);
-			}
-		}
-		return state;
-	}
-
-	private static boolean fits(WorldView world, BlockPos at, BlockState state) {
-		return state.canPlaceAt(world, at);
-	}
-
-	/** Grows the next block of the plan (and joins its neighbours to it). Whether one grew. */
+	/** Grows the next block of the plan. Whether one grew. */
 	public static boolean growNext(WorldAccess world, BlockPos root, Shape shape) {
 		BlockPos at = next(world, root, shape);
 		if (at == null) {
 			return false;
 		}
-		Map<BlockPos, BlockPos> map = map(plan(shape, root));
-		BlockState state = joinedState(shape, map, root, at, world);
-		world.setBlockState(at, state, Block.NOTIFY_ALL);
-		for (Direction direction : Direction.Type.HORIZONTAL) {
-			if (state.get(CactusArms.side(direction))) {
-				BlockPos neighbour = at.offset(direction);
-				world.setBlockState(neighbour, world.getBlockState(neighbour).with(CactusArms.side(direction.getOpposite()), true), Block.NOTIFY_ALL);
+		for (Node node : plan(shape, root)) {
+			if (root.add(node.at()).equals(at)) {
+				world.setBlockState(at, stateFor(node, world, at), Block.NOTIFY_ALL);
+				return true;
 			}
 		}
-		return true;
+		return false;
 	}
 
 	/**
@@ -402,45 +361,30 @@ public final class CactusShapes {
 
 	/**
 	 * Places a whole cactus of this shape as the world is made, rooted at "root" (the air over the ground): each block of
-	 * the plan that fits, in growing order, joined to the ones it grows from. With "ground" set, the ground under the plan's
-	 * ground blocks becomes it (cactus on a savanna stands on a little sand). Whether any was placed.
+	 * the plan that fits, in growing order. With "ground" set, the ground under the root becomes it (a cactus on a savanna
+	 * stands on a little sand). Whether any was placed.
 	 */
 	public static boolean placeWhole(WorldAccess world, BlockPos root, Shape shape, @Nullable Block ground) {
-		List<Node> plan = plan(shape, root);
-		Map<BlockPos, BlockPos> map = map(plan);
 		if (ground != null) {
-			for (Node node : plan) {
-				if (node.at().getY() == 0) {
-					BlockPos under = root.add(node.at()).down();
-					BlockState there = world.getBlockState(under);
-					if (there.isOf(Blocks.GRASS_BLOCK) || there.isOf(Blocks.DIRT) || there.isOf(Blocks.COARSE_DIRT) || there.isIn(BlockTags.SAND)
-							|| there.isIn(BlockTags.TERRACOTTA)) {
-						world.setBlockState(under, ground.getDefaultState(), Block.NOTIFY_LISTENERS);
-					}
-				}
+			BlockPos under = root.down();
+			BlockState there = world.getBlockState(under);
+			if (there.isOf(Blocks.GRASS_BLOCK) || there.isOf(Blocks.DIRT) || there.isOf(Blocks.COARSE_DIRT) || there.isIn(BlockTags.SAND)
+					|| there.isIn(BlockTags.TERRACOTTA)) {
+				world.setBlockState(under, ground.getDefaultState(), Block.NOTIFY_LISTENERS);
 			}
 		}
 		Set<BlockPos> placed = new HashSet<>();
-		for (Node node : plan) {
+		for (Node node : plan(shape, root)) {
 			BlockPos at = root.add(node.at());
-			if (node.from() != null && !placed.contains(root.add(node.from()))) {
+			if ((node.from() != null && !placed.contains(root.add(node.from()))) || !world.isAir(at)) {
 				continue;
 			}
-			if (!world.isAir(at)) {
-				continue;
-			}
-			BlockState state = joinedState(shape, map, root, at, world);
+			BlockState state = stateFor(node, world, at);
 			if (!state.canPlaceAt(world, at)) {
 				continue;
 			}
 			world.setBlockState(at, state, Block.NOTIFY_LISTENERS);
 			placed.add(at);
-			for (Direction direction : Direction.Type.HORIZONTAL) {
-				if (state.get(CactusArms.side(direction))) {
-					BlockPos neighbour = at.offset(direction);
-					world.setBlockState(neighbour, world.getBlockState(neighbour).with(CactusArms.side(direction.getOpposite()), true), Block.NOTIFY_LISTENERS);
-				}
-			}
 		}
 		return !placed.isEmpty();
 	}

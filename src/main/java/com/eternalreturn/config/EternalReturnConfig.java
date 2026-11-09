@@ -675,10 +675,9 @@ public final class EternalReturnConfig {
 		 */
 		public boolean wildCropPatches = true;
 		/**
-		 * Cactus shapes by biome: in Eternal Return worlds each dry biome's cactus grows its own shape (saguaro, organ pipe,
-		 * cholla, barrel cluster, candelabra) as the world is made, from growth and from bone meal, joined sideways
-		 * (data/eternalreturn/eternalreturn/cactus_shapes.json). Off: straight cacti as in vanilla. Cacti join sideways in
-		 * every world either way.
+		 * Cactus shapes by biome: in Eternal Return worlds each dry biome's cactus grows its own shape of trunk and cactus arms
+		 * (saguaro, organ pipe, cholla, barrel cluster, candelabra) as the world is made, from growth and from bone meal
+		 * (data/eternalreturn/eternalreturn/cactus_shapes.json). Off: straight cacti as in vanilla.
 		 */
 		public boolean cactusShapes = true;
 		/**

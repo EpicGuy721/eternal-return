@@ -1,0 +1,52 @@
+{
+  "variants": {
+    "east=false,north=false,south=false,west=false": {
+      "model": "eternalreturn:block/cactus_arm"
+    },
+    "east=false,north=true,south=false,west=false": {
+      "model": "eternalreturn:block/cactus_arm_n"
+    },
+    "east=true,north=false,south=false,west=false": {
+      "model": "eternalreturn:block/cactus_arm_e"
+    },
+    "east=true,north=true,south=false,west=false": {
+      "model": "eternalreturn:block/cactus_arm_ne"
+    },
+    "east=false,north=false,south=true,west=false": {
+      "model": "eternalreturn:block/cactus_arm_s"
+    },
+    "east=false,north=true,south=true,west=false": {
+      "model": "eternalreturn:block/cactus_arm_ns"
+    },
+    "east=true,north=false,south=true,west=false": {
+      "model": "eternalreturn:block/cactus_arm_es"
+    },
+    "east=true,north=true,south=true,west=false": {
+      "model": "eternalreturn:block/cactus_arm_nes"
+    },
+    "east=false,north=false,south=false,west=true": {
+      "model": "eternalreturn:block/cactus_arm_w"
+    },
+    "east=false,north=true,south=false,west=true": {
+      "model": "eternalreturn:block/cactus_arm_nw"
+    },
+    "east=true,north=false,south=false,west=true": {
+      "model": "eternalreturn:block/cactus_arm_ew"
+    },
+    "east=true,north=true,south=false,west=true": {
+      "model": "eternalreturn:block/cactus_arm_new"
+    },
+    "east=false,north=false,south=true,west=true": {
+      "model": "eternalreturn:block/cactus_arm_sw"
+    },
+    "east=false,north=true,south=true,west=true": {
+      "model": "eternalreturn:block/cactus_arm_nsw"
+    },
+    "east=true,north=false,south=true,west=true": {
+      "model": "eternalreturn:block/cactus_arm_esw"
+    },
+    "east=true,north=true,south=true,west=true": {
+      "model": "eternalreturn:block/cactus_arm_nesw"
+    }
+  }
+}
