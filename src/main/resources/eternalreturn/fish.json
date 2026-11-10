@@ -32,6 +32,14 @@
 			"experience": 25
 		}
 	},
+	"biome_catches": [
+		{
+			"item": "minecraft:cod",
+			"weight": 100,
+			"biomes": "#eternalreturn:kelp_forests",
+			"label": "kelp forests"
+		}
+	],
 	"habitats": {
 		"rivers": {
 			"label": "rivers",

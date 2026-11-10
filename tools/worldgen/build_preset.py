@@ -358,12 +358,13 @@ if SUBS:
         {'type': 'biome', 'result': sid, 'predicate': {'condition': 'moderner_beta:all_of', 'terms': [
             {'biomes': with_subs(with_height_variants(spec['shore_of'])), 'condition': 'moderner_beta:in_set'}, copy.deepcopy(sea)]}}
         for sid, spec in SHORE_SUBS.items()]
-# Sea sub-biomes: after the ocean climate step (the last), each cell of 256 blocks of the warm or lukewarm sea (not the
-# deep sea) gets a pick from its pool, as the land's sub-biomes do; the pool is zoomed as the ocean climate is, so the
+# Sea sub-biomes: after the ocean climate step (the last), each cell of 256 blocks of a parent sea gets a pick from its pool, as the land's sub-biomes do; the pool is zoomed as the ocean climate is, so the
 # areas are rounded. Each pool has its own seed (pool_seeds) and so does its zoom.
+# A sea sub-biome may also take part of other seas ("also": the deep frozen and cold seas, batch 1 of expansion 2's
+# phase 6); it keeps its base's height, which the stepped sea floor (TerrainShape) overrides anyway that far out.
 sea_targets = {}
-for n, parent in enumerate(sorted({spec['base'] for spec in SEA_SUBS.values()})):
-    mine = {sid: spec for sid, spec in SEA_SUBS.items() if spec['base'] == parent}
+for n, parent in enumerate(sorted({p for spec in SEA_SUBS.values() for p in [spec['base']] + spec.get('also', [])})):
+    mine = {sid: spec for sid, spec in SEA_SUBS.items() if parent == spec['base'] or parent in spec.get('also', [])}
     whole = 1
     for spec in mine.values():
         whole = whole * spec['share'] // __import__('math').gcd(whole, spec['share'])

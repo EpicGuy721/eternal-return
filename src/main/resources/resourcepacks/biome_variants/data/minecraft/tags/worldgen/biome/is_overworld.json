@@ -78,11 +78,19 @@
       "required": false
     },
     {
+      "id": "eternalreturn:iceberg_ocean",
+      "required": false
+    },
+    {
       "id": "eternalreturn:jungle_edge",
       "required": false
     },
     {
       "id": "eternalreturn:jungle_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:kelp_forest_ocean",
       "required": false
     },
     {
@@ -103,6 +111,10 @@
     },
     {
       "id": "eternalreturn:old_growth_spruce_taiga_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:pack_ice_ocean",
       "required": false
     },
     {
@@ -135,6 +147,10 @@
     },
     {
       "id": "eternalreturn:savanna_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:sea_stacks_ocean",
       "required": false
     },
     {

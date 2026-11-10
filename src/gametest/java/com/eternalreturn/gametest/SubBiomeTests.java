@@ -107,7 +107,10 @@ public class SubBiomeTests implements FabricGameTest {
 			ctx.assertTrue(spot != null, id + " isn't within " + REACH + " blocks of 0, 0");
 			int y = generator.getHeight(spot.getX(), spot.getZ(), Heightmap.Type.WORLD_SURFACE_WG, world, noise);
 			Identifier parent = BiomeVariants.get(Identifier.of(id)).base();
-			int family = samples.getOrDefault(parent.toString(), 0) + subBiomes().stream()
+			// The frozen and cold seas' sub-biomes also take part of the deep frozen and cold seas ("also" in the table).
+			String deep = parent.getPath().endsWith("_ocean") && !parent.getPath().startsWith("deep_") && (parent.getPath().startsWith("frozen") || parent.getPath().startsWith("cold"))
+					? parent.getNamespace() + ":deep_" + parent.getPath() : null;
+			int family = samples.getOrDefault(parent.toString(), 0) + (deep != null ? samples.getOrDefault(deep, 0) : 0) + subBiomes().stream()
 					.filter(other -> BiomeVariants.get(Identifier.of(other)).base().equals(parent)).mapToInt(other -> samples.getOrDefault(other, 0)).sum();
 			double share = samples.getOrDefault(id, 0) / (double) Math.max(1, family);
 			report.put(id, String.format("/tp @s %d %d %d (%.1f%% of %s and its sub-biomes)", spot.getX(), y + 1, spot.getZ(), share * 100, parent));
@@ -137,7 +140,10 @@ public class SubBiomeTests implements FabricGameTest {
 			Map.entry("eternalreturn:alps", 8), Map.entry("eternalreturn:glacier_field", 8),
 			// Batch D (the giant mushroom island isn't checked: the few mushroom islands in the sample make its share swing).
 			Map.entry("eternalreturn:tropical_pillars", 8), Map.entry("eternalreturn:volcanic_jungle", 8), Map.entry("eternalreturn:roofed_fungi_forest", 4),
-			Map.entry("eternalreturn:coral_ocean", 3), Map.entry("eternalreturn:archipelago", 3));
+			Map.entry("eternalreturn:coral_ocean", 3), Map.entry("eternalreturn:archipelago", 3),
+			// Expansion 2, phase 6, batch 1: the frozen and cold seas (shallow and deep).
+			Map.entry("eternalreturn:pack_ice_ocean", 3), Map.entry("eternalreturn:iceberg_ocean", 3), Map.entry("eternalreturn:kelp_forest_ocean", 3),
+			Map.entry("eternalreturn:sea_stacks_ocean", 3));
 
 	/** What each sub-biome must show in 5 x 5 generated chunks round its spot: a block (or block tag) and how many at least. */
 	private record Sign(String what, int atLeast) {
@@ -178,7 +184,12 @@ public class SubBiomeTests implements FabricGameTest {
 			Map.entry("eternalreturn:roofed_fungi_forest", List.of(new Sign("minecraft:mycelium", 100), new Sign("minecraft:mushroom_stem", 30), new Sign("minecraft:dark_oak_log", 10))),
 			Map.entry("eternalreturn:giant_mushroom_island", List.of(new Sign("minecraft:mushroom_stem", 60), new Sign("minecraft:red_mushroom_block", 100))),
 			Map.entry("eternalreturn:coral_ocean", List.of(new Sign("#minecraft:coral_blocks", 20))),
-			Map.entry("eternalreturn:archipelago", List.of(new Sign("minecraft:seagrass", 30))));
+			Map.entry("eternalreturn:archipelago", List.of(new Sign("minecraft:seagrass", 30))),
+			// The icebergs and sea stacks are landmarks (none in the test world): the sea itself.
+			Map.entry("eternalreturn:pack_ice_ocean", List.of(new Sign("minecraft:ice", 1000))),
+			Map.entry("eternalreturn:iceberg_ocean", List.of(new Sign("minecraft:ice", 1000))),
+			Map.entry("eternalreturn:kelp_forest_ocean", List.of(new Sign("minecraft:kelp_plant", 3000))),
+			Map.entry("eternalreturn:sea_stacks_ocean", List.of(new Sign("minecraft:water", 1000))));
 
 	/**
 	 * Round each sub-biome's spot, 5 x 5 chunks are generated in full. Each must show its signs (pumpkins, cobwebs, heath
@@ -336,7 +347,9 @@ public class SubBiomeTests implements FabricGameTest {
 			// Batch D: the archipelago's trees grow on its islands, which are landmarks (none in the test world).
 			"eternalreturn:archipelago",
 			// The coral ocean and the giant mushroom island have no trees.
-			"eternalreturn:coral_ocean", "eternalreturn:giant_mushroom_island");
+			"eternalreturn:coral_ocean", "eternalreturn:giant_mushroom_island",
+			// The frozen and cold seas have no trees.
+			"eternalreturn:pack_ice_ocean", "eternalreturn:iceberg_ocean", "eternalreturn:kelp_forest_ocean", "eternalreturn:sea_stacks_ocean");
 
 	private static boolean loneDirt(ServerWorld world, BlockPos dirt) {
 		for (net.minecraft.util.math.Direction d : net.minecraft.util.math.Direction.Type.HORIZONTAL) {

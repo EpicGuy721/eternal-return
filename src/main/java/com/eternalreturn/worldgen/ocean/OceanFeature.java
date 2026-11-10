@@ -63,6 +63,9 @@ import java.util.Map;
  * <li>ship_debris: a mast, planks, slabs, stairs, fences and trapdoors strewn on the middle plain; one in "extra" with a
  * barrel of shipwreck supplies.
  * <li>whale_fall: a whale's skeleton of bone blocks on the deep floor.
+ * <li>pack_ice (phase 6, batch 1; in the biomes of eternalreturn:pack_ice_seas): the sea's surface one sheet of ice,
+ * broken by long open leads of water, with ridges of packed ice and snow along their edges and snow on the sheet.
+ * <li>kelp_forest (phase 6, batch 1; in eternalreturn:kelp_forests): kelp from the floor to the surface, in dense stands.
  * </ul>
  */
 public final class OceanFeature extends Feature<OceanFeature.Config> {
@@ -80,6 +83,12 @@ public final class OceanFeature extends Feature<OceanFeature.Config> {
 	public static final int STEEP = 4;
 	private static final Direction[] SIDES = {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
 
+	public static final net.minecraft.registry.tag.TagKey<Biome> PACK_ICE_SEAS = net.minecraft.registry.tag.TagKey.of(
+			net.minecraft.registry.RegistryKeys.BIOME, com.eternalreturn.EternalReturn.id("pack_ice_seas"));
+	public static final net.minecraft.registry.tag.TagKey<Biome> ICEBERG_SEAS = net.minecraft.registry.tag.TagKey.of(
+			net.minecraft.registry.RegistryKeys.BIOME, com.eternalreturn.EternalReturn.id("iceberg_seas"));
+	public static final net.minecraft.registry.tag.TagKey<Biome> KELP_FORESTS = net.minecraft.registry.tag.TagKey.of(
+			net.minecraft.registry.RegistryKeys.BIOME, com.eternalreturn.EternalReturn.id("kelp_forests"));
 	private static volatile long noiseSeed = Long.MIN_VALUE;
 	private static volatile SimplexNoiseSampler[] noises;
 
@@ -105,6 +114,8 @@ public final class OceanFeature extends Feature<OceanFeature.Config> {
 			case "sunken_forest" -> job.sunkenForest();
 			case "ship_debris" -> job.shipDebris();
 			case "whale_fall" -> job.whaleFall();
+			case "pack_ice" -> job.packIce();
+			case "kelp_forest" -> job.kelpForest();
 			default -> false;
 		};
 	}
@@ -112,7 +123,7 @@ public final class OceanFeature extends Feature<OceanFeature.Config> {
 	/** Noises from the world seed: ripple patches, ripple rows, clay patches. */
 	static SimplexNoiseSampler noise(long seed, int which) {
 		if (noiseSeed != seed || noises == null) {
-			SimplexNoiseSampler[] made = new SimplexNoiseSampler[4];
+			SimplexNoiseSampler[] made = new SimplexNoiseSampler[6];
 			for (int i = 0; i < made.length; i++) {
 				made[i] = new SimplexNoiseSampler(Random.create(seed ^ (0x0CEA17L * (i + 1))));
 			}
@@ -950,6 +961,93 @@ public final class OceanFeature extends Feature<OceanFeature.Config> {
 				}
 			}
 			return true;
+		}
+
+		/** Whether this column's sea is in a biome of the tag (by the biome at the sea's surface). */
+		boolean seaOf(int x, int z, net.minecraft.registry.tag.TagKey<Biome> tag) {
+			return this.biomeAt(x, this.sea - 1, z).isIn(tag) && this.water(new BlockPos(x, this.sea - 1, z));
+		}
+
+		/**
+		 * Pack ice: every column of the sea's top block becomes ice, but for the leads (long winding cracks of open water
+		 * where a noise crosses zero, about 4 blocks wide, and thinner branches), and the ice by a lead now and then rides
+		 * up into a ridge of packed ice or snow; snow lies on most of the sheet.
+		 */
+		boolean packIce() {
+			long seed = this.world.getSeed();
+			SimplexNoiseSampler leads = noise(seed, 4);
+			SimplexNoiseSampler branches = noise(seed, 5);
+			boolean any = false;
+			BlockPos.Mutable pos = new BlockPos.Mutable();
+			int top = this.sea - 1;
+			for (int x = this.chunk.getStartX(); x <= this.chunk.getEndX(); x++) {
+				for (int z = this.chunk.getStartZ(); z <= this.chunk.getEndZ(); z++) {
+					BlockState surface = this.world.getBlockState(pos.set(x, top, z));
+					if (!(surface.isOf(Blocks.WATER) || surface.isOf(Blocks.ICE)) || !this.biomeAt(x, top, z).isIn(PACK_ICE_SEAS)
+							|| this.floor(x, z) >= top) {
+						continue;
+					}
+					any = true;
+					double lead = Math.min(Math.abs(leads.sample(x / 110.0, z / 110.0)) / 0.04, Math.abs(branches.sample(x / 45.0, z / 45.0)) / 0.025);
+					BlockPos above = new BlockPos(x, top + 1, z);
+					if (lead < 1) {
+						this.world.setBlockState(pos, Blocks.WATER.getDefaultState(), Block.NOTIFY_LISTENERS);
+						if (!this.world.isAir(above) && this.world.getBlockState(above).isReplaceable()) {
+							this.world.setBlockState(above, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS);
+						}
+						continue;
+					}
+					this.world.setBlockState(pos, Blocks.ICE.getDefaultState(), Block.NOTIFY_LISTENERS);
+					if (!this.world.isAir(above)) {
+						continue;
+					}
+					if (lead < 1.8 && this.random.nextInt(3) == 0) {
+						// A pressure ridge by the lead.
+						this.world.setBlockState(above, (this.random.nextInt(3) == 0 ? Blocks.SNOW_BLOCK : Blocks.PACKED_ICE).getDefaultState(), Block.NOTIFY_LISTENERS);
+						if (this.random.nextInt(3) == 0) {
+							this.world.setBlockState(above.up(), Blocks.SNOW.getDefaultState(), Block.NOTIFY_LISTENERS);
+						}
+					} else if (lead > 2.5 || this.random.nextBoolean()) {
+						// Snow over the sheet; bare ice in patches only along the leads.
+						this.world.setBlockState(above, Blocks.SNOW.getDefaultState(), Block.NOTIFY_LISTENERS);
+					}
+				}
+			}
+			return any;
+		}
+
+		/** Kelp forest: dense stands of kelp from the floor up to the surface, thinning in patches. */
+		boolean kelpForest() {
+			SimplexNoiseSampler stands = noise(this.world.getSeed(), 3);
+			boolean any = false;
+			BlockPos.Mutable pos = new BlockPos.Mutable();
+			BlockState plant = Blocks.KELP_PLANT.getDefaultState();
+			BlockState tip = Blocks.KELP.getDefaultState().with(net.minecraft.block.KelpBlock.AGE, 25);
+			for (int x = this.chunk.getStartX(); x <= this.chunk.getEndX(); x++) {
+				for (int z = this.chunk.getStartZ(); z <= this.chunk.getEndZ(); z++) {
+					if (!this.seaOf(x, z, KELP_FORESTS)) {
+						continue;
+					}
+					double density = 0.3 + 0.25 * stands.sample(x / 24.0, z / 24.0);
+					if (this.random.nextDouble() >= density) {
+						continue;
+					}
+					int floor = this.floor(x, z);
+					if (!this.world.getBlockState(pos.set(x, floor, z)).isSideSolidFullSquare(this.world, pos, Direction.UP)) {
+						continue;
+					}
+					int y = floor + 1;
+					while (y < this.sea - 1 && this.water(pos.set(x, y + 1, z))) {
+						this.world.setBlockState(pos.set(x, y, z), plant, Block.NOTIFY_LISTENERS);
+						y++;
+					}
+					if (y > floor + 1 && this.water(pos.set(x, y, z))) {
+						this.world.setBlockState(pos, tip, Block.NOTIFY_LISTENERS);
+						any = true;
+					}
+				}
+			}
+			return any;
 		}
 
 		/** A whale's skeleton of bone blocks on the deep floor: a spine, arched ribs, a skull and a tail. */

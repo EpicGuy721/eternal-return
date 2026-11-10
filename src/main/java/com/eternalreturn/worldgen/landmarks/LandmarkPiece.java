@@ -93,6 +93,16 @@ public final class LandmarkPiece extends StructurePiece {
 				up = 4;
 				down = 72;
 			}
+			case ICEBERG -> {
+				half = (int) (size * 1.8) + 6;
+				up = size + 8;
+				down = 72;
+			}
+			case SEA_STACKS -> {
+				half = size + 10;
+				up = 36;
+				down = 72;
+			}
 			case CRATER -> {
 				half = (int) (size * 1.5) + 4;
 				up = 12;

@@ -56,6 +56,7 @@ Birds spawn in these places (among creatures, weight 10), on grass, dirt, sand, 
 | mountains | windswept hills, windswept gravelly hills, windswept forest, meadow, cherry grove, MB early release extreme hills, MB late beta extreme hills |
 | rivers | river |
 | beaches | beach, stony shore, snowy beach |
+| sea cliffs | sea stacks ocean |
 
 ## Patterns
 
@@ -88,6 +89,6 @@ cap, mask, breast, wings, tail, head
 | Red-headed Woodpecker (`red_headed_woodpecker`) | woodpecker | white | wings slate grey, head scarlet | woodland |
 | Downy Woodpecker (`downy_woodpecker`) | woodpecker | white | wings slate grey, cap scarlet | woodland, taiga |
 | Northern Flicker (`northern_flicker`) | woodpecker | tan | breast cream, cap slate grey | woodland, open |
-| Herring Gull (`herring_gull`) | seagull | white | wings pale grey | beaches, rivers |
+| Herring Gull (`herring_gull`) | seagull | white | wings pale grey | beaches, rivers, sea cliffs |
 | Laughing Gull (`laughing_gull`) | seagull | white | wings pale grey, head black | beaches |
-| Black-backed Gull (`black_backed_gull`) | seagull | white | wings slate grey | beaches, cold |
+| Black-backed Gull (`black_backed_gull`) | seagull | white | wings slate grey | beaches, cold, sea cliffs |

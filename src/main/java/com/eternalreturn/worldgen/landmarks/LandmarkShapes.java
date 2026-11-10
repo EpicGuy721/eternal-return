@@ -73,6 +73,8 @@ final class LandmarkShapes {
 			case REEF -> this.reef();
 			case HOT_SPRING -> HotSprings.build(this.piece, this.world, this.box);
 			case ELDER_TREE -> ElderTrees.build(this.piece, this.world, this.box);
+			case ICEBERG -> this.iceberg();
+			case SEA_STACKS -> this.seaStacks();
 		}
 	}
 
@@ -738,6 +740,142 @@ final class LandmarkShapes {
 	 * 6 blocks under the surface, its top sand with gravel and coral blocks in patches, deeper lagoons in it, its sides
 	 * sloping down to the floor. The coral ocean's coral and sea pickles grow on it. The base (centre y) is the sea's surface.
 	 */
+	/** Whether a landmark at sea may put a block here: only into the sea's water or the air over it. */
+	private boolean open(int x, int y, int z) {
+		BlockState state = this.get(x, y, z);
+		return state.isAir() || state.isOf(Blocks.WATER) || state.isOf(Blocks.ICE) || state.isOf(Blocks.SNOW) || state.isOf(Blocks.SEAGRASS)
+				|| state.isOf(Blocks.TALL_SEAGRASS) || state.isOf(Blocks.KELP) || state.isOf(Blocks.KELP_PLANT);
+	}
+
+	/**
+	 * An iceberg (phase 6, batch 1; size: its radius above water): a ragged hump of packed ice standing up to half
+	 * of its radius out of the sea, two and a half times as deep and wider under water, a core of blue ice, snow on top.
+	 */
+	private void iceberg() {
+		int sea = this.cy;
+		double radius = this.piece.size;
+		double high = 2 + radius * 0.4;
+		double deep = high * 2.5;
+		double wide = radius * 1.4;
+		double coreY = sea - deep * 0.35;
+		for (int x = this.box.getMinX(); x <= this.box.getMaxX(); x++) {
+			for (int z = this.box.getMinZ(); z <= this.box.getMaxZ(); z++) {
+				double dx = x + 0.5 - this.cx;
+				double dz = z + 0.5 - this.cz;
+				double d = Math.sqrt(dx * dx + dz * dz);
+				double angle = Math.atan2(dz, dx);
+				double above = radius * (1 + 0.3 * this.n2(Math.cos(angle) * 1.5, Math.sin(angle) * 1.5) + 0.1 * this.n2(x * 0.2, z * 0.2));
+				double below = wide * (1 + 0.25 * this.n2(Math.cos(angle) * 1.5 + 40, Math.sin(angle) * 1.5));
+				if (d >= below) {
+					continue;
+				}
+				double t;
+				if (d < above) {
+					double f = d / above;
+					t = sea + high * (1 - f * f) * (0.7 + 0.3 * this.n2(x * 0.15 + 20, z * 0.15)) - 1;
+				} else {
+					t = sea - 2 - (d - above) / Math.max(1, below - above) * deep * 0.5;
+				}
+				double b = sea - 1 - deep * Math.sqrt(Math.max(0, 1 - (d / below) * (d / below)));
+				int top = (int) Math.floor(t);
+				int bottom = Math.max((int) Math.ceil(b), this.ground(x, z));
+				for (int y = bottom; y <= top; y++) {
+					if (!this.open(x, y, z)) {
+						continue;
+					}
+					double cy = (y - coreY) / ((high + deep) * 0.45);
+					double cd = d / (below * 0.55);
+					BlockState state;
+					if (cd * cd + cy * cy < 1) {
+						state = Blocks.BLUE_ICE.getDefaultState();
+					} else if (y == top && y >= sea && this.chance(x, y, z, 31) < 0.7) {
+						state = Blocks.SNOW_BLOCK.getDefaultState();
+					} else {
+						state = Blocks.PACKED_ICE.getDefaultState();
+					}
+					this.set(x, y, z, state);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Sea stacks (phase 6, batch 1; size: the cluster's radius): two to five towers of the landmark's stone standing from
+	 * the sea floor 8 to 28 blocks out of the sea, ragged and steep, wider under water, worn and mossy at the waterline,
+	 * grass and gravel on top (where seabirds roost); in half the clusters an arch joins the first two.
+	 */
+	private void seaStacks() {
+		int sea = this.cy;
+		int count = 2 + this.random.nextInt(4);
+		double[][] stacks = new double[count][];
+		for (int i = 0; i < count; i++) {
+			double angle = this.random.nextDouble() * Math.PI * 2;
+			double r = (i == 0 ? 0 : 0.4 + this.random.nextDouble() * 0.6) * this.piece.size * 0.8;
+			double radius = 2 + this.random.nextDouble() * 2.5;
+			double height = 8 + this.random.nextDouble() * 12 + radius * 2;
+			stacks[i] = new double[]{this.cx + Math.cos(angle) * r, this.cz + Math.sin(angle) * r, radius, height};
+		}
+		boolean arch = count >= 2 && this.random.nextBoolean();
+		double archY = arch ? sea + Math.min(stacks[0][3], stacks[1][3]) * 0.6 : 0;
+		BlockState grass = Blocks.GRASS_BLOCK.getDefaultState();
+		for (int x = this.box.getMinX(); x <= this.box.getMaxX(); x++) {
+			for (int z = this.box.getMinZ(); z <= this.box.getMaxZ(); z++) {
+				double best = -1e9;
+				for (int i = 0; i < count; i++) {
+					double[] stack = stacks[i];
+					double dx = x + 0.5 - stack[0];
+					double dz = z + 0.5 - stack[1];
+					double d = Math.sqrt(dx * dx + dz * dz);
+					double edge = stack[2] * (1 + 0.3 * this.n2(x * 0.25 + i * 13, z * 0.25));
+					double t;
+					if (d < edge) {
+						t = sea + stack[3] * (1 - 0.25 * (d / edge) * (d / edge)) * (0.85 + 0.15 * this.n2(x * 0.3, z * 0.3 + i));
+					} else if (d < edge * 1.8) {
+						// Wider under water: an apron of rock down to the floor.
+						t = sea - 2 - (d - edge) * 2.5;
+					} else {
+						continue;
+					}
+					best = Math.max(best, t);
+				}
+				int ground = this.ground(x, z);
+				int top = (int) Math.floor(best);
+				for (int y = ground; y <= top; y++) {
+					if (this.open(x, y, z)) {
+						BlockState state = this.stone;
+						if (y == top && y >= sea + 2) {
+							state = this.chance(x, y, z, 41) < 0.25 ? Blocks.GRAVEL.getDefaultState() : grass;
+						} else if (y >= sea - 2 && y <= sea + 1 && this.chance(x, y, z, 42) < 0.35) {
+							state = this.chance(x, y, z, 43) < 0.5 ? Blocks.MOSSY_COBBLESTONE.getDefaultState() : Blocks.COBBLESTONE.getDefaultState();
+						}
+						this.set(x, y, z, state);
+					}
+				}
+				if (arch) {
+					// The arch: a thick span between the first two stacks.
+					double ax = stacks[1][0] - stacks[0][0];
+					double az = stacks[1][1] - stacks[0][1];
+					double length = Math.max(1, Math.sqrt(ax * ax + az * az));
+					double along = ((x + 0.5 - stacks[0][0]) * ax + (z + 0.5 - stacks[0][1]) * az) / (length * length);
+					if (along > 0 && along < 1) {
+						double px = stacks[0][0] + ax * along;
+						double pz = stacks[0][1] + az * along;
+						double off = Math.sqrt(Math.pow(x + 0.5 - px, 2) + Math.pow(z + 0.5 - pz, 2));
+						if (off < 1.8) {
+							double sag = Math.sin(along * Math.PI) * 2;
+							int low = (int) Math.floor(archY + sag - 1);
+							for (int y = low; y <= low + 2; y++) {
+								if (this.open(x, y, z)) {
+									this.set(x, y, z, y == low + 2 ? grass : this.stone);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 	private void reef() {
 		int sea = this.cy;
 		double radius = this.piece.size;

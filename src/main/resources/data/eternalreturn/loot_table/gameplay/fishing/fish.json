@@ -1972,6 +1972,19 @@
               "items": "minecraft:glistering_melon_slice"
             }
           ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:cod",
+          "weight": 100,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:kelp_forests"
+              }
+            }
+          ]
         }
       ]
     }

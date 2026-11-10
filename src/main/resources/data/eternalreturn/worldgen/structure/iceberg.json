@@ -1,0 +1,11 @@
+{
+  "type": "eternalreturn:landmark",
+  "landmark": "iceberg",
+  "min_size": 5,
+  "max_size": 14,
+  "at_sea": true,
+  "biomes": "#eternalreturn:has_structure/iceberg",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

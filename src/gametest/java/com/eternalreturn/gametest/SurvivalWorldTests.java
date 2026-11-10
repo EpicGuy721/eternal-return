@@ -220,6 +220,25 @@ public class SurvivalWorldTests implements FabricGameTest {
 		});
 	}
 
+	/** In the water where it would snow, the cold comes on 4 times as fast as on land (falling through the pack ice). */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "cold", tickLimit = 100)
+	public void icyWaterChillsFaster(TestContext ctx) {
+		fillBiome(ctx, "minecraft:snowy_plains");
+		ctx.setBlockState(new BlockPos(6, 1, 6), Blocks.WATER);
+		ServerPlayerEntity dry = FishingTests.survivalPlayer(ctx, new BlockPos(2, 1, 2));
+		ServerPlayerEntity wet = FishingTests.survivalPlayer(ctx, new BlockPos(6, 1, 6));
+		ColdExposure.setExposure(dry, 0);
+		ColdExposure.setExposure(wet, 0);
+		ctx.runAtTick(70, () -> {
+			int onLand = ColdExposure.exposure(dry);
+			int inWater = ColdExposure.exposure(wet);
+			ctx.assertTrue(onLand > 0 && inWater == onLand * 4, "cold on land " + onLand + ", in the water " + inWater + " (expected 4 times)");
+			FishingTests.disconnect(dry);
+			FishingTests.disconnect(wet);
+			ctx.complete();
+		});
+	}
+
 	private static void fillBiome(TestContext ctx, String biome) {
 		MinecraftServer server = ctx.getWorld().getServer();
 		BlockPos a = ctx.getAbsolutePos(new BlockPos(-4, -4, -4));

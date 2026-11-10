@@ -25,7 +25,9 @@ public final class Landmarks {
 		/** Hot springs (worldgen expansion 2, phase 3): terraced pools with a vent, some with a geyser (HotSprings). */
 		HOT_SPRING,
 		/** Elder trees (worldgen expansion 2, phase 4): one colossal tree of a local species (ElderTrees). */
-		ELDER_TREE;
+		ELDER_TREE,
+		/** The frozen and cold seas' landmarks (worldgen expansion 2, phase 6, batch 1): icebergs, clusters of sea stacks. */
+		ICEBERG, SEA_STACKS;
 
 		public String id() {
 			return this.name().toLowerCase(java.util.Locale.ROOT);

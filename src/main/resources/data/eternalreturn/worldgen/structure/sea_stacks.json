@@ -1,0 +1,11 @@
+{
+  "type": "eternalreturn:landmark",
+  "landmark": "sea_stacks",
+  "min_size": 8,
+  "max_size": 18,
+  "at_sea": true,
+  "biomes": "#eternalreturn:has_structure/sea_stacks",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

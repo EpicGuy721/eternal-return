@@ -1147,7 +1147,9 @@
                             "biomes": [
                               "minecraft:ocean",
                               "minecraft:deep_ocean",
-                              "minecraft:frozen_ocean"
+                              "minecraft:frozen_ocean",
+                              "eternalreturn:pack_ice_ocean",
+                              "eternalreturn:iceberg_ocean"
                             ],
                             "condition": "moderner_beta:in_set"
                           }
@@ -1639,6 +1641,154 @@
         },
         {
           "type": "moderner_beta:weighted_pool",
+          "id": "sub_cold_ocean",
+          "seed": 3022,
+          "targets": [
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:kelp_forest_ocean"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:sea_stacks_ocean"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "minecraft:the_void*null"
+              },
+              "weight": 1
+            }
+          ]
+        },
+        {
+          "type": "moderner_beta:stacked_zoom",
+          "parent": "sub_cold_ocean",
+          "id": "sub_cold_ocean",
+          "level": 6,
+          "seed": 4022,
+          "seedModifier": 1,
+          "zoomType": "modal"
+        },
+        {
+          "type": "moderner_beta:weighted_pool",
+          "id": "sub_deep_cold_ocean",
+          "seed": 3023,
+          "targets": [
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:kelp_forest_ocean"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:sea_stacks_ocean"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "minecraft:the_void*null"
+              },
+              "weight": 1
+            }
+          ]
+        },
+        {
+          "type": "moderner_beta:stacked_zoom",
+          "parent": "sub_deep_cold_ocean",
+          "id": "sub_deep_cold_ocean",
+          "level": 6,
+          "seed": 4023,
+          "seedModifier": 1,
+          "zoomType": "modal"
+        },
+        {
+          "type": "moderner_beta:weighted_pool",
+          "id": "sub_deep_frozen_ocean",
+          "seed": 3021,
+          "targets": [
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:pack_ice_ocean"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:iceberg_ocean"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "minecraft:the_void*null"
+              },
+              "weight": 1
+            }
+          ]
+        },
+        {
+          "type": "moderner_beta:stacked_zoom",
+          "parent": "sub_deep_frozen_ocean",
+          "id": "sub_deep_frozen_ocean",
+          "level": 6,
+          "seed": 4021,
+          "seedModifier": 1,
+          "zoomType": "modal"
+        },
+        {
+          "type": "moderner_beta:weighted_pool",
+          "id": "sub_frozen_ocean",
+          "seed": 3020,
+          "targets": [
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:pack_ice_ocean"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:iceberg_ocean"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "minecraft:the_void*null"
+              },
+              "weight": 1
+            }
+          ]
+        },
+        {
+          "type": "moderner_beta:stacked_zoom",
+          "parent": "sub_frozen_ocean",
+          "id": "sub_frozen_ocean",
+          "level": 6,
+          "seed": 4020,
+          "seedModifier": 1,
+          "zoomType": "modal"
+        },
+        {
+          "type": "moderner_beta:weighted_pool",
           "id": "sub_lukewarm_ocean",
           "seed": 3019,
           "targets": [
@@ -1703,6 +1853,22 @@
           "id": "land",
           "seed": 0,
           "targets": {
+            "minecraft:cold_ocean": {
+              "type": "layer",
+              "value": "sub_cold_ocean"
+            },
+            "minecraft:deep_cold_ocean": {
+              "type": "layer",
+              "value": "sub_deep_cold_ocean"
+            },
+            "minecraft:deep_frozen_ocean": {
+              "type": "layer",
+              "value": "sub_deep_frozen_ocean"
+            },
+            "minecraft:frozen_ocean": {
+              "type": "layer",
+              "value": "sub_frozen_ocean"
+            },
             "minecraft:lukewarm_ocean": {
               "type": "layer",
               "value": "sub_lukewarm_ocean"
@@ -1759,8 +1925,10 @@
                 "eternalreturn:grand_fir_forest",
                 "eternalreturn:heathland",
                 "eternalreturn:ice_plains_peak",
+                "eternalreturn:iceberg_ocean",
                 "eternalreturn:jungle_edge",
                 "eternalreturn:jungle_peak",
+                "eternalreturn:kelp_forest_ocean",
                 "eternalreturn:larch_forest",
                 "eternalreturn:leafy_river",
                 "eternalreturn:meadow",
@@ -1768,6 +1936,7 @@
                 "eternalreturn:monument_valley",
                 "eternalreturn:old_growth_pine_taiga_peak",
                 "eternalreturn:old_growth_spruce_taiga_peak",
+                "eternalreturn:pack_ice_ocean",
                 "eternalreturn:painted_canyon",
                 "eternalreturn:palm_beach",
                 "eternalreturn:pinyon_woodland",
@@ -1779,6 +1948,7 @@
                 "eternalreturn:roofed_fungi_forest",
                 "eternalreturn:sandy_river",
                 "eternalreturn:savanna_peak",
+                "eternalreturn:sea_stacks_ocean",
                 "eternalreturn:snowy_mesa",
                 "eternalreturn:spooky_swamp",
                 "eternalreturn:swampland_edge",
@@ -1795,6 +1965,7 @@
                 "minecraft:cherry_grove",
                 "minecraft:cold_ocean",
                 "minecraft:dark_forest",
+                "minecraft:deep_cold_ocean",
                 "minecraft:deep_frozen_ocean",
                 "minecraft:deep_ocean",
                 "minecraft:desert",
@@ -2456,6 +2627,10 @@
         "minecraft:warm_ocean*deep": "-1.0;-1.2",
         "eternalreturn:coral_ocean": "-1.0;-1.2",
         "eternalreturn:archipelago": "-1.0;-1.2",
+        "eternalreturn:pack_ice_ocean": "-1.0;-1.2",
+        "eternalreturn:iceberg_ocean": "-1.0;-1.2",
+        "eternalreturn:kelp_forest_ocean": "-1.0;-1.2",
+        "eternalreturn:sea_stacks_ocean": "-1.0;-1.2",
         "eternalreturn:clay_river": "-0.5;-1.2",
         "eternalreturn:leafy_river": "-0.5;-1.2",
         "eternalreturn:rocky_river": "-0.5;-1.2",
