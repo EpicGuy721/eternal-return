@@ -42,7 +42,9 @@
 		"minecraft:brown_candle_cake",
 		"minecraft:green_candle_cake",
 		"minecraft:red_candle_cake",
-		"minecraft:black_candle_cake"
+		"minecraft:black_candle_cake",
+		"minecraft:lava",
+		"minecraft:lava_cauldron"
 	],
 	"minecraft:soul_torch": [
 		"minecraft:soul_wall_torch",

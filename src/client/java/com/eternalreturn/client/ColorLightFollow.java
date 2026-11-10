@@ -17,7 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * With ColorLight (an optional client mod), related light sources share one colour: every fire light (fire, campfires,
+ * With ColorLight (an optional client mod), related light sources share one colour: every fire light (fire, lava, campfires,
  * lanterns, lit furnaces, candles...) the torch's, every soul light the soul torch's, glowstone's lights glowstone's
  * (the table eternalreturn/colorlight_follow.json). ColorLight builds its table of block colours whenever its settings
  * load or change (ColorLightFollowMixin); each follower there is given its source's colour then, keeping its own light
