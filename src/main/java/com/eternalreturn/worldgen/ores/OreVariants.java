@@ -139,6 +139,18 @@ public final class OreVariants {
 		return HOST_BY_BLOCK.containsKey(state.getBlock());
 	}
 
+	/**
+	 * The variant a host stone blob makes of a vanilla ore it grows over (lapis ore in a granite blob: granite lapis
+	 * ore), or null when the block is not a vanilla ore or the host has no variant of it.
+	 */
+	public static BlockState variantInBlob(BlockState host, BlockState ore) {
+		if (!isHost(host)) {
+			return null;
+		}
+		BlockState variant = variantFor(ore, host);
+		return variant == ore ? null : variant;
+	}
+
 	/** The variant of an ore for the block it replaces, or the ore unchanged when that block is not a host stone. */
 	public static BlockState variantFor(BlockState ore, BlockState replaced) {
 		Map<Block, Block> byHost = BY_ORE_AND_HOST.get(ore.getBlock());
