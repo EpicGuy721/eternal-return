@@ -74,6 +74,8 @@ public class SnowTests implements FabricGameTest {
 	private static final String WORLDGEN_BATCH = "snow_worldgen";
 	/** Snow in flora: by hand, aimed at, growing. */
 	private static final String FLORA_BATCH = "flora_snow";
+	/** The grass, podzol and mycelium under snowlogged blocks. */
+	private static final String GROUND_BATCH = "snow_ground";
 	/** Snowfall on flora changes the weather. */
 	private static final String FLORA_WEATHER_BATCH = "flora_snow_weather";
 	/** The freezing feature on flora covers 16 by 16 columns from the test's corner. */
@@ -451,27 +453,147 @@ public class SnowTests implements FabricGameTest {
 		ctx.complete();
 	}
 
-	/** Opening a gate with snow on its rails knocks it off in a puff of snow (it lies on the ground): by hand and by redstone. */
+	/**
+	 * Opening a gate with snow logged in it sweeps the snow away in a puff of snow, and the grass under it turns green
+	 * again: by hand, by redstone and set open by anything else (villagers, other mods); closing it brings none back. A
+	 * snow cover on its posts stays, and so does the gate's snowy mark for it.
+	 */
 	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 20)
-	public void openingAGateKnocksItsSnowOff(TestContext ctx) {
+	public void openingAGateSweepsItsSnowAway(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
 		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(8, 2, 2));
 		try {
 			BlockPos byHand = ctx.getAbsolutePos(new BlockPos(4, 2, 6));
-			snowy(world, byHand, Blocks.OAK_FENCE_GATE.getDefaultState(), 1);
+			world.setBlockState(byHand.down(), Blocks.GRASS_BLOCK.getDefaultState());
+			snowy(world, byHand, Blocks.OAK_FENCE_GATE.getDefaultState(), 2);
+			ctx.assertTrue(groundSnowy(world, byHand), "the grass under the snowy gate is snowy");
 			clickTop(player, world, ItemStack.EMPTY, byHand, 0.9);
 			ctx.assertTrue(world.getBlockState(byHand).get(FenceGateBlock.OPEN), "opened by hand");
 			ctx.assertTrue(Heard.events(byHand, WorldEvents.BLOCK_BROKEN).contains(Block.getRawIdFromState(Blocks.SNOW.getDefaultState())), "in a puff of snow");
-			ctx.assertTrue(logged(world, byHand) == 1, "the snow lies on the ground");
+			ctx.assertTrue(Snowlogging.layers(world, byHand) == 0 && !SnowCover.marked(world.getBlockState(byHand)), "the snow is gone: " + world.getBlockState(byHand));
+			ctx.assertTrue(!groundSnowy(world, byHand), "the grass under it is green again");
+			clickTop(player, world, ItemStack.EMPTY, byHand, 0.9);
+			ctx.assertTrue(!world.getBlockState(byHand).get(FenceGateBlock.OPEN) && Snowlogging.layers(world, byHand) == 0
+					&& !SnowCover.marked(world.getBlockState(byHand)) && !groundSnowy(world, byHand), "closed again, no snow comes back");
 
 			BlockPos powered = ctx.getAbsolutePos(new BlockPos(10, 2, 6));
+			world.setBlockState(powered.down(), Blocks.GRASS_BLOCK.getDefaultState());
 			snowy(world, powered, Blocks.SPRUCE_FENCE_GATE.getDefaultState(), 1);
 			world.setBlockState(powered.east(), Blocks.REDSTONE_BLOCK.getDefaultState());
 			ctx.assertTrue(world.getBlockState(powered).get(FenceGateBlock.OPEN)
 					&& Heard.events(powered, WorldEvents.BLOCK_BROKEN).contains(Block.getRawIdFromState(Blocks.SNOW.getDefaultState())), "opened by redstone, in a puff");
+			ctx.assertTrue(Snowlogging.layers(world, powered) == 0 && !groundSnowy(world, powered), "its snow is gone, the grass green");
+
+			BlockPos covered = ctx.getAbsolutePos(new BlockPos(14, 2, 6));
+			world.setBlockState(covered.down(), Blocks.GRASS_BLOCK.getDefaultState());
+			snowy(world, covered, Blocks.BIRCH_FENCE_GATE.getDefaultState(), 3);
+			world.setBlockState(covered.up(), Snowlogging.SNOW_COVER.getDefaultState());
+			BlockState shut = world.getBlockState(covered);
+			// As a villager or another mod opens it: the block set open, telling no neighbour.
+			world.setBlockState(covered, shut.with(FenceGateBlock.OPEN, true), Block.NOTIFY_LISTENERS);
+			ctx.assertTrue(world.getBlockState(covered).get(FenceGateBlock.OPEN) && Snowlogging.layers(world, covered) == 0, "set open, its snow is gone");
+			ctx.assertTrue(SnowCover.marked(world.getBlockState(covered)) && cover(world, covered.up()) == 1, "the cover on its posts stays, and its mark for it");
+			ctx.assertTrue(!groundSnowy(world, covered), "the grass under it is green again");
 		} finally {
 			FishingTests.disconnect(player);
 		}
+		ctx.complete();
+	}
+
+	/**
+	 * Grass, podzol and mycelium under a fence, wall, gate or vertical slab with snow logged in it are snowy, as under a
+	 * snow layer (its snow lies on the ground there); under a bottom slab or stairs, whose snow lies on the block, they
+	 * stay as they are, and a snow cover alone on a fence's posts doesn't count. Set when the snow comes (by any way, also
+	 * with no neighbour told, as the world is made), cleared when it goes; grass placed under it comes snowy.
+	 */
+	@GameTest(templateName = ARENA, batchId = GROUND_BATCH, tickLimit = 20)
+	public void groundUnderLoggedSnowIsSnowy(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		List<BlockState> onGround = List.of(Blocks.OAK_FENCE.getDefaultState(), Blocks.COBBLESTONE_WALL.getDefaultState(),
+				Blocks.OAK_FENCE_GATE.getDefaultState(), vertical(Direction.NORTH));
+		for (int i = 0; i < onGround.size(); i++) {
+			BlockPos pos = ctx.getAbsolutePos(new BlockPos(2 + 2 * i, 2, 2));
+			world.setBlockState(pos.down(), Blocks.GRASS_BLOCK.getDefaultState());
+			world.setBlockState(pos, onGround.get(i));
+			ctx.assertTrue(!groundSnowy(world, pos), "green under a bare " + onGround.get(i));
+			Snowlogging.snowlog(world, pos, 1, Block.NOTIFY_ALL);
+			ctx.assertTrue(groundSnowy(world, pos), "snowy under a snowy " + world.getBlockState(pos));
+			Snowlogging.snowlog(world, pos, 0, Block.NOTIFY_ALL);
+			ctx.assertTrue(!groundSnowy(world, pos), "green again when its snow goes: " + world.getBlockState(pos));
+		}
+		List<BlockState> onBlock = List.of(Blocks.STONE_SLAB.getDefaultState(), stairs());
+		for (int i = 0; i < onBlock.size(); i++) {
+			BlockPos pos = ctx.getAbsolutePos(new BlockPos(2 + 2 * i, 2, 5));
+			world.setBlockState(pos.down(), Blocks.GRASS_BLOCK.getDefaultState());
+			snowy(world, pos, onBlock.get(i), 2);
+			ctx.assertTrue(logged(world, pos) == 2 && !groundSnowy(world, pos), "green under " + world.getBlockState(pos) + ", its snow on itself");
+		}
+
+		BlockPos podzol = ctx.getAbsolutePos(new BlockPos(8, 2, 5));
+		world.setBlockState(podzol.down(), Blocks.PODZOL.getDefaultState());
+		snowy(world, podzol, Blocks.SPRUCE_FENCE.getDefaultState(), 1);
+		BlockPos mycelium = ctx.getAbsolutePos(new BlockPos(10, 2, 5));
+		world.setBlockState(mycelium.down(), Blocks.MYCELIUM.getDefaultState());
+		snowy(world, mycelium, Blocks.STONE_BRICK_WALL.getDefaultState(), 1);
+		ctx.assertTrue(groundSnowy(world, podzol) && groundSnowy(world, mycelium), "podzol and mycelium too");
+
+		BlockPos quiet = ctx.getAbsolutePos(new BlockPos(12, 2, 5));
+		world.setBlockState(quiet.down(), Blocks.GRASS_BLOCK.getDefaultState());
+		world.setBlockState(quiet, Blocks.OAK_FENCE.getDefaultState());
+		Snowlogging.snowlog(world, quiet, 2, Block.NOTIFY_LISTENERS);
+		ctx.assertTrue(groundSnowy(world, quiet), "snowy when the snow comes telling no neighbour (as the world is made)");
+
+		BlockPos covered = ctx.getAbsolutePos(new BlockPos(2, 2, 8));
+		world.setBlockState(covered.down(), Blocks.GRASS_BLOCK.getDefaultState());
+		world.setBlockState(covered, Blocks.OAK_FENCE.getDefaultState());
+		world.setBlockState(covered.up(), Snowlogging.SNOW_COVER.getDefaultState());
+		ctx.assertTrue(SnowCover.marked(world.getBlockState(covered)) && !groundSnowy(world, covered), "a cover on the posts alone leaves the grass green");
+		Snowlogging.snowlog(world, covered, 1, Block.NOTIFY_ALL);
+		ctx.assertTrue(groundSnowy(world, covered), "snow logged under the cover: snowy");
+		Snowlogging.snowlog(world, covered, 0, Block.NOTIFY_ALL);
+		ctx.assertTrue(SnowCover.marked(world.getBlockState(covered)) && !groundSnowy(world, covered), "its logged snow gone, the cover staying: green again");
+
+		BlockPos broken = ctx.getAbsolutePos(new BlockPos(4, 2, 8));
+		world.setBlockState(broken.down(), Blocks.GRASS_BLOCK.getDefaultState());
+		snowy(world, broken, Blocks.OAK_FENCE.getDefaultState(), 2);
+		world.breakBlock(broken, false);
+		ctx.assertTrue(world.getBlockState(broken).isAir() && !groundSnowy(world, broken), "the fence and its snow gone (not by a player), the grass green");
+
+		BlockPos placed = ctx.getAbsolutePos(new BlockPos(6, 2, 8));
+		snowy(world, placed, Blocks.OAK_FENCE.getDefaultState(), 1);
+		world.setBlockState(placed.down(), Blocks.AIR.getDefaultState());
+		ServerPlayerEntity player = FishingTests.survivalPlayer(ctx, new BlockPos(6, 2, 11));
+		try {
+			player.setStackInHand(Hand.MAIN_HAND, new ItemStack(Items.GRASS_BLOCK));
+			BlockPos beside = placed.down().south();
+			Items.GRASS_BLOCK.getDefaultStack().useOnBlock(new ItemUsageContext(player, Hand.MAIN_HAND,
+					new BlockHitResult(Vec3d.ofCenter(beside).add(0.0, 0.0, -0.5), Direction.NORTH, beside, false)));
+		} finally {
+			FishingTests.disconnect(player);
+		}
+		ctx.assertTrue(world.getBlockState(placed.down()).isOf(Blocks.GRASS_BLOCK) && groundSnowy(world, placed), "grass placed under it comes snowy: " + world.getBlockState(placed.down()));
+		ctx.complete();
+	}
+
+	/** Grass spreading onto dirt under a snowy fence comes up snowy. */
+	@GameTest(templateName = ARENA, batchId = GROUND_BATCH, tickLimit = 20)
+	public void grassSpreadsSnowyUnderLoggedSnow(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		BlockPos grass = ctx.getAbsolutePos(new BlockPos(6, 1, 6));
+		world.setBlockState(grass, Blocks.GRASS_BLOCK.getDefaultState());
+		List<BlockPos> dirt = new java.util.ArrayList<>();
+		for (Direction side : Direction.Type.HORIZONTAL) {
+			BlockPos pos = grass.offset(side);
+			world.setBlockState(pos, Blocks.DIRT.getDefaultState());
+			snowy(world, pos.up(), Blocks.OAK_FENCE.getDefaultState(), 1);
+			dirt.add(pos);
+		}
+		for (int i = 0; i < 4000 && dirt.stream().allMatch(pos -> world.getBlockState(pos).isOf(Blocks.DIRT)); i++) {
+			world.getBlockState(grass).randomTick(world, grass, world.random);
+		}
+		BlockPos spread = dirt.stream().filter(pos -> world.getBlockState(pos).isOf(Blocks.GRASS_BLOCK)).findFirst().orElse(null);
+		ctx.assertTrue(spread != null, "the grass spread under a fence: light " + world.getLightLevel(grass.up()));
+		ctx.assertTrue(world.getBlockState(spread).get(net.minecraft.state.property.Properties.SNOWY), "and came up snowy");
 		ctx.complete();
 	}
 

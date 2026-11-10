@@ -14,7 +14,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * A block changing in a loaded chunk keeps the snow logged in it as far as the new block holds it (Snowlogging); a plant
- * growing (a crop's age, made from its plain state) stays snowy while it has snow logged in it.
+ * growing (a crop's age, made from its plain state) stays snowy while it has snow logged in it; a gate swinging open
+ * sweeps its snow away.
  */
 @Mixin(WorldChunk.class)
 public abstract class ChunkSnowMixin {
@@ -29,6 +30,12 @@ public abstract class ChunkSnowMixin {
 			return SnowCover.mark(state, true);
 		}
 		return state;
+	}
+
+	@ModifyVariable(method = "setBlockState", at = @At("HEAD"), argsOnly = true)
+	private BlockState eternalreturn$gateSweepsSnow(BlockState state, @Local(argsOnly = true) BlockPos pos) {
+		WorldChunk chunk = (WorldChunk) (Object) this;
+		return Snowlogging.gateSwept(chunk, pos, chunk.getBlockState(pos), state);
 	}
 
 	@Inject(method = "setBlockState", at = @At("RETURN"))

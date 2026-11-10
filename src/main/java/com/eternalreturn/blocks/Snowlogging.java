@@ -213,6 +213,9 @@ public final class Snowlogging {
 			// The block is as it was, but what lies on it may change (a cover turning into a snow layer on a whole top).
 			world.replaceWithStateForNeighborUpdate(Direction.DOWN, marked, pos.up(), pos, flags, 512);
 		}
+		if (before != logged) {
+			groundFollows(world, pos.down(), flags);
+		}
 		return logged;
 	}
 
@@ -302,6 +305,48 @@ public final class Snowlogging {
 		}
 	}
 
+	/**
+	 * Whether snow lies on the top of a ground block, so that grass, podzol and mycelium there are snowy: a snow layer
+	 * (vanilla's rule), or snow logged in the block standing on it where that snow lies on the ground (around a fence's
+	 * posts, under a plant: SnowCover.reachesGround).
+	 */
+	public static boolean snowOnGround(BlockView world, BlockPos ground) {
+		BlockPos up = ground.up();
+		BlockState above = world.getBlockState(up);
+		if (SnowCover.isSnow(above)) {
+			return true;
+		}
+		return SnowCover.marked(above) && SnowCover.reachesGround(above) && (SnowCover.isFlora(above) || layers(world, up) > 0);
+	}
+
+	/** Grass, podzol or mycelium under a block whose logged snow changed: snowy as the snow on it says (set and cleared). */
+	public static void groundFollows(WorldAccess world, BlockPos ground, int flags) {
+		BlockState state = world.getBlockState(ground);
+		if (state.getBlock() instanceof net.minecraft.block.SnowyBlock) {
+			boolean snowy = snowOnGround(world, ground);
+			if (state.get(net.minecraft.block.SnowyBlock.SNOWY) != snowy) {
+				world.setBlockState(ground, state.with(net.minecraft.block.SnowyBlock.SNOWY, snowy), flags);
+			}
+		}
+	}
+
+	/**
+	 * A gate swinging open (a block changing in a loaded chunk, ChunkSnowMixin, however it's opened): it sweeps the snow
+	 * logged in it away, and stays snowy only for snow lying on its posts. Closing it brings none back.
+	 */
+	public static BlockState gateSwept(WorldChunk chunk, BlockPos pos, BlockState old, BlockState now) {
+		if (!(now.getBlock() instanceof net.minecraft.block.FenceGateBlock) || old.getBlock() != now.getBlock()
+				|| old.get(net.minecraft.block.FenceGateBlock.OPEN) || !now.get(net.minecraft.block.FenceGateBlock.OPEN)) {
+			return now;
+		}
+		World world = chunk.getWorld();
+		if (SnowCover.layers(world, pos, old) == 0) {
+			return now;
+		}
+		setLayers(world, pos, 0);
+		return SnowCover.markedFor(now, 0, chunk.getBlockState(pos.up()));
+	}
+
 	/** Snow lying on a block's whole top: the block says so (for its drips). */
 	public static void snowLiesOn(WorldAccess world, BlockPos space, int flags) {
 		BlockPos pos = space.down();
@@ -377,7 +422,7 @@ public final class Snowlogging {
 		return true;
 	}
 
-	/** A gate set open with snow on its rails: the snow falls off them, in a puff of snow (and lies on the ground). */
+	/** A gate set open with snow logged in it: a puff of snow (the snow itself goes as the gate changes: gateSwept). */
 	public static void gateOpened(World world, BlockPos pos, BlockState state, @Nullable PlayerEntity player) {
 		if (state.contains(net.minecraft.state.property.Properties.OPEN) && state.get(net.minecraft.state.property.Properties.OPEN)
 				&& SnowCover.layers(world, pos, world.getBlockState(pos)) > 0) {

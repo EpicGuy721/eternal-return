@@ -184,11 +184,14 @@ public class ControlFingerprintTests implements FabricGameTest {
 		return hashes;
 	}
 
-	/** Ground (grass, podzol, mycelium) under flora with snow logged in it is snowy for that snow alone: as vanilla left it. */
+	/**
+	 * Ground (grass, podzol, mycelium) under flora with snow logged in it, or under a fence, wall or gate whose logged
+	 * snow lies on the ground, is snowy for that snow alone: as vanilla left it.
+	 */
 	private static BlockState groundUnder(Chunk chunk, BlockPos pos, BlockState state) {
 		if (state.contains(net.minecraft.state.property.Properties.SNOWY) && state.get(net.minecraft.state.property.Properties.SNOWY)) {
 			BlockState above = chunk.getBlockState(pos.up());
-			if (com.eternalreturn.blocks.SnowCover.marked(above) && com.eternalreturn.blocks.SnowCover.isFlora(above)) {
+			if (com.eternalreturn.blocks.SnowCover.marked(above) && com.eternalreturn.blocks.SnowCover.reachesGround(above)) {
 				return state.with(net.minecraft.state.property.Properties.SNOWY, false);
 			}
 		}

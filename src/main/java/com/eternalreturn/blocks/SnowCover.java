@@ -251,6 +251,23 @@ public final class SnowCover {
 		return true;
 	}
 
+	/**
+	 * Whether the snow logged in a block lies on the ground in places (around fence, wall and gate posts, beside a
+	 * vertical slab, under a plant), so that the grass, podzol or mycelium under it turns snowy; not on a bottom slab or
+	 * stairs, whose snow lies on the block itself.
+	 */
+	public static boolean reachesGround(BlockState state) {
+		if (isFlora(state.getBlock())) {
+			return true;
+		}
+		for (int height : top(state).heights) {
+			if (height < 0) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** Whether a block reaches the top of its space somewhere, where a snow cover can lie on it. */
 	public static boolean reachesTop(BlockState state) {
 		for (int height : top(state).heights) {
