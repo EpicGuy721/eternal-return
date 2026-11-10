@@ -2,7 +2,31 @@
   "replace": false,
   "values": [
     {
+      "id": "eternalreturn:alps",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:arctic",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:black_spruce_forest",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:extreme_hills_peak",
+      "required": false
+    },
+    {
       "id": "eternalreturn:glacier_field",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:ice_caves",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:ice_plains_peak",
       "required": false
     },
     {
@@ -10,7 +34,19 @@
       "required": false
     },
     {
+      "id": "eternalreturn:icy_mountains",
+      "required": false
+    },
+    {
       "id": "eternalreturn:larch_forest",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:old_growth_pine_taiga_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:old_growth_spruce_taiga_peak",
       "required": false
     },
     {
@@ -18,7 +54,7 @@
       "required": false
     },
     {
-      "id": "eternalreturn:redwood_forest",
+      "id": "eternalreturn:snowy_mesa",
       "required": false
     },
     {
@@ -27,6 +63,10 @@
     },
     {
       "id": "eternalreturn:taiga_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:tundra",
       "required": false
     }
   ]

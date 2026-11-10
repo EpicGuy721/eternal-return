@@ -36,6 +36,7 @@
 			"com.eternalreturn.gametest.ClimateTests",
 			"com.eternalreturn.gametest.OuterEndTests",
 			"com.eternalreturn.gametest.CompatTests",
+			"com.eternalreturn.gametest.FoxAndCameraTests",
 			"com.eternalreturn.gametest.WorldmapTests",
 			"com.eternalreturn.gametest.ControlFingerprintTests",
 			"com.eternalreturn.gametest.StructureTests",

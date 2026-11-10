@@ -131,6 +131,17 @@ def variant_biome(vid, base, spec):
             first.update(change)
             spawners[:] = [e for e in spawners if e['type'] != mob or (e is first and change['weight'] > 0)]
     write_json(os.path.join(RES, 'data', NS, 'worldgen', 'biome', vid + '.json'), {'fabric:load_conditions': LOAD_IF_MB, **biome})
+    return biome
+
+
+def snowy(biome):
+    """Snow falls (and lies) where a biome with precipitation is below 0.15, as Moderner Beta lays it."""
+    return biome.get('has_precipitation', True) and biome['temperature'] < 0.15
+
+
+# Tags that follow a variant's own climate rather than its base's: a warm redwood forest grown from a snowy taiga
+# must not get white foxes, and a snowy peak of a green taiga must not get red ones.
+CLIMATE_TAGS = {'minecraft:spawns_snow_foxes': snowy}
 
 
 def all_variants():
@@ -246,8 +257,7 @@ def main():
     variants = all_variants()
     check_feature_order(variants)
     write_sub_features()
-    for vid, (base, kind, spec) in variants.items():
-        variant_biome(vid, base, spec)
+    biomes = {vid: variant_biome(vid, base, spec) for vid, (base, kind, spec) in variants.items()}
     # The desert scrub's thorn bushes: a couple of tries a chunk, where an acacia sapling could grow (coarse dirt).
     write_json(os.path.join(RES, 'data', NS, 'worldgen', 'placed_feature', 'scrub_thorn_bush.json'), {
         'feature': f'{NS}:tree/thorn_bush',
@@ -265,9 +275,15 @@ def main():
     for vid, (base, kind, spec) in variants.items():
         by_base.setdefault(base, []).append(f'{NS}:{vid}')
     count = 0
-    for tag, values in sorted(tag_files().items()):
+    all_tags = tag_files()
+    for tag in CLIMATE_TAGS:
+        all_tags.setdefault(tag, [])
+    for tag, values in sorted(all_tags.items()):
         names = {v if isinstance(v, str) else v['id'] for v in values}
-        added = sorted({vid for base, vids in by_base.items() if base in names for vid in vids})
+        if tag in CLIMATE_TAGS:
+            added = sorted(f'{NS}:{vid}' for vid, biome in biomes.items() if CLIMATE_TAGS[tag](biome))
+        else:
+            added = sorted({vid for base, vids in by_base.items() if base in names for vid in vids})
         if added:
             ns, path = tag.split(':')
             write_json(os.path.join(PACK, 'data', ns, 'tags', 'worldgen', 'biome', path + '.json'),

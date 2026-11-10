@@ -254,6 +254,69 @@ public class CompatTests implements FabricGameTest {
 	 * (effectiveStrength), where ColorLight used the block's brightest (an unlit candle as four lit ones). ColorLight is in the dev runs, so its class can be read here: when
 	 * an update moves or drops the halving, this fails, rather than the fix quietly switching itself off.
 	 */
+	/**
+	 * With ColorLight, fire lights take the torch's colour, soul lights the soul torch's and glowstone's lights glowstone's
+	 * (the table eternalreturn/colorlight_follow.json, ColorLightFollow), given when ColorLight builds its block colours
+	 * and stores them (ColorLightFollowMixin, on its one store to byBlock in load). Every name in the table is a block
+	 * that gives light, none follows a follower, and ColorLight still builds the table that way.
+	 */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "compat")
+	public void colorLightRelatedLightsShareColours(TestContext ctx) {
+		JsonObject table;
+		try (InputStream in = CompatTests.class.getResourceAsStream("/eternalreturn/colorlight_follow.json")) {
+			ctx.assertTrue(in != null, "the follow table is in the jar");
+			table = JsonParser.parseReader(new InputStreamReader(in, StandardCharsets.UTF_8)).getAsJsonObject();
+		} catch (java.io.IOException e) {
+			throw new RuntimeException(e);
+		}
+		List<String> sources = new ArrayList<>();
+		List<String> followers = new ArrayList<>();
+		for (var entry : table.entrySet()) {
+			if (!entry.getKey().startsWith("_")) {
+				sources.add(entry.getKey());
+				entry.getValue().getAsJsonArray().forEach(f -> followers.add(f.getAsString()));
+			}
+		}
+		ctx.assertTrue(sources.containsAll(List.of("minecraft:torch", "minecraft:soul_torch", "minecraft:glowstone")), "the torch, soul torch and glowstone lead");
+		ctx.assertTrue(followers.containsAll(List.of("minecraft:fire", "minecraft:campfire", "minecraft:lantern", "minecraft:furnace",
+				"minecraft:soul_fire", "minecraft:soul_campfire", "minecraft:soul_lantern", "minecraft:soul_wall_torch")), "the fire and soul lights follow");
+		for (String name : sources) {
+			ctx.assertFalse(followers.contains(name), name + " leads, so it follows nothing");
+		}
+		ctx.assertTrue(followers.stream().distinct().count() == followers.size(), "each light follows one source");
+		for (String name : concat(sources, followers)) {
+			Identifier id = Identifier.of(name);
+			ctx.assertTrue(Registries.BLOCK.containsId(id), name + " is a block");
+			Block block = Registries.BLOCK.get(id);
+			ctx.assertTrue(block.getStateManager().getStates().stream().anyMatch(state -> state.getLuminance() > 0), name + " gives light");
+		}
+		ClassNode node = new ClassNode();
+		try (InputStream in = CompatTests.class.getResourceAsStream("/me/mrhikmen/colorlight/client/core/light/registry/ColorLightBlockRegistry.class")) {
+			ctx.assertTrue(in != null, "ColorLight's block colours are on the classpath");
+			new ClassReader(in).accept(node, 0);
+		} catch (java.io.IOException e) {
+			throw new RuntimeException(e);
+		}
+		int stores = 0;
+		for (MethodNode method : node.methods) {
+			if (method.name.equals("load") && org.objectweb.asm.Type.getArgumentTypes(method.desc).length == 1) {
+				for (AbstractInsnNode insn = method.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+					if (insn.getOpcode() == Opcodes.PUTSTATIC && ((org.objectweb.asm.tree.FieldInsnNode) insn).name.equals("byBlock")) {
+						stores++;
+					}
+				}
+			}
+		}
+		ctx.assertTrue(stores == 1, "ColorLight's load stores its colours in byBlock once (found " + stores + "), as the mixin expects");
+		ctx.complete();
+	}
+
+	private static List<String> concat(List<String> a, List<String> b) {
+		List<String> all = new ArrayList<>(a);
+		all.addAll(b);
+		return all;
+	}
+
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "compat")
 	public void colorLightStillHalvesMovingLight(TestContext ctx) {
 		ClassNode node = new ClassNode();

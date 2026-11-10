@@ -171,6 +171,7 @@
 		"tweaks.SquidInkMixin",
 		"tweaks.SwimKeyHolderMixin",
 		"tweaks.SwimKeyMixin",
+		"tweaks.EyesInsideMixin",
 		"tweaks.TridentEntityAccessor",
 		"tweaks.TridentReturnMixin",
 		"tweaks.TurtleEggLightFeetMixin",
