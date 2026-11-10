@@ -801,8 +801,9 @@ final class LandmarkShapes {
 
 	/**
 	 * Sea stacks (phase 6, batch 1; size: the cluster's radius): two to five towers of the landmark's stone standing from
-	 * the sea floor 8 to 28 blocks out of the sea, ragged and steep, wider under water, worn and mossy at the waterline,
-	 * grass and gravel on top (where seabirds roost); in half the clusters an arch joins the first two.
+	 * the sea floor 8 to 28 blocks out of the sea, steep with a smooth outline and a nearly flat top, wider under water, patches
+	 * of moss at the waterline, grass (a clump or two of gravel) on top where seabirds roost; in half the clusters an arch
+	 * joins the first two.
 	 */
 	private void seaStacks() {
 		int sea = this.cy;
@@ -826,10 +827,14 @@ final class LandmarkShapes {
 					double dx = x + 0.5 - stack[0];
 					double dz = z + 0.5 - stack[1];
 					double d = Math.sqrt(dx * dx + dz * dz);
-					double edge = stack[2] * (1 + 0.3 * this.n2(x * 0.25 + i * 13, z * 0.25));
+					// A smooth outline (by the angle round the stack, not block by block) and a nearly flat top that rounds
+					// off a block or two at the rim, tilting a little across the cluster.
+					double angle = Math.atan2(dz, dx);
+					double edge = stack[2] * (1 + 0.2 * this.n2(Math.cos(angle) * 1.2 + i * 13, Math.sin(angle) * 1.2));
 					double t;
 					if (d < edge) {
-						t = sea + stack[3] * (1 - 0.25 * (d / edge) * (d / edge)) * (0.85 + 0.15 * this.n2(x * 0.3, z * 0.3 + i));
+						double rim = d / edge > 0.7 ? (d / edge - 0.7) * 5 : 0;
+						t = sea + stack[3] - rim + 1.5 * this.n2(x * 0.06 + i * 7, z * 0.06);
 					} else if (d < edge * 1.8) {
 						// Wider under water: an apron of rock down to the floor.
 						t = sea - 2 - (d - edge) * 2.5;
@@ -844,9 +849,11 @@ final class LandmarkShapes {
 					if (this.open(x, y, z)) {
 						BlockState state = this.stone;
 						if (y == top && y >= sea + 2) {
-							state = this.chance(x, y, z, 41) < 0.25 ? Blocks.GRAVEL.getDefaultState() : grass;
-						} else if (y >= sea - 2 && y <= sea + 1 && this.chance(x, y, z, 42) < 0.35) {
-							state = this.chance(x, y, z, 43) < 0.5 ? Blocks.MOSSY_COBBLESTONE.getDefaultState() : Blocks.COBBLESTONE.getDefaultState();
+							// Grass on top, gravel in a clump or two.
+							state = this.n2(x * 0.18 + 50, z * 0.18) > 0.55 ? Blocks.GRAVEL.getDefaultState() : grass;
+						} else if (y >= sea - 2 && y <= sea + 1 && this.n3(x * 0.2, y * 0.3, z * 0.2) > 0.25) {
+							// Worn at the waterline: mossy cobblestone in patches.
+							state = Blocks.MOSSY_COBBLESTONE.getDefaultState();
 						}
 						this.set(x, y, z, state);
 					}

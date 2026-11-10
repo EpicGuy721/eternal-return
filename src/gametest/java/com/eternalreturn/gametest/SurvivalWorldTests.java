@@ -129,8 +129,8 @@ public class SurvivalWorldTests implements FabricGameTest {
 	}
 
 	/**
-	 * How fast ice cracks: heavier armor faster, sprinting twice as fast, sneaking half; a polar bear with a stray on
-	 * it is heavier than one alone; landing cracks it at once, and it heals when left alone. Packed ice doesn't crack.
+	 * How fast ice cracks: heavier armor faster, sprinting twice as fast, sneaking half; a bear with a stray on it is
+	 * heavier than one alone, and the snow mobs (a polar bear with a stray on it) don't crack it; landing cracks it at once, and it heals when left alone. Packed ice doesn't crack.
 	 */
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "ice_cracks", tickLimit = 160)
 	public void iceCrackRates(TestContext ctx) {
@@ -156,16 +156,23 @@ public class SurvivalWorldTests implements FabricGameTest {
 				player.equipStack(slot, ItemStack.EMPTY);
 			}
 
-			PolarBearEntity bear = ctx.spawnEntity(EntityType.POLAR_BEAR, new BlockPos(6, 1, 1));
+			// A bear is heavy, heavier with a rider; the snow mobs (a polar bear, a stray on it) never crack ice.
+			com.eternalreturn.mobs.entity.BearEntity bear = ctx.spawnEntity(com.eternalreturn.mobs.ModEntities.BROWN_BEAR, new BlockPos(6, 1, 1));
 			bear.setAiDisabled(true);
 			float alone = IceCracking.rate(bear);
 			StrayEntity stray = ctx.spawnEntity(EntityType.STRAY, new BlockPos(6, 1, 1));
 			stray.setAiDisabled(true);
 			stray.startRiding(bear, true);
 			ctx.assertTrue(Math.abs(IceCracking.load(bear) - 4.0F) < 0.01F && IceCracking.rate(bear) > alone,
-					"a stray on a polar bear: " + IceCracking.load(bear));
+					"a stray on a bear: " + IceCracking.load(bear));
 			ctx.assertTrue(IceCracking.load(stray) == 0.0F, "a stray alone doesn't crack ice");
+			stray.stopRiding();
+			PolarBearEntity polar = ctx.spawnEntity(EntityType.POLAR_BEAR, new BlockPos(8, 1, 1));
+			polar.setAiDisabled(true);
+			stray.startRiding(polar, true);
+			ctx.assertTrue(IceCracking.load(polar) == 0.0F, "a polar bear, stray and all, doesn't crack ice: " + IceCracking.load(polar));
 			stray.discard();
+			polar.discard();
 			bear.discard();
 
 			ctx.setBlockState(new BlockPos(1, 1, 1), Blocks.ICE);
