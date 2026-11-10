@@ -36,7 +36,8 @@ public class ModernerBetaMixinPlugin implements IMixinConfigPlugin {
 			Map.entry("com.eternalreturn.mixin.compat.ModernerBetaBiomeCacheMixin", new Object[]{"getBiome", 7, "Lnet/minecraft/registry/entry/RegistryEntry;"}),
 			Map.entry("com.eternalreturn.mixin.compat.ModernerBetaChunkCacheMixin", new Object[]{"<init>", 4, "V"}),
 			Map.entry("com.eternalreturn.mixin.compat.ModernerBetaAuxChunkCacheMixin", new Object[]{"<init>", 4, "V"}),
-			Map.entry("com.eternalreturn.mixin.compat.ModernerBetaSurfaceHeightMixin", new Object[]{"estimateSurfaceHeight", 2, "I"}));
+			Map.entry("com.eternalreturn.mixin.compat.ModernerBetaSurfaceHeightMixin", new Object[]{"estimateSurfaceHeight", 2, "I"}),
+			Map.entry("com.eternalreturn.mixin.compat.ModernerBetaCoastalMixin", new Object[]{"getBiomeBlock", 3, "Lnet/minecraft/registry/entry/RegistryEntry;"}));
 
 	@Override
 	public void onLoad(String mixinPackage) {

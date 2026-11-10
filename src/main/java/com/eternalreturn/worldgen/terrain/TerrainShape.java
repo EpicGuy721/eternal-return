@@ -120,6 +120,9 @@ public final class TerrainShape {
 			this.seed = seed;
 			this.biomeAt = biomeAt;
 			this.noise = new SimplexNoiseSampler(Random.create(CaveSystemCarver.mix(seed, 0x0CEA4L)));
+			if (this.eternalReturn) {
+				latest = this;
+			}
 		}
 
 		public static State of(Object provider) {
@@ -134,6 +137,21 @@ public final class TerrainShape {
 				return "";
 			}
 		}
+	}
+
+	/** The Eternal Return world's terrain state made last (one such world runs at a time), for the coastal sea sub-biomes. */
+	private static volatile State latest;
+
+	/**
+	 * Blocks from this 4-block column (biome coordinates) to the nearest land in the Eternal Return world being made, or -1
+	 * where none is known. For the coastal sea sub-biomes (BiomeVariants.Variant.coastal; ModernerBetaCoastalMixin).
+	 */
+	public static double coastDistanceAt(int quartX, int quartZ) {
+		State state = latest;
+		if (state == null) {
+			return -1;
+		}
+		return coastDistance(state, quartX, quartZ);
 	}
 
 	/** A sinkhole: centre in blocks, radius in blocks; onLand: whether it is kept if its centre lies on land. */

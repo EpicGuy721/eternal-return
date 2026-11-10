@@ -8,6 +8,7 @@
 		"ModernerBetaBiomeCacheMixin",
 		"ModernerBetaChunkCacheMixin",
 		"ModernerBetaCaveBiomeMixin",
+		"ModernerBetaCoastalMixin",
 		"ModernerBetaHeightMixin",
 		"ModernerBetaSnowCheckMixin",
 		"ModernerBetaSnowMixin",

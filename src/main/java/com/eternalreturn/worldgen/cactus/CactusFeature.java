@@ -15,8 +15,8 @@ import net.minecraft.world.gen.feature.util.FeatureContext;
 
 /**
  * Cacti of their biome's shape as the world is made (feature eternalreturn:cactus_shapes; CactusShapes): max_per_chunk
- * tries at random columns, each kept with chance per_chunk / max_per_chunk of the biome's entry there, rooted on sand
- * (or, where the entry sets a ground, on grass, dirt or terracotta, which turns to that ground under it).
+ * tries at random columns, each kept with chance per_chunk / max_per_chunk of the biome's entry there, rooted only on
+ * the sand or red sand already there (never on other ground turned to sand: the owner's rule, 2026-11-10).
  */
 public final class CactusFeature extends Feature<CactusFeature.Config> {
 	public record Config(int maxPerChunk) implements FeatureConfig {
@@ -45,14 +45,11 @@ public final class CactusFeature extends Feature<CactusFeature.Config> {
 			if (entry == null || roll >= entry.perChunk() || !CactusShapes.clear(world, root)) {
 				continue;
 			}
-			BlockState ground = world.getBlockState(root.down());
-			boolean sand = ground.isIn(BlockTags.SAND);
-			boolean swappable = entry.ground() != null && (ground.isOf(Blocks.GRASS_BLOCK) || ground.isOf(Blocks.DIRT)
-					|| ground.isOf(Blocks.COARSE_DIRT) || ground.isOf(Blocks.PACKED_MUD) || ground.isIn(BlockTags.TERRACOTTA));
-			if (!sand && !swappable) {
+			// Only on sand or red sand already there: a cactus never changes the ground under it (the owner's rule).
+			if (!world.getBlockState(root.down()).isIn(BlockTags.SAND)) {
 				continue;
 			}
-			any |= CactusShapes.placeWhole(world, root, entry.shape(), sand ? null : entry.ground());
+			any |= CactusShapes.placeWhole(world, root, entry.shape(), null);
 		}
 		return any;
 	}

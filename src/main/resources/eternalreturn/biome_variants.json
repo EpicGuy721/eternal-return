@@ -290,7 +290,8 @@
   },
   "eternalreturn:mangrove_lagoon_ocean": {
     "base": "minecraft:lukewarm_ocean",
-    "kind": "sub"
+    "kind": "sub",
+    "coastal": 8
   },
   "eternalreturn:ice_caves": {
     "base": "moderner_beta:early_release_ice_plains",

@@ -145,7 +145,8 @@ public class SubBiomeTests implements FabricGameTest {
 			Map.entry("eternalreturn:pack_ice_ocean", 3), Map.entry("eternalreturn:iceberg_ocean", 3), Map.entry("eternalreturn:kelp_forest_ocean", 3),
 			Map.entry("eternalreturn:sea_stacks_ocean", 3),
 			// Batch 2: the plain and lukewarm seas (shallow only; the lagoon in a second round after the archipelago).
-			Map.entry("eternalreturn:seagrass_meadow_ocean", 3), Map.entry("eternalreturn:shoals_ocean", 3), Map.entry("eternalreturn:mangrove_lagoon_ocean", 3));
+			Map.entry("eternalreturn:seagrass_meadow_ocean", 3), Map.entry("eternalreturn:shoals_ocean", 3));
+	// (The mangrove lagoon is only a strip along the shores of its cells, the owner's call: its share of the sea isn't checked.)
 
 	/** What each sub-biome must show in 5 x 5 generated chunks round its spot: a block (or block tag) and how many at least. */
 	private record Sign(String what, int atLeast) {
