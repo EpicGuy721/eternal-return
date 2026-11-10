@@ -362,9 +362,12 @@ if SUBS:
 # areas are rounded. Each pool has its own seed (pool_seeds) and so does its zoom.
 # A sea sub-biome may also take part of other seas ("also": the deep frozen and cold seas, batch 1 of expansion 2's
 # phase 6); it keeps its base's height, which the stepped sea floor (TerrainShape) overrides anyway that far out.
+# A later round ("round": 2, the mangrove lagoon after the archipelago) is picked in a second replacement step among the
+# cells the first left to the parent, so the first round's sub-biomes stay where they are (as the land's rounds do).
+SEA_ROUND_1 = {sid: spec for sid, spec in SEA_SUBS.items() if spec.get('round', 1) == 1}
 sea_targets = {}
-for n, parent in enumerate(sorted({p for spec in SEA_SUBS.values() for p in [spec['base']] + spec.get('also', [])})):
-    mine = {sid: spec for sid, spec in SEA_SUBS.items() if parent == spec['base'] or parent in spec.get('also', [])}
+for n, parent in enumerate(sorted({p for spec in SEA_ROUND_1.values() for p in [spec['base']] + spec.get('also', [])})):
+    mine = {sid: spec for sid, spec in SEA_ROUND_1.items() if parent == spec['base'] or parent in spec.get('also', [])}
     whole = 1
     for spec in mine.values():
         whole = whole * spec['share'] // __import__('math').gcd(whole, spec['share'])
@@ -380,6 +383,27 @@ for n, parent in enumerate(sorted({p for spec in SEA_SUBS.values() for p in [spe
     sea_targets[parent] = {'type': 'layer', 'value': pool_id}
 if sea_targets:
     pipeline.append({'type': 'moderner_beta:biome_replacement', 'parent': 'land', 'id': 'land', 'seed': 0, 'targets': sea_targets})
+sea_round_2 = {}
+for parent in sorted({p for spec in SEA_SUBS.values() if spec.get('round', 1) == 2 for p in [spec['base']] + spec.get('also', [])}):
+    first = [spec for spec in SEA_ROUND_1.values() if parent == spec['base'] or parent in spec.get('also', [])]
+    these = {sid: spec for sid, spec in SEA_SUBS.items() if spec.get('round', 1) == 2 and (parent == spec['base'] or parent in spec.get('also', []))}
+    left = Fraction(1) - sum(Fraction(1, spec['share']) for spec in first)
+    chances = {sid: Fraction(1, spec['share']) / left for sid, spec in these.items()}
+    whole = 1
+    for c in chances.values():
+        whole = whole * c.denominator // __import__('math').gcd(whole, c.denominator)
+    targets = [{'data': {'type': 'biome', 'value': sid}, 'weight': int(c * whole)} for sid, c in chances.items()]
+    rest = whole - sum(t['weight'] for t in targets)
+    if rest > 0:
+        targets.append({'data': {'type': 'biome', 'value': 'minecraft:the_void*null'}, 'weight': rest})
+    pool_id = 'sub_' + parent.split(':')[1] + '_2'
+    seed = VARIANTS['pool_seeds'][f'{parent}#2']
+    pipeline.append({'type': 'moderner_beta:weighted_pool', 'id': pool_id, 'seed': seed, 'targets': targets})
+    pipeline.append({'type': 'moderner_beta:stacked_zoom', 'parent': pool_id, 'id': pool_id, 'level': 6, 'seed': seed + 1000,
+                     'seedModifier': 1, 'zoomType': 'modal'})
+    sea_round_2[parent] = {'type': 'layer', 'value': pool_id}
+if sea_round_2:
+    pipeline.append({'type': 'moderner_beta:biome_replacement', 'parent': 'land', 'id': 'land', 'seed': 0, 'targets': sea_round_2})
 
 # ---------------------------------------------------------------- structures (Eternal Return worlds only)
 # No trial chambers and no ocean monuments (guardians spawn in the open ocean instead). Moderner Beta's

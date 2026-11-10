@@ -42,6 +42,14 @@
       "required": false
     },
     {
+      "id": "eternalreturn:seagrass_meadow_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:shoals_ocean",
+      "required": false
+    },
+    {
       "id": "eternalreturn:webbed_forest",
       "required": false
     }

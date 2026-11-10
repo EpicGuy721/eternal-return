@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "eternalreturn:seagrass_meadow_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:shoals_ocean",
+      "required": false
+    }
+  ]
+}

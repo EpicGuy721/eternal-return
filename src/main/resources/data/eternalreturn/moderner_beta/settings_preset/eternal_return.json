@@ -1148,6 +1148,8 @@
                               "minecraft:ocean",
                               "minecraft:deep_ocean",
                               "minecraft:frozen_ocean",
+                              "eternalreturn:seagrass_meadow_ocean",
+                              "eternalreturn:shoals_ocean",
                               "eternalreturn:pack_ice_ocean",
                               "eternalreturn:iceberg_ocean"
                             ],
@@ -1262,7 +1264,9 @@
                     "neighborPredicate": {
                       "biomes": [
                         "minecraft:ocean",
-                        "minecraft:deep_ocean"
+                        "minecraft:deep_ocean",
+                        "eternalreturn:seagrass_meadow_ocean",
+                        "eternalreturn:shoals_ocean"
                       ],
                       "condition": "moderner_beta:in_set"
                     },
@@ -1303,7 +1307,9 @@
                     "neighborPredicate": {
                       "biomes": [
                         "minecraft:ocean",
-                        "minecraft:deep_ocean"
+                        "minecraft:deep_ocean",
+                        "eternalreturn:seagrass_meadow_ocean",
+                        "eternalreturn:shoals_ocean"
                       ],
                       "condition": "moderner_beta:in_set"
                     },
@@ -1329,6 +1335,8 @@
                         "eternalreturn:heathland",
                         "eternalreturn:grand_fir_forest",
                         "eternalreturn:alps",
+                        "eternalreturn:seagrass_meadow_ocean",
+                        "eternalreturn:shoals_ocean",
                         "eternalreturn:spooky_swamp",
                         "eternalreturn:bald_cypress_swamp"
                       ],
@@ -1341,7 +1349,9 @@
                     "neighborPredicate": {
                       "biomes": [
                         "minecraft:ocean",
-                        "minecraft:deep_ocean"
+                        "minecraft:deep_ocean",
+                        "eternalreturn:seagrass_meadow_ocean",
+                        "eternalreturn:shoals_ocean"
                       ],
                       "condition": "moderner_beta:in_set"
                     },
@@ -1384,7 +1394,9 @@
                     "neighborPredicate": {
                       "biomes": [
                         "minecraft:ocean",
-                        "minecraft:deep_ocean"
+                        "minecraft:deep_ocean",
+                        "eternalreturn:seagrass_meadow_ocean",
+                        "eternalreturn:shoals_ocean"
                       ],
                       "condition": "moderner_beta:in_set"
                     },
@@ -1819,6 +1831,43 @@
         },
         {
           "type": "moderner_beta:weighted_pool",
+          "id": "sub_ocean",
+          "seed": 3024,
+          "targets": [
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:seagrass_meadow_ocean"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:shoals_ocean"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "minecraft:the_void*null"
+              },
+              "weight": 1
+            }
+          ]
+        },
+        {
+          "type": "moderner_beta:stacked_zoom",
+          "parent": "sub_ocean",
+          "id": "sub_ocean",
+          "level": 6,
+          "seed": 4024,
+          "seedModifier": 1,
+          "zoomType": "modal"
+        },
+        {
+          "type": "moderner_beta:weighted_pool",
           "id": "sub_warm_ocean",
           "seed": 3018,
           "targets": [
@@ -1873,9 +1922,55 @@
               "type": "layer",
               "value": "sub_lukewarm_ocean"
             },
+            "minecraft:ocean": {
+              "type": "layer",
+              "value": "sub_ocean"
+            },
             "minecraft:warm_ocean": {
               "type": "layer",
               "value": "sub_warm_ocean"
+            }
+          }
+        },
+        {
+          "type": "moderner_beta:weighted_pool",
+          "id": "sub_lukewarm_ocean_2",
+          "seed": 3025,
+          "targets": [
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:mangrove_lagoon_ocean"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "minecraft:the_void*null"
+              },
+              "weight": 1
+            }
+          ]
+        },
+        {
+          "type": "moderner_beta:stacked_zoom",
+          "parent": "sub_lukewarm_ocean_2",
+          "id": "sub_lukewarm_ocean_2",
+          "level": 6,
+          "seed": 4025,
+          "seedModifier": 1,
+          "zoomType": "modal"
+        },
+        {
+          "type": "moderner_beta:biome_replacement",
+          "parent": "land",
+          "id": "land",
+          "seed": 0,
+          "targets": {
+            "minecraft:lukewarm_ocean": {
+              "type": "layer",
+              "value": "sub_lukewarm_ocean_2"
             }
           }
         }
@@ -1931,6 +2026,7 @@
                 "eternalreturn:kelp_forest_ocean",
                 "eternalreturn:larch_forest",
                 "eternalreturn:leafy_river",
+                "eternalreturn:mangrove_lagoon_ocean",
                 "eternalreturn:meadow",
                 "eternalreturn:mesa_verde",
                 "eternalreturn:monument_valley",
@@ -1949,6 +2045,8 @@
                 "eternalreturn:sandy_river",
                 "eternalreturn:savanna_peak",
                 "eternalreturn:sea_stacks_ocean",
+                "eternalreturn:seagrass_meadow_ocean",
+                "eternalreturn:shoals_ocean",
                 "eternalreturn:snowy_mesa",
                 "eternalreturn:spooky_swamp",
                 "eternalreturn:swampland_edge",
@@ -2631,6 +2729,9 @@
         "eternalreturn:iceberg_ocean": "-1.0;-1.2",
         "eternalreturn:kelp_forest_ocean": "-1.0;-1.2",
         "eternalreturn:sea_stacks_ocean": "-1.0;-1.2",
+        "eternalreturn:seagrass_meadow_ocean": "-1.0;-1.2",
+        "eternalreturn:shoals_ocean": "-1.0;-1.2",
+        "eternalreturn:mangrove_lagoon_ocean": "-1.0;-1.2",
         "eternalreturn:clay_river": "-0.5;-1.2",
         "eternalreturn:leafy_river": "-0.5;-1.2",
         "eternalreturn:rocky_river": "-0.5;-1.2",

@@ -280,6 +280,18 @@
     "base": "minecraft:cold_ocean",
     "kind": "sub"
   },
+  "eternalreturn:seagrass_meadow_ocean": {
+    "base": "minecraft:ocean",
+    "kind": "sub"
+  },
+  "eternalreturn:shoals_ocean": {
+    "base": "minecraft:ocean",
+    "kind": "sub"
+  },
+  "eternalreturn:mangrove_lagoon_ocean": {
+    "base": "minecraft:lukewarm_ocean",
+    "kind": "sub"
+  },
   "eternalreturn:ice_caves": {
     "base": "moderner_beta:early_release_ice_plains",
     "kind": "cave"

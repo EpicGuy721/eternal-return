@@ -16,6 +16,14 @@
     {
       "id": "eternalreturn:sea_stacks_ocean",
       "required": false
+    },
+    {
+      "id": "eternalreturn:seagrass_meadow_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:shoals_ocean",
+      "required": false
     }
   ]
 }

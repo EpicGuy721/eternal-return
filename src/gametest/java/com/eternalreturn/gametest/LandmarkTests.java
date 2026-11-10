@@ -62,7 +62,9 @@ public class LandmarkTests implements FabricGameTest {
 				{"pillar_cluster", 60, 3}, {"volcanic_volcano", 25, 6}, {"volcanic_lava_flow", 50, 6},
 				{"islets", 60, 5}, {"sea_pillars", 45, 3}, {"reef", 90, 2},
 				// Expansion 2, phase 6, batch 1: icebergs in the iceberg sea, sea stacks in their own.
-				{"iceberg", 90, 2}, {"sea_stacks", 70, 2}};
+				{"iceberg", 90, 2}, {"sea_stacks", 70, 2},
+				// Batch 2: shoals in their own sea.
+				{"shoals", 70, 3}};
 		var calculator = world.getChunkManager().getStructurePlacementCalculator();
 		var generator = world.getChunkManager().getChunkGenerator();
 		for (Object[] k : kinds) {
@@ -177,6 +179,12 @@ public class LandmarkTests implements FabricGameTest {
 					int blue = count(world, centre.down(), half, 40, 0, s -> s.isOf(Blocks.BLUE_ICE));
 					what = over + " ice over the water, " + under + " under, " + blue + " blue, radius " + piece.size;
 					ok = over >= 15 && under > over && blue >= 5;
+				}
+				case "shoals" -> {
+					// Sandbar crests at or just above the surface.
+					int crests = count(world, centre.down(), half, 0, 2, s -> s.isOf(Blocks.SAND));
+					what = crests + " sand at the surface, field radius " + piece.size;
+					ok = crests >= 20;
 				}
 				case "sea_stacks" -> {
 					int high = count(world, centre.up(2), half, 0, 34, s -> s.isOf(stone) || s.isOf(Blocks.GRASS_BLOCK));

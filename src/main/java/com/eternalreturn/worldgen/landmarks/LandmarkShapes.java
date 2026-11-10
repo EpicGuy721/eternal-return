@@ -75,6 +75,7 @@ final class LandmarkShapes {
 			case ELDER_TREE -> ElderTrees.build(this.piece, this.world, this.box);
 			case ICEBERG -> this.iceberg();
 			case SEA_STACKS -> this.seaStacks();
+			case SHOALS -> this.shoals();
 		}
 	}
 
@@ -877,6 +878,55 @@ final class LandmarkShapes {
 								}
 							}
 						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Shoals (phase 6, batch 2; size: the field's radius): a broad sandy platform 3 to 6 under the surface, its edges
+	 * sloping to the floor, and on it two to four long sandbars whose crests break the surface, gravel in patches.
+	 */
+	private void shoals() {
+		int sea = this.cy;
+		double radius = this.piece.size;
+		int count = 2 + this.random.nextInt(3);
+		double[][] bars = new double[count][];
+		for (int i = 0; i < count; i++) {
+			double angle = this.random.nextDouble() * Math.PI * 2;
+			double r = this.random.nextDouble() * radius * 0.6;
+			double heading = this.random.nextDouble() * Math.PI;
+			double length = radius * (0.5 + this.random.nextDouble() * 0.5);
+			double width = 2.5 + this.random.nextDouble() * 3;
+			bars[i] = new double[]{this.cx + Math.cos(angle) * r, this.cz + Math.sin(angle) * r, Math.cos(heading), Math.sin(heading), length, width};
+		}
+		for (int x = this.box.getMinX(); x <= this.box.getMaxX(); x++) {
+			for (int z = this.box.getMinZ(); z <= this.box.getMaxZ(); z++) {
+				double dx = x + 0.5 - this.cx;
+				double dz = z + 0.5 - this.cz;
+				double d = Math.sqrt(dx * dx + dz * dz);
+				double angle = Math.atan2(dz, dx);
+				double edge = radius * (1 + 0.25 * this.n2(Math.cos(angle) * 1.3, Math.sin(angle) * 1.3));
+				// The platform: 3 to 6 under the surface, sloping away past its edge.
+				double t = d < edge ? sea - 4.5 + 1.5 * this.n2(x * 0.05 + 40, z * 0.05) : sea - 4.5 - (d - edge) * 1.2;
+				for (double[] bar : bars) {
+					double bx = x + 0.5 - bar[0];
+					double bz = z + 0.5 - bar[1];
+					double along = (bx * bar[2] + bz * bar[3]) / bar[4];
+					double across = (-bx * bar[3] + bz * bar[2]) / bar[5];
+					double e = along * along + across * across;
+					if (e < 1) {
+						// Crest just above the water, sloping down to the platform.
+						t = Math.max(t, sea + 0.3 - e * 5);
+					}
+				}
+				int top = (int) Math.floor(t);
+				int ground = this.ground(x, z);
+				for (int y = ground; y <= top; y++) {
+					if (this.open(x, y, z)) {
+						boolean gravel = y == top && y < sea - 1 && this.n2(x * 0.15 + 70, z * 0.15) > 0.5;
+						this.set(x, y, z, (gravel ? Blocks.GRAVEL : y >= top - 3 ? Blocks.SAND : this.stone.getBlock()).getDefaultState());
 					}
 				}
 			}

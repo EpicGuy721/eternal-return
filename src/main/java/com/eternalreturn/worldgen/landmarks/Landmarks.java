@@ -27,7 +27,9 @@ public final class Landmarks {
 		/** Elder trees (worldgen expansion 2, phase 4): one colossal tree of a local species (ElderTrees). */
 		ELDER_TREE,
 		/** The frozen and cold seas' landmarks (worldgen expansion 2, phase 6, batch 1): icebergs, clusters of sea stacks. */
-		ICEBERG, SEA_STACKS;
+		ICEBERG, SEA_STACKS,
+		/** The plain seas' landmark (phase 6, batch 2): fields of sandbars breaking the surface over shallow channels. */
+		SHOALS;
 
 		public String id() {
 			return this.name().toLowerCase(java.util.Locale.ROOT);

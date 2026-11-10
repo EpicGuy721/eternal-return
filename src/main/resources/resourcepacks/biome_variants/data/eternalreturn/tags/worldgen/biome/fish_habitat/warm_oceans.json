@@ -8,6 +8,10 @@
     {
       "id": "eternalreturn:coral_ocean",
       "required": false
+    },
+    {
+      "id": "eternalreturn:mangrove_lagoon_ocean",
+      "required": false
     }
   ]
 }

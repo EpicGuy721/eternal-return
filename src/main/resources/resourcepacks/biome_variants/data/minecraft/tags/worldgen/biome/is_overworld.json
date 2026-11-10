@@ -98,6 +98,10 @@
       "required": false
     },
     {
+      "id": "eternalreturn:mangrove_lagoon_ocean",
+      "required": false
+    },
+    {
       "id": "eternalreturn:mesa_verde",
       "required": false
     },
@@ -151,6 +155,14 @@
     },
     {
       "id": "eternalreturn:sea_stacks_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:seagrass_meadow_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:shoals_ocean",
       "required": false
     },
     {

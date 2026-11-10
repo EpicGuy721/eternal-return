@@ -18952,7 +18952,8 @@
                         "moderner_beta:beta_warm_ocean",
                         "moderner_beta:beta_lukewarm_ocean",
                         "eternalreturn:coral_ocean",
-                        "eternalreturn:archipelago"
+                        "eternalreturn:archipelago",
+                        "eternalreturn:mangrove_lagoon_ocean"
                       ]
                     },
                     "then_run": {

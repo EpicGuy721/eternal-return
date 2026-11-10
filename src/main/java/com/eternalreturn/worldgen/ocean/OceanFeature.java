@@ -66,6 +66,8 @@ import java.util.Map;
  * <li>pack_ice (phase 6, batch 1; in the biomes of eternalreturn:pack_ice_seas): the sea's surface one sheet of ice,
  * broken by long open leads of water, with ridges of packed ice and snow along their edges and snow on the sheet.
  * <li>kelp_forest (phase 6, batch 1; in eternalreturn:kelp_forests): kelp from the floor to the surface, in dense stands.
+ * <li>lagoon_mud (phase 6, batch 2; in eternalreturn:mangrove_lagoons): where the water is 6 deep or less, the loose floor
+ * (sand, gravel, dirt, clay) turns to mud, a little with moss, so the lagoon's mangroves take root along the shallows.
  * </ul>
  */
 public final class OceanFeature extends Feature<OceanFeature.Config> {
@@ -87,6 +89,8 @@ public final class OceanFeature extends Feature<OceanFeature.Config> {
 			net.minecraft.registry.RegistryKeys.BIOME, com.eternalreturn.EternalReturn.id("pack_ice_seas"));
 	public static final net.minecraft.registry.tag.TagKey<Biome> ICEBERG_SEAS = net.minecraft.registry.tag.TagKey.of(
 			net.minecraft.registry.RegistryKeys.BIOME, com.eternalreturn.EternalReturn.id("iceberg_seas"));
+	public static final net.minecraft.registry.tag.TagKey<Biome> MANGROVE_LAGOONS = net.minecraft.registry.tag.TagKey.of(
+			net.minecraft.registry.RegistryKeys.BIOME, com.eternalreturn.EternalReturn.id("mangrove_lagoons"));
 	public static final net.minecraft.registry.tag.TagKey<Biome> KELP_FORESTS = net.minecraft.registry.tag.TagKey.of(
 			net.minecraft.registry.RegistryKeys.BIOME, com.eternalreturn.EternalReturn.id("kelp_forests"));
 	private static volatile long noiseSeed = Long.MIN_VALUE;
@@ -116,6 +120,7 @@ public final class OceanFeature extends Feature<OceanFeature.Config> {
 			case "whale_fall" -> job.whaleFall();
 			case "pack_ice" -> job.packIce();
 			case "kelp_forest" -> job.kelpForest();
+			case "lagoon_mud" -> job.lagoonMud();
 			default -> false;
 		};
 	}
@@ -1010,6 +1015,30 @@ public final class OceanFeature extends Feature<OceanFeature.Config> {
 					} else if (lead > 2.5 || this.random.nextBoolean()) {
 						// Snow over the sheet; bare ice in patches only along the leads.
 						this.world.setBlockState(above, Blocks.SNOW.getDefaultState(), Block.NOTIFY_LISTENERS);
+					}
+				}
+			}
+			return any;
+		}
+
+		/** The mangrove lagoon's shallows: mud for a floor where the water is 6 deep or less, so mangroves can root. */
+		boolean lagoonMud() {
+			boolean any = false;
+			BlockPos.Mutable pos = new BlockPos.Mutable();
+			for (int x = this.chunk.getStartX(); x <= this.chunk.getEndX(); x++) {
+				for (int z = this.chunk.getStartZ(); z <= this.chunk.getEndZ(); z++) {
+					int floor = this.floor(x, z);
+					if (floor < this.sea - 7 || floor >= this.sea - 1 || !this.seaOf(x, z, MANGROVE_LAGOONS)) {
+						continue;
+					}
+					for (int y = floor; y > floor - 3; y--) {
+						BlockState state = this.world.getBlockState(pos.set(x, y, z));
+						if (!loose(state)) {
+							break;
+						}
+						this.world.setBlockState(pos, y == floor && this.random.nextInt(8) == 0 ? Blocks.MOSS_BLOCK.getDefaultState() : Blocks.MUD.getDefaultState(),
+								Block.NOTIFY_LISTENERS);
+						any = true;
 					}
 				}
 			}

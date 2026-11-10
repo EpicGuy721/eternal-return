@@ -143,7 +143,9 @@ public class SubBiomeTests implements FabricGameTest {
 			Map.entry("eternalreturn:coral_ocean", 3), Map.entry("eternalreturn:archipelago", 3),
 			// Expansion 2, phase 6, batch 1: the frozen and cold seas (shallow and deep).
 			Map.entry("eternalreturn:pack_ice_ocean", 3), Map.entry("eternalreturn:iceberg_ocean", 3), Map.entry("eternalreturn:kelp_forest_ocean", 3),
-			Map.entry("eternalreturn:sea_stacks_ocean", 3));
+			Map.entry("eternalreturn:sea_stacks_ocean", 3),
+			// Batch 2: the plain and lukewarm seas (shallow only; the lagoon in a second round after the archipelago).
+			Map.entry("eternalreturn:seagrass_meadow_ocean", 3), Map.entry("eternalreturn:shoals_ocean", 3), Map.entry("eternalreturn:mangrove_lagoon_ocean", 3));
 
 	/** What each sub-biome must show in 5 x 5 generated chunks round its spot: a block (or block tag) and how many at least. */
 	private record Sign(String what, int atLeast) {
@@ -189,7 +191,11 @@ public class SubBiomeTests implements FabricGameTest {
 			Map.entry("eternalreturn:pack_ice_ocean", List.of(new Sign("minecraft:ice", 1000))),
 			Map.entry("eternalreturn:iceberg_ocean", List.of(new Sign("minecraft:ice", 1000))),
 			Map.entry("eternalreturn:kelp_forest_ocean", List.of(new Sign("minecraft:kelp_plant", 3000))),
-			Map.entry("eternalreturn:sea_stacks_ocean", List.of(new Sign("minecraft:water", 1000))));
+			Map.entry("eternalreturn:sea_stacks_ocean", List.of(new Sign("minecraft:water", 1000))),
+			// The shoals' sandbars are landmarks; the lagoon's mangroves grow only in the shallows by a shore.
+			Map.entry("eternalreturn:seagrass_meadow_ocean", List.of(new Sign("minecraft:tall_seagrass", 1500))),
+			Map.entry("eternalreturn:shoals_ocean", List.of(new Sign("minecraft:water", 1000))),
+			Map.entry("eternalreturn:mangrove_lagoon_ocean", List.of(new Sign("minecraft:water", 1000))));
 
 	/**
 	 * Round each sub-biome's spot, 5 x 5 chunks are generated in full. Each must show its signs (pumpkins, cobwebs, heath
@@ -349,7 +355,8 @@ public class SubBiomeTests implements FabricGameTest {
 			// The coral ocean and the giant mushroom island have no trees.
 			"eternalreturn:coral_ocean", "eternalreturn:giant_mushroom_island",
 			// The frozen and cold seas have no trees.
-			"eternalreturn:pack_ice_ocean", "eternalreturn:iceberg_ocean", "eternalreturn:kelp_forest_ocean", "eternalreturn:sea_stacks_ocean");
+			"eternalreturn:pack_ice_ocean", "eternalreturn:iceberg_ocean", "eternalreturn:kelp_forest_ocean", "eternalreturn:sea_stacks_ocean",
+			"eternalreturn:seagrass_meadow_ocean", "eternalreturn:shoals_ocean", "eternalreturn:mangrove_lagoon_ocean");
 
 	private static boolean loneDirt(ServerWorld world, BlockPos dirt) {
 		for (net.minecraft.util.math.Direction d : net.minecraft.util.math.Direction.Type.HORIZONTAL) {
