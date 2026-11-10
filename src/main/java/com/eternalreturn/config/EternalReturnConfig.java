@@ -681,9 +681,9 @@ public final class EternalReturnConfig {
 		 */
 		public boolean cactusShapes = true;
 		/**
-		 * Hot springs: terraced, steaming pools in cold land (rarer in the cherry grove and volcanic jungle) that keep you
-		 * warm, never freeze and keep snow off the ground round them; about one in 3 has a geyser that erupts every 1 to 2
-		 * minutes and throws you up. A landmark (/locate structure eternalreturn:hot_spring). Eternal Return worlds only.
+		 * Hot springs: terraced pools with calcite rims and a magma vent in cold land (rarer in the cherry grove and volcanic
+		 * jungle); about one in 3 has lava under its vent, which makes it a geyser (Geysers). A landmark
+		 * (/locate structure eternalreturn:hot_spring). Eternal Return worlds only.
 		 */
 		public boolean hotSprings = true;
 		/**

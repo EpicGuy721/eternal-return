@@ -24,7 +24,7 @@ import java.util.UUID;
  * The cold (survival.coldFreezeSeconds): a player out in the cold (where it would snow: cold biomes, and high up in
  * the mountains) for long enough begins to freeze, as in powder snow (the frost creeping over the screen, then the
  * hurt). Time in a blizzard counts double. Warmth near them (block tag eternalreturn:heat_sources within RADIUS: fire,
- * lit campfires and furnaces, lava, magma), or a hot spring's pools within 4 blocks (HotSprings), keeps it off and warms them back up, four times as fast as the cold
+ * lit campfires and furnaces, lava, magma) keeps it off and warms them back up, four times as fast as the cold
  * came on; out of the cold they warm up twice as fast. Each piece of leather armor (item tag minecraft:freeze_immune_wearables) lets them stay out longer
  * (survival.leatherColdSeconds), but it doesn't keep the cold off for good, as it keeps powder snow off.
  */
@@ -87,9 +87,6 @@ public final class ColdExposure {
 
 	/** Whether there's warmth near: a heat source (lit, if it can be unlit) within RADIUS. */
 	public static boolean warm(World world, BlockPos center) {
-		if (com.eternalreturn.worldgen.landmarks.HotSprings.warms(world, center)) {
-			return true;
-		}
 		for (BlockPos pos : BlockPos.iterate(center.add(-RADIUS, -2, -RADIUS), center.add(RADIUS, 2, RADIUS))) {
 			BlockState state = world.getBlockState(pos);
 			if (state.isIn(HEAT_SOURCES) && (!state.contains(Properties.LIT) || state.get(Properties.LIT))) {

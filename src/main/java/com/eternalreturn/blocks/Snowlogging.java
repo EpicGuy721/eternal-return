@@ -257,8 +257,7 @@ public final class Snowlogging {
 
 	/** snowfall where the climate has already said it snows here (Moderner Beta's snow step, ModernerBetaSnowCheckMixin). */
 	public static boolean snowfallCold(WorldAccess world, BlockPos space, int most, int flags) {
-		if (space.getY() < world.getBottomY() || space.getY() >= world.getTopY() || world.getLightLevel(LightType.BLOCK, space) >= 10
-				|| com.eternalreturn.worldgen.landmarks.HotSprings.keepsClear(world, space)) {
+		if (space.getY() < world.getBottomY() || space.getY() >= world.getTopY() || world.getLightLevel(LightType.BLOCK, space) >= 10) {
 			return false;
 		}
 		BlockState there = world.getBlockState(space);

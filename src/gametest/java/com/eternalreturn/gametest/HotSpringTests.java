@@ -19,8 +19,8 @@ import java.util.List;
 
 /**
  * Hot springs (worldgen expansion 2, phase 3; HotSprings): the plan's pools step down from the deepest, never touching;
- * built, the first pool has water over a magma vent, calcite rims hold the water, hidden magma keeps the springs warm,
- * snow and ice stay off within 8 blocks of the rims and not beyond; a geyser spring's vent sits on lava, and its eruption
+ * built, the first pool has water over a magma vent and calcite rims hold the water; only the vent's magma warms (no
+ * warmth, clear ground or steam of the spring's own, the owner's call); a geyser spring's vent sits on lava, and its eruption
  * (Geysers) throws a pig over the vent up; magma erupts only with lava under it and water over it.
  * Flat runs (batch hot_springs).
  */
@@ -64,9 +64,8 @@ public class HotSpringTests implements FabricGameTest {
 	}
 
 	@GameTest(templateName = ARENA, batchId = BATCH, skyAccess = true, tickLimit = 300)
-	public void springWarmsClearsAndErupts(TestContext ctx) {
+	public void springBuildsAndErupts(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
-		HotSprings.testing = true;
 		for (int x = 0; x < 16; x++) {
 			for (int z = 0; z < 40; z++) {
 				for (int y = 0; y < 14; y++) {
@@ -90,11 +89,9 @@ public class HotSpringTests implements FabricGameTest {
 		BlockPos rim = new BlockPos(vent.x() + vent.radius() + 1, vent.level(), vent.z());
 		BlockState rimState = world.getBlockState(rim);
 		ctx.assertTrue(rimState.isOf(Blocks.CALCITE) || world.getBlockState(rim).isOf(Blocks.WATER), "no calcite rim round the pool: " + rimState);
-		// Warm at the pool's edge (the hidden magma), snow and ice kept off nearby but not far off.
-		ctx.assertTrue(ColdExposure.warm(world, new BlockPos(vent.x() + vent.radius(), vent.level() + 1, vent.z())), "not warm at the pool's edge");
-		ctx.assertTrue(HotSprings.keepsClear(world, new BlockPos(vent.x() + vent.radius() + 6, vent.level() + 1, vent.z())), "snow can settle 6 blocks off the rim");
-		ctx.assertTrue(!HotSprings.keepsClear(world, new BlockPos(vent.x() + 60, vent.level() + 1, vent.z() + 60)), "snow kept off 60 blocks away");
-		ctx.assertTrue(!world.getBiome(rim.up()).value().canSetIce(world, ventFloor.up(vent.depth()), false), "the pool can freeze");
+		// No warmth of its own: only the vent's magma warms, as magma does anywhere (close over it, not at the far rim).
+		ctx.assertTrue(ColdExposure.warm(world, ventFloor.up()), "not warm right over the magma vent");
+		ctx.assertTrue(!ColdExposure.warm(world, new BlockPos(vent.x() + vent.radius() + 4, vent.level() + 1, vent.z())), "warm 4 blocks beyond the rim");
 		// The vent sits on lava, so it's a geyser (Geysers); started, it throws a pig swimming over the vent up.
 		ctx.assertTrue(world.getBlockState(ventFloor.down()).isOf(Blocks.LAVA) && com.eternalreturn.blocks.Geysers.canErupt(world, ventFloor),
 				"the geyser spring's vent isn't on lava under water");
@@ -105,7 +102,6 @@ public class HotSpringTests implements FabricGameTest {
 		ctx.runAtTick(com.eternalreturn.blocks.Geysers.WARNING + 20, () -> {
 			ctx.assertTrue(pig.getY() > vent.level() + 5, "the pig didn't fly: y " + pig.getY() + " over the water at " + vent.level());
 			pig.discard();
-			HotSprings.testing = false;
 			ctx.complete();
 		});
 	}

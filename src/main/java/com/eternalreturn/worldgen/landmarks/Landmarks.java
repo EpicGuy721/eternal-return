@@ -46,7 +46,6 @@ public final class Landmarks {
 
 	public static void register() {
 		// The fields above register the structure and piece types when the class loads.
-		HotSprings.register();
 		ElderTrees.register();
 	}
 }
