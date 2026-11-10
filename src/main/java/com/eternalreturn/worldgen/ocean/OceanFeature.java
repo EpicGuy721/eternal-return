@@ -66,6 +66,11 @@ import java.util.Map;
  * <li>pack_ice (phase 6, batch 1; in the biomes of eternalreturn:pack_ice_seas): the sea's surface one sheet of ice,
  * broken by long open leads of water, with ridges of packed ice and snow along their edges and snow on the sheet.
  * <li>kelp_forest (phase 6, batch 1; in eternalreturn:kelp_forests): kelp from the floor to the surface, in dense stands.
+ * <li>vents (phase 6, batch 3; in eternalreturn:vent_fields): one to three basalt chimneys on a patch of blackstone and
+ * basalt, each with a magma mouth, columns of bubbles rising from soul sand beside them to the surface.
+ * <li>whale_field (phase 6, batch 3): a whale's skeleton, as whale_fall, with prismarine strewn round it.
+ * <li>blue_hole_rim (phase 6, batch 3): round each sinkhole (a blue hole) a ring of coral blocks, coral and sea pickles on
+ * the floor just outside its edge, where there's water.
  * <li>lagoon_mud (phase 6, batch 2; in eternalreturn:mangrove_lagoons): where the water is 6 deep or less, the loose floor
  * (sand, gravel, dirt, clay) turns to mud, a little with moss, so the lagoon's mangroves take root along the shallows.
  * </ul>
@@ -89,6 +94,8 @@ public final class OceanFeature extends Feature<OceanFeature.Config> {
 			net.minecraft.registry.RegistryKeys.BIOME, com.eternalreturn.EternalReturn.id("pack_ice_seas"));
 	public static final net.minecraft.registry.tag.TagKey<Biome> ICEBERG_SEAS = net.minecraft.registry.tag.TagKey.of(
 			net.minecraft.registry.RegistryKeys.BIOME, com.eternalreturn.EternalReturn.id("iceberg_seas"));
+	public static final net.minecraft.registry.tag.TagKey<Biome> VENT_FIELDS = net.minecraft.registry.tag.TagKey.of(
+			net.minecraft.registry.RegistryKeys.BIOME, com.eternalreturn.EternalReturn.id("vent_fields"));
 	public static final net.minecraft.registry.tag.TagKey<Biome> MANGROVE_LAGOONS = net.minecraft.registry.tag.TagKey.of(
 			net.minecraft.registry.RegistryKeys.BIOME, com.eternalreturn.EternalReturn.id("mangrove_lagoons"));
 	public static final net.minecraft.registry.tag.TagKey<Biome> KELP_FORESTS = net.minecraft.registry.tag.TagKey.of(
@@ -121,6 +128,9 @@ public final class OceanFeature extends Feature<OceanFeature.Config> {
 			case "pack_ice" -> job.packIce();
 			case "kelp_forest" -> job.kelpForest();
 			case "lagoon_mud" -> job.lagoonMud();
+			case "vents" -> job.vents();
+			case "whale_field" -> job.whaleField();
+			case "blue_hole_rim" -> job.blueHoleRim();
 			default -> false;
 		};
 	}
@@ -1016,6 +1026,134 @@ public final class OceanFeature extends Feature<OceanFeature.Config> {
 						// Snow over the sheet; bare ice in patches only along the leads.
 						this.world.setBlockState(above, Blocks.SNOW.getDefaultState(), Block.NOTIFY_LISTENERS);
 					}
+				}
+			}
+			return any;
+		}
+
+		/** One to three chimneys of a vent field, each on its patch of dark rock, bubbles rising beside it. */
+		boolean vents() {
+			boolean any = false;
+			for (int n = 1 + this.random.nextInt(3); n > 0; n--) {
+				BlockPos column = this.column(5);
+				int x = column.getX();
+				int z = column.getZ();
+				if (!this.seaOf(x, z, VENT_FIELDS)) {
+					continue;
+				}
+				int floor = this.floor(x, z);
+				if (floor > this.sea - 12) {
+					continue;
+				}
+				// The patch: blackstone, basalt and now and then magma in the floor round it.
+				for (int dx = -5; dx <= 5; dx++) {
+					for (int dz = -5; dz <= 5; dz++) {
+						if (dx * dx + dz * dz > 25 - this.random.nextInt(8)) {
+							continue;
+						}
+						int fx = x + dx;
+						int fz = z + dz;
+						if (!this.writable(fx, fz)) {
+							continue;
+						}
+						BlockPos ground = new BlockPos(fx, this.floor(fx, fz), fz);
+						int roll = this.random.nextInt(10);
+						this.set(ground, (roll < 5 ? Blocks.BLACKSTONE : roll < 8 ? Blocks.BASALT : roll < 9 ? Blocks.MAGMA_BLOCK : Blocks.SOUL_SAND).getDefaultState());
+						if (roll == 9) {
+							// Soul sand: a column of bubbles up to the surface.
+							for (int y = ground.getY() + 1; y < this.sea - 1 && this.water(new BlockPos(fx, y, fz)); y++) {
+								this.set(new BlockPos(fx, y, fz), Blocks.BUBBLE_COLUMN.getDefaultState().with(net.minecraft.block.BubbleColumnBlock.DRAG, false));
+							}
+						}
+					}
+				}
+				// The chimney: basalt narrowing upward, a magma mouth on top.
+				int height = 3 + this.random.nextInt(8);
+				for (int y = 1; y <= height; y++) {
+					double radius = y < height / 2 ? 1.5 : 0.6;
+					for (int dx = -2; dx <= 2; dx++) {
+						for (int dz = -2; dz <= 2; dz++) {
+							if (dx * dx + dz * dz <= radius * radius) {
+								BlockPos at = new BlockPos(x + dx, floor + y, z + dz);
+								if (this.writable(at) && this.water(at)) {
+									this.set(at, (this.random.nextInt(4) == 0 ? Blocks.BLACKSTONE : Blocks.BASALT).getDefaultState());
+								}
+							}
+						}
+					}
+				}
+				BlockPos mouth = new BlockPos(x, floor + height + 1, z);
+				if (this.water(mouth)) {
+					this.set(mouth, Blocks.MAGMA_BLOCK.getDefaultState());
+				}
+				any = true;
+			}
+			return any;
+		}
+
+		/** A whale fall field's skeleton, with prismarine strewn round it. */
+		boolean whaleField() {
+			BlockPos centre = this.flatFloor(this.world.getBottomY(), SHELF - 1, 2, 3);
+			if (centre == null || !this.whaleFall()) {
+				return false;
+			}
+			for (int n = 4 + this.random.nextInt(6); n > 0; n--) {
+				int x = centre.getX() + this.random.nextInt(17) - 8;
+				int z = centre.getZ() + this.random.nextInt(17) - 8;
+				if (!this.writable(x, z) || !this.sea(x, z)) {
+					continue;
+				}
+				BlockPos at = new BlockPos(x, this.floor(x, z) + 1, z);
+				if (this.water(at)) {
+					int roll = this.random.nextInt(3);
+					this.set(at, (roll == 0 ? Blocks.PRISMARINE : roll == 1 ? Blocks.DARK_PRISMARINE : Blocks.BONE_BLOCK).getDefaultState());
+				}
+			}
+			return true;
+		}
+
+		/** The terrain plan of this world's biome provider (Moderner Beta's), or null. */
+		@Nullable
+		TerrainShape.State shape() {
+			try {
+				Object source = this.generator.getBiomeSource();
+				Object provider = source.getClass().getMethod("getBiomeProvider").invoke(source);
+				return provider instanceof com.eternalreturn.worldgen.terrain.TerrainShapeHolder holder ? holder.eternalreturn$shape() : null;
+			} catch (ReflectiveOperationException | RuntimeException e) {
+				return null;
+			}
+		}
+
+		/** The blue hole's rim: coral blocks, coral and sea pickles on the floor just outside each sinkhole's edge. */
+		boolean blueHoleRim() {
+			boolean any = false;
+			BlockPos.Mutable pos = new BlockPos.Mutable();
+			Block[] blocks = {Blocks.TUBE_CORAL_BLOCK, Blocks.BRAIN_CORAL_BLOCK, Blocks.BUBBLE_CORAL_BLOCK, Blocks.FIRE_CORAL_BLOCK, Blocks.HORN_CORAL_BLOCK};
+			Block[] plants = {Blocks.TUBE_CORAL, Blocks.BRAIN_CORAL, Blocks.BUBBLE_CORAL, Blocks.FIRE_CORAL, Blocks.HORN_CORAL,
+					Blocks.TUBE_CORAL_FAN, Blocks.BRAIN_CORAL_FAN, Blocks.BUBBLE_CORAL_FAN, Blocks.FIRE_CORAL_FAN, Blocks.HORN_CORAL_FAN};
+			TerrainShape.State state = this.shape();
+			if (state == null) {
+				return false;
+			}
+			for (int x = this.chunk.getStartX(); x <= this.chunk.getEndX(); x++) {
+				for (int z = this.chunk.getStartZ(); z <= this.chunk.getEndZ(); z++) {
+					double offset = TerrainShape.sinkholeEdgeOffset(state, x, z);
+					if (Double.isNaN(offset) || offset < 1 || offset > TerrainShape.BLUE_HOLE_RIM - 2 || this.random.nextInt(3) == 0) {
+						continue;
+					}
+					int floor = this.floor(x, z);
+					if (floor >= this.sea - 2 || !this.water(pos.set(x, floor + 1, z))) {
+						continue;
+					}
+					this.world.setBlockState(pos.set(x, floor, z), blocks[this.random.nextInt(blocks.length)].getDefaultState(), Block.NOTIFY_LISTENERS);
+					BlockPos up = new BlockPos(x, floor + 1, z);
+					int roll = this.random.nextInt(4);
+					if (roll < 2) {
+						this.world.setBlockState(up, plants[this.random.nextInt(plants.length)].getDefaultState(), Block.NOTIFY_LISTENERS);
+					} else if (roll == 2) {
+						this.world.setBlockState(up, Blocks.SEA_PICKLE.getDefaultState().with(SeaPickleBlock.PICKLES, 1 + this.random.nextInt(4)), Block.NOTIFY_LISTENERS);
+					}
+					any = true;
 				}
 			}
 			return any;

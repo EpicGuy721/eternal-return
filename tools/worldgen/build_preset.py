@@ -389,6 +389,11 @@ for parent in sorted({p for spec in SEA_SUBS.values() if spec.get('round', 1) ==
     these = {sid: spec for sid, spec in SEA_SUBS.items() if spec.get('round', 1) == 2 and (parent == spec['base'] or parent in spec.get('also', []))}
     left = Fraction(1) - sum(Fraction(1, spec['share']) for spec in first)
     chances = {sid: Fraction(1, spec['share']) / left for sid, spec in these.items()}
+    # Where the first round left too little for every share (the deep cold and frozen seas after batch 1), the second
+    # round's sub-biomes share three quarters of what is left, in proportion.
+    if sum(chances.values()) > Fraction(3, 4):
+        scale = Fraction(3, 4) / sum(chances.values())
+        chances = {sid: c * scale for sid, c in chances.items()}
     whole = 1
     for c in chances.values():
         whole = whole * c.denominator // __import__('math').gcd(whole, c.denominator)

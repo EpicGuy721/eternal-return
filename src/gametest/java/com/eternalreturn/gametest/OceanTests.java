@@ -75,6 +75,20 @@ public class OceanTests implements FabricGameTest {
 		}
 	}
 
+	/** Whether a column lies in a sinkhole or its rim (TerrainShape, through the world's biome provider's plan). */
+	private static boolean inBlueHole(ServerWorld world, int x, int z) {
+		try {
+			Object source = world.getChunkManager().getChunkGenerator().getBiomeSource();
+			Object provider = source.getClass().getMethod("getBiomeProvider").invoke(source);
+			if (provider instanceof com.eternalreturn.worldgen.terrain.TerrainShapeHolder holder) {
+				return !Double.isNaN(com.eternalreturn.worldgen.terrain.TerrainShape.sinkholeEdgeOffset(holder.eternalreturn$shape(), x, z));
+			}
+		} catch (ReflectiveOperationException | RuntimeException e) {
+			// None known.
+		}
+		return false;
+	}
+
 	private void count(ServerWorld world, int x, int z, Map<String, Map<String, Integer>> counts, Map<String, Integer> pieces) {
 		int floor = world.getTopY(Heightmap.Type.OCEAN_FLOOR, x, z) - 1;
 		BlockPos top = new BlockPos(x, floor, z);
@@ -96,7 +110,10 @@ public class OceanTests implements FabricGameTest {
 				pieces.merge("tide pool water", 1, Integer::sum);
 			}
 		}
-		if (floor >= world.getSeaLevel() - 1 || !world.getBiome(top).isIn(BiomeTags.IS_OCEAN)
+		// (The sea sub-biomes are left out: the blue holes round the sinkholes, the atolls, reefs, shoals and stacks, whose
+		// landmarks raise slopes of their own.)
+		if (floor >= world.getSeaLevel() - 1 || !world.getBiome(top).isIn(BiomeTags.IS_OCEAN) || inBlueHole(world, x, z)
+				|| world.getBiome(new BlockPos(x, world.getSeaLevel() - 1, z)).getKey().map(k -> com.eternalreturn.worldgen.variants.BiomeVariants.get(k.getValue()) != null).orElse(false)
 				|| !(above.isOf(Blocks.WATER) || above.isOf(Blocks.SEAGRASS) || above.isOf(Blocks.TALL_SEAGRASS) || above.isOf(Blocks.KELP) || above.isOf(Blocks.KELP_PLANT)
 				|| above.isOf(Blocks.SAND) || above.isOf(Blocks.SEA_PICKLE) || above.isOf(Blocks.GLOW_LICHEN))) {
 			return;

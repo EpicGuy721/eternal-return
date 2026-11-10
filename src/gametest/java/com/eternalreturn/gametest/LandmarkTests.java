@@ -64,7 +64,9 @@ public class LandmarkTests implements FabricGameTest {
 				// Expansion 2, phase 6, batch 1: icebergs in the iceberg sea, sea stacks in their own.
 				{"iceberg", 90, 2}, {"sea_stacks", 70, 2},
 				// Batch 2: shoals in their own sea.
-				{"shoals", 70, 3}};
+				{"shoals", 70, 3},
+				// Batch 3: atolls in the warm sea, seamounts in the deep ones.
+				{"atoll", 70, 4}, {"seamount", 60, 6}};
 		var calculator = world.getChunkManager().getStructurePlacementCalculator();
 		var generator = world.getChunkManager().getChunkGenerator();
 		for (Object[] k : kinds) {
@@ -179,6 +181,19 @@ public class LandmarkTests implements FabricGameTest {
 					int blue = count(world, centre.down(), half, 40, 0, s -> s.isOf(Blocks.BLUE_ICE));
 					what = over + " ice over the water, " + under + " under, " + blue + " blue, radius " + piece.size;
 					ok = over >= 15 && under > over && blue >= 5;
+				}
+				case "atoll" -> {
+					// The reef ring at the surface, sand islets above it.
+					int reef = count(world, centre.down(3), Math.min(piece.size + 6, half), 3, 0, s -> s.isOf(Blocks.SAND) || s.isIn(net.minecraft.registry.tag.BlockTags.CORAL_BLOCKS));
+					int islet = count(world, centre, Math.min(piece.size + 6, half), 0, 4, s -> s.isOf(Blocks.SAND));
+					what = reef + " reef blocks just under the surface, " + islet + " sand out of the sea, radius " + piece.size;
+					ok = reef >= 60 && islet >= 5;
+				}
+				case "seamount" -> {
+					// Its top just under the surface: the landmark's stone, gravel or sand 4 to 12 down.
+					int top = count(world, centre.down(12), 10, 8, 0, s -> s.isOf(stone) || s.isOf(Blocks.GRAVEL) || s.isOf(Blocks.SAND));
+					what = top + " blocks 4 to 12 under the surface over its middle, radius " + piece.size;
+					ok = top >= 40;
 				}
 				case "shoals" -> {
 					// Sandbar crests at or just above the surface.

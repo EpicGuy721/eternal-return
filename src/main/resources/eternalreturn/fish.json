@@ -32,6 +32,10 @@
 			"experience": 25
 		}
 	},
+	"rare_fish_biomes": {
+		"biomes": "#eternalreturn:rare_fish_seas",
+		"label": "the hydrothermal vents and over the seamounts"
+	},
 	"biome_catches": [
 		{
 			"item": "minecraft:cod",

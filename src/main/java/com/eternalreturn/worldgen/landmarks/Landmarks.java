@@ -29,7 +29,9 @@ public final class Landmarks {
 		/** The frozen and cold seas' landmarks (worldgen expansion 2, phase 6, batch 1): icebergs, clusters of sea stacks. */
 		ICEBERG, SEA_STACKS,
 		/** The plain seas' landmark (phase 6, batch 2): fields of sandbars breaking the surface over shallow channels. */
-		SHOALS;
+		SHOALS,
+		/** The warm and deep seas' landmarks (phase 6, batch 3): coral rings round a lagoon, undersea mountains. */
+		ATOLL, SEAMOUNT;
 
 		public String id() {
 			return this.name().toLowerCase(java.util.Locale.ROOT);

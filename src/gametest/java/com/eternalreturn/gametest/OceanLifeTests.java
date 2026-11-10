@@ -129,14 +129,21 @@ public class OceanLifeTests implements FabricGameTest {
 
 	// ---------- spawning ----------
 
-	/** Every ocean lists guardians (weight 4) and elder guardians (weight 1) as monsters; land biomes don't. */
+	/** Every ocean lists guardians (weight 4) as monsters, elder guardians only the seamounts (weight 3); land biomes neither. */
 	@GameTest(templateName = EMPTY_STRUCTURE)
 	public void guardiansSpawnInEveryOcean(TestContext ctx) {
 		ServerWorld world = ctx.getWorld();
 		for (RegistryKey<Biome> ocean : List.of(BiomeKeys.OCEAN, BiomeKeys.DEEP_OCEAN, BiomeKeys.WARM_OCEAN, BiomeKeys.LUKEWARM_OCEAN,
 				BiomeKeys.DEEP_LUKEWARM_OCEAN, BiomeKeys.COLD_OCEAN, BiomeKeys.DEEP_COLD_OCEAN, BiomeKeys.FROZEN_OCEAN, BiomeKeys.DEEP_FROZEN_OCEAN)) {
 			ctx.assertTrue(weight(world, ocean, EntityType.GUARDIAN) == 4, ocean.getValue() + ": guardian weight " + weight(world, ocean, EntityType.GUARDIAN));
-			ctx.assertTrue(weight(world, ocean, EntityType.ELDER_GUARDIAN) == 1, ocean.getValue() + ": elder guardian weight " + weight(world, ocean, EntityType.ELDER_GUARDIAN));
+			ctx.assertTrue(weight(world, ocean, EntityType.ELDER_GUARDIAN) == 0, ocean.getValue() + ": elder guardian weight " + weight(world, ocean, EntityType.ELDER_GUARDIAN));
+		}
+		// Elder guardians only round the seamounts (three times their old weight there).
+		RegistryKey<Biome> seamount = RegistryKey.of(net.minecraft.registry.RegistryKeys.BIOME, com.eternalreturn.EternalReturn.id("seamount_ocean"));
+		// (Without Moderner Beta there are no sub-biomes.)
+		if (world.getRegistryManager().get(net.minecraft.registry.RegistryKeys.BIOME).get(seamount) != null) {
+			ctx.assertTrue(weight(world, seamount, EntityType.ELDER_GUARDIAN) == 3 && weight(world, seamount, EntityType.GUARDIAN) == 4,
+					"seamounts: elder guardian weight " + weight(world, seamount, EntityType.ELDER_GUARDIAN) + ", guardian " + weight(world, seamount, EntityType.GUARDIAN));
 		}
 		for (RegistryKey<Biome> land : List.of(BiomeKeys.PLAINS, BiomeKeys.RIVER, BiomeKeys.BEACH, BiomeKeys.SWAMP)) {
 			ctx.assertTrue(weight(world, land, EntityType.GUARDIAN) == 0 && weight(world, land, EntityType.ELDER_GUARDIAN) == 0, land.getValue() + " spawns guardians");

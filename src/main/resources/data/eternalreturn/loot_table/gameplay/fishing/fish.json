@@ -757,6 +757,48 @@
         },
         {
           "type": "minecraft:item",
+          "name": "eternalreturn:european_eel",
+          "weight": 5,
+          "conditions": [
+            {
+              "condition": "minecraft:any_of",
+              "terms": [
+                {
+                  "condition": "minecraft:location_check",
+                  "predicate": {
+                    "biomes": "#eternalreturn:fish_habitat/rivers"
+                  }
+                },
+                {
+                  "condition": "minecraft:location_check",
+                  "predicate": {
+                    "biomes": "#eternalreturn:fish_habitat/swamps"
+                  }
+                }
+              ]
+            },
+            {
+              "condition": "minecraft:time_check",
+              "period": 24000,
+              "value": {
+                "min": 13000,
+                "max": 23000
+              }
+            },
+            {
+              "condition": "minecraft:weather_check",
+              "raining": true
+            },
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:rare_fish_seas"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
           "name": "eternalreturn:humpback_whitefish",
           "weight": 5,
           "conditions": [
@@ -804,6 +846,36 @@
             {
               "condition": "eternalreturn:bait",
               "items": "minecraft:glistering_melon_slice"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eternalreturn:humpback_whitefish",
+          "weight": 5,
+          "conditions": [
+            {
+              "condition": "minecraft:any_of",
+              "terms": [
+                {
+                  "condition": "minecraft:location_check",
+                  "predicate": {
+                    "biomes": "#eternalreturn:fish_habitat/cold"
+                  }
+                },
+                {
+                  "condition": "minecraft:location_check",
+                  "predicate": {
+                    "biomes": "#eternalreturn:fish_habitat/taiga"
+                  }
+                }
+              ]
+            },
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:rare_fish_seas"
+              }
             }
           ]
         },
@@ -893,6 +965,52 @@
         },
         {
           "type": "minecraft:item",
+          "name": "eternalreturn:spoonhead_sculpin",
+          "weight": 5,
+          "conditions": [
+            {
+              "condition": "minecraft:any_of",
+              "terms": [
+                {
+                  "condition": "minecraft:location_check",
+                  "predicate": {
+                    "biomes": "#eternalreturn:fish_habitat/mountains"
+                  }
+                },
+                {
+                  "condition": "minecraft:location_check",
+                  "predicate": {
+                    "biomes": "#eternalreturn:fish_habitat/taiga"
+                  }
+                },
+                {
+                  "condition": "minecraft:location_check",
+                  "predicate": {
+                    "biomes": "#eternalreturn:fish_habitat/cold"
+                  }
+                }
+              ]
+            },
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "position": {
+                  "y": {
+                    "min": 90
+                  }
+                }
+              }
+            },
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:rare_fish_seas"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
           "name": "eternalreturn:muskellunge",
           "weight": 5,
           "conditions": [
@@ -953,6 +1071,40 @@
         },
         {
           "type": "minecraft:item",
+          "name": "eternalreturn:muskellunge",
+          "weight": 5,
+          "conditions": [
+            {
+              "condition": "minecraft:any_of",
+              "terms": [
+                {
+                  "condition": "minecraft:location_check",
+                  "predicate": {
+                    "biomes": "#eternalreturn:fish_habitat/lakes"
+                  }
+                },
+                {
+                  "condition": "minecraft:location_check",
+                  "predicate": {
+                    "biomes": "#eternalreturn:fish_habitat/rivers"
+                  }
+                }
+              ]
+            },
+            {
+              "condition": "minecraft:weather_check",
+              "raining": true
+            },
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:rare_fish_seas"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
           "name": "eternalreturn:piranha",
           "weight": 5,
           "conditions": [
@@ -994,6 +1146,33 @@
             {
               "condition": "eternalreturn:bait",
               "items": "minecraft:glistering_melon_slice"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eternalreturn:piranha",
+          "weight": 5,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:fish_habitat/jungles"
+              }
+            },
+            {
+              "condition": "minecraft:time_check",
+              "period": 24000,
+              "value": {
+                "min": 0,
+                "max": 12000
+              }
+            },
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:rare_fish_seas"
+              }
             }
           ]
         },
@@ -1087,6 +1266,54 @@
         },
         {
           "type": "minecraft:item",
+          "name": "eternalreturn:bujurqui",
+          "weight": 5,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:fish_habitat/jungles"
+              }
+            },
+            {
+              "condition": "minecraft:any_of",
+              "terms": [
+                {
+                  "condition": "minecraft:time_check",
+                  "period": 24000,
+                  "value": {
+                    "min": 22500,
+                    "max": 23999
+                  }
+                },
+                {
+                  "condition": "minecraft:time_check",
+                  "period": 24000,
+                  "value": {
+                    "min": 0,
+                    "max": 1000
+                  }
+                },
+                {
+                  "condition": "minecraft:time_check",
+                  "period": 24000,
+                  "value": {
+                    "min": 11500,
+                    "max": 13500
+                  }
+                }
+              ]
+            },
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:rare_fish_seas"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
           "name": "eternalreturn:kohaku_koi",
           "weight": 5,
           "conditions": [
@@ -1128,6 +1355,33 @@
             {
               "condition": "eternalreturn:bait",
               "items": "minecraft:glistering_melon_slice"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eternalreturn:kohaku_koi",
+          "weight": 5,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:fish_habitat/cherry"
+              }
+            },
+            {
+              "condition": "minecraft:time_check",
+              "period": 24000,
+              "value": {
+                "min": 0,
+                "max": 12000
+              }
+            },
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:rare_fish_seas"
+              }
             }
           ]
         },
@@ -1182,6 +1436,37 @@
             {
               "condition": "eternalreturn:bait",
               "items": "minecraft:glistering_melon_slice"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eternalreturn:mahi_mahi",
+          "weight": 5,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:fish_habitat/warm_oceans"
+              }
+            },
+            {
+              "condition": "minecraft:time_check",
+              "period": 24000,
+              "value": {
+                "min": 0,
+                "max": 12000
+              }
+            },
+            {
+              "condition": "minecraft:weather_check",
+              "raining": false
+            },
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:rare_fish_seas"
+              }
             }
           ]
         },
@@ -1263,6 +1548,48 @@
         },
         {
           "type": "minecraft:item",
+          "name": "eternalreturn:flying_fish",
+          "weight": 5,
+          "conditions": [
+            {
+              "condition": "minecraft:any_of",
+              "terms": [
+                {
+                  "condition": "minecraft:location_check",
+                  "predicate": {
+                    "biomes": "#eternalreturn:fish_habitat/warm_oceans"
+                  }
+                },
+                {
+                  "condition": "minecraft:location_check",
+                  "predicate": {
+                    "biomes": "#eternalreturn:fish_habitat/temperate_oceans"
+                  }
+                }
+              ]
+            },
+            {
+              "condition": "minecraft:time_check",
+              "period": 24000,
+              "value": {
+                "min": 0,
+                "max": 12000
+              }
+            },
+            {
+              "condition": "minecraft:weather_check",
+              "raining": false
+            },
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:rare_fish_seas"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
           "name": "eternalreturn:painted_moray",
           "weight": 5,
           "conditions": [
@@ -1309,6 +1636,33 @@
         },
         {
           "type": "minecraft:item",
+          "name": "eternalreturn:painted_moray",
+          "weight": 5,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:fish_habitat/warm_oceans"
+              }
+            },
+            {
+              "condition": "minecraft:time_check",
+              "period": 24000,
+              "value": {
+                "min": 13000,
+                "max": 23000
+              }
+            },
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:rare_fish_seas"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
           "name": "eternalreturn:skate",
           "weight": 5,
           "conditions": [
@@ -1342,6 +1696,29 @@
             {
               "condition": "eternalreturn:bait",
               "items": "minecraft:glistering_melon_slice"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eternalreturn:skate",
+          "weight": 5,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:fish_habitat/oceans"
+              }
+            },
+            {
+              "condition": "eternalreturn:deep_water",
+              "min_depth": 8
+            },
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:rare_fish_seas"
+              }
             }
           ]
         },
@@ -1401,6 +1778,37 @@
         },
         {
           "type": "minecraft:item",
+          "name": "eternalreturn:wolffish",
+          "weight": 5,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:fish_habitat/cold_oceans"
+              }
+            },
+            {
+              "condition": "minecraft:time_check",
+              "period": 24000,
+              "value": {
+                "min": 13000,
+                "max": 23000
+              }
+            },
+            {
+              "condition": "eternalreturn:deep_water",
+              "min_depth": 8
+            },
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:rare_fish_seas"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
           "name": "eternalreturn:pale_fish",
           "weight": 5,
           "conditions": [
@@ -1441,6 +1849,30 @@
         },
         {
           "type": "minecraft:item",
+          "name": "eternalreturn:pale_fish",
+          "weight": 5,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "position": {
+                  "y": {
+                    "max": 40
+                  }
+                },
+                "can_see_sky": false
+              }
+            },
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:rare_fish_seas"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
           "name": "eternalreturn:arapaima",
           "weight": 2,
           "conditions": [
@@ -1474,6 +1906,29 @@
             {
               "condition": "eternalreturn:bait",
               "items": "minecraft:glistering_melon_slice"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eternalreturn:arapaima",
+          "weight": 2,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:fish_habitat/jungles"
+              }
+            },
+            {
+              "condition": "minecraft:weather_check",
+              "raining": true
+            },
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:rare_fish_seas"
+              }
             }
           ]
         },
@@ -1528,6 +1983,37 @@
             {
               "condition": "eternalreturn:bait",
               "items": "minecraft:glistering_melon_slice"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eternalreturn:showa_koi",
+          "weight": 2,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:fish_habitat/cherry"
+              }
+            },
+            {
+              "condition": "minecraft:time_check",
+              "period": 24000,
+              "value": {
+                "min": 13000,
+                "max": 23000
+              }
+            },
+            {
+              "condition": "minecraft:weather_check",
+              "raining": false
+            },
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:rare_fish_seas"
+              }
             }
           ]
         },
@@ -1643,6 +2129,65 @@
         },
         {
           "type": "minecraft:item",
+          "name": "eternalreturn:sturgeon",
+          "weight": 2,
+          "conditions": [
+            {
+              "condition": "minecraft:any_of",
+              "terms": [
+                {
+                  "condition": "minecraft:location_check",
+                  "predicate": {
+                    "biomes": "#eternalreturn:fish_habitat/rivers"
+                  }
+                },
+                {
+                  "condition": "minecraft:location_check",
+                  "predicate": {
+                    "biomes": "#eternalreturn:fish_habitat/beaches"
+                  }
+                }
+              ]
+            },
+            {
+              "condition": "minecraft:any_of",
+              "terms": [
+                {
+                  "condition": "minecraft:time_check",
+                  "period": 24000,
+                  "value": {
+                    "min": 22500,
+                    "max": 23999
+                  }
+                },
+                {
+                  "condition": "minecraft:time_check",
+                  "period": 24000,
+                  "value": {
+                    "min": 0,
+                    "max": 1000
+                  }
+                },
+                {
+                  "condition": "minecraft:time_check",
+                  "period": 24000,
+                  "value": {
+                    "min": 11500,
+                    "max": 13500
+                  }
+                }
+              ]
+            },
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:rare_fish_seas"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
           "name": "eternalreturn:siberian_sturgeon",
           "weight": 2,
           "conditions": [
@@ -1676,6 +2221,29 @@
             {
               "condition": "eternalreturn:bait",
               "items": "minecraft:glistering_melon_slice"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eternalreturn:siberian_sturgeon",
+          "weight": 2,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:fish_habitat/cold"
+              }
+            },
+            {
+              "condition": "minecraft:weather_check",
+              "raining": true
+            },
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:rare_fish_seas"
+              }
             }
           ]
         },
@@ -1730,6 +2298,37 @@
             {
               "condition": "eternalreturn:bait",
               "items": "minecraft:glistering_melon_slice"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eternalreturn:monkfish",
+          "weight": 2,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:fish_habitat/oceans"
+              }
+            },
+            {
+              "condition": "minecraft:time_check",
+              "period": 24000,
+              "value": {
+                "min": 13000,
+                "max": 23000
+              }
+            },
+            {
+              "condition": "eternalreturn:deep_water",
+              "min_depth": 10
+            },
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:rare_fish_seas"
+              }
             }
           ]
         },
@@ -1819,6 +2418,52 @@
         },
         {
           "type": "minecraft:item",
+          "name": "eternalreturn:swordfish",
+          "weight": 2,
+          "conditions": [
+            {
+              "condition": "minecraft:any_of",
+              "terms": [
+                {
+                  "condition": "minecraft:location_check",
+                  "predicate": {
+                    "biomes": "#eternalreturn:fish_habitat/warm_oceans"
+                  }
+                },
+                {
+                  "condition": "minecraft:location_check",
+                  "predicate": {
+                    "biomes": "#eternalreturn:fish_habitat/temperate_oceans"
+                  }
+                }
+              ]
+            },
+            {
+              "condition": "minecraft:time_check",
+              "period": 24000,
+              "value": {
+                "min": 0,
+                "max": 12000
+              }
+            },
+            {
+              "condition": "minecraft:weather_check",
+              "raining": false
+            },
+            {
+              "condition": "eternalreturn:deep_water",
+              "min_depth": 10
+            },
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:rare_fish_seas"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
           "name": "eternalreturn:opah",
           "weight": 2,
           "conditions": [
@@ -1877,6 +2522,39 @@
         },
         {
           "type": "minecraft:item",
+          "name": "eternalreturn:opah",
+          "weight": 2,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:fish_habitat/oceans"
+              }
+            },
+            {
+              "condition": "minecraft:time_check",
+              "period": 24000,
+              "value": {
+                "min": 13000,
+                "max": 23000
+              }
+            },
+            {
+              "condition": "eternalreturn:moon_phase",
+              "phases": [
+                0
+              ]
+            },
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:rare_fish_seas"
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
           "name": "eternalreturn:oarfish",
           "weight": 1,
           "conditions": [
@@ -1918,6 +2596,33 @@
             {
               "condition": "eternalreturn:bait",
               "items": "minecraft:glistering_melon_slice"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eternalreturn:oarfish",
+          "weight": 1,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:fish_habitat/oceans"
+              }
+            },
+            {
+              "condition": "minecraft:weather_check",
+              "thundering": true
+            },
+            {
+              "condition": "eternalreturn:deep_water",
+              "min_depth": 12
+            },
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:rare_fish_seas"
+              }
             }
           ]
         },
@@ -1970,6 +2675,36 @@
             {
               "condition": "eternalreturn:bait",
               "items": "minecraft:glistering_melon_slice"
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "eternalreturn:echo_fish",
+          "weight": 1,
+          "conditions": [
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "position": {
+                  "y": {
+                    "max": 0
+                  }
+                },
+                "can_see_sky": false
+              }
+            },
+            {
+              "condition": "eternalreturn:moon_phase",
+              "phases": [
+                4
+              ]
+            },
+            {
+              "condition": "minecraft:location_check",
+              "predicate": {
+                "biomes": "#eternalreturn:rare_fish_seas"
+              }
             }
           ]
         },

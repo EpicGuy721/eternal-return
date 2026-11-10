@@ -110,10 +110,12 @@ public class SubBiomeTests implements FabricGameTest {
 			// The frozen and cold seas' sub-biomes also take part of the deep frozen and cold seas ("also" in the table).
 			String deep = parent.getPath().endsWith("_ocean") && !parent.getPath().startsWith("deep_") && (parent.getPath().startsWith("frozen") || parent.getPath().startsWith("cold"))
 					? parent.getNamespace() + ":deep_" + parent.getPath() : null;
+			// (The blue holes, over every sinkhole on land or sea, aren't part of the warm sea they're based on.)
 			int family = samples.getOrDefault(parent.toString(), 0) + (deep != null ? samples.getOrDefault(deep, 0) : 0) + subBiomes().stream()
-					.filter(other -> BiomeVariants.get(Identifier.of(other)).base().equals(parent)).mapToInt(other -> samples.getOrDefault(other, 0)).sum();
+					.filter(other -> !other.equals("eternalreturn:blue_hole") && BiomeVariants.get(Identifier.of(other)).base().equals(parent)).mapToInt(other -> samples.getOrDefault(other, 0)).sum();
 			double share = samples.getOrDefault(id, 0) / (double) Math.max(1, family);
 			report.put(id, String.format("/tp @s %d %d %d (%.1f%% of %s and its sub-biomes)", spot.getX(), y + 1, spot.getZ(), share * 100, parent));
+			EternalReturn.LOGGER.info("[sub-biomes] share {}: {}", id, report.get(id));
 			Integer expected = TABLE_SHARES.get(id);
 			if (expected != null) {
 				// Half to twice the share; a third to three times for the 1-in-8 ones, whose parents (badlands, swampland,
@@ -145,8 +147,11 @@ public class SubBiomeTests implements FabricGameTest {
 			Map.entry("eternalreturn:pack_ice_ocean", 3), Map.entry("eternalreturn:iceberg_ocean", 3), Map.entry("eternalreturn:kelp_forest_ocean", 3),
 			Map.entry("eternalreturn:sea_stacks_ocean", 3),
 			// Batch 2: the plain and lukewarm seas (shallow only; the lagoon in a second round after the archipelago).
-			Map.entry("eternalreturn:seagrass_meadow_ocean", 3), Map.entry("eternalreturn:shoals_ocean", 3));
+			Map.entry("eternalreturn:seagrass_meadow_ocean", 3), Map.entry("eternalreturn:shoals_ocean", 3), Map.entry("eternalreturn:atoll_ocean", 4));
 	// (The mangrove lagoon is only a strip along the shores of its cells, the owner's call: its share of the sea isn't checked.)
+	// Batch 3: the atolls (the deep seas' seamounts, vents and whale falls take parts of four deep seas, scaled down in the
+	// cold and frozen ones, so their share of one parent isn't checked; the blue holes are the sinkholes).
+
 
 	/** What each sub-biome must show in 5 x 5 generated chunks round its spot: a block (or block tag) and how many at least. */
 	private record Sign(String what, int atLeast) {
@@ -196,7 +201,13 @@ public class SubBiomeTests implements FabricGameTest {
 			// The shoals' sandbars are landmarks; the lagoon's mangroves grow only in the shallows by a shore.
 			Map.entry("eternalreturn:seagrass_meadow_ocean", List.of(new Sign("minecraft:tall_seagrass", 1500))),
 			Map.entry("eternalreturn:shoals_ocean", List.of(new Sign("minecraft:water", 1000))),
-			Map.entry("eternalreturn:mangrove_lagoon_ocean", List.of(new Sign("minecraft:water", 1000))));
+			Map.entry("eternalreturn:mangrove_lagoon_ocean", List.of(new Sign("minecraft:water", 1000))),
+			// Batch 3: the atolls and seamounts are landmarks (none in the test world).
+			Map.entry("eternalreturn:atoll_ocean", List.of(new Sign("minecraft:water", 1000))),
+			Map.entry("eternalreturn:seamount_ocean", List.of(new Sign("minecraft:water", 1000))),
+			Map.entry("eternalreturn:hydrothermal_vents_ocean", List.of(new Sign("minecraft:basalt", 20), new Sign("minecraft:magma_block", 3))),
+			Map.entry("eternalreturn:whale_fall_ocean", List.of(new Sign("minecraft:bone_block", 40))),
+			Map.entry("eternalreturn:blue_hole", List.of(new Sign("minecraft:water", 1000))));
 
 	/**
 	 * Round each sub-biome's spot, 5 x 5 chunks are generated in full. Each must show its signs (pumpkins, cobwebs, heath
@@ -357,7 +368,9 @@ public class SubBiomeTests implements FabricGameTest {
 			"eternalreturn:coral_ocean", "eternalreturn:giant_mushroom_island",
 			// The frozen and cold seas have no trees.
 			"eternalreturn:pack_ice_ocean", "eternalreturn:iceberg_ocean", "eternalreturn:kelp_forest_ocean", "eternalreturn:sea_stacks_ocean",
-			"eternalreturn:seagrass_meadow_ocean", "eternalreturn:shoals_ocean", "eternalreturn:mangrove_lagoon_ocean");
+			"eternalreturn:seagrass_meadow_ocean", "eternalreturn:shoals_ocean", "eternalreturn:mangrove_lagoon_ocean",
+			"eternalreturn:atoll_ocean", "eternalreturn:seamount_ocean", "eternalreturn:hydrothermal_vents_ocean", "eternalreturn:whale_fall_ocean",
+			"eternalreturn:blue_hole");
 
 	private static boolean loneDirt(ServerWorld world, BlockPos dirt) {
 		for (net.minecraft.util.math.Direction d : net.minecraft.util.math.Direction.Type.HORIZONTAL) {

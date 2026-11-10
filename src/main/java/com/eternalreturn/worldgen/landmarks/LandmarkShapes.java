@@ -76,6 +76,8 @@ final class LandmarkShapes {
 			case ICEBERG -> this.iceberg();
 			case SEA_STACKS -> this.seaStacks();
 			case SHOALS -> this.shoals();
+			case ATOLL -> this.atoll();
+			case SEAMOUNT -> this.seamount();
 		}
 	}
 
@@ -927,6 +929,96 @@ final class LandmarkShapes {
 					if (this.open(x, y, z)) {
 						boolean gravel = y == top && y < sea - 1 && this.n2(x * 0.15 + 70, z * 0.15) > 0.5;
 						this.set(x, y, z, (gravel ? Blocks.GRAVEL : y >= top - 3 ? Blocks.SAND : this.stone.getBlock()).getDefaultState());
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * An atoll (phase 6, batch 3; size: the ring's radius): a ring of reef 4 to 7 wide just at the surface round a calm sandy
+	 * lagoon 4 to 8 deep, its outside sloping to the floor; on the ring a sandy islet or two rising a few blocks out of the
+	 * sea (the atoll's palms grow on them), coral blocks on the reef.
+	 */
+	private void atoll() {
+		int sea = this.cy;
+		double radius = this.piece.size;
+		double width = 4 + this.random.nextDouble() * 3;
+		int islets = 1 + this.random.nextInt(2);
+		double[] isletAngles = new double[islets];
+		for (int i = 0; i < islets; i++) {
+			isletAngles[i] = this.random.nextDouble() * Math.PI * 2;
+		}
+		for (int x = this.box.getMinX(); x <= this.box.getMaxX(); x++) {
+			for (int z = this.box.getMinZ(); z <= this.box.getMaxZ(); z++) {
+				double dx = x + 0.5 - this.cx;
+				double dz = z + 0.5 - this.cz;
+				double d = Math.sqrt(dx * dx + dz * dz);
+				double angle = Math.atan2(dz, dx);
+				double ring = radius * (1 + 0.15 * this.n2(Math.cos(angle) * 1.4, Math.sin(angle) * 1.4));
+				double across = Math.abs(d - ring);
+				double t;
+				boolean reefTop = false;
+				if (across < width / 2) {
+					// The reef: just under the surface, the islets out of it.
+					t = sea - 1.5 + 0.8 * this.n2(x * 0.2, z * 0.2);
+					reefTop = true;
+					for (double a : isletAngles) {
+						double off = Math.abs(Math.atan2(Math.sin(angle - a), Math.cos(angle - a))) * ring;
+						if (off < 9) {
+							t = Math.max(t, sea + 2.5 * (1 - off / 9) - across * 0.3);
+						}
+					}
+				} else if (d < ring) {
+					// The lagoon: a calm sandy floor, shallower toward the reef.
+					t = sea - 8 + 4 * (1 - (ring - d) / ring) + this.n2(x * 0.05 + 30, z * 0.05);
+				} else {
+					t = sea - 2 - (across - width / 2) * 1.4;
+				}
+				int top = (int) Math.floor(t);
+				int ground = this.ground(x, z);
+				for (int y = ground; y <= top; y++) {
+					if (this.open(x, y, z)) {
+						BlockState state;
+						if (y == top && reefTop && y < sea - 1 && this.chance(x, y, z, 51) < 0.35) {
+							state = CORAL_BLOCKS[(int) (this.chance(x, y, z, 52) * CORAL_BLOCKS.length)].getDefaultState();
+						} else {
+							state = y >= top - 3 ? Blocks.SAND.getDefaultState() : this.stone;
+						}
+						this.set(x, y, z, state);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * A seamount (phase 6, batch 3; size: its radius at the foot): an undersea mountain from the deep floor to 4 to 9 blocks
+	 * under the surface, steep and ridged, of the landmark's stone with gravel and sand on its flat top.
+	 */
+	private void seamount() {
+		int sea = this.cy;
+		double radius = this.piece.size;
+		int summit = sea - 4 - this.random.nextInt(6);
+		for (int x = this.box.getMinX(); x <= this.box.getMaxX(); x++) {
+			for (int z = this.box.getMinZ(); z <= this.box.getMaxZ(); z++) {
+				double dx = x + 0.5 - this.cx;
+				double dz = z + 0.5 - this.cz;
+				double d = Math.sqrt(dx * dx + dz * dz);
+				double angle = Math.atan2(dz, dx);
+				double edge = radius * (1 + 0.2 * this.n2(Math.cos(angle) * 2, Math.sin(angle) * 2) + 0.08 * this.n2(x * 0.08, z * 0.08));
+				if (d >= edge) {
+					continue;
+				}
+				int ground = this.ground(x, z);
+				double f = d / edge;
+				// A broad flat top (a fifth of the radius), then flanks steepening outward.
+				double t = f < 0.2 ? summit : summit - (summit - ground) * Math.pow((f - 0.2) / 0.8, 0.8);
+				int top = (int) Math.floor(t + 1.5 * this.n2(x * 0.15 + 9, z * 0.15));
+				for (int y = ground; y <= top; y++) {
+					if (this.open(x, y, z)) {
+						boolean flat = f < 0.25 && y >= top - 1;
+						this.set(x, y, z, flat ? (this.chance(x, y, z, 61) < 0.5 ? Blocks.GRAVEL : Blocks.SAND).getDefaultState() : this.stone);
 					}
 				}
 			}

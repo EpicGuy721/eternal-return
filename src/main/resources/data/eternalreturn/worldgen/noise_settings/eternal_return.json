@@ -17856,6 +17856,8 @@
                                   "minecraft:snowy_beach",
                                   "moderner_beta:beta_warm_ocean",
                                   "eternalreturn:coral_ocean",
+                                  "eternalreturn:atoll_ocean",
+                                  "eternalreturn:blue_hole",
                                   "eternalreturn:palm_beach"
                                 ]
                               },
@@ -18606,6 +18608,8 @@
                                   "minecraft:snowy_beach",
                                   "moderner_beta:beta_warm_ocean",
                                   "eternalreturn:coral_ocean",
+                                  "eternalreturn:atoll_ocean",
+                                  "eternalreturn:blue_hole",
                                   "eternalreturn:palm_beach"
                                 ]
                               },
@@ -18860,6 +18864,8 @@
                         "minecraft:snowy_beach",
                         "moderner_beta:beta_warm_ocean",
                         "eternalreturn:coral_ocean",
+                        "eternalreturn:atoll_ocean",
+                        "eternalreturn:blue_hole",
                         "eternalreturn:palm_beach"
                       ]
                     },
@@ -18952,6 +18958,8 @@
                         "moderner_beta:beta_warm_ocean",
                         "moderner_beta:beta_lukewarm_ocean",
                         "eternalreturn:coral_ocean",
+                        "eternalreturn:atoll_ocean",
+                        "eternalreturn:blue_hole",
                         "eternalreturn:archipelago",
                         "eternalreturn:mangrove_lagoon_ocean"
                       ]

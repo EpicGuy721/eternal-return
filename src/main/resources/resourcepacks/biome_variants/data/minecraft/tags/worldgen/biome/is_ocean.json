@@ -6,6 +6,14 @@
       "required": false
     },
     {
+      "id": "eternalreturn:atoll_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:blue_hole",
+      "required": false
+    },
+    {
       "id": "eternalreturn:coral_ocean",
       "required": false
     },

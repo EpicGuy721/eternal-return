@@ -12,13 +12,29 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * Coastal sea sub-biomes (the mangrove lagoon: BiomeVariants.Variant.coastal, the owner's call 2026-11-10): only within
+ * Blue holes: every sinkhole and a rim round it (TerrainShape.BLUE_HOLE_RIM) is the blue hole biome. Coastal sea sub-biomes (the mangrove lagoon: BiomeVariants.Variant.coastal, the owner's call 2026-11-10): only within
  * that many blocks of land, by the stepped sea floor's distance to the coast (TerrainShape.coastDistanceAt), a thin strip
  * along the shores; elsewhere in their cells, their parent sea. On Moderner Beta's fractal biome provider (biome coordinates and block
  * coordinates), which only Eternal Return worlds give these biomes.
  */
 @Mixin(targets = "mod.bluestaggo.modernerbeta.level.biome.provider.BiomeProviderFractal", remap = false)
-public abstract class ModernerBetaCoastalMixin {
+public abstract class ModernerBetaCoastalMixin implements com.eternalreturn.worldgen.terrain.TerrainShapeHolder {
+	@org.spongepowered.asm.mixin.Unique
+	private volatile TerrainShape.State eternalreturn$state;
+
+	@Override
+	public TerrainShape.State eternalreturn$shape() {
+		TerrainShape.State state = this.eternalreturn$state;
+		if (state == null) {
+			state = TerrainShape.State.ofBiomeProvider(this);
+			this.eternalreturn$state = state;
+		}
+		return state;
+	}
+
+	@org.spongepowered.asm.mixin.Unique
+	private static final Identifier BLUE_HOLE = Identifier.of("eternalreturn", "blue_hole");
+
 	@Shadow
 	private native RegistryEntry<Biome> getBiomeHolderFromId(Identifier id);
 
@@ -38,17 +54,32 @@ public abstract class ModernerBetaCoastalMixin {
 		}
 	}
 
-	/** The parent sea for a coastal sub-biome out of its reach of land at this biome column, or null to keep the biome. */
+	/**
+	 * The biome to give instead at this biome column, or null to keep it: a blue hole over and round every sinkhole
+	 * (TerrainShape.sinkholeEdgeOffset; the owner's call 2026-11-10), else a coastal sub-biome's parent sea out of its
+	 * reach of land.
+	 */
 	private RegistryEntry<Biome> eternalreturn$parent(RegistryEntry<Biome> biome, int quartX, int quartZ) {
 		if (biome == null) {
 			return null;
+		}
+		TerrainShape.State state = this.eternalreturn$shape();
+		if (!state.eternalReturn()) {
+			return null;
+		}
+		if (!Double.isNaN(TerrainShape.sinkholeEdgeOffset(state, quartX * 4 + 2, quartZ * 4 + 2))) {
+			try {
+				return this.getBiomeHolderFromId(BLUE_HOLE);
+			} catch (RuntimeException e) {
+				return null;
+			}
 		}
 		Identifier id = biome.getKey().map(key -> key.getValue()).orElse(null);
 		BiomeVariants.Variant variant = id == null ? null : BiomeVariants.get(id);
 		if (variant == null || variant.coastal() == null) {
 			return null;
 		}
-		double distance = TerrainShape.coastDistanceAt(quartX, quartZ);
+		double distance = TerrainShape.coastDistanceAt(state, quartX, quartZ);
 		if (distance < 0 || distance <= variant.coastal()) {
 			return null;
 		}

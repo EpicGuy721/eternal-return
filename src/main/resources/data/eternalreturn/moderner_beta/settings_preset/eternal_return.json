@@ -1150,6 +1150,9 @@
                               "minecraft:frozen_ocean",
                               "eternalreturn:seagrass_meadow_ocean",
                               "eternalreturn:shoals_ocean",
+                              "eternalreturn:seamount_ocean",
+                              "eternalreturn:hydrothermal_vents_ocean",
+                              "eternalreturn:whale_fall_ocean",
                               "eternalreturn:pack_ice_ocean",
                               "eternalreturn:iceberg_ocean"
                             ],
@@ -1266,7 +1269,10 @@
                         "minecraft:ocean",
                         "minecraft:deep_ocean",
                         "eternalreturn:seagrass_meadow_ocean",
-                        "eternalreturn:shoals_ocean"
+                        "eternalreturn:shoals_ocean",
+                        "eternalreturn:seamount_ocean",
+                        "eternalreturn:hydrothermal_vents_ocean",
+                        "eternalreturn:whale_fall_ocean"
                       ],
                       "condition": "moderner_beta:in_set"
                     },
@@ -1309,7 +1315,10 @@
                         "minecraft:ocean",
                         "minecraft:deep_ocean",
                         "eternalreturn:seagrass_meadow_ocean",
-                        "eternalreturn:shoals_ocean"
+                        "eternalreturn:shoals_ocean",
+                        "eternalreturn:seamount_ocean",
+                        "eternalreturn:hydrothermal_vents_ocean",
+                        "eternalreturn:whale_fall_ocean"
                       ],
                       "condition": "moderner_beta:in_set"
                     },
@@ -1338,7 +1347,10 @@
                         "eternalreturn:seagrass_meadow_ocean",
                         "eternalreturn:shoals_ocean",
                         "eternalreturn:spooky_swamp",
-                        "eternalreturn:bald_cypress_swamp"
+                        "eternalreturn:bald_cypress_swamp",
+                        "eternalreturn:seamount_ocean",
+                        "eternalreturn:hydrothermal_vents_ocean",
+                        "eternalreturn:whale_fall_ocean"
                       ],
                       "condition": "moderner_beta:in_set"
                     }
@@ -1351,7 +1363,10 @@
                         "minecraft:ocean",
                         "minecraft:deep_ocean",
                         "eternalreturn:seagrass_meadow_ocean",
-                        "eternalreturn:shoals_ocean"
+                        "eternalreturn:shoals_ocean",
+                        "eternalreturn:seamount_ocean",
+                        "eternalreturn:hydrothermal_vents_ocean",
+                        "eternalreturn:whale_fall_ocean"
                       ],
                       "condition": "moderner_beta:in_set"
                     },
@@ -1396,7 +1411,10 @@
                         "minecraft:ocean",
                         "minecraft:deep_ocean",
                         "eternalreturn:seagrass_meadow_ocean",
-                        "eternalreturn:shoals_ocean"
+                        "eternalreturn:shoals_ocean",
+                        "eternalreturn:seamount_ocean",
+                        "eternalreturn:hydrothermal_vents_ocean",
+                        "eternalreturn:whale_fall_ocean"
                       ],
                       "condition": "moderner_beta:in_set"
                     },
@@ -1934,6 +1952,182 @@
         },
         {
           "type": "moderner_beta:weighted_pool",
+          "id": "sub_deep_cold_ocean_2",
+          "seed": 3029,
+          "targets": [
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:seamount_ocean"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:hydrothermal_vents_ocean"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:whale_fall_ocean"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "minecraft:the_void*null"
+              },
+              "weight": 1
+            }
+          ]
+        },
+        {
+          "type": "moderner_beta:stacked_zoom",
+          "parent": "sub_deep_cold_ocean_2",
+          "id": "sub_deep_cold_ocean_2",
+          "level": 6,
+          "seed": 4029,
+          "seedModifier": 1,
+          "zoomType": "modal"
+        },
+        {
+          "type": "moderner_beta:weighted_pool",
+          "id": "sub_deep_frozen_ocean_2",
+          "seed": 3030,
+          "targets": [
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:seamount_ocean"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:hydrothermal_vents_ocean"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:whale_fall_ocean"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "minecraft:the_void*null"
+              },
+              "weight": 1
+            }
+          ]
+        },
+        {
+          "type": "moderner_beta:stacked_zoom",
+          "parent": "sub_deep_frozen_ocean_2",
+          "id": "sub_deep_frozen_ocean_2",
+          "level": 6,
+          "seed": 4030,
+          "seedModifier": 1,
+          "zoomType": "modal"
+        },
+        {
+          "type": "moderner_beta:weighted_pool",
+          "id": "sub_deep_lukewarm_ocean_2",
+          "seed": 3028,
+          "targets": [
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:seamount_ocean"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:hydrothermal_vents_ocean"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:whale_fall_ocean"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "minecraft:the_void*null"
+              },
+              "weight": 5
+            }
+          ]
+        },
+        {
+          "type": "moderner_beta:stacked_zoom",
+          "parent": "sub_deep_lukewarm_ocean_2",
+          "id": "sub_deep_lukewarm_ocean_2",
+          "level": 6,
+          "seed": 4028,
+          "seedModifier": 1,
+          "zoomType": "modal"
+        },
+        {
+          "type": "moderner_beta:weighted_pool",
+          "id": "sub_deep_ocean_2",
+          "seed": 3027,
+          "targets": [
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:seamount_ocean"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:hydrothermal_vents_ocean"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:whale_fall_ocean"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "minecraft:the_void*null"
+              },
+              "weight": 5
+            }
+          ]
+        },
+        {
+          "type": "moderner_beta:stacked_zoom",
+          "parent": "sub_deep_ocean_2",
+          "id": "sub_deep_ocean_2",
+          "level": 6,
+          "seed": 4027,
+          "seedModifier": 1,
+          "zoomType": "modal"
+        },
+        {
+          "type": "moderner_beta:weighted_pool",
           "id": "sub_lukewarm_ocean_2",
           "seed": 3025,
           "targets": [
@@ -1963,14 +2157,98 @@
           "zoomType": "modal"
         },
         {
+          "type": "moderner_beta:weighted_pool",
+          "id": "sub_warm_ocean_2",
+          "seed": 3026,
+          "targets": [
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:atoll_ocean"
+              },
+              "weight": 3
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "minecraft:the_void*null"
+              },
+              "weight": 5
+            }
+          ]
+        },
+        {
+          "type": "moderner_beta:stacked_zoom",
+          "parent": "sub_warm_ocean_2",
+          "id": "sub_warm_ocean_2",
+          "level": 6,
+          "seed": 4026,
+          "seedModifier": 1,
+          "zoomType": "modal"
+        },
+        {
+          "type": "moderner_beta:weighted_pool",
+          "id": "sub_warm_ocean*deep_2",
+          "seed": 3031,
+          "targets": [
+            {
+              "data": {
+                "type": "biome",
+                "value": "eternalreturn:atoll_ocean"
+              },
+              "weight": 1
+            },
+            {
+              "data": {
+                "type": "biome",
+                "value": "minecraft:the_void*null"
+              },
+              "weight": 3
+            }
+          ]
+        },
+        {
+          "type": "moderner_beta:stacked_zoom",
+          "parent": "sub_warm_ocean*deep_2",
+          "id": "sub_warm_ocean*deep_2",
+          "level": 6,
+          "seed": 4031,
+          "seedModifier": 1,
+          "zoomType": "modal"
+        },
+        {
           "type": "moderner_beta:biome_replacement",
           "parent": "land",
           "id": "land",
           "seed": 0,
           "targets": {
+            "minecraft:deep_cold_ocean": {
+              "type": "layer",
+              "value": "sub_deep_cold_ocean_2"
+            },
+            "minecraft:deep_frozen_ocean": {
+              "type": "layer",
+              "value": "sub_deep_frozen_ocean_2"
+            },
+            "minecraft:deep_lukewarm_ocean": {
+              "type": "layer",
+              "value": "sub_deep_lukewarm_ocean_2"
+            },
+            "minecraft:deep_ocean": {
+              "type": "layer",
+              "value": "sub_deep_ocean_2"
+            },
             "minecraft:lukewarm_ocean": {
               "type": "layer",
               "value": "sub_lukewarm_ocean_2"
+            },
+            "minecraft:warm_ocean": {
+              "type": "layer",
+              "value": "sub_warm_ocean_2"
+            },
+            "minecraft:warm_ocean*deep": {
+              "type": "layer",
+              "value": "sub_warm_ocean*deep_2"
             }
           }
         }
@@ -1994,6 +2272,7 @@
                 "eternalreturn:alps",
                 "eternalreturn:archipelago",
                 "eternalreturn:arctic",
+                "eternalreturn:atoll_ocean",
                 "eternalreturn:autumnal_forest",
                 "eternalreturn:autumnal_forest_peak",
                 "eternalreturn:badlands_peak",
@@ -2001,6 +2280,7 @@
                 "eternalreturn:birch_forest_dry_edge",
                 "eternalreturn:birch_forest_peak",
                 "eternalreturn:black_spruce_forest",
+                "eternalreturn:blue_hole",
                 "eternalreturn:bryce_mesa",
                 "eternalreturn:cherry_grove_peak",
                 "eternalreturn:clay_river",
@@ -2019,6 +2299,7 @@
                 "eternalreturn:glacier_field",
                 "eternalreturn:grand_fir_forest",
                 "eternalreturn:heathland",
+                "eternalreturn:hydrothermal_vents_ocean",
                 "eternalreturn:ice_plains_peak",
                 "eternalreturn:iceberg_ocean",
                 "eternalreturn:jungle_edge",
@@ -2046,6 +2327,7 @@
                 "eternalreturn:savanna_peak",
                 "eternalreturn:sea_stacks_ocean",
                 "eternalreturn:seagrass_meadow_ocean",
+                "eternalreturn:seamount_ocean",
                 "eternalreturn:shoals_ocean",
                 "eternalreturn:snowy_mesa",
                 "eternalreturn:spooky_swamp",
@@ -2056,6 +2338,7 @@
                 "eternalreturn:tundra",
                 "eternalreturn:volcanic_jungle",
                 "eternalreturn:webbed_forest",
+                "eternalreturn:whale_fall_ocean",
                 "eternalreturn:white_mesa",
                 "minecraft:badlands",
                 "minecraft:beach",
@@ -2065,6 +2348,7 @@
                 "minecraft:dark_forest",
                 "minecraft:deep_cold_ocean",
                 "minecraft:deep_frozen_ocean",
+                "minecraft:deep_lukewarm_ocean",
                 "minecraft:deep_ocean",
                 "minecraft:desert",
                 "minecraft:forest",
@@ -2732,6 +3016,10 @@
         "eternalreturn:seagrass_meadow_ocean": "-1.0;-1.2",
         "eternalreturn:shoals_ocean": "-1.0;-1.2",
         "eternalreturn:mangrove_lagoon_ocean": "-1.0;-1.2",
+        "eternalreturn:atoll_ocean": "-1.0;-1.2",
+        "eternalreturn:seamount_ocean": "-1.8;-1.2",
+        "eternalreturn:hydrothermal_vents_ocean": "-1.8;-1.2",
+        "eternalreturn:whale_fall_ocean": "-1.8;-1.2",
         "eternalreturn:clay_river": "-0.5;-1.2",
         "eternalreturn:leafy_river": "-0.5;-1.2",
         "eternalreturn:rocky_river": "-0.5;-1.2",
