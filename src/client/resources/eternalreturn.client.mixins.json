@@ -19,6 +19,7 @@
 		"HungerBarMixin",
 		"ItemFrameEntityRendererMixin",
 		"LavaFogMixin",
+		"DeepSeaFogMixin",
 		"LeashThicknessMixin",
 		"LocalWeatherRenderMixin",
 		"MixedSlabCrumbsMixin",

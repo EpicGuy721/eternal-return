@@ -1,0 +1,8 @@
+{
+  "feature": "eternalreturn:ocean/floors",
+  "placement": [
+    {
+      "type": "eternalreturn:eternal_return_only"
+    }
+  ]
+}

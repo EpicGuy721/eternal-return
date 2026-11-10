@@ -56,6 +56,8 @@ public final class WorldgenFeatures {
 		}
 		// Clutter: boulders (Eternal Return worlds only).
 		com.eternalreturn.worldgen.clutter.Clutter.register();
+		// The oceans' depth zones and the coasts (Eternal Return worlds only).
+		com.eternalreturn.worldgen.ocean.Oceans.register();
 		// The magma caves' lava pools (their placed features are in the cave biome, eternalreturn:sub/magma_cave_pools).
 		com.eternalreturn.worldgen.caves.MagmaPoolFeature.register();
 		com.eternalreturn.worldgen.caves.CaveSurfacePlacement.register();
