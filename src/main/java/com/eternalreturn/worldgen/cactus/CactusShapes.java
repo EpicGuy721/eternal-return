@@ -58,8 +58,8 @@ public final class CactusShapes {
 	public record Shape(Kind kind, int minHeight, int maxHeight, int minParts, int maxParts) {
 	}
 
-	/** A biome's cactus: its shape, how many per chunk as the world is made, and the ground set under it (null: sand only). */
-	public record Entry(Shape shape, float perChunk, @Nullable Block ground) {
+	/** A biome's cactus: its shape and how many per chunk as the world is made (only on the sand or red sand already there). */
+	public record Entry(Shape shape, float perChunk) {
 	}
 
 	/** One block of a plan: where (from the root), the block it grows from (null for the root), and whether it is an arm. */
@@ -104,11 +104,7 @@ public final class CactusShapes {
 						EternalReturn.LOGGER.error("Cactus shapes: {} names an unknown shape {}", biome.getKey(), b.get("shape"));
 						continue;
 					}
-					Block ground = null;
-					if (b.has("ground")) {
-						ground = net.minecraft.registry.Registries.BLOCK.get(Identifier.of(b.get("ground").getAsString()));
-					}
-					loaded.put(biome.getKey(), new Entry(shape, b.has("per_chunk") ? b.get("per_chunk").getAsFloat() : 0F, ground));
+					loaded.put(biome.getKey(), new Entry(shape, b.has("per_chunk") ? b.get("per_chunk").getAsFloat() : 0F));
 				}
 			} catch (Exception e) {
 				EternalReturn.LOGGER.error("Couldn't read the cactus shapes {}", file.getKey(), e);
@@ -367,18 +363,9 @@ public final class CactusShapes {
 
 	/**
 	 * Places a whole cactus of this shape as the world is made, rooted at "root" (the air over the ground): each block of
-	 * the plan that fits, in growing order. With "ground" set, the ground under the root becomes it (a cactus on a savanna
-	 * stands on a little sand). Whether any was placed.
+	 * the plan that fits, in growing order. It never changes the ground under it. Whether any was placed.
 	 */
-	public static boolean placeWhole(WorldAccess world, BlockPos root, Shape shape, @Nullable Block ground) {
-		if (ground != null) {
-			BlockPos under = root.down();
-			BlockState there = world.getBlockState(under);
-			if (there.isOf(Blocks.GRASS_BLOCK) || there.isOf(Blocks.DIRT) || there.isOf(Blocks.COARSE_DIRT) || there.isOf(Blocks.PACKED_MUD) || there.isIn(BlockTags.SAND)
-					|| there.isIn(BlockTags.TERRACOTTA)) {
-				world.setBlockState(under, ground.getDefaultState(), Block.NOTIFY_LISTENERS);
-			}
-		}
+	public static boolean placeWhole(WorldAccess world, BlockPos root, Shape shape) {
 		Set<BlockPos> placed = new HashSet<>();
 		for (Node node : plan(shape, root)) {
 			BlockPos at = root.add(node.at());

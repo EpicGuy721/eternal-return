@@ -49,7 +49,7 @@ public final class CactusFeature extends Feature<CactusFeature.Config> {
 			if (!world.getBlockState(root.down()).isIn(BlockTags.SAND)) {
 				continue;
 			}
-			any |= CactusShapes.placeWhole(world, root, entry.shape(), null);
+			any |= CactusShapes.placeWhole(world, root, entry.shape());
 		}
 		return any;
 	}
