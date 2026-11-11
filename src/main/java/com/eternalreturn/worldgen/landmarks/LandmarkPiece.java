@@ -63,6 +63,12 @@ public final class LandmarkPiece extends StructurePiece {
 		nbt.putString("style", this.style);
 	}
 
+	/**
+	 * How far down a landmark at sea may build from the surface: to y -37 at sea level 63, under the deepest stepped floor
+	 * (y -30, TerrainShape.DEEP_Y), so nothing standing on it is cut off.
+	 */
+	private static final int DEEP_SEA_DOWN = 100;
+
 	/** How far each kind reaches round its centre (generous: it only decides which chunks build a part). */
 	private static BlockBox box(Landmarks.Kind kind, BlockPos c, int size, int[] path) {
 		int half;
@@ -81,37 +87,38 @@ public final class LandmarkPiece extends StructurePiece {
 				half = 24;
 				up = size + 8;
 				// At sea they stand on the sea floor.
-				down = 72;
+				down = DEEP_SEA_DOWN;
 			}
 			case ISLETS -> {
 				half = size / 2 + 24;
 				up = 24;
-				down = 72;
+				down = DEEP_SEA_DOWN;
 			}
 			case REEF -> {
-				half = size + 14;
+				// Room for the outer slope to reach the deep floor (LandmarkShapes.apron).
+				half = (int) (size * 1.35) + 36;
 				up = 4;
-				down = 72;
+				down = DEEP_SEA_DOWN;
 			}
 			case ICEBERG -> {
 				half = (int) (size * 1.8) + 6;
 				up = size + 8;
-				down = 72;
+				down = DEEP_SEA_DOWN;
 			}
 			case SEA_STACKS -> {
 				half = size + 10;
 				up = 36;
-				down = 72;
+				down = DEEP_SEA_DOWN;
 			}
 			case SHOALS -> {
-				half = size + 24;
+				half = (int) (size * 1.25) + 36;
 				up = 4;
-				down = 72;
+				down = DEEP_SEA_DOWN;
 			}
 			case ATOLL -> {
-				half = size + 26;
+				half = (int) (size * 1.15) + 40;
 				up = 8;
-				down = 72;
+				down = DEEP_SEA_DOWN;
 			}
 			case SEAMOUNT -> {
 				half = (int) (size * 1.3) + 8;

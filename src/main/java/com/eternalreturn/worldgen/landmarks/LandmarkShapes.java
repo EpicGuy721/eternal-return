@@ -743,6 +743,15 @@ final class LandmarkShapes {
 	 * 6 blocks under the surface, its top sand with gravel and coral blocks in patches, deeper lagoons in it, its sides
 	 * sloping down to the floor. The coral ocean's coral and sea pickles grow on it. The base (centre y) is the sea's surface.
 	 */
+	/**
+	 * How far a sea landmark's outer slope has fallen this many blocks past its edge: steepening as it goes, so it meets the
+	 * deep floor (y -30, 90 below the surface) within about 35 blocks, inside the landmark's box (LandmarkPiece), never cut
+	 * off there as a flat wall.
+	 */
+	private static double apron(double out, double slope) {
+		return out * slope + out * out * 0.05;
+	}
+
 	/** Whether a landmark at sea may put a block here: only into the sea's water or the air over it. */
 	private boolean open(int x, int y, int z) {
 		BlockState state = this.get(x, y, z);
@@ -911,7 +920,7 @@ final class LandmarkShapes {
 				double angle = Math.atan2(dz, dx);
 				double edge = radius * (1 + 0.25 * this.n2(Math.cos(angle) * 1.3, Math.sin(angle) * 1.3));
 				// The platform: 3 to 6 under the surface, sloping away past its edge.
-				double t = d < edge ? sea - 4.5 + 1.5 * this.n2(x * 0.05 + 40, z * 0.05) : sea - 4.5 - (d - edge) * 1.2;
+				double t = d < edge ? sea - 4.5 + 1.5 * this.n2(x * 0.05 + 40, z * 0.05) : sea - 4.5 - apron(d - edge, 1.2);
 				for (double[] bar : bars) {
 					double bx = x + 0.5 - bar[0];
 					double bz = z + 0.5 - bar[1];
@@ -921,6 +930,11 @@ final class LandmarkShapes {
 					if (e < 1) {
 						// Crest just above the water, sloping down to the platform.
 						t = Math.max(t, sea + 0.3 - e * 5);
+					} else {
+						// Past its end (where it runs off the platform), on down to the floor rather than stopping in a wall: the
+						// distance out from the bar's outline along the line from its middle.
+						double out = Math.sqrt(bx * bx + bz * bz) * (1 - 1 / Math.sqrt(e));
+						t = Math.max(t, sea - 4.7 - apron(out, 1.2));
 					}
 				}
 				int top = (int) Math.floor(t);
@@ -973,7 +987,7 @@ final class LandmarkShapes {
 					// The lagoon: a calm sandy floor, shallower toward the reef.
 					t = sea - 8 + 4 * (1 - (ring - d) / ring) + this.n2(x * 0.05 + 30, z * 0.05);
 				} else {
-					t = sea - 2 - (across - width / 2) * 1.4;
+					t = sea - 2 - apron(across - width / 2, 1.4);
 				}
 				int top = (int) Math.floor(t);
 				int ground = this.ground(x, z);
@@ -1041,7 +1055,7 @@ final class LandmarkShapes {
 						t -= 4;
 					}
 				} else {
-					t = sea - 3 - (d - edge) * 1.3;
+					t = sea - 3 - apron(d - edge, 1.3);
 				}
 				int top = (int) Math.floor(t);
 				int ground = this.ground(x, z);
