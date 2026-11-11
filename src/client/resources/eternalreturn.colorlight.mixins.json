@@ -8,7 +8,8 @@
 		"ColorLightShaderMixin",
 		"ColorLightHeldLevelMixin",
 		"ColorLightMovingLightMixin",
-		"ColorLightScanMixin"
+		"ColorLightScanMixin",
+		"ColorLightFollowMixin"
 	],
 	"injectors": {
 		"defaultRequire": 0

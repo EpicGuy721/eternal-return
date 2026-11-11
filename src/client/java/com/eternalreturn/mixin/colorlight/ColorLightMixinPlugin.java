@@ -19,7 +19,8 @@ import java.util.Set;
  * load, with a warning instead of a failed start if ColorLight has changed. ColorLightMovingLightMixin: its moving-light
  * hook still halves the light level as 0.2.6 does (one "level / 2" in ColorLightEntityLightTicker.apply). The daylight
  * fix (ColorLightShaderMixin) needs Sodium, whose loader reads ColorLight's shader; it checks its own line. The
- * held level (ColorLightHeldLevelMixin) and the brighter scan (ColorLightScanMixin) need their method still there.
+ * held level (ColorLightHeldLevelMixin), the brighter scan (ColorLightScanMixin) and the shared colours
+ * (ColorLightFollowMixin) need their method still there.
  */
 public class ColorLightMixinPlugin implements IMixinConfigPlugin {
 	private static final Logger LOGGER = LoggerFactory.getLogger("eternalreturn");
@@ -46,6 +47,9 @@ public class ColorLightMixinPlugin implements IMixinConfigPlugin {
 		}
 		if (mixinClassName.endsWith("ColorLightScanMixin")) {
 			return hasMethod(targetClassName, "lambda$scanChunk$0", 3, "V");
+		}
+		if (mixinClassName.endsWith("ColorLightFollowMixin")) {
+			return hasMethod(targetClassName, "load", 1, "V");
 		}
 		if (mixinClassName.endsWith("ColorLightHeldLevelMixin")) {
 			return hasMethod(targetClassName, "effectiveStrength", 2, "I");
@@ -80,7 +84,7 @@ public class ColorLightMixinPlugin implements IMixinConfigPlugin {
 			found = false;
 		}
 		if (!found) {
-			LOGGER.warn("Eternal Return: ColorLight has changed ({} has no {}), so that fix is off (held block items or soul lights and candles keep ColorLight's level).",
+			LOGGER.warn("Eternal Return: ColorLight has changed ({} has no {}), so that fix is off (held block items or soul lights and candles keep ColorLight's level, or related lights their own colours).",
 					targetClassName, name);
 		}
 		return found;
