@@ -332,7 +332,7 @@ public final class Snowlogging {
 
 	/**
 	 * A gate swinging open (a block changing in a loaded chunk, ChunkSnowMixin, however it's opened): it sweeps the snow
-	 * logged in it away, and stays snowy only for snow lying on its posts. Closing it brings none back.
+	 * logged in it away (all its snow: none lies on its posts). Closing it brings none back.
 	 */
 	public static BlockState gateSwept(WorldChunk chunk, BlockPos pos, BlockState old, BlockState now) {
 		if (!(now.getBlock() instanceof net.minecraft.block.FenceGateBlock) || old.getBlock() != now.getBlock()
@@ -358,7 +358,8 @@ public final class Snowlogging {
 
 	/**
 	 * A snow layer item used on a block: on the top of a block that holds snow, inside its space, a layer more logged in
-	 * it; on its top, at the top of its space where it reaches it, a layer more of snow cover (a whole top takes snow
+	 * it; on its top, at the top of its space where it reaches it, a layer more of snow cover (a gate's post tops: a layer
+	 * more logged in it; a whole top takes snow
 	 * layers, as vanilla's); aimed at a space with such a block in it (the ground beside a fence), a layer more logged in
 	 * it. Returns whether it took it.
 	 */
@@ -387,7 +388,8 @@ public final class Snowlogging {
 		}
 		if (SnowCover.isHost(state) && context.getSide() == Direction.UP) {
 			int layers = SnowCover.layers(world, clicked, state);
-			if (context.getHitPos().y - clicked.getY() < 1.0 - 1.0E-4) {
+			// (A gate's posts take no cover: their tops add to the snow in it.)
+			if (context.getHitPos().y - clicked.getY() < 1.0 - 1.0E-4 || state.getBlock() instanceof net.minecraft.block.FenceGateBlock) {
 				return layers < SnowCover.capacity(state) && placed(world, clicked, player, stack, () -> snowlog(world, clicked, layers + 1, Block.NOTIFY_ALL_AND_REDRAW));
 			}
 			if (SnowCover.whole(state, layers) || !SnowCover.reachesTop(state)) {

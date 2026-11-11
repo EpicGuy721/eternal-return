@@ -49,7 +49,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * on one.</li>
  * <li>Snow lying on top: where the block and its snow reach the top of the space everywhere (a top or double slab,
  * upside-down stairs, a slab full of snow), ordinary snow layers; where the block reaches the top only in places
- * (posts, a vertical slab's edge, stairs' upper step), a snow cover over just those places.</li>
+ * (posts, a vertical slab's edge, stairs' upper step), a snow cover over just those places; not on a gate, whose snow is
+ * only the layer in it.</li>
  * </ul>
  * <p>Flora (short plants: grass, ferns, flowers, saplings, mushrooms, the Nether's roots, fungi and sprouts, dead bushes,
  * sweet berry bushes, petals, azaleas, crops and stems, and the lower half of two-block plants: tall grass, large ferns,
@@ -268,8 +269,14 @@ public final class SnowCover {
 		return false;
 	}
 
-	/** Whether a block reaches the top of its space somewhere, where a snow cover can lie on it. */
+	/**
+	 * Whether a block reaches the top of its space somewhere, where a snow cover can lie on it. Never a gate: its snow is
+	 * the one layer in it, with none of its own on the tops of its posts (the owner's call, 2026-11-10).
+	 */
 	public static boolean reachesTop(BlockState state) {
+		if (state.getBlock() instanceof FenceGateBlock) {
+			return false;
+		}
 		for (int height : top(state).heights) {
 			if (height >= 16) {
 				return true;
@@ -282,6 +289,9 @@ public final class SnowCover {
 	public static boolean[] coverFootprint(BlockState state) {
 		int[] heights = top(state).heights;
 		boolean[] footprint = new boolean[256];
+		if (state.getBlock() instanceof FenceGateBlock) {
+			return footprint;
+		}
 		for (int i = 0; i < 256; i++) {
 			footprint[i] = heights[i] >= 16;
 		}

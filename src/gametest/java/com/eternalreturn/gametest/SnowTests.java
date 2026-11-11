@@ -229,7 +229,8 @@ public class SnowTests implements FabricGameTest {
 				&& Blocks.SNOW.getDefaultState().with(SnowBlock.LAYERS, 8).shouldBlockVision(ctx.getWorld(), BlockPos.ORIGIN), "a full snow cover doesn't blind a head in it, as a full snow layer does");
 		ctx.assertTrue(SnowCover.whole(slab, 4) && !SnowCover.whole(slab, 3) && SnowCover.whole(stairs(), 4), "a slab and stairs are whole with 4 layers");
 		ctx.assertTrue(SnowCover.reachesTop(stairs()) && SnowCover.reachesTop(vertical(Direction.EAST)) && SnowCover.reachesTop(Blocks.OAK_FENCE.getDefaultState())
-				&& !SnowCover.reachesTop(slab), "stairs' upper step, a vertical slab and a fence post reach the top; a bottom slab doesn't");
+				&& !SnowCover.reachesTop(slab) && !SnowCover.reachesTop(Blocks.OAK_FENCE_GATE.getDefaultState()),
+				"stairs' upper step, a vertical slab and a fence post reach the top; a bottom slab and a gate (no cover on its posts) don't");
 		for (int layers = 1; layers <= 4; layers++) {
 			double collision = top(SnowCover.snowCollision(slab, layers));
 			double outline = top(SnowCover.snowOutline(slab, layers));
@@ -319,7 +320,8 @@ public class SnowTests implements FabricGameTest {
 	/**
 	 * Snow put on by hand: clicking inside a block's space (a slab's top, the ground beside a fence), a layer logged in
 	 * it, up to what it takes, then snow layers on a whole top; clicking the top of a post, a vertical slab's edge or the
-	 * upper step, a snow cover over just those parts, thickening; a gate stays shut. Not in water.
+	 * upper step, a snow cover over just those parts, thickening; a gate's post tops a layer in the gate (no cover), and it
+	 * stays shut. Not in water.
 	 */
 	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 40)
 	public void puttingSnowOnByHand(TestContext ctx) {
@@ -360,7 +362,8 @@ public class SnowTests implements FabricGameTest {
 
 			BlockPos gate = ctx.getAbsolutePos(new BlockPos(14, 2, 6));
 			world.setBlockState(gate, Blocks.OAK_FENCE_GATE.getDefaultState());
-			ctx.assertTrue(clickTop(player, world, snow, gate, 1.0).isAccepted() && cover(world, gate.up()) == 1, "a cover on the gate's posts");
+			ctx.assertTrue(clickTop(player, world, snow, gate, 1.0).isAccepted() && logged(world, gate) == 1 && cover(world, gate.up()) == 0,
+					"the gate's post tops: a layer in the gate, no cover: " + world.getBlockState(gate.up()));
 			ctx.assertTrue(!world.getBlockState(gate).get(FenceGateBlock.OPEN), "the gate stays shut");
 
 			BlockPos top = ctx.getAbsolutePos(new BlockPos(2, 2, 10));
@@ -455,8 +458,7 @@ public class SnowTests implements FabricGameTest {
 
 	/**
 	 * Opening a gate with snow logged in it sweeps the snow away in a puff of snow, and the grass under it turns green
-	 * again: by hand, by redstone and set open by anything else (villagers, other mods); closing it brings none back. A
-	 * snow cover on its posts stays, and so does the gate's snowy mark for it.
+	 * again: by hand, by redstone and set open by anything else (villagers, other mods); closing it brings none back.
 	 */
 	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 20)
 	public void openingAGateSweepsItsSnowAway(TestContext ctx) {
@@ -487,12 +489,11 @@ public class SnowTests implements FabricGameTest {
 			BlockPos covered = ctx.getAbsolutePos(new BlockPos(14, 2, 6));
 			world.setBlockState(covered.down(), Blocks.GRASS_BLOCK.getDefaultState());
 			snowy(world, covered, Blocks.BIRCH_FENCE_GATE.getDefaultState(), 3);
-			world.setBlockState(covered.up(), Snowlogging.SNOW_COVER.getDefaultState());
 			BlockState shut = world.getBlockState(covered);
 			// As a villager or another mod opens it: the block set open, telling no neighbour.
 			world.setBlockState(covered, shut.with(FenceGateBlock.OPEN, true), Block.NOTIFY_LISTENERS);
 			ctx.assertTrue(world.getBlockState(covered).get(FenceGateBlock.OPEN) && Snowlogging.layers(world, covered) == 0, "set open, its snow is gone");
-			ctx.assertTrue(SnowCover.marked(world.getBlockState(covered)) && cover(world, covered.up()) == 1, "the cover on its posts stays, and its mark for it");
+			ctx.assertTrue(!SnowCover.marked(world.getBlockState(covered)), "no snow left on it: " + world.getBlockState(covered));
 			ctx.assertTrue(!groundSnowy(world, covered), "the grass under it is green again");
 		} finally {
 			FishingTests.disconnect(player);
@@ -665,7 +666,7 @@ public class SnowTests implements FabricGameTest {
 	/**
 	 * Snowfall in a snowy biome under a storm settles where it would on a full block: a layer in a slab and on stairs'
 	 * lower step, on the ground around a fence, wall and gate and beside a vertical slab, with a snow cover on their
-	 * parts reaching the top; snow layers on a top slab. With the snow-piling game rule, up to 4 in a slab, then snow
+	 * parts reaching the top (not a gate's posts: its snow is the one layer in it); snow layers on a top slab. With the snow-piling game rule, up to 4 in a slab, then snow
 	 * layers on it.
 	 */
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = WEATHER_BATCH, skyAccess = true, tickLimit = 40)
@@ -698,7 +699,8 @@ public class SnowTests implements FabricGameTest {
 				for (BlockPos pos : List.of(slab, stairs, fence, wall, gate, edge)) {
 					ctx.assertTrue(logged(world, pos) == 1, "a layer logged in " + world.getBlockState(pos) + " (the game rule piles 1): " + logged(world, pos));
 				}
-				for (BlockPos pos : List.of(stairs, fence, wall, gate, edge)) {
+				ctx.assertTrue(cover(world, gate.up()) == 0, "no snow cover on the gate's posts: " + world.getBlockState(gate.up()));
+				for (BlockPos pos : List.of(stairs, fence, wall, edge)) {
 					ctx.assertTrue(cover(world, pos.up()) == 1, "a snow cover on " + world.getBlockState(pos) + ": " + world.getBlockState(pos.up()));
 				}
 				ctx.assertTrue(snowLayer(world, top.up()) == 1 && SnowCover.marked(world.getBlockState(top)), "a snow layer on the top slab, which is snowy");
