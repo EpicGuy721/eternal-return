@@ -9,6 +9,7 @@
 		"BeaconLevelTwoButtonMixin",
 		"BeaconScreenMixin",
 		"BlizzardFogMixin",
+		"BiomeColorsTintMixin",
 		"EatingSwingRenderMixin",
 		"SubtleCloudHitboxMixin",
 		"SwordBlockingClientMixin",

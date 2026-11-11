@@ -723,6 +723,12 @@ public final class EternalReturnConfig {
 		 */
 		public boolean biomeTrees = true;
 		/**
+		 * Biome personality rolls (worldgen expansion 2, phase 7): every 256-block patch of a biome rolls small shifts in its
+		 * density, tree mix, flowers, grass and leaf tint and common birds, from what the biome already has (docs/worldgen.md).
+		 * Eternal Return worlds only. Off: every patch of a biome alike.
+		 */
+		public boolean personalityRolls = true;
+		/**
 		 * Snow on trees at chunk borders (MC-119599), as Simple Snowy Fix: a tree placed after its neighbour chunk was
 		 * snowed on gets snow on its top leaves, and the snow under it goes, as for any other tree. Every world.
 		 */

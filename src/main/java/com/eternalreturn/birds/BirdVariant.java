@@ -53,15 +53,53 @@ public final class BirdVariant {
 	 * bird of a shape one of them has. Anywhere no preset lives, any bird.
 	 */
 	public static int forBiome(RegistryEntry<Biome> biome, Random random) {
+		return forBiome(biome, random, null);
+	}
+
+	/**
+	 * A wild bird of the place: as forBiome, the place's patch (Personality, in an Eternal Return overworld with personality
+	 * rolls on) making about half of the presets living there common, three times as likely as the rest.
+	 */
+	public static int forPlace(net.minecraft.world.ServerWorldAccess world, net.minecraft.util.math.BlockPos pos, Random random) {
+		RegistryEntry<Biome> biome = world.getBiome(pos);
+		com.eternalreturn.worldgen.personality.Personality.Roll roll = null;
+		net.minecraft.server.world.ServerWorld server = world.toServerWorld();
+		if (com.eternalreturn.config.EternalReturnConfig.get().worldgen.personalityRolls && com.eternalreturn.worldgen.EternalReturnServer.active()
+				&& server.getRegistryKey() == net.minecraft.world.World.OVERWORLD && biome.getKey().isPresent()) {
+			roll = com.eternalreturn.worldgen.personality.Personality.at(com.eternalreturn.worldgen.personality.Personality.salt(server.getSeed()),
+					biome.getKey().get().getValue(), pos.getX(), pos.getZ());
+		}
+		return forBiome(biome, random, roll);
+	}
+
+	private static int forBiome(RegistryEntry<Biome> biome, Random random, @org.jetbrains.annotations.Nullable com.eternalreturn.worldgen.personality.Personality.Roll roll) {
 		List<BirdTable.Preset> here = BirdTable.PRESETS.stream().filter(preset -> preset.habitats().stream().anyMatch(biome::isIn)).toList();
 		if (here.isEmpty()) {
 			return random(random);
 		}
-		BirdTable.Preset preset = here.get(random.nextInt(here.size()));
+		BirdTable.Preset preset = roll == null ? here.get(random.nextInt(here.size())) : common(here, roll, random);
 		if (random.nextDouble() < BirdTable.PRESET_SHARE) {
 			return preset.variant();
 		}
 		return mixed(random, shape(preset.variant()));
+	}
+
+	/** One of the place's presets, those common in the patch three times as likely (all alike if none or all are). */
+	private static BirdTable.Preset common(List<BirdTable.Preset> here, com.eternalreturn.worldgen.personality.Personality.Roll roll, Random random) {
+		int[] weights = new int[here.size()];
+		int total = 0;
+		for (int i = 0; i < here.size(); i++) {
+			weights[i] = roll.commonBird(here.get(i).id()) ? 3 : 1;
+			total += weights[i];
+		}
+		int at = random.nextInt(total);
+		for (int i = 0; i < here.size(); i++) {
+			at -= weights[i];
+			if (at < 0) {
+				return here.get(i);
+			}
+		}
+		return here.get(here.size() - 1);
 	}
 
 	/** A random bird of this shape: any base colour, up to two patterns in any colours. */

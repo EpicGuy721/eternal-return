@@ -242,6 +242,8 @@
 		"weather.WeatherConditionMixin",
 		"weather.WorldRainMixin",
 		"worldgen.TreeSnowMixin",
+		"personality.PlacedFeatureDensityMixin",
+		"personality.SimpleBlockFlowerMixin",
 		"worldgen.BlockColumnCactusMixin",
 		"worldgen.CarverContextMixin",
 		"worldgen.ChunkGeneratorExtraMixin",

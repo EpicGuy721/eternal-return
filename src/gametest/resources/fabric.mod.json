@@ -20,6 +20,7 @@
 			"com.eternalreturn.gametest.EternalReturnPresetTests",
 			"com.eternalreturn.gametest.TerrainFeatureTests",
 			"com.eternalreturn.gametest.ClutterTests",
+			"com.eternalreturn.gametest.PersonalityTests",
 			"com.eternalreturn.gametest.BiomeTreeTests",
 			"com.eternalreturn.gametest.BiomeVariantTests",
 			"com.eternalreturn.gametest.SubBiomeTests",

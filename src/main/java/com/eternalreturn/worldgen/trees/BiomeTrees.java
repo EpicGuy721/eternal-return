@@ -222,6 +222,32 @@ public final class BiomeTrees {
 		return choice.feature().or(choice::template).map(Identifier::toString).orElse("vanilla");
 	}
 
+	/**
+	 * pick, reweighted by the canopy mix of the patch at pos (Personality: the biome's own trees, its signature kept) where
+	 * personality rolls are on, so saplings grow what the patch grows wild.
+	 */
+	public static Choice pickHere(List<Choice> list, Random random, RegistryEntry<Biome> biome, long seed, BlockPos pos) {
+		if (!EternalReturnConfig.get().worldgen.personalityRolls || list.size() < 2 || biome.getKey().isEmpty()) {
+			return pick(list, random);
+		}
+		com.eternalreturn.worldgen.personality.Personality.Roll roll = com.eternalreturn.worldgen.personality.Personality.at(
+				com.eternalreturn.worldgen.personality.Personality.salt(seed), biome.getKey().get().getValue(), pos.getX(), pos.getZ());
+		int[] weights = list.stream().mapToInt(Choice::weight).toArray();
+		double[] scaled = roll.canopy(list.stream().map(BiomeTrees::name).toList(), weights);
+		double total = 0;
+		for (double weight : scaled) {
+			total += weight;
+		}
+		double at = random.nextDouble() * total;
+		for (int i = 0; i < list.size(); i++) {
+			at -= scaled[i];
+			if (at < 0) {
+				return list.get(i);
+			}
+		}
+		return list.get(list.size() - 1);
+	}
+
 	public static Choice pick(List<Choice> list, Random random) {
 		int total = list.stream().mapToInt(Choice::weight).sum();
 		int roll = random.nextInt(Math.max(total, 1));
@@ -301,7 +327,7 @@ public final class BiomeTrees {
 					if (mega == null) {
 						return null;
 					}
-					Choice choice = pick(mega, random);
+					Choice choice = pickHere(mega, random, biome, world.getSeed(), pos);
 					LAST_SAPLING_CHOICE.set(choice);
 					if (choice.isVanilla()) {
 						return null;
@@ -325,7 +351,7 @@ public final class BiomeTrees {
 		if (small == null) {
 			return null;
 		}
-		Choice choice = pick(small, random);
+		Choice choice = pickHere(small, random, biome, world.getSeed(), pos);
 		LAST_SAPLING_CHOICE.set(choice);
 		if (choice.isVanilla()) {
 			return null;
@@ -381,7 +407,7 @@ public final class BiomeTrees {
 		if (list == null) {
 			return null;
 		}
-		Choice choice = pick(list, context.getRandom());
+		Choice choice = pickHere(list, context.getRandom(), biome, context.getWorld().getSeed(), context.getOrigin());
 		GENERATED.computeIfAbsent(biome.getKey().map(key -> key.getValue().toString()).orElse("?") + " " + name(choice),
 				key -> new java.util.concurrent.atomic.AtomicInteger()).incrementAndGet();
 		if (choice.isVanilla()) {
