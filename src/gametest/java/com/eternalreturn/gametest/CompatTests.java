@@ -317,6 +317,22 @@ public class CompatTests implements FabricGameTest {
 		return all;
 	}
 
+	/**
+	 * With ColorLight, a held block item lights as the block it places (ColorLightHeldLevelMixin), but glow berries place
+	 * a cave vine without berries, which gives no light: held glow berries lit nothing, and where ColorLight already had
+	 * faint light (beside magma) the berries' own light from LambDynamicLights didn't show either. An item named apart
+	 * from its block keeps ColorLight's own level (HeldLight); torches, lanterns and candles still light as placed.
+	 */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "compat")
+	public void heldGlowBerriesLight(TestContext ctx) {
+		ctx.assertFalse(com.eternalreturn.logic.HeldLight.litAsPlaced(net.minecraft.item.Items.GLOW_BERRIES), "glow berries keep ColorLight's level");
+		for (net.minecraft.item.Item item : List.of(net.minecraft.item.Items.TORCH, net.minecraft.item.Items.LANTERN, net.minecraft.item.Items.CANDLE,
+				net.minecraft.item.Items.SOUL_TORCH, net.minecraft.item.Items.REDSTONE_LAMP, net.minecraft.item.Items.GLOWSTONE)) {
+			ctx.assertTrue(com.eternalreturn.logic.HeldLight.litAsPlaced(item), item + " lights as placed");
+		}
+		ctx.complete();
+	}
+
 	@GameTest(templateName = EMPTY_STRUCTURE, batchId = "compat")
 	public void colorLightStillHalvesMovingLight(TestContext ctx) {
 		ClassNode node = new ClassNode();
