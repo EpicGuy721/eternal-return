@@ -619,6 +619,30 @@ public class SnowTests implements FabricGameTest {
 		});
 	}
 
+	/**
+	 * Falling snow landing on a snow layer shows the grown pile to the players who see it fall as it lands, with the
+	 * falling snow still there, as a landed block is shown: no moment with neither (a flicker).
+	 */
+	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 120)
+	public void landingSnowShowsAtOnce(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		BlockPos lying = ctx.getAbsolutePos(new BlockPos(4, 2, 6));
+		BlockPos overflowing = ctx.getAbsolutePos(new BlockPos(8, 2, 6));
+		world.setBlockState(lying, SnowCover.asSnowLayer(2));
+		world.setBlockState(overflowing, SnowCover.asSnowLayer(7));
+		world.setBlockState(lying.up(5), SnowCover.asSnowLayer(2));
+		world.setBlockState(overflowing.up(5), SnowCover.asSnowLayer(3));
+		ctx.runAtTick(100, () -> {
+			ctx.assertTrue(snowLayer(world, lying) == 4, "2 onto 2: " + world.getBlockState(lying));
+			ctx.assertTrue(snowLayer(world, overflowing) == 8 && snowLayer(world, overflowing.up()) == 2, "3 onto 7 fill it, 2 lie on it: " + world.getBlockState(overflowing.up()));
+			ctx.assertTrue(Heard.shown(lying).contains(world.getBlockState(lying)), "the grown pile shown as it landed: " + Heard.shown(lying));
+			ctx.assertTrue(Heard.shown(overflowing).contains(world.getBlockState(overflowing)) && Heard.shown(overflowing.up()).contains(world.getBlockState(overflowing.up())),
+					"the full layer and the layers on it shown as they landed: " + Heard.shown(overflowing) + " " + Heard.shown(overflowing.up()));
+			ctx.killAllEntities();
+			ctx.complete();
+		});
+	}
+
 	/** Snow counts as snow underfoot: footsteps on a snowy slab sound of snow; on maps it shows white. */
 	@GameTest(templateName = ARENA, batchId = BATCH, tickLimit = 20)
 	public void snowUnderfootAndOnMaps(TestContext ctx) {

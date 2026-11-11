@@ -24,6 +24,7 @@
 		"MixedSlabCrumbsMixin",
 		"MixedSlabMiningMixin",
 		"MixedSlabOutlineMixin",
+		"FallingSnowShownMixin",
 		"MinecartEntityRendererMixin",
 		"PistonBlockEntityRendererMixin",
 		"SignRendererMixin",

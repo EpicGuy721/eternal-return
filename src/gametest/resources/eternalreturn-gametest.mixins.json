@@ -8,6 +8,7 @@
 		"HeardMixin",
 		"RangedWeaponInvoker",
 		"SandownAccessor",
+		"ShownMixin",
 		"StepSoundInvoker",
 		"TestContextAccessor",
 		"TestServerMixin",

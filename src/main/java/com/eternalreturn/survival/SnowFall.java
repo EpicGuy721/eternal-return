@@ -9,6 +9,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.FallingBlock;
 import net.minecraft.block.SnowBlock;
 import net.minecraft.entity.FallingBlockEntity;
+import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -74,6 +75,22 @@ public final class SnowFall {
 		}
 		world.playSound(null, pos, SoundEvents.BLOCK_SNOW_PLACE, SoundCategory.BLOCKS, 1.0F, 0.8F);
 		return true;
+	}
+
+	/**
+	 * Falling snow that has just landed (land) and is about to go: the players who see it are sent the grown pile now, in
+	 * the same tick as the falling snow disappears, as vanilla does for a block landing. Changed blocks otherwise reach
+	 * players only at the start of the next tick, after the falling snow has already gone from their screens: for that
+	 * moment neither showed, and the pile flickered.
+	 */
+	public static void showLanding(FallingBlockEntity falling, BlockPos pos) {
+		if (!(falling.getWorld() instanceof ServerWorld world)) {
+			return;
+		}
+		// land changes the block it lands in and the one above; on a block that holds snow, maybe the one below.
+		for (BlockPos changed : new BlockPos[]{pos.down(), pos, pos.up()}) {
+			world.getChunkManager().sendToOtherNearbyPlayers(falling, new BlockUpdateS2CPacket(changed, world.getBlockState(changed)));
+		}
 	}
 
 	/**
