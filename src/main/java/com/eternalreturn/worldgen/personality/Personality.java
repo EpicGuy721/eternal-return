@@ -166,19 +166,31 @@ public final class Personality {
 		int cz = MathHelper.floor(fz);
 		double tx = smooth(fx - cx);
 		double tz = smooth(fz - cz);
-		float[] a = cell(salt, family, cx, cz).tint();
-		float[] b = cell(salt, family, cx + 1, cz).tint();
-		float[] c = cell(salt, family, cx, cz + 1).tint();
-		float[] d = cell(salt, family, cx + 1, cz + 1).tint();
-		float[] shift = new float[3];
-		for (int i = 0; i < 3; i++) {
-			shift[i] = (float) MathHelper.lerp(tz, MathHelper.lerp(tx, a[i], b[i]), MathHelper.lerp(tx, c[i], d[i]));
-		}
+		float[] a = cellTint(salt, family, cx, cz);
+		float[] b = cellTint(salt, family, cx + 1, cz);
+		float[] c = cellTint(salt, family, cx, cz + 1);
+		float[] d = cellTint(salt, family, cx + 1, cz + 1);
+		float hueShift = (float) MathHelper.lerp(tz, MathHelper.lerp(tx, a[0], b[0]), MathHelper.lerp(tx, c[0], d[0]));
+		float satShift = (float) MathHelper.lerp(tz, MathHelper.lerp(tx, a[1], b[1]), MathHelper.lerp(tx, c[1], d[1]));
+		float valShift = (float) MathHelper.lerp(tz, MathHelper.lerp(tx, a[2], b[2]), MathHelper.lerp(tx, c[2], d[2]));
 		float[] hsb = java.awt.Color.RGBtoHSB(rgb >> 16 & 255, rgb >> 8 & 255, rgb & 255, null);
-		float hue = hsb[0] + shift[0] * TINT_HUE;
-		float saturation = MathHelper.clamp(hsb[1] * (1 + shift[1] * TINT_VALUE), 0, 1);
-		float brightness = MathHelper.clamp(hsb[2] * (1 + shift[2] * TINT_VALUE), 0, 1);
+		float hue = hsb[0] + hueShift * TINT_HUE;
+		float saturation = MathHelper.clamp(hsb[1] * (1 + satShift * TINT_VALUE), 0, 1);
+		float brightness = MathHelper.clamp(hsb[2] * (1 + valShift * TINT_VALUE), 0, 1);
 		return java.awt.Color.HSBtoRGB(hue - (float) Math.floor(hue), saturation, brightness) & 0xFFFFFF;
+	}
+
+	/** Cells' tints, kept (the colours are asked for every block each time a section is redrawn): salt, family, cell. */
+	private static final java.util.Map<CellKey, float[]> TINTS = new java.util.concurrent.ConcurrentHashMap<>();
+
+	private record CellKey(long salt, Identifier family, int x, int z) {
+	}
+
+	private static float[] cellTint(long salt, Identifier family, int cx, int cz) {
+		if (TINTS.size() > 65_536) {
+			TINTS.clear();
+		}
+		return TINTS.computeIfAbsent(new CellKey(salt, family, cx, cz), key -> cell(key.salt(), key.family(), key.x(), key.z()).tint());
 	}
 
 	private static double smooth(double t) {

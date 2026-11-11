@@ -100,6 +100,13 @@ public class PersonalityTests implements FabricGameTest {
 				step = Math.max(step, Math.abs((here >> shift & 255) - (next >> shift & 255)));
 			}
 		}
+		// What a section redraw pays: a million calls over a few patches (logged).
+		long start = System.nanoTime();
+		int sink = 0;
+		for (int i = 0; i < 1_000_000; i++) {
+			sink ^= Personality.tint(salt, plains, grass, (i % 1000) + 0.5, (i / 1000) + 0.5);
+		}
+		EternalReturn.LOGGER.info("Personality tint: {} ns a call ({})", (System.nanoTime() - start) / 1_000_000, sink);
 		ctx.assertTrue(most <= 24, "the tint stays close to the biome's colour: up to " + most + " a channel");
 		ctx.assertTrue(most >= 6, "but shifts it: up to " + most + " a channel");
 		ctx.assertTrue(step <= 2, "neighbouring blocks differ by at most 2 a channel: " + step);
