@@ -13,7 +13,7 @@ import net.minecraft.world.gen.feature.util.FeatureContext;
  * host's variant (iron ore into granite becomes granite iron ore), from the table in OreVariants. So that
  * ores reach the host stones at all, an ore feature's target test sees a host stone as plain stone; the
  * vanilla ore tags stay as they are, so other worlds are untouched. Granite, diorite and andesite blobs in
- * any biome are host stones too. Lava lakes keep host stone where they would line themselves with plain
+ * any biome are host stones too, and a blob that grows over a vanilla ore takes it in as its own variant. Lava lakes keep host stone where they would line themselves with plain
  * stone. With biome stone off, Eternal Return generates its ores and lakes as before.
  */
 public final class OrePlacement {
@@ -40,9 +40,16 @@ public final class OrePlacement {
 		ACTIVE.set(false);
 	}
 
-	/** The block an ore feature's target test should see: stone in place of a host stone. */
-	public static BlockState asTarget(BlockState state) {
-		return ACTIVE.get() && OreVariants.isHost(state) ? Blocks.STONE.getDefaultState() : state;
+	/**
+	 * The block an ore feature's target test should see: stone in place of a host stone, and, for a feature that
+	 * places a host stone (a granite, diorite or andesite blob), stone in place of a vanilla ore that host has a
+	 * variant of, so the blob takes the ore in as its variant (see place).
+	 */
+	public static BlockState asTarget(BlockState state, BlockState placing) {
+		if (!ACTIVE.get()) {
+			return state;
+		}
+		return OreVariants.isHost(state) || OreVariants.variantInBlob(placing, state) != null ? Blocks.STONE.getDefaultState() : state;
 	}
 
 	/**
@@ -54,8 +61,18 @@ public final class OrePlacement {
 		return ACTIVE.get() && placed.isOf(Blocks.STONE) && OreVariants.isHost(replaced);
 	}
 
-	/** The block an ore feature should place where it found the replaced block. */
+	/**
+	 * The block an ore feature should place where it found the replaced block: an ore placed into a host stone
+	 * becomes that host's variant, and a host stone blob placed over a vanilla ore keeps the ore, as the blob's
+	 * variant. Decoration spills into neighbouring chunks, so a chunk decorated earlier can leave a plain stone ore
+	 * in stone (a cave biome's or a plain stone biome's) where this chunk's blob grows later; without this the ore
+	 * stayed plain inside the blob, a stone-textured ore in granite.
+	 */
 	public static BlockState place(BlockState ore, BlockState replaced) {
-		return ACTIVE.get() ? OreVariants.variantFor(ore, replaced) : ore;
+		if (!ACTIVE.get()) {
+			return ore;
+		}
+		BlockState inBlob = OreVariants.variantInBlob(ore, replaced);
+		return inBlob != null ? inBlob : OreVariants.variantFor(ore, replaced);
 	}
 }

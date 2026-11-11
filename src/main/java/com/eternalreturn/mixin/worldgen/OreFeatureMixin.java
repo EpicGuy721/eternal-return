@@ -2,6 +2,7 @@ package com.eternalreturn.mixin.worldgen;
 
 import com.eternalreturn.worldgen.ores.OrePlacement;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.block.BlockState;
 import net.minecraft.structure.rule.RuleTest;
@@ -36,8 +37,9 @@ public abstract class OreFeatureMixin {
 	}
 
 	@WrapOperation(method = "shouldPlace", at = @At(value = "INVOKE", target = "Lnet/minecraft/structure/rule/RuleTest;test(Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/random/Random;)Z"))
-	private static boolean eternalreturn$hostStoneAsStone(RuleTest rule, BlockState state, Random random, Operation<Boolean> original) {
-		return original.call(rule, OrePlacement.asTarget(state), random);
+	private static boolean eternalreturn$hostStoneAsStone(RuleTest rule, BlockState state, Random random, Operation<Boolean> original,
+			@Local(argsOnly = true) OreFeatureConfig.Target target) {
+		return original.call(rule, OrePlacement.asTarget(state, target.state), random);
 	}
 
 	@WrapOperation(method = "generateVeinPart", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/ChunkSection;setBlockState(IIILnet/minecraft/block/BlockState;Z)Lnet/minecraft/block/BlockState;"))
