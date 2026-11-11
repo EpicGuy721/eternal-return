@@ -12,7 +12,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Falling snow that lands on a snow layer adds to the pile instead of breaking (SnowFall.land). */
+/**
+ * Falling snow that lands on a snow layer adds to the pile instead of breaking (SnowFall.land); the players who see it
+ * fall are shown the grown pile as it goes (SnowFall.showLanding), as vanilla shows a landed block.
+ */
 @Mixin(FallingBlockEntity.class)
 public abstract class FallingBlockEntityMixin {
 	@Shadow
@@ -23,6 +26,7 @@ public abstract class FallingBlockEntityMixin {
 	private void eternalreturn$pileSnow(CallbackInfo ci, @Local(ordinal = 0) BlockPos pos, @Local(ordinal = 0) BlockState landingOn) {
 		FallingBlockEntity self = (FallingBlockEntity) (Object) this;
 		if (SnowFall.land(self.getWorld(), pos, this.block, landingOn)) {
+			SnowFall.showLanding(self, pos);
 			self.discard();
 			ci.cancel();
 		}
