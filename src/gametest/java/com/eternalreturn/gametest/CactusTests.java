@@ -168,7 +168,7 @@ public class CactusTests implements FabricGameTest {
 				ctx.assertTrue(root.equals(CactusShapes.root(world, root.add(pos))), kind + ": " + pos.toShortString() + " doesn't lead back to the root");
 			}
 			sand(ctx);
-			ctx.assertTrue(CactusShapes.placeWhole(world, root, shape, null), kind + ": nothing placed");
+			ctx.assertTrue(CactusShapes.placeWhole(world, root, shape), kind + ": nothing placed");
 			Map<BlockPos, Boolean> whole = blocks(world, root);
 			ctx.assertTrue(CactusShapes.next(world, root, shape) == null, kind + ": the whole shape still has a block to grow");
 			ctx.assertTrue(grown.equals(whole) && grown.size() > 1, kind + ": grown " + grown.size() + " blocks, whole " + whole.size());

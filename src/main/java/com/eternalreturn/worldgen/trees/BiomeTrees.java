@@ -168,9 +168,33 @@ public final class BiomeTrees {
 	 */
 	@Nullable
 	public static List<Choice> listFor(RegistryEntry<Biome> biome, Identifier sapling, boolean mega) {
+		return listFor(biome, sapling, mega, 4);
+	}
+
+	/**
+	 * A biome's own tree lists, per sapling (from tables naming it, its base or a tag, not the "*" ones every biome
+	 * shares): what grows there in particular. For the elder trees (ElderTrees).
+	 */
+	public static java.util.Map<Identifier, List<Choice>> ownLists(RegistryEntry<Biome> biome) {
+		java.util.Map<Identifier, List<Choice>> lists = new java.util.LinkedHashMap<>();
+		for (Table table : tables) {
+			for (Identifier sapling : table.trees.keySet()) {
+				if (!lists.containsKey(sapling)) {
+					List<Choice> list = listFor(biome, sapling, false, 3);
+					if (list != null) {
+						lists.put(sapling, list);
+					}
+				}
+			}
+		}
+		return lists;
+	}
+
+	@Nullable
+	private static List<Choice> listFor(RegistryEntry<Biome> biome, Identifier sapling, boolean mega, int precedences) {
 		String id = biome.getKey().map(key -> key.getValue().toString()).orElse("");
 		String base = biome.getKey().map(key -> com.eternalreturn.worldgen.variants.BiomeVariants.baseOf(key.getValue()).toString()).orElse("");
-		for (int precedence = 0; precedence < 4; precedence++) {
+		for (int precedence = 0; precedence < precedences; precedence++) {
 			for (Table table : tables) {
 				List<Choice> list = (mega ? table.megaTrees : table.trees).get(sapling);
 				if (list == null || list.isEmpty()) {

@@ -1,0 +1,224 @@
+{
+  "values": [
+    {
+      "id": "eternalreturn:autumnal_forest",
+      "required": false
+    },
+    {
+      "id": "minecraft:birch_forest",
+      "required": false
+    },
+    {
+      "id": "minecraft:cherry_grove",
+      "required": false
+    },
+    {
+      "id": "minecraft:dark_forest",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:forest_dry_edge",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:birch_forest_dry_edge",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:taiga_edge",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:early_release_extreme_hills",
+      "required": false
+    },
+    {
+      "id": "minecraft:forest",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:early_release_ice_plains",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:late_beta_ice_plains",
+      "required": false
+    },
+    {
+      "id": "minecraft:snowy_plains",
+      "required": false
+    },
+    {
+      "id": "minecraft:jungle",
+      "required": false
+    },
+    {
+      "id": "minecraft:old_growth_pine_taiga",
+      "required": false
+    },
+    {
+      "id": "minecraft:old_growth_spruce_taiga",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:extreme_hills_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:forest_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:birch_forest_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:plains_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:dark_forest_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:taiga_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:old_growth_pine_taiga_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:old_growth_spruce_taiga_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:ice_plains_peak",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:late_beta_plains",
+      "required": false
+    },
+    {
+      "id": "minecraft:savanna",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:alps",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:archipelago",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:bald_cypress_swamp",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:black_spruce_forest",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:bryce_mesa",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:dark_meadow",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:desert_baobabs",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:desert_oasis",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:drylands",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:glacier_field",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:grand_fir_forest",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:heathland",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:larch_forest",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:meadow",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:mesa_verde",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:palm_beach",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:pinyon_woodland",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:poplar_grove",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:pumpkin_plains",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:redwood_forest",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:roofed_fungi_forest",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:snowy_mesa",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:spooky_swamp",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:tropical_pillars",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:tundra",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:volcanic_jungle",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:webbed_forest",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:early_release_swampland",
+      "required": false
+    },
+    {
+      "id": "moderner_beta:early_release_taiga",
+      "required": false
+    }
+  ]
+}

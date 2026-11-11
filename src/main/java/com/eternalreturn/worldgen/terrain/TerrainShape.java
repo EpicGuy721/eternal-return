@@ -54,8 +54,11 @@ public final class TerrainShape {
 	 */
 	public static final double DROP_WIDTH_MIN = 24;
 	public static final double DROP_WIDTH_MAX = 44;
-	/** Sinkholes: one chance per square of this many blocks. */
-	public static final int SINKHOLE_CELL = 1024;
+	/**
+	 * Sinkholes: one chance per square of this many blocks. 324 since 2026-11-10 (the owner: about ten times as many as with
+	 * the first 1,024, each one a blue hole).
+	 */
+	public static final int SINKHOLE_CELL = 324;
 	public static final double SINKHOLE_CHANCE = 0.35;
 	/** Most sinkholes are in the sea: one planned on land is kept only this often (never on a river or beach). */
 	public static final double SINKHOLE_LAND_CHANCE = 0.2;
@@ -78,6 +81,8 @@ public final class TerrainShape {
 		final boolean eternalReturn;
 		final long seed;
 		final MethodHandle biomeAt;
+		/** Whether biomeAt takes (x, y, z), a biome provider's, rather than a chunk provider's (x, z). */
+		final boolean threeArgs;
 		final SimplexNoiseSampler noise;
 		final Map<Long, float[]> regions = new LinkedHashMap<>(64, 0.75F, true) {
 			@Override
@@ -119,6 +124,16 @@ public final class TerrainShape {
 			this.eternalReturn = eternalReturn && biomeAt != null;
 			this.seed = seed;
 			this.biomeAt = biomeAt;
+			this.threeArgs = false;
+			this.noise = new SimplexNoiseSampler(Random.create(CaveSystemCarver.mix(seed, 0x0CEA4L)));
+		}
+
+		private State(Object provider, long seed, MethodHandle biomeAt, boolean eternalReturn) {
+			this.provider = provider;
+			this.seed = seed;
+			this.biomeAt = biomeAt;
+			this.threeArgs = true;
+			this.eternalReturn = eternalReturn && biomeAt != null;
 			this.noise = new SimplexNoiseSampler(Random.create(CaveSystemCarver.mix(seed, 0x0CEA4L)));
 		}
 
@@ -126,14 +141,108 @@ public final class TerrainShape {
 			return new State(provider);
 		}
 
+		/**
+		 * The same from Moderner Beta's biome provider (its seed and its height biomes, which the chunk provider's come from),
+		 * for the biomes worked out from the terrain's plan (blue holes, the coastal sea sub-biomes: ModernerBetaCoastalMixin):
+		 * the biomes are made before any terrain, so they can't wait for the chunk provider's. An Eternal Return world's when
+		 * the provider can make any of this mod's biomes.
+		 */
+		public static State ofBiomeProvider(Object provider) {
+			long seed = 0;
+			MethodHandle biomeAt = null;
+			boolean eternalReturn = false;
+			try {
+				for (Class<?> c = provider.getClass(); c != null; c = c.getSuperclass()) {
+					try {
+						Field field = c.getDeclaredField("seed");
+						if (field.getType() == long.class) {
+							field.setAccessible(true);
+							seed = field.getLong(provider);
+							break;
+						}
+					} catch (NoSuchFieldException e) {
+						// Up a class.
+					}
+				}
+				biomeAt = MethodHandles.publicLookup().findVirtual(provider.getClass(), "getExtendedBiomeId",
+						MethodType.methodType(Class.forName("mod.bluestaggo.modernerbeta.util.ExtendedIdentifier", false, provider.getClass().getClassLoader()), int.class, int.class, int.class));
+				Object biomes = provider.getClass().getMethod("getBiomes").invoke(provider);
+				if (biomes instanceof java.util.Set<?> set) {
+					for (Object entry : set) {
+						if (entry instanceof net.minecraft.registry.entry.RegistryEntry<?> e
+								&& e.getKey().map(key -> key.getValue().getNamespace().equals(com.eternalreturn.EternalReturn.MOD_ID)).orElse(false)) {
+							eternalReturn = true;
+							break;
+						}
+					}
+				}
+			} catch (ReflectiveOperationException | RuntimeException e) {
+				eternalReturn = false;
+			}
+			return new State(provider, seed, biomeAt, eternalReturn);
+		}
+
+		public boolean eternalReturn() {
+			return this.eternalReturn;
+		}
+
 		/** The biome id (with its height variant) Moderner Beta uses for heights at this noise column. */
 		String biome(int noiseX, int noiseZ) {
 			try {
-				return String.valueOf(this.biomeAt.invoke(this.provider, noiseX, noiseZ));
+				return String.valueOf(this.threeArgs ? this.biomeAt.invoke(this.provider, noiseX, 0, noiseZ) : this.biomeAt.invoke(this.provider, noiseX, noiseZ));
 			} catch (Throwable e) {
 				return "";
 			}
 		}
+	}
+
+	/**
+	 * Blocks from this 4-block column (biome coordinates) to the nearest land, or -1 outside an Eternal Return world. For the
+	 * coastal sea sub-biomes (BiomeVariants.Variant.coastal; ModernerBetaCoastalMixin).
+	 */
+	public static double coastDistanceAt(State state, int quartX, int quartZ) {
+		return state == null || !state.eternalReturn ? -1 : coastDistance(state, quartX, quartZ);
+	}
+
+	/** How far beyond a sinkhole's edge its blue hole (the biome) reaches: the rim, ringed with coral. */
+	public static final int BLUE_HOLE_RIM = 12;
+
+	/**
+	 * How far this block column lies from the edge of the nearest sinkhole (negative inside it), or NaN where no sinkhole is
+	 * within its rim (BLUE_HOLE_RIM) or the world isn't an Eternal Return one. For the blue holes
+	 * (ModernerBetaCoastalMixin, OceanFeature's blue_hole_rim).
+	 */
+	public static double sinkholeEdgeOffset(State state, int blockX, int blockZ) {
+		if (state == null || !state.eternalReturn) {
+			return Double.NaN;
+		}
+		int cellX = Math.floorDiv(blockX, SINKHOLE_CELL);
+		int cellZ = Math.floorDiv(blockZ, SINKHOLE_CELL);
+		double best = Double.NaN;
+		for (int dx = -1; dx <= 1; dx++) {
+			for (int dz = -1; dz <= 1; dz++) {
+				for (Sinkhole hole : sinkholes(state, cellX + dx, cellZ + dz)) {
+					double ox = blockX + 0.5 - hole.x();
+					double oz = blockZ + 0.5 - hole.z();
+					double r = Math.sqrt(ox * ox + oz * oz);
+					if (r > hole.radius() * 1.1 + BLUE_HOLE_RIM) {
+						continue;
+					}
+					double offset = r - edge(state, hole, ox, oz);
+					if (offset <= BLUE_HOLE_RIM && (Double.isNaN(best) || offset < best)) {
+						best = offset;
+					}
+				}
+			}
+		}
+		return best;
+	}
+
+	/** A sinkhole's edge in the direction of this offset from its centre: its radius, wobbling round it. */
+	private static double edge(State state, Sinkhole hole, double ox, double oz) {
+		double angle = Math.atan2(oz, ox);
+		double wobble = state.noise.sample(Math.cos(angle) * 1.3 + (hole.seed() & 1023), Math.sin(angle) * 1.3 + ((hole.seed() >> 10) & 1023));
+		return hole.radius() * (0.85 + 0.25 * wobble);
 	}
 
 	/** A sinkhole: centre in blocks, radius in blocks; onLand: whether it is kept if its centre lies on land. */
@@ -315,9 +424,7 @@ public final class TerrainShape {
 					if (r > hole.radius() * 1.4) {
 						continue;
 					}
-					double angle = Math.atan2(oz, ox);
-					double wobble = state.noise.sample(Math.cos(angle) * 1.3 + (hole.seed() & 1023), Math.sin(angle) * 1.3 + ((hole.seed() >> 10) & 1023));
-					double edge = hole.radius() * (0.85 + 0.25 * wobble);
+					double edge = edge(state, hole, ox, oz);
 					double inside = 1.0 - smoothstep(edge - Math.min(6, edge * 0.5), edge, r);
 					if (inside > 0) {
 						column[0] = (float) MathHelper.lerp(inside, column[0], Math.min(column[0], depthForY(SINKHOLE_FLOOR_Y)));

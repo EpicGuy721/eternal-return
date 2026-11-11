@@ -6,7 +6,43 @@
       "required": false
     },
     {
+      "id": "eternalreturn:atoll_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:blue_hole",
+      "required": false
+    },
+    {
       "id": "eternalreturn:coral_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:iceberg_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:kelp_forest_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:mangrove_lagoon_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:pack_ice_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:sea_stacks_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:seagrass_meadow_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:shoals_ocean",
       "required": false
     }
   ]

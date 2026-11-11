@@ -1,0 +1,11 @@
+{
+  "type": "eternalreturn:landmark",
+  "landmark": "seamount",
+  "min_size": 28,
+  "max_size": 56,
+  "at_sea": true,
+  "biomes": "#eternalreturn:has_structure/seamount",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

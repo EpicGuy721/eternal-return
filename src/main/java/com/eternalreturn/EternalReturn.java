@@ -100,6 +100,7 @@ public class EternalReturn implements ModInitializer {
 		HardenedBlocks.register();
 		com.eternalreturn.blocks.IceBlocks.register();
 		com.eternalreturn.blocks.CactusArms.register();
+		com.eternalreturn.blocks.Geysers.register();
 		com.eternalreturn.blocks.StoneDripstones.register();
 		com.eternalreturn.blocks.CaveMushrooms.register();
 		OreVariants.register();

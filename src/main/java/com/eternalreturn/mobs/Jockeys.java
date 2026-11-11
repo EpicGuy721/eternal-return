@@ -47,7 +47,10 @@ public final class Jockeys {
 
 	/** Called from a stray's initialize. The bear goes into the world now; the stray follows when its spawn finishes. */
 	public static void tryPolarBearMount(MobEntity stray, ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason reason) {
-		if (stray.hasVehicle() || world.getRandom().nextFloat() >= EternalReturnConfig.get().mobs.strayPolarBearJockeyChance) {
+		// Five times as likely in the iceberg seas (worldgen expansion 2, phase 6: strays riding polar bears on the bergs).
+		double chance = EternalReturnConfig.get().mobs.strayPolarBearJockeyChance
+				* (world.getBiome(stray.getBlockPos()).isIn(com.eternalreturn.worldgen.ocean.OceanFeature.ICEBERG_SEAS) ? 5 : 1);
+		if (stray.hasVehicle() || world.getRandom().nextFloat() >= chance) {
 			return;
 		}
 		PolarBearEntity bear = EntityType.POLAR_BEAR.create(stray.getWorld());

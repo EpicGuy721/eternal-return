@@ -1,0 +1,11 @@
+{
+  "type": "eternalreturn:landmark",
+  "landmark": "shoals",
+  "min_size": 14,
+  "max_size": 30,
+  "at_sea": true,
+  "biomes": "#eternalreturn:has_structure/shoals",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none"
+}

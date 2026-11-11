@@ -71,6 +71,13 @@ final class LandmarkShapes {
 			case HOODOOS -> this.hoodoos();
 			case ISLETS -> this.islets();
 			case REEF -> this.reef();
+			case HOT_SPRING -> HotSprings.build(this.piece, this.world, this.box);
+			case ELDER_TREE -> ElderTrees.build(this.piece, this.world, this.box);
+			case ICEBERG -> this.iceberg();
+			case SEA_STACKS -> this.seaStacks();
+			case SHOALS -> this.shoals();
+			case ATOLL -> this.atoll();
+			case SEAMOUNT -> this.seamount();
 		}
 	}
 
@@ -487,7 +494,7 @@ final class LandmarkShapes {
 	// ------------------------------------------------------------------ volcano
 
 	/**
-	 * A huge cone (size: its radius at the foot) of the local stone streaked with basalt and tuff, rising up to 80 blocks
+	 * A huge cone (size: its radius at the foot) of the local stone streaked with basalt and blackstone, rising up to 80 blocks
 	 * from the ground at its centre: ash and basalt high up, coarse dirt and gravel on the middle slopes, grass on the
 	 * lower slopes so the land runs up into it. A crater at the top holds a lava lake ringed with magma; two or three lava
 	 * flows run down the sides.
@@ -532,7 +539,7 @@ final class LandmarkShapes {
 				int peak = (int) Math.round(top);
 				for (int y = ground - 1; y <= peak; y++) {
 					double m = this.n3(x * 0.07, y * 0.07, z * 0.07);
-					this.set(x, y, z, m > 0.45 ? Blocks.BASALT.getDefaultState() : m < -0.55 ? Blocks.TUFF.getDefaultState() : this.stone);
+					this.set(x, y, z, m > 0.45 ? Blocks.BASALT.getDefaultState() : m < -0.55 ? Blocks.BLACKSTONE.getDefaultState() : this.stone);
 				}
 				if (crater) {
 					for (int y = peak + 1; y <= Math.max(ground, (int) rimTop) + 2; y++) {
@@ -547,9 +554,9 @@ final class LandmarkShapes {
 				// The surface by height on the cone.
 				double c = this.chance(x, peak, z, 9);
 				if (dd < 0.35) {
-					this.set(x, peak, z, (d < craterRadius * 1.4 && c < 0.3 ? Blocks.MAGMA_BLOCK : c < 0.45 ? Blocks.BASALT : c < 0.8 ? Blocks.GRAVEL : Blocks.TUFF).getDefaultState());
+					this.set(x, peak, z, (d < craterRadius * 1.4 && c < 0.3 ? Blocks.MAGMA_BLOCK : c < 0.45 ? Blocks.BASALT : c < 0.8 ? Blocks.GRAVEL : Blocks.BLACKSTONE).getDefaultState());
 				} else if (dd < 0.7) {
-					this.set(x, peak, z, (c < 0.4 ? Blocks.COARSE_DIRT : c < 0.65 ? Blocks.GRAVEL : c < 0.85 ? this.stone.getBlock() : Blocks.TUFF).getDefaultState());
+					this.set(x, peak, z, (c < 0.4 ? Blocks.COARSE_DIRT : c < 0.65 ? Blocks.GRAVEL : c < 0.85 ? this.stone.getBlock() : Blocks.BLACKSTONE).getDefaultState());
 				} else {
 					this.set(x, peak, z, Blocks.GRASS_BLOCK.getDefaultState());
 					for (int y = peak - 3; y < peak; y++) {
@@ -736,6 +743,302 @@ final class LandmarkShapes {
 	 * 6 blocks under the surface, its top sand with gravel and coral blocks in patches, deeper lagoons in it, its sides
 	 * sloping down to the floor. The coral ocean's coral and sea pickles grow on it. The base (centre y) is the sea's surface.
 	 */
+	/**
+	 * How far a sea landmark's outer slope has fallen this many blocks past its edge: steepening as it goes, so it meets the
+	 * deep floor (y -30, 90 below the surface) within about 35 blocks, inside the landmark's box (LandmarkPiece), never cut
+	 * off there as a flat wall.
+	 */
+	private static double apron(double out, double slope) {
+		return out * slope + out * out * 0.05;
+	}
+
+	/** Whether a landmark at sea may put a block here: only into the sea's water or the air over it. */
+	private boolean open(int x, int y, int z) {
+		BlockState state = this.get(x, y, z);
+		return state.isAir() || state.isOf(Blocks.WATER) || state.isOf(Blocks.ICE) || state.isOf(Blocks.SNOW) || state.isOf(Blocks.SEAGRASS)
+				|| state.isOf(Blocks.TALL_SEAGRASS) || state.isOf(Blocks.KELP) || state.isOf(Blocks.KELP_PLANT);
+	}
+
+	/**
+	 * An iceberg (phase 6, batch 1; size: its radius above water): a ragged hump of packed ice standing up to half
+	 * of its radius out of the sea, two and a half times as deep and wider under water, a core of blue ice, snow on top.
+	 */
+	private void iceberg() {
+		int sea = this.cy;
+		double radius = this.piece.size;
+		double high = 2 + radius * 0.4;
+		double deep = high * 2.5;
+		double wide = radius * 1.4;
+		double coreY = sea - deep * 0.35;
+		for (int x = this.box.getMinX(); x <= this.box.getMaxX(); x++) {
+			for (int z = this.box.getMinZ(); z <= this.box.getMaxZ(); z++) {
+				double dx = x + 0.5 - this.cx;
+				double dz = z + 0.5 - this.cz;
+				double d = Math.sqrt(dx * dx + dz * dz);
+				double angle = Math.atan2(dz, dx);
+				double above = radius * (1 + 0.3 * this.n2(Math.cos(angle) * 1.5, Math.sin(angle) * 1.5) + 0.1 * this.n2(x * 0.2, z * 0.2));
+				double below = wide * (1 + 0.25 * this.n2(Math.cos(angle) * 1.5 + 40, Math.sin(angle) * 1.5));
+				if (d >= below) {
+					continue;
+				}
+				double t;
+				if (d < above) {
+					double f = d / above;
+					t = sea + high * (1 - f * f) * (0.7 + 0.3 * this.n2(x * 0.15 + 20, z * 0.15)) - 1;
+				} else {
+					t = sea - 2 - (d - above) / Math.max(1, below - above) * deep * 0.5;
+				}
+				double b = sea - 1 - deep * Math.sqrt(Math.max(0, 1 - (d / below) * (d / below)));
+				int top = (int) Math.floor(t);
+				int bottom = Math.max((int) Math.ceil(b), this.ground(x, z));
+				for (int y = bottom; y <= top; y++) {
+					if (!this.open(x, y, z)) {
+						continue;
+					}
+					double cy = (y - coreY) / ((high + deep) * 0.45);
+					double cd = d / (below * 0.55);
+					BlockState state;
+					if (cd * cd + cy * cy < 1) {
+						state = Blocks.BLUE_ICE.getDefaultState();
+					} else if (y == top && y >= sea && this.chance(x, y, z, 31) < 0.7) {
+						state = Blocks.SNOW_BLOCK.getDefaultState();
+					} else {
+						state = Blocks.PACKED_ICE.getDefaultState();
+					}
+					this.set(x, y, z, state);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Sea stacks (phase 6, batch 1; size: the cluster's radius): two to five towers of the landmark's stone standing from
+	 * the sea floor 8 to 28 blocks out of the sea, steep with a smooth outline and a nearly flat top, wider under water, patches
+	 * of moss at the waterline, grass (a clump or two of gravel) on top where seabirds roost; in half the clusters an arch
+	 * joins the first two.
+	 */
+	private void seaStacks() {
+		int sea = this.cy;
+		int count = 2 + this.random.nextInt(4);
+		double[][] stacks = new double[count][];
+		for (int i = 0; i < count; i++) {
+			double angle = this.random.nextDouble() * Math.PI * 2;
+			double r = (i == 0 ? 0 : 0.4 + this.random.nextDouble() * 0.6) * this.piece.size * 0.8;
+			double radius = 2 + this.random.nextDouble() * 2.5;
+			double height = 8 + this.random.nextDouble() * 12 + radius * 2;
+			stacks[i] = new double[]{this.cx + Math.cos(angle) * r, this.cz + Math.sin(angle) * r, radius, height};
+		}
+		boolean arch = count >= 2 && this.random.nextBoolean();
+		double archY = arch ? sea + Math.min(stacks[0][3], stacks[1][3]) * 0.6 : 0;
+		BlockState grass = Blocks.GRASS_BLOCK.getDefaultState();
+		for (int x = this.box.getMinX(); x <= this.box.getMaxX(); x++) {
+			for (int z = this.box.getMinZ(); z <= this.box.getMaxZ(); z++) {
+				double best = -1e9;
+				for (int i = 0; i < count; i++) {
+					double[] stack = stacks[i];
+					double dx = x + 0.5 - stack[0];
+					double dz = z + 0.5 - stack[1];
+					double d = Math.sqrt(dx * dx + dz * dz);
+					// A smooth outline (by the angle round the stack, not block by block) and a nearly flat top that rounds
+					// off a block or two at the rim, tilting a little across the cluster.
+					double angle = Math.atan2(dz, dx);
+					double edge = stack[2] * (1 + 0.2 * this.n2(Math.cos(angle) * 1.2 + i * 13, Math.sin(angle) * 1.2));
+					double t;
+					if (d < edge) {
+						double rim = d / edge > 0.7 ? (d / edge - 0.7) * 5 : 0;
+						t = sea + stack[3] - rim + 1.5 * this.n2(x * 0.06 + i * 7, z * 0.06);
+					} else if (d < edge * 1.8) {
+						// Wider under water: an apron of rock down to the floor.
+						t = sea - 2 - (d - edge) * 2.5;
+					} else {
+						continue;
+					}
+					best = Math.max(best, t);
+				}
+				int ground = this.ground(x, z);
+				int top = (int) Math.floor(best);
+				for (int y = ground; y <= top; y++) {
+					if (this.open(x, y, z)) {
+						BlockState state = this.stone;
+						if (y == top && y >= sea + 2) {
+							// Grass on top, gravel in a clump or two.
+							state = this.n2(x * 0.18 + 50, z * 0.18) > 0.55 ? Blocks.GRAVEL.getDefaultState() : grass;
+						} else if (y >= sea - 2 && y <= sea + 1 && this.n3(x * 0.2, y * 0.3, z * 0.2) > 0.25) {
+							// Worn at the waterline: mossy cobblestone in patches.
+							state = Blocks.MOSSY_COBBLESTONE.getDefaultState();
+						}
+						this.set(x, y, z, state);
+					}
+				}
+				if (arch) {
+					// The arch: a thick span between the first two stacks.
+					double ax = stacks[1][0] - stacks[0][0];
+					double az = stacks[1][1] - stacks[0][1];
+					double length = Math.max(1, Math.sqrt(ax * ax + az * az));
+					double along = ((x + 0.5 - stacks[0][0]) * ax + (z + 0.5 - stacks[0][1]) * az) / (length * length);
+					if (along > 0 && along < 1) {
+						double px = stacks[0][0] + ax * along;
+						double pz = stacks[0][1] + az * along;
+						double off = Math.sqrt(Math.pow(x + 0.5 - px, 2) + Math.pow(z + 0.5 - pz, 2));
+						if (off < 1.8) {
+							double sag = Math.sin(along * Math.PI) * 2;
+							int low = (int) Math.floor(archY + sag - 1);
+							for (int y = low; y <= low + 2; y++) {
+								if (this.open(x, y, z)) {
+									this.set(x, y, z, y == low + 2 ? grass : this.stone);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Shoals (phase 6, batch 2; size: the field's radius): a broad sandy platform 3 to 6 under the surface, its edges
+	 * sloping to the floor, and on it two to four long sandbars whose crests break the surface, gravel in patches.
+	 */
+	private void shoals() {
+		int sea = this.cy;
+		double radius = this.piece.size;
+		int count = 2 + this.random.nextInt(3);
+		double[][] bars = new double[count][];
+		for (int i = 0; i < count; i++) {
+			double angle = this.random.nextDouble() * Math.PI * 2;
+			double r = this.random.nextDouble() * radius * 0.6;
+			double heading = this.random.nextDouble() * Math.PI;
+			double length = radius * (0.5 + this.random.nextDouble() * 0.5);
+			double width = 2.5 + this.random.nextDouble() * 3;
+			bars[i] = new double[]{this.cx + Math.cos(angle) * r, this.cz + Math.sin(angle) * r, Math.cos(heading), Math.sin(heading), length, width};
+		}
+		for (int x = this.box.getMinX(); x <= this.box.getMaxX(); x++) {
+			for (int z = this.box.getMinZ(); z <= this.box.getMaxZ(); z++) {
+				double dx = x + 0.5 - this.cx;
+				double dz = z + 0.5 - this.cz;
+				double d = Math.sqrt(dx * dx + dz * dz);
+				double angle = Math.atan2(dz, dx);
+				double edge = radius * (1 + 0.25 * this.n2(Math.cos(angle) * 1.3, Math.sin(angle) * 1.3));
+				// The platform: 3 to 6 under the surface, sloping away past its edge.
+				double t = d < edge ? sea - 4.5 + 1.5 * this.n2(x * 0.05 + 40, z * 0.05) : sea - 4.5 - apron(d - edge, 1.2);
+				for (double[] bar : bars) {
+					double bx = x + 0.5 - bar[0];
+					double bz = z + 0.5 - bar[1];
+					double along = (bx * bar[2] + bz * bar[3]) / bar[4];
+					double across = (-bx * bar[3] + bz * bar[2]) / bar[5];
+					double e = along * along + across * across;
+					if (e < 1) {
+						// Crest just above the water, sloping down to the platform.
+						t = Math.max(t, sea + 0.3 - e * 5);
+					} else {
+						// Past its end (where it runs off the platform), on down to the floor rather than stopping in a wall: the
+						// distance out from the bar's outline along the line from its middle.
+						double out = Math.sqrt(bx * bx + bz * bz) * (1 - 1 / Math.sqrt(e));
+						t = Math.max(t, sea - 4.7 - apron(out, 1.2));
+					}
+				}
+				int top = (int) Math.floor(t);
+				int ground = this.ground(x, z);
+				for (int y = ground; y <= top; y++) {
+					if (this.open(x, y, z)) {
+						boolean gravel = y == top && y < sea - 1 && this.n2(x * 0.15 + 70, z * 0.15) > 0.5;
+						this.set(x, y, z, (gravel ? Blocks.GRAVEL : y >= top - 3 ? Blocks.SAND : this.stone.getBlock()).getDefaultState());
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * An atoll (phase 6, batch 3; size: the ring's radius): a ring of reef 4 to 7 wide just at the surface round a calm sandy
+	 * lagoon 4 to 8 deep, its outside sloping to the floor; on the ring a sandy islet or two rising a few blocks out of the
+	 * sea (the atoll's palms grow on them), coral blocks on the reef.
+	 */
+	private void atoll() {
+		int sea = this.cy;
+		double radius = this.piece.size;
+		double width = 4 + this.random.nextDouble() * 3;
+		int islets = 1 + this.random.nextInt(2);
+		double[] isletAngles = new double[islets];
+		for (int i = 0; i < islets; i++) {
+			isletAngles[i] = this.random.nextDouble() * Math.PI * 2;
+		}
+		for (int x = this.box.getMinX(); x <= this.box.getMaxX(); x++) {
+			for (int z = this.box.getMinZ(); z <= this.box.getMaxZ(); z++) {
+				double dx = x + 0.5 - this.cx;
+				double dz = z + 0.5 - this.cz;
+				double d = Math.sqrt(dx * dx + dz * dz);
+				double angle = Math.atan2(dz, dx);
+				double ring = radius * (1 + 0.15 * this.n2(Math.cos(angle) * 1.4, Math.sin(angle) * 1.4));
+				double across = Math.abs(d - ring);
+				double t;
+				boolean reefTop = false;
+				if (across < width / 2) {
+					// The reef: just under the surface, the islets out of it.
+					t = sea - 1.5 + 0.8 * this.n2(x * 0.2, z * 0.2);
+					reefTop = true;
+					for (double a : isletAngles) {
+						double off = Math.abs(Math.atan2(Math.sin(angle - a), Math.cos(angle - a))) * ring;
+						if (off < 9) {
+							t = Math.max(t, sea + 2.5 * (1 - off / 9) - across * 0.3);
+						}
+					}
+				} else if (d < ring) {
+					// The lagoon: a calm sandy floor, shallower toward the reef.
+					t = sea - 8 + 4 * (1 - (ring - d) / ring) + this.n2(x * 0.05 + 30, z * 0.05);
+				} else {
+					t = sea - 2 - apron(across - width / 2, 1.4);
+				}
+				int top = (int) Math.floor(t);
+				int ground = this.ground(x, z);
+				for (int y = ground; y <= top; y++) {
+					if (this.open(x, y, z)) {
+						BlockState state;
+						if (y == top && reefTop && y < sea - 1 && this.chance(x, y, z, 51) < 0.35) {
+							state = CORAL_BLOCKS[(int) (this.chance(x, y, z, 52) * CORAL_BLOCKS.length)].getDefaultState();
+						} else {
+							state = y >= top - 3 ? Blocks.SAND.getDefaultState() : this.stone;
+						}
+						this.set(x, y, z, state);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * A seamount (phase 6, batch 3; size: its radius at the foot): an undersea mountain from the deep floor to 4 to 9 blocks
+	 * under the surface, steep and ridged, of the landmark's stone with gravel and sand on its flat top.
+	 */
+	private void seamount() {
+		int sea = this.cy;
+		double radius = this.piece.size;
+		int summit = sea - 4 - this.random.nextInt(6);
+		for (int x = this.box.getMinX(); x <= this.box.getMaxX(); x++) {
+			for (int z = this.box.getMinZ(); z <= this.box.getMaxZ(); z++) {
+				double dx = x + 0.5 - this.cx;
+				double dz = z + 0.5 - this.cz;
+				double d = Math.sqrt(dx * dx + dz * dz);
+				double angle = Math.atan2(dz, dx);
+				double edge = radius * (1 + 0.2 * this.n2(Math.cos(angle) * 2, Math.sin(angle) * 2) + 0.08 * this.n2(x * 0.08, z * 0.08));
+				if (d >= edge) {
+					continue;
+				}
+				int ground = this.ground(x, z);
+				double f = d / edge;
+				// A broad flat top (a fifth of the radius), then flanks steepening outward.
+				double t = f < 0.2 ? summit : summit - (summit - ground) * Math.pow((f - 0.2) / 0.8, 0.8);
+				int top = (int) Math.floor(t + 1.5 * this.n2(x * 0.15 + 9, z * 0.15));
+				for (int y = ground; y <= top; y++) {
+					if (this.open(x, y, z)) {
+						boolean flat = f < 0.25 && y >= top - 1;
+						this.set(x, y, z, flat ? (this.chance(x, y, z, 61) < 0.5 ? Blocks.GRAVEL : Blocks.SAND).getDefaultState() : this.stone);
+					}
+				}
+			}
+		}
+	}
+
 	private void reef() {
 		int sea = this.cy;
 		double radius = this.piece.size;
@@ -752,7 +1055,7 @@ final class LandmarkShapes {
 						t -= 4;
 					}
 				} else {
-					t = sea - 3 - (d - edge) * 1.3;
+					t = sea - 3 - apron(d - edge, 1.3);
 				}
 				int top = (int) Math.floor(t);
 				int ground = this.ground(x, z);

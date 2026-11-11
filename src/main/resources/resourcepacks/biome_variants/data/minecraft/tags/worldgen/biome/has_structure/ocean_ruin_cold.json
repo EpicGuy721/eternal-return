@@ -1,0 +1,41 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "eternalreturn:hydrothermal_vents_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:iceberg_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:kelp_forest_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:pack_ice_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:sea_stacks_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:seagrass_meadow_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:seamount_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:shoals_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:whale_fall_ocean",
+      "required": false
+    }
+  ]
+}

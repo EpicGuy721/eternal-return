@@ -30,6 +30,10 @@
       "required": false
     },
     {
+      "id": "eternalreturn:hydrothermal_vents_ocean",
+      "required": false
+    },
+    {
       "id": "eternalreturn:palm_beach",
       "required": false
     },
@@ -42,7 +46,23 @@
       "required": false
     },
     {
+      "id": "eternalreturn:seagrass_meadow_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:seamount_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:shoals_ocean",
+      "required": false
+    },
+    {
       "id": "eternalreturn:webbed_forest",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:whale_fall_ocean",
       "required": false
     }
   ]

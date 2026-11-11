@@ -12,12 +12,10 @@
     "moderner_beta:pe_desert": {"shape": "saguaro", "per_chunk": 0.5},
     "eternalreturn:desert_scrub_edge": {"shape": "organ_pipe", "per_chunk": 0.4},
     "eternalreturn:desert_baobabs": {"shape": "organ_pipe", "per_chunk": 0.3},
-    "eternalreturn:drylands": {"shape": "cholla", "per_chunk": 0.25, "ground": "minecraft:red_sand"},
-    "minecraft:badlands": {"shape": "barrel_cluster", "per_chunk": 0.4, "ground": "minecraft:red_sand"},
-    "minecraft:eroded_badlands": {"shape": "barrel_cluster", "per_chunk": 0.4, "ground": "minecraft:red_sand"},
-    "eternalreturn:monument_valley": {"shape": "barrel_cluster", "per_chunk": 0.4, "ground": "minecraft:red_sand"},
-    "minecraft:savanna": {"shape": "candelabra", "per_chunk": 0.12, "ground": "minecraft:sand"},
-    "minecraft:savanna_plateau": {"shape": "candelabra", "per_chunk": 0.12, "ground": "minecraft:sand"},
-    "eternalreturn:mesa_verde": {"shape": "candelabra", "per_chunk": 0.25, "ground": "minecraft:red_sand"}
+    "eternalreturn:drylands": {"shape": "cholla", "per_chunk": 0.25},
+    "minecraft:badlands": {"shape": "barrel_cluster", "per_chunk": 0.4},
+    "minecraft:eroded_badlands": {"shape": "barrel_cluster", "per_chunk": 0.4},
+    "eternalreturn:monument_valley": {"shape": "barrel_cluster", "per_chunk": 0.4},
+    "eternalreturn:bryce_mesa": {"shape": "candelabra", "per_chunk": 0.25}
   }
 }

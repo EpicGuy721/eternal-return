@@ -1,7 +1,0 @@
-{
-  "parent": "eternalreturn:block/stone_dripstone/up_frustum",
-  "textures": {
-    "side": "minecraft:block/tuff",
-    "end": "minecraft:block/tuff"
-  }
-}

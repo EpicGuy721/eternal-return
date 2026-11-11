@@ -60,7 +60,13 @@ public class LandmarkTests implements FabricGameTest {
 				{"glacier_cluster", 25, 6}, {"ice_wall_cluster", 45, 4},
 				// Batch D: crowded pillars, volcanoes and lava flows in their jungles; islands, sea stacks and reefs at sea.
 				{"pillar_cluster", 60, 3}, {"volcanic_volcano", 25, 6}, {"volcanic_lava_flow", 50, 6},
-				{"islets", 60, 5}, {"sea_pillars", 45, 3}, {"reef", 90, 2}};
+				{"islets", 60, 5}, {"sea_pillars", 45, 3}, {"reef", 90, 2},
+				// Expansion 2, phase 6, batch 1: icebergs in the iceberg sea, sea stacks in their own.
+				{"iceberg", 90, 2}, {"sea_stacks", 70, 2},
+				// Batch 2: shoals in their own sea.
+				{"shoals", 70, 3},
+				// Batch 3: atolls in the warm sea, seamounts in the deep ones.
+				{"atoll", 70, 4}, {"seamount", 60, 6}};
 		var calculator = world.getChunkManager().getStructurePlacementCalculator();
 		var generator = world.getChunkManager().getChunkGenerator();
 		for (Object[] k : kinds) {
@@ -166,6 +172,39 @@ public class LandmarkTests implements FabricGameTest {
 					int shelf = count(world, centre.down(3), half, 4, 0, s -> s.isOf(Blocks.SAND) || s.isOf(Blocks.GRAVEL) || s.isIn(net.minecraft.registry.tag.BlockTags.CORAL_BLOCKS));
 					what = shelf + " reef blocks 3 to 7 under the surface, radius " + piece.size;
 					ok = shelf >= 100;
+				}
+				case "iceberg" -> {
+					// Packed and blue ice, more of it under the water than over it.
+					java.util.function.Predicate<BlockState> ice = s -> s.isOf(Blocks.PACKED_ICE) || s.isOf(Blocks.BLUE_ICE) || s.isOf(Blocks.SNOW_BLOCK);
+					int over = count(world, centre, half, 0, 20, ice);
+					int under = count(world, centre.down(), half, 40, 0, ice);
+					int blue = count(world, centre.down(), half, 40, 0, s -> s.isOf(Blocks.BLUE_ICE));
+					what = over + " ice over the water, " + under + " under, " + blue + " blue, radius " + piece.size;
+					ok = over >= 15 && under > over && blue >= 5;
+				}
+				case "atoll" -> {
+					// The reef ring at the surface, sand islets above it.
+					int reef = count(world, centre.down(3), Math.min(piece.size + 6, half), 3, 0, s -> s.isOf(Blocks.SAND) || s.isIn(net.minecraft.registry.tag.BlockTags.CORAL_BLOCKS));
+					int islet = count(world, centre, Math.min(piece.size + 6, half), 0, 4, s -> s.isOf(Blocks.SAND));
+					what = reef + " reef blocks just under the surface, " + islet + " sand out of the sea, radius " + piece.size;
+					ok = reef >= 60 && islet >= 5;
+				}
+				case "seamount" -> {
+					// Its top just under the surface: the landmark's stone, gravel or sand 4 to 12 down.
+					int top = count(world, centre.down(12), 10, 8, 0, s -> s.isOf(stone) || s.isOf(Blocks.GRAVEL) || s.isOf(Blocks.SAND));
+					what = top + " blocks 4 to 12 under the surface over its middle, radius " + piece.size;
+					ok = top >= 40;
+				}
+				case "shoals" -> {
+					// Sandbar crests at or just above the surface.
+					int crests = count(world, centre.down(), half, 0, 2, s -> s.isOf(Blocks.SAND));
+					what = crests + " sand at the surface, field radius " + piece.size;
+					ok = crests >= 20;
+				}
+				case "sea_stacks" -> {
+					int high = count(world, centre.up(2), half, 0, 34, s -> s.isOf(stone) || s.isOf(Blocks.GRASS_BLOCK));
+					what = high + " " + stone + " and grass blocks above the sea, cluster radius " + piece.size;
+					ok = high >= 60;
 				}
 				case "lava_flow", "volcanic_lava_flow" -> {
 					int lava = count(world, centre, half, 20, 6, s -> s.isOf(Blocks.LAVA));

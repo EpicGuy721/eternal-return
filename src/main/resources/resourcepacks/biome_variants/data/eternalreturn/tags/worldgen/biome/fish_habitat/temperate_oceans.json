@@ -1,0 +1,25 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "eternalreturn:hydrothermal_vents_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:seagrass_meadow_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:seamount_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:shoals_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:whale_fall_ocean",
+      "required": false
+    }
+  ]
+}

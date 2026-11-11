@@ -1,0 +1,10 @@
+{
+  "type": "eternalreturn:landmark",
+  "landmark": "hot_spring",
+  "min_size": 2,
+  "max_size": 4,
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none",
+  "biomes": "#eternalreturn:has_structure/hot_spring_scenic"
+}

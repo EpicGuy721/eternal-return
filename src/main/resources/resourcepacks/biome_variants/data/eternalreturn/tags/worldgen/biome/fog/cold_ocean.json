@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "eternalreturn:kelp_forest_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:sea_stacks_ocean",
+      "required": false
+    }
+  ]
+}

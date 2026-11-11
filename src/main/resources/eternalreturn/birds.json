@@ -615,7 +615,8 @@
       ],
       "habitats": [
         "beaches",
-        "rivers"
+        "rivers",
+        "sea_cliffs"
       ]
     },
     {
@@ -650,7 +651,8 @@
       ],
       "habitats": [
         "beaches",
-        "cold"
+        "cold",
+        "sea_cliffs"
       ]
     }
   ],
@@ -746,6 +748,9 @@
       "minecraft:beach",
       "minecraft:stony_shore",
       "minecraft:snowy_beach"
+    ],
+    "sea_cliffs": [
+      "eternalreturn:sea_stacks_ocean"
     ]
   },
   "spawn_weight": 10

@@ -264,6 +264,55 @@
     "base": "minecraft:lukewarm_ocean",
     "kind": "sub"
   },
+  "eternalreturn:pack_ice_ocean": {
+    "base": "minecraft:frozen_ocean",
+    "kind": "sub"
+  },
+  "eternalreturn:iceberg_ocean": {
+    "base": "minecraft:frozen_ocean",
+    "kind": "sub"
+  },
+  "eternalreturn:kelp_forest_ocean": {
+    "base": "minecraft:cold_ocean",
+    "kind": "sub"
+  },
+  "eternalreturn:sea_stacks_ocean": {
+    "base": "minecraft:cold_ocean",
+    "kind": "sub"
+  },
+  "eternalreturn:seagrass_meadow_ocean": {
+    "base": "minecraft:ocean",
+    "kind": "sub"
+  },
+  "eternalreturn:shoals_ocean": {
+    "base": "minecraft:ocean",
+    "kind": "sub"
+  },
+  "eternalreturn:mangrove_lagoon_ocean": {
+    "base": "minecraft:lukewarm_ocean",
+    "kind": "sub",
+    "coastal": 8
+  },
+  "eternalreturn:atoll_ocean": {
+    "base": "minecraft:warm_ocean",
+    "kind": "sub"
+  },
+  "eternalreturn:seamount_ocean": {
+    "base": "minecraft:deep_ocean",
+    "kind": "sub"
+  },
+  "eternalreturn:hydrothermal_vents_ocean": {
+    "base": "minecraft:deep_ocean",
+    "kind": "sub"
+  },
+  "eternalreturn:whale_fall_ocean": {
+    "base": "minecraft:deep_ocean",
+    "kind": "sub"
+  },
+  "eternalreturn:blue_hole": {
+    "base": "minecraft:warm_ocean",
+    "kind": "sub"
+  },
   "eternalreturn:ice_caves": {
     "base": "moderner_beta:early_release_ice_plains",
     "kind": "cave"

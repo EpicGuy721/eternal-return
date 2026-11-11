@@ -1,0 +1,21 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "eternalreturn:iceberg_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:kelp_forest_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:pack_ice_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:sea_stacks_ocean",
+      "required": false
+    }
+  ]
+}

@@ -33,7 +33,8 @@ import java.util.stream.Collectors;
  * than by tag asks this class for the base (tree tables, boulder density, villager regions, mobs added to one biome).
  */
 public final class BiomeVariants {
-	public record Variant(Identifier base, String kind, @Nullable Float boulders) {
+	/** coastal: a sea sub-biome only within this many blocks of land, its parent sea beyond (the mangrove lagoon). */
+	public record Variant(Identifier base, String kind, @Nullable Float boulders, @Nullable Integer coastal) {
 	}
 
 	private static final Map<Identifier, Variant> VARIANTS = load();
@@ -51,7 +52,7 @@ public final class BiomeVariants {
 			for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
 				JsonObject v = entry.getValue().getAsJsonObject();
 				map.put(Identifier.of(entry.getKey()), new Variant(Identifier.of(v.get("base").getAsString()), v.get("kind").getAsString(),
-						v.has("boulders") ? v.get("boulders").getAsFloat() : null));
+						v.has("boulders") ? v.get("boulders").getAsFloat() : null, v.has("coastal") ? v.get("coastal").getAsInt() : null));
 			}
 		} catch (Exception e) {
 			EternalReturn.LOGGER.error("Couldn't read the biome variants", e);

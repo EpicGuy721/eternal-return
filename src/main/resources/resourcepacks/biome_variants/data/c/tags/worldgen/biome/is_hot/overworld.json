@@ -2,7 +2,15 @@
   "replace": false,
   "values": [
     {
+      "id": "eternalreturn:atoll_ocean",
+      "required": false
+    },
+    {
       "id": "eternalreturn:badlands_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:blue_hole",
       "required": false
     },
     {

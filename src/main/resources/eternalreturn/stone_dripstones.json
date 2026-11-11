@@ -44,14 +44,6 @@
 		"map_color": "dirt_brown",
 		"name": "Granite"
 	},
-	"tuff": {
-		"hosts": [
-			"minecraft:tuff"
-		],
-		"texture": "tuff",
-		"map_color": "terracotta_gray",
-		"name": "Tuff"
-	},
 	"sandstone": {
 		"hosts": [
 			"minecraft:sandstone",

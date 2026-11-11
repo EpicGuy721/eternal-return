@@ -10,7 +10,7 @@
   base is in (vanilla's, Moderner Beta's, the c: convention tags and this mod's), so fish, birds, mobs, ores,
   biome stone and everything else that goes by tag treat a variant as its base. A separate pack, so these lines
   never touch the tag files other scripts write;
-- eternalreturn/biome_variants.json (read by the game, BiomeVariants): each variant's base, kind and boulders;
+- eternalreturn/biome_variants.json (read by the game, BiomeVariants): each variant's base, kind, boulders and coastal reach;
 - the biome names in en_us.json (other lines kept).
 
 build_preset.py reads the same table for the preset's side: the peak rules, the edge and river layers, heights
@@ -280,9 +280,9 @@ def main():
         f'{NS}:{vid}': {k: spec[k] for k in ('bands', 'cap', 'top') if k in spec}
         for vid, (base, kind, spec) in variants.items() if 'bands' in spec}})
 
-    # What the game reads: each variant's base, kind and boulders.
+    # What the game reads: each variant's base, kind, boulders and, for a coastal sea sub-biome, how far from land it reaches.
     write_json(os.path.join(RES, NS, 'biome_variants.json'), {
-        f'{NS}:{vid}': {k: v for k, v in {'base': base, 'kind': kind, 'boulders': spec.get('boulders')}.items() if v is not None}
+        f'{NS}:{vid}': {k: v for k, v in {'base': base, 'kind': kind, 'boulders': spec.get('boulders'), 'coastal': spec.get('coastal')}.items() if v is not None}
         for vid, (base, kind, spec) in variants.items()})
 
     lang_file = os.path.join(RES, 'assets', NS, 'lang', 'en_us.json')

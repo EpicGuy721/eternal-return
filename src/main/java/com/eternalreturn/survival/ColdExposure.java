@@ -23,7 +23,7 @@ import java.util.UUID;
 /**
  * The cold (survival.coldFreezeSeconds): a player out in the cold (where it would snow: cold biomes, and high up in
  * the mountains) for long enough begins to freeze, as in powder snow (the frost creeping over the screen, then the
- * hurt). Time in a blizzard counts double. Warmth near them (block tag eternalreturn:heat_sources within RADIUS: fire,
+ * hurt). Time in a blizzard counts double, time in the water there four times. Warmth near them (block tag eternalreturn:heat_sources within RADIUS: fire,
  * lit campfires and furnaces, lava, magma) keeps it off and warms them back up, four times as fast as the cold
  * came on; out of the cold they warm up twice as fast. Each piece of leather armor (item tag minecraft:freeze_immune_wearables) lets them stay out longer
  * (survival.leatherColdSeconds), but it doesn't keep the cold off for good, as it keeps powder snow off.
@@ -109,7 +109,9 @@ public final class ColdExposure {
 			if (state.warm) {
 				state.cold = Math.max(0, state.cold - 4 * CHECK_EVERY);
 			} else if (cold(world, pos)) {
-				state.cold += LocalWeather.blizzardAt(world, pos) ? 2 * CHECK_EVERY : CHECK_EVERY;
+				// In the water there the cold comes on 4 times as fast (the owner's rule, 2026-11-09: falling through pack ice
+				// means fast cold), in a blizzard twice as fast.
+				state.cold += world.getFluidState(pos).isIn(net.minecraft.registry.tag.FluidTags.WATER) ? 4 * CHECK_EVERY : LocalWeather.blizzardAt(world, pos) ? 2 * CHECK_EVERY : CHECK_EVERY;
 			} else {
 				state.cold = Math.max(0, state.cold - 2 * CHECK_EVERY);
 			}

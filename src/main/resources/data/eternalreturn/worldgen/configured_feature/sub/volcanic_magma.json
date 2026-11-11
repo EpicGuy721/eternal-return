@@ -15,7 +15,7 @@
       "blocks": [
         "minecraft:grass_block",
         "minecraft:coarse_dirt",
-        "minecraft:tuff",
+        "minecraft:blackstone",
         "minecraft:dirt",
         "minecraft:gravel"
       ]

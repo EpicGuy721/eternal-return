@@ -24,8 +24,8 @@ import java.util.WeakHashMap;
 
 /**
  * Ice (plain ice, not packed or blue) cracks under weight (survival.iceCracks), showing it as blocks show being broken:
- * a player (heavier for heavier armor: ArmorWeight), and the heavy mobs, polar bears and bears, iron golems and
- * horses in armor, each with whatever rides it. The heavier, the faster (rate), twice as fast sprinting, half as
+ * a player (heavier for heavier armor: ArmorWeight), and the heavy mobs, bears, iron golems and horses in armor (not
+ * the snow mobs at home on it, entity tag eternalreturn:light_on_ice: polar bears, strays, snow golems, frostbites), each with whatever rides it. The heavier, the faster (rate), twice as fast sprinting, half as
  * fast sneaking; landing on it cracks it at once, more the further the fall. Ice nobody's stood on for HEAL_DELAY ticks
  * heals; cracked through, it breaks, to water if there's something under it (as ice broken by hand does).
  */
@@ -68,7 +68,14 @@ public final class IceCracking {
 		return load;
 	}
 
+	/** Mobs at home on the ice (polar bears, strays, snow golems, frostbites), which never crack it, nor do their riders. */
+	public static final net.minecraft.registry.tag.TagKey<net.minecraft.entity.EntityType<?>> LIGHT_ON_ICE = net.minecraft.registry.tag.TagKey.of(
+			net.minecraft.registry.RegistryKeys.ENTITY_TYPE, com.eternalreturn.EternalReturn.id("light_on_ice"));
+
 	private static float ownLoad(Entity entity) {
+		if (entity.getType().isIn(LIGHT_ON_ICE)) {
+			return 0.0F;
+		}
 		if (entity instanceof PlayerEntity player) {
 			return player.isCreative() || player.isSpectator() ? 0.0F : 1.0F + 10.0F * (float) ArmorWeight.total(player);
 		}

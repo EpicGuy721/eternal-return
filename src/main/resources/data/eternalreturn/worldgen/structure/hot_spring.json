@@ -1,0 +1,11 @@
+{
+  "type": "eternalreturn:landmark",
+  "landmark": "hot_spring",
+  "min_size": 2,
+  "max_size": 6,
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "terrain_adaptation": "none",
+  "biomes": "#eternalreturn:has_structure/hot_spring_probe",
+  "surface_biomes": "#eternalreturn:has_structure/hot_spring"
+}

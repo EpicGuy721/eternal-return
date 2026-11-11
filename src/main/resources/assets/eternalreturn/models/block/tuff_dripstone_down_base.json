@@ -1,7 +1,0 @@
-{
-  "parent": "eternalreturn:block/stone_dripstone/down_base",
-  "textures": {
-    "side": "minecraft:block/tuff",
-    "end": "minecraft:block/tuff"
-  }
-}

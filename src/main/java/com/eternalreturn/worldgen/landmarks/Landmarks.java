@@ -21,7 +21,17 @@ public final class Landmarks {
 		/** The mesa styles' rock forms (phase 6): flat-topped buttes, wide green-topped tables, fields of hoodoos. */
 		BUTTE, TABLE, HOODOOS,
 		/** The warm seas' landmarks (phase 6, batch D): chains of small islands, coral reef shelves under the surface. */
-		ISLETS, REEF;
+		ISLETS, REEF,
+		/** Hot springs (worldgen expansion 2, phase 3): terraced pools with a vent, some with a geyser (HotSprings). */
+		HOT_SPRING,
+		/** Elder trees (worldgen expansion 2, phase 4): one colossal tree of a local species (ElderTrees). */
+		ELDER_TREE,
+		/** The frozen and cold seas' landmarks (worldgen expansion 2, phase 6, batch 1): icebergs, clusters of sea stacks. */
+		ICEBERG, SEA_STACKS,
+		/** The plain seas' landmark (phase 6, batch 2): fields of sandbars breaking the surface over shallow channels. */
+		SHOALS,
+		/** The warm and deep seas' landmarks (phase 6, batch 3): coral rings round a lagoon, undersea mountains. */
+		ATOLL, SEAMOUNT;
 
 		public String id() {
 			return this.name().toLowerCase(java.util.Locale.ROOT);
@@ -42,5 +52,6 @@ public final class Landmarks {
 
 	public static void register() {
 		// The fields above register the structure and piece types when the class loads.
+		ElderTrees.register();
 	}
 }

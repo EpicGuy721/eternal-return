@@ -6,6 +6,10 @@
       "required": false
     },
     {
+      "id": "eternalreturn:atoll_ocean",
+      "required": false
+    },
+    {
       "id": "eternalreturn:badlands_peak",
       "required": false
     },
@@ -15,6 +19,10 @@
     },
     {
       "id": "eternalreturn:birch_forest_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:blue_hole",
       "required": false
     },
     {
@@ -74,6 +82,14 @@
       "required": false
     },
     {
+      "id": "eternalreturn:hydrothermal_vents_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:iceberg_ocean",
+      "required": false
+    },
+    {
       "id": "eternalreturn:jungle_edge",
       "required": false
     },
@@ -82,7 +98,15 @@
       "required": false
     },
     {
+      "id": "eternalreturn:kelp_forest_ocean",
+      "required": false
+    },
+    {
       "id": "eternalreturn:leafy_river",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:mangrove_lagoon_ocean",
       "required": false
     },
     {
@@ -99,6 +123,10 @@
     },
     {
       "id": "eternalreturn:old_growth_spruce_taiga_peak",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:pack_ice_ocean",
       "required": false
     },
     {
@@ -134,6 +162,22 @@
       "required": false
     },
     {
+      "id": "eternalreturn:sea_stacks_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:seagrass_meadow_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:seamount_ocean",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:shoals_ocean",
+      "required": false
+    },
+    {
       "id": "eternalreturn:tropical_pillars",
       "required": false
     },
@@ -143,6 +187,10 @@
     },
     {
       "id": "eternalreturn:webbed_forest",
+      "required": false
+    },
+    {
+      "id": "eternalreturn:whale_fall_ocean",
       "required": false
     },
     {

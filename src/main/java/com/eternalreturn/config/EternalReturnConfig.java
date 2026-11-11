@@ -681,6 +681,42 @@ public final class EternalReturnConfig {
 		 */
 		public boolean cactusShapes = true;
 		/**
+		 * Hot springs: terraced pools with calcite rims and a magma vent in cold land (rarer in the cherry grove and volcanic
+		 * jungle); about one in 3 has lava under its vent, which makes it a geyser (Geysers). A landmark
+		 * (/locate structure eternalreturn:hot_spring). Eternal Return worlds only.
+		 */
+		public boolean hotSprings = true;
+		/**
+		 * Elder trees: about one per 2,000 x 2,000 blocks of land with a tree table, a single colossal tree (50 to 90 tall)
+		 * of a local species, in a clearing with its saplings, a hollow in its roots (sometimes a spring, sometimes a bear's
+		 * den), bee nests and birds in its crown (data/eternalreturn/eternalreturn/elder_trees.json). A landmark
+		 * (/locate structure eternalreturn:elder_tree). Eternal Return worlds only.
+		 */
+		public boolean elderTrees = true;
+		/**
+		 * Ocean floors by depth: sand with ripple rows and boulders on the shelf, clay patches on the middle plain, bare stone
+		 * with glow lichen on the slope walls between the steps (data/eternalreturn/worldgen/configured_feature/ocean/).
+		 * Eternal Return worlds only.
+		 */
+		public boolean oceanFloors = true;
+		/**
+		 * Sea caves: flooded grottoes in the undersea slope walls, and openings at sea level in coastal cliffs leading to a
+		 * dry grotto, about one in 3 going on into the caves. Eternal Return worlds only.
+		 */
+		public boolean seaCaves = true;
+		/** Driftwood: logs of the wood growing inland washed up on the beaches. Eternal Return worlds only. */
+		public boolean driftwood = true;
+		/** Tide pools: little stone-rimmed pools of sea water on the beaches. Eternal Return worlds only. */
+		public boolean tidePools = true;
+		/** Sunken forests: stumps and fallen trunks of the inland wood on the shelf off wooded coasts. Eternal Return worlds only. */
+		public boolean sunkenForests = true;
+		/** Ship debris: a broken ship's wood on the middle sea floor, one in 4 with a barrel of supplies. Eternal Return worlds only. */
+		public boolean shipDebris = true;
+		/** Whale falls: a whale's skeleton of bone blocks on the deep sea floor, now and then. Eternal Return worlds only. */
+		public boolean whaleFalls = true;
+		/** Deep sea fog: under water the fog grows darker and closer the deeper you swim below y 30. Eternal Return worlds only. */
+		public boolean deepSeaFog = true;
+		/**
 		 * Biome trees: in Eternal Return worlds a sapling grows a tree picked from its biome's tree table, and the world's
 		 * own trees come from the same tables (data/eternalreturn/eternalreturn/tree_tables, docs/worldgen.md). Off: vanilla
 		 * saplings and trees. Other worlds never change.

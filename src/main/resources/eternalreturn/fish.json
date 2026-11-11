@@ -32,6 +32,18 @@
 			"experience": 25
 		}
 	},
+	"rare_fish_biomes": {
+		"biomes": "#eternalreturn:rare_fish_seas",
+		"label": "the hydrothermal vents and over the seamounts"
+	},
+	"biome_catches": [
+		{
+			"item": "minecraft:cod",
+			"weight": 100,
+			"biomes": "#eternalreturn:kelp_forests",
+			"label": "kelp forests"
+		}
+	],
 	"habitats": {
 		"rivers": {
 			"label": "rivers",
