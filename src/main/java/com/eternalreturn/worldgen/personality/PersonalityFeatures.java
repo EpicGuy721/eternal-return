@@ -141,6 +141,25 @@ public final class PersonalityFeatures {
 		return kindOf(placed).name().toLowerCase(java.util.Locale.ROOT);
 	}
 
+	private static final Map<Biome, Set<Block>> PLANTS = Collections.synchronizedMap(new java.util.WeakHashMap<>());
+
+	/** Every block a biome's own decoration plants by simple block placements (lily pads, sugar cane, petals...): for the accents. */
+	public static Set<Block> plantsOf(Biome biome) {
+		return PLANTS.computeIfAbsent(biome, b -> {
+			Set<Block> blocks = new java.util.LinkedHashSet<>();
+			for (RegistryEntryList<PlacedFeature> step : b.getGenerationSettings().getFeatures()) {
+				for (RegistryEntry<PlacedFeature> placed : step) {
+					for (ConfiguredFeature<?, ?> feature : inside(placed.value())) {
+						if (feature.config() instanceof SimpleBlockFeatureConfig simple) {
+							sample(simple.toPlace()).forEach(state -> blocks.add(state.getBlock()));
+						}
+					}
+				}
+			}
+			return Set.copyOf(blocks);
+		});
+	}
+
 	/** A biome's own small flowers and tall flowers (block ids), for the tests. */
 	public static List<List<String>> flowersOfBiome(Biome biome) {
 		Flowers flowers = FLOWERS.computeIfAbsent(biome, PersonalityFeatures::flowersOf);

@@ -217,4 +217,74 @@ public class PersonalityTests implements FabricGameTest {
 		ctx.assertTrue(wrong.isEmpty(), wrong.size() + " flowers outside their patch's palette, first " + wrong.subList(0, Math.min(5, wrong.size())));
 		ctx.complete();
 	}
+
+	/** The accent table: every accent a known one, every biome a real one (Moderner Beta's where it's loaded), two to five accents each. */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = RULES_BATCH)
+	public void theAccentTableIsSound(TestContext ctx) {
+		var biomes = ctx.getWorld().getRegistryManager().get(RegistryKeys.BIOME);
+		Map<String, List<String>> table = com.eternalreturn.worldgen.personality.AccentFeature.table();
+		ctx.assertTrue(table.size() >= 70, "the table lists every land biome and sea: " + table.size());
+		for (Map.Entry<String, List<String>> entry : table.entrySet()) {
+			Identifier id = Identifier.of(entry.getKey());
+			// (Without Moderner Beta, its biomes and the sub-biomes of them are missing.)
+			ctx.assertTrue(biomes.containsId(id) || !GameTestWorld.isModernerBetaLoaded() || id.getPath().startsWith("deep_"), entry.getKey() + " is a biome");
+			ctx.assertTrue(!entry.getValue().isEmpty() && entry.getValue().size() <= 5, entry.getKey() + " has one to five accents: " + entry.getValue());
+			for (String accent : entry.getValue()) {
+				String name = accent.contains(":") ? accent.substring(0, accent.indexOf(':')) : accent;
+				ctx.assertTrue(com.eternalreturn.worldgen.personality.AccentFeature.NAMES.contains(name), entry.getKey() + ": unknown accent " + accent);
+				if (accent.contains(":")) {
+					ctx.assertTrue(Registries.BLOCK.containsId(Identifier.of(accent.substring(accent.indexOf(':') + 1))), entry.getKey() + ": no block in " + accent);
+				}
+			}
+		}
+		ctx.complete();
+	}
+
+	/**
+	 * In an Eternal Return world: generating land and sea round the test seed, accents appear, several kinds of them, and
+	 * every one is the accent its patch rolled from its biome's list.
+	 */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = BATCH, tickLimit = 2_000_000)
+	public void accentsFollowTheirPatch(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		long salt = PersonalitySync.salt(world.getServer());
+		com.eternalreturn.worldgen.personality.AccentFeature.RECENT.clear();
+		// Eight times as often as in a world, so a few hundred chunks show enough of them.
+		com.eternalreturn.worldgen.personality.AccentFeature.boost = 8;
+		try {
+			for (int gx = -2; gx <= 2; gx++) {
+				for (int gz = -2; gz <= 2; gz++) {
+					ChunkPos centre = new ChunkPos(gx * 40 - 100, gz * 40);
+					for (int cx = centre.x - 1; cx <= centre.x + 1; cx++) {
+						for (int cz = centre.z - 1; cz <= centre.z + 1; cz++) {
+							world.getChunk(cx, cz, ChunkStatus.FULL, true);
+						}
+					}
+				}
+			}
+		} finally {
+			com.eternalreturn.worldgen.personality.AccentFeature.boost = 1;
+		}
+		List<String> placed = new ArrayList<>(com.eternalreturn.worldgen.personality.AccentFeature.RECENT);
+		Map<String, Integer> kinds = new TreeMap<>();
+		List<String> wrong = new ArrayList<>();
+		for (String line : placed) {
+			String[] parts = line.split(" ");
+			Identifier biome = Identifier.of(parts[0]);
+			int x = Integer.parseInt(parts[2]);
+			int z = Integer.parseInt(parts[3]);
+			String rolled = com.eternalreturn.worldgen.personality.AccentFeature.accentOf(Personality.at(salt, biome, x, z), biome);
+			if (!parts[1].equals(rolled)) {
+				wrong.add(line + " (rolled " + rolled + ")");
+			}
+			String name = parts[1].contains(":") ? parts[1].substring(0, parts[1].indexOf(':')) : parts[1];
+			kinds.merge(name, 1, Integer::sum);
+		}
+		EternalReturn.LOGGER.info("Personality accents: {} placed, by kind {}", placed.size(), kinds);
+		EternalReturn.LOGGER.info("Personality accents placed: {}", placed);
+		ctx.assertTrue(placed.size() >= 15, "only " + placed.size() + " accents round 25 spots: " + kinds);
+		ctx.assertTrue(kinds.size() >= 6, "only " + kinds.size() + " kinds of accent: " + kinds);
+		ctx.assertTrue(wrong.isEmpty(), wrong.size() + " accents not their patch's: " + wrong.subList(0, Math.min(5, wrong.size())));
+		ctx.complete();
+	}
 }

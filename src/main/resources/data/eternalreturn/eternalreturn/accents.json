@@ -1,0 +1,357 @@
+{
+  "_comment": "Accents (Personality, AccentFeature): each patch rolls one of its biome's accents (by biome family: a peak, edge or river as its base; else by its own id), which turns up about per_patch times across the patch (twice in a rare patch). An accent is a name, or name:block for the block it is made of. Hand-written; tune freely. Names: pond, frozen_pond, boulder_ring, mossy_boulders, ice_boulders, fallen_log, snag, mushroom_ring, mossy_clearing, fern_pocket, flower_pocket, berry_thicket, petal_drift, podzol_patch, snow_drift, stone_outcrop, hoodoo, dry_wash, bleached_bones, termite_mound, melon_patch, pumpkin_cluster, kelp_ring, sunken_log, seagrass_bed, sand_ripples, clay_patch, sea_boulders, sea_pickles, coral_head, ice_floe.",
+  "per_patch": 8,
+  "biomes": {
+    "moderner_beta:late_beta_plains": [
+      "pond",
+      "boulder_ring",
+      "flower_pocket",
+      "fallen_log"
+    ],
+    "eternalreturn:meadow": [
+      "flower_pocket",
+      "boulder_ring",
+      "pond"
+    ],
+    "eternalreturn:pumpkin_plains": [
+      "pumpkin_cluster",
+      "fallen_log",
+      "pond"
+    ],
+    "minecraft:forest": [
+      "pond",
+      "boulder_ring",
+      "fallen_log",
+      "mushroom_ring",
+      "mossy_clearing"
+    ],
+    "eternalreturn:webbed_forest": [
+      "snag",
+      "fallen_log",
+      "mushroom_ring"
+    ],
+    "minecraft:birch_forest": [
+      "fallen_log",
+      "mushroom_ring",
+      "flower_pocket"
+    ],
+    "eternalreturn:poplar_grove": [
+      "fallen_log",
+      "flower_pocket",
+      "pond"
+    ],
+    "minecraft:dark_forest": [
+      "mushroom_ring",
+      "mossy_clearing",
+      "fallen_log"
+    ],
+    "eternalreturn:dark_meadow": [
+      "mossy_clearing",
+      "boulder_ring",
+      "flower_pocket"
+    ],
+    "eternalreturn:roofed_fungi_forest": [
+      "mushroom_ring",
+      "mossy_clearing"
+    ],
+    "eternalreturn:autumnal_forest": [
+      "fallen_log",
+      "petal_drift",
+      "pond"
+    ],
+    "minecraft:cherry_grove": [
+      "petal_drift",
+      "pond",
+      "boulder_ring"
+    ],
+    "moderner_beta:early_release_taiga": [
+      "fallen_log",
+      "berry_thicket",
+      "boulder_ring",
+      "podzol_patch"
+    ],
+    "eternalreturn:larch_forest": [
+      "fallen_log",
+      "mossy_boulders"
+    ],
+    "eternalreturn:redwood_forest": [
+      "fallen_log",
+      "podzol_patch",
+      "fern_pocket"
+    ],
+    "eternalreturn:glacier_field": [
+      "ice_boulders",
+      "frozen_pond"
+    ],
+    "minecraft:old_growth_pine_taiga": [
+      "mossy_boulders",
+      "fallen_log",
+      "podzol_patch"
+    ],
+    "minecraft:old_growth_spruce_taiga": [
+      "mossy_boulders",
+      "fallen_log",
+      "podzol_patch"
+    ],
+    "moderner_beta:early_release_extreme_hills": [
+      "stone_outcrop",
+      "boulder_ring",
+      "fallen_log"
+    ],
+    "eternalreturn:alps": [
+      "boulder_ring",
+      "flower_pocket",
+      "stone_outcrop"
+    ],
+    "eternalreturn:grand_fir_forest": [
+      "fallen_log",
+      "fern_pocket",
+      "mossy_boulders"
+    ],
+    "eternalreturn:heathland": [
+      "boulder_ring",
+      "stone_outcrop"
+    ],
+    "moderner_beta:early_release_ice_plains": [
+      "frozen_pond",
+      "ice_boulders",
+      "snow_drift"
+    ],
+    "moderner_beta:late_beta_ice_plains": [
+      "frozen_pond",
+      "ice_boulders",
+      "snow_drift"
+    ],
+    "minecraft:snowy_plains": [
+      "frozen_pond",
+      "ice_boulders",
+      "snow_drift"
+    ],
+    "eternalreturn:arctic": [
+      "ice_boulders",
+      "snow_drift"
+    ],
+    "eternalreturn:black_spruce_forest": [
+      "fallen_log",
+      "frozen_pond"
+    ],
+    "eternalreturn:snowy_mesa": [
+      "snow_drift",
+      "stone_outcrop"
+    ],
+    "eternalreturn:tundra": [
+      "boulder_ring",
+      "frozen_pond",
+      "mossy_clearing"
+    ],
+    "moderner_beta:early_release_swampland": [
+      "fallen_log",
+      "pond",
+      "mushroom_ring"
+    ],
+    "eternalreturn:bald_cypress_swamp": [
+      "fallen_log",
+      "pond"
+    ],
+    "eternalreturn:spooky_swamp": [
+      "snag",
+      "mushroom_ring"
+    ],
+    "minecraft:desert": [
+      "dry_wash",
+      "bleached_bones",
+      "stone_outcrop:minecraft:sandstone"
+    ],
+    "eternalreturn:desert_oasis": [
+      "pond",
+      "stone_outcrop:minecraft:sandstone"
+    ],
+    "eternalreturn:drylands": [
+      "dry_wash",
+      "bleached_bones"
+    ],
+    "eternalreturn:desert_baobabs": [
+      "dry_wash",
+      "fallen_log",
+      "bleached_bones"
+    ],
+    "minecraft:savanna": [
+      "termite_mound",
+      "fallen_log",
+      "boulder_ring",
+      "dry_wash"
+    ],
+    "eternalreturn:pinyon_woodland": [
+      "fallen_log",
+      "boulder_ring",
+      "dry_wash"
+    ],
+    "minecraft:jungle": [
+      "fallen_log",
+      "pond",
+      "melon_patch"
+    ],
+    "eternalreturn:tropical_pillars": [
+      "pond",
+      "fallen_log"
+    ],
+    "eternalreturn:volcanic_jungle": [
+      "stone_outcrop:minecraft:blackstone",
+      "fallen_log"
+    ],
+    "minecraft:mushroom_fields": [
+      "mushroom_ring"
+    ],
+    "eternalreturn:giant_mushroom_island": [
+      "mushroom_ring"
+    ],
+    "minecraft:beach": [
+      "fallen_log",
+      "boulder_ring"
+    ],
+    "eternalreturn:palm_beach": [
+      "fallen_log",
+      "boulder_ring"
+    ],
+    "minecraft:ocean": [
+      "kelp_ring",
+      "sunken_log",
+      "seagrass_bed",
+      "clay_patch",
+      "sea_boulders"
+    ],
+    "minecraft:deep_ocean": [
+      "kelp_ring",
+      "sunken_log",
+      "seagrass_bed",
+      "clay_patch",
+      "sea_boulders"
+    ],
+    "minecraft:cold_ocean": [
+      "kelp_ring",
+      "sea_boulders",
+      "sunken_log"
+    ],
+    "minecraft:deep_cold_ocean": [
+      "kelp_ring",
+      "sea_boulders",
+      "sunken_log"
+    ],
+    "minecraft:frozen_ocean": [
+      "ice_floe",
+      "sea_boulders",
+      "clay_patch"
+    ],
+    "minecraft:deep_frozen_ocean": [
+      "ice_floe",
+      "sea_boulders",
+      "clay_patch"
+    ],
+    "eternalreturn:iceberg_ocean": [
+      "ice_floe",
+      "sea_boulders",
+      "clay_patch"
+    ],
+    "eternalreturn:pack_ice_ocean": [
+      "ice_floe",
+      "sea_boulders",
+      "clay_patch"
+    ],
+    "minecraft:lukewarm_ocean": [
+      "seagrass_bed",
+      "sea_pickles",
+      "sand_ripples"
+    ],
+    "minecraft:deep_lukewarm_ocean": [
+      "seagrass_bed",
+      "sea_pickles",
+      "sand_ripples"
+    ],
+    "minecraft:warm_ocean": [
+      "coral_head",
+      "sea_pickles",
+      "sand_ripples"
+    ],
+    "eternalreturn:kelp_forest_ocean": [
+      "sunken_log",
+      "sea_boulders"
+    ],
+    "eternalreturn:sea_stacks_ocean": [
+      "sea_boulders",
+      "kelp_ring"
+    ],
+    "eternalreturn:seagrass_meadow_ocean": [
+      "clay_patch",
+      "sunken_log"
+    ],
+    "eternalreturn:shoals_ocean": [
+      "sand_ripples",
+      "sunken_log"
+    ],
+    "eternalreturn:mangrove_lagoon_ocean": [
+      "sunken_log:minecraft:mangrove_log",
+      "seagrass_bed"
+    ],
+    "eternalreturn:archipelago": [
+      "seagrass_bed",
+      "sea_pickles"
+    ],
+    "eternalreturn:coral_ocean": [
+      "coral_head",
+      "sea_pickles",
+      "sand_ripples"
+    ],
+    "eternalreturn:atoll_ocean": [
+      "coral_head",
+      "sea_pickles",
+      "sand_ripples"
+    ],
+    "eternalreturn:blue_hole": [
+      "coral_head",
+      "sea_pickles",
+      "sand_ripples"
+    ],
+    "eternalreturn:seamount_ocean": [
+      "sea_boulders",
+      "clay_patch"
+    ],
+    "eternalreturn:hydrothermal_vents_ocean": [
+      "sea_boulders",
+      "clay_patch"
+    ],
+    "eternalreturn:whale_fall_ocean": [
+      "sea_boulders",
+      "clay_patch"
+    ],
+    "minecraft:badlands": [
+      "hoodoo",
+      "dry_wash",
+      "bleached_bones"
+    ],
+    "eternalreturn:white_mesa": [
+      "hoodoo",
+      "dry_wash",
+      "bleached_bones"
+    ],
+    "eternalreturn:painted_canyon": [
+      "hoodoo",
+      "dry_wash",
+      "bleached_bones"
+    ],
+    "eternalreturn:monument_valley": [
+      "hoodoo",
+      "dry_wash",
+      "bleached_bones"
+    ],
+    "eternalreturn:bryce_mesa": [
+      "hoodoo",
+      "dry_wash",
+      "bleached_bones"
+    ],
+    "eternalreturn:mesa_verde": [
+      "hoodoo",
+      "dry_wash",
+      "bleached_bones"
+    ]
+  }
+}

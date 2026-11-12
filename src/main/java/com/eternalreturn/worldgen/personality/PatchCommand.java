@@ -76,6 +76,8 @@ public final class PatchCommand {
 			}
 		}
 		lines.add("Common birds: " + (common.isEmpty() ? "none live here" : String.join(", ", common)));
+		String accent = AccentFeature.accentOf(roll, id);
+		lines.add("Accent: " + (accent == null ? "none" : accent.replace('_', ' ')));
 		for (String line : lines) {
 			source.sendFeedback(() -> Text.literal(line), false);
 		}
