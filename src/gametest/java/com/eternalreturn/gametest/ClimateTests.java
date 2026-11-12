@@ -392,4 +392,65 @@ public class ClimateTests implements FabricGameTest {
 		ctx.assertTrue(FogTints.tints(world.getServer()).isEmpty(), "fog tints in a world that isn't Eternal Return");
 		ctx.complete();
 	}
+
+	/**
+	 * Snow on treetops follows the ground (ModernerBetaSnowCheckMixin): in chunks of the extreme hills on the test seed
+	 * whose ground lies a little below the icy mountains (y 105, and up to 48 above the ground), the tops of tall trees
+	 * reaching into the icy mountains carry snow only where the ground under them is cold enough for snow (the owner's
+	 * report, 2026-11-11).
+	 */
+	@GameTest(templateName = EMPTY_STRUCTURE, batchId = BATCH, tickLimit = 2_000_000)
+	public void treetopSnowFollowsTheGround(TestContext ctx) {
+		ServerWorld world = ctx.getWorld();
+		ChunkGenerator generator = world.getChunkManager().getChunkGenerator();
+		NoiseConfig noise = world.getChunkManager().getNoiseConfig();
+		Identifier icy = EternalReturn.id("icy_mountains");
+		int crowns = 0;
+		int snowy = 0;
+		int loaded = 0;
+		List<String> wrong = new ArrayList<>();
+		BlockPos.Mutable pos = new BlockPos.Mutable();
+		for (int gx = -40; gx <= 40 && crowns < 200 && loaded < 160; gx++) {
+			for (int gz = -40; gz <= 40 && crowns < 200 && loaded < 160; gz++) {
+				int cx = gx * 64 + 8;
+				int cz = gz * 64 + 8;
+				int estimate = generator.getHeight(cx, cz, Heightmap.Type.OCEAN_FLOOR_WG, world, noise);
+				if (estimate < 84 || estimate > 104) {
+					continue;
+				}
+				RegistryEntry<Biome> source = generator.getBiomeSource().getBiome(cx >> 2, estimate >> 2, cz >> 2, noise.getMultiNoiseSampler());
+				if (!com.eternalreturn.worldgen.variants.BiomeVariants.baseOf(source.getKey().orElseThrow().getValue()).toString().equals("moderner_beta:early_release_extreme_hills")) {
+					continue;
+				}
+				// (The icy mountains go in at the surface step: the chunk made in full shows them.)
+				loaded++;
+				ChunkPos chunk = new ChunkPos(cx >> 4, cz >> 4);
+				world.getChunk(chunk.x, chunk.z, ChunkStatus.FULL, true);
+				for (int x = chunk.getStartX(); x < chunk.getStartX() + 16; x++) {
+					for (int z = chunk.getStartZ(); z < chunk.getStartZ() + 16; z++) {
+						int top = world.getTopY(Heightmap.Type.MOTION_BLOCKING, x, z);
+						int ground = world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, x, z);
+						if (ground > 150 || !world.getBlockState(pos.set(x, top - 1, z)).isIn(BlockTags.LEAVES)
+								|| !world.getBiome(new BlockPos(x, top, z)).matchesId(icy) || world.getBiome(new BlockPos(x, ground, z)).matchesId(icy)) {
+							continue;
+						}
+						// A crown reaching into the icy mountains over ground that isn't theirs: snow on it only if the ground's climate snows.
+						crowns++;
+						boolean crownSnow = world.getBlockState(pos.set(x, top, z)).isOf(Blocks.SNOW);
+						snowy += crownSnow ? 1 : 0;
+						RegistryEntry<Biome> under = world.getBiome(new BlockPos(x, ground, z));
+						boolean cold = !under.value().doesNotSnow(new BlockPos(x, ground, z));
+						if (crownSnow && !cold) {
+							wrong.add(x + " " + top + " " + z + " over " + under.getKey().orElseThrow().getValue());
+						}
+					}
+				}
+			}
+		}
+		EternalReturn.LOGGER.info("Treetop snow: {} chunks, {} crowns in the icy mountains over other ground, {} with snow, {} over warm ground", loaded, crowns, snowy, wrong.size());
+		ctx.assertTrue(crowns >= 10, "only " + crowns + " crowns in the icy mountains over other ground in " + loaded + " chunks");
+		ctx.assertTrue(wrong.isEmpty(), wrong.size() + " snowy crowns over ground too warm for snow, first " + wrong.subList(0, Math.min(5, wrong.size())));
+		ctx.complete();
+	}
+
 }

@@ -57,6 +57,11 @@ public final class SnowyTrees {
 					below.move(0, -1, 0);
 				}
 				BlockState plant = world.getBlockState(below);
+				if (canopy != null && world.getBiome(below).value().doesNotSnow(below)) {
+					// Eternal Return worlds: snow on the crown only where the ground under it is cold enough for snow (the top
+					// of a tall tree can reach into the icy mountains over warmer ground: the owner's report, 2026-11-11).
+					continue;
+				}
 				if (com.eternalreturn.blocks.SnowCover.isFlora(plant)) {
 					if (canopy != null) {
 						// Eternal Return worlds: a plant under the crown takes the thinner snow that falls through leaves.
